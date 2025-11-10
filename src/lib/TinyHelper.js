@@ -48,7 +48,7 @@ export default class TinyHelper {
             style_formats: this.styleFormats(),
             custom_undo_redo_levels: 10,
             text_patterns: false,
-            skin: 'default',
+            skin_url: 'default',
             content_css: 'default',
             content_style: contentLocalCss.toString() + '\n' + headlinesThreeCss.toString(),
             browser_spellcheck: true,
