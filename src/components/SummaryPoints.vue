@@ -1,12 +1,10 @@
 <script setup>
 import { ref } from 'vue';
-import { useSettingsStore } from '@/store/settings';
-import { useLevelsStore } from '@/store/levels';
-import { useSummariesStore } from '@/store/summaries';
+import {stores} from "@/store";
 
-const settingsStore = useSettingsStore();
-const levelsStore = useLevelsStore();
-const summariesStore = useSummariesStore();
+const settingsStore = stores.settings();
+const levelsStore = stores.levels();
+const summariesStore = stores.summaries();
 
 const props = defineProps(['corrector_key']);
 

@@ -5,17 +5,13 @@ import MarkingGeneralCriteria from "@/components/MarkingGeneralCriteria.vue";
 import OwnSummaryText from "@/components/OwnSummaryText.vue";
 import SumOfPoints from "@/components/SumOfPoints.vue";
 
-import { useApiStore } from '@/store/api';
-import { useLayoutStore } from "@/store/layout";
-import { useCommentsStore } from "@/store/comments";
-import { useCriteriaStore } from '@/store/criteria';
-import { useSummariesStore } from '@/store/summaries';
+import {stores} from "@/store";
 
-const apiStore = useApiStore();
-const layoutStore = useLayoutStore();
-const commentsStore = useCommentsStore();
-const criteriaStore = useCriteriaStore();
-const summariesStore = useSummariesStore();
+const apiStore = stores.api();
+const layoutStore = stores.layout();
+const commentsStore = stores.comments();
+const criteriaStore = stores.criteria();
+const summariesStore = stores.summaries();
 
 function markingCommentsShown() {
   return layoutStore.showMarkingComments && (!apiStore.isForReviewOrStitch || summariesStore.isOneAuthorized)

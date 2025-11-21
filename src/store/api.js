@@ -1,34 +1,18 @@
-import { defineStore } from 'pinia';
+/**
+ * API Store
+ * Handles the communication with the backend
+ */
+import {clearAllStores, stores} from "@/store";
+import {defineStore} from 'pinia';
 import axios from 'axios'
 import Cookies from 'js-cookie';
-import { useSettingsStore } from "./settings";
-import { useTaskStore } from "./task";
-import { useLayoutStore } from "./layout";
-import { useResourcesStore } from "./resources";
-import { useItemsStore } from "./items";
-import { useEssayStore } from "./essay";
-import { usePagesStore } from './pages';
-import { useSummariesStore } from "./summaries";
-import { useLevelsStore } from "./levels";
-import { useCriteriaStore } from "./criteria";
-import { useCorrectorsStore } from "./correctors";
-import { useCommentsStore } from "./comments";
-import { usePointsStore } from "./points";
-import { useChangesStore } from '@/store/changes';
-import { usePreferencesStore } from '@/store/preferences';
-import {useSnippetsStore} from "@/store/snippets";
 
 import md5 from 'md5';
 import Change from '@/data/Change';
 import Item from '@/data/Item';
 
-
 const sendInterval = 5000;      // time (ms) to wait for sending open savings to the backend
 
-/**
- * API Store
- * Handles the communication with the backend
- */
 export const useApiStore = defineStore('api', {
 
   state: () => {
@@ -36,17 +20,21 @@ export const useApiStore = defineStore('api', {
       // saved in storage
       backendUrl: '',                     // url to be used for REST calls
       returnUrl: '',                      // url to be called when the corrector is closed
-      userKey: '',                        // identifying user key of the correcting user
-      environmentKey: '',                 // identifying key of the correcting envirnonment (defining the task)
+      userId: '',                         // identifying id of the current user
+      assId: '',                          // identifying id of the assesment
+      contextId: '',                      // identifying id of the context for permission checks
       correctorKey: '',                   // identifying corrector key of the correcting user
       itemKey: '',                        // identifying key of the correction item
       dataToken: '',                      // authentication token for transmission if data
       fileToken: '',                      // authentication token for loading files
       timeOffset: 0,                      // differnce between server time and client time (ms)
-      isReview: false,                    // corrector is opened for review
-      isStitchDecision: false,            // corrector is opened for stitch decision
 
       // not saved
+      intervals: {},                       // list of all registered timer intervals, indexed by their name
+      lastSendingTry: 0,                  // timestamp of the last try to send changes (milliseconds)
+      lastLoadingTry: 0,                  // timestamp of the last try to load data (milliseconds)
+
+      // todo: move to layout store
       initialized: false,                 // used to switch from startup screen to the editing view
       showInitFailure: false,             // show a message that the initialisation failed
       showItemLoadFailure: false,         // show a message that the loading if an item failed
@@ -54,9 +42,6 @@ export const useApiStore = defineStore('api', {
       showSendFailure: false,             // show a message about a sending failure
       showDataReplaceConfirmation: false, // show a confirmation that the stored data should be replaced by another task or user
       showItemReplaceConfirmation: false, // show a confirmation that the stored item should be replaced by another item
-      lastSendingTry: 0,                  // timestamp of the last try to send changes (milliseconds)
-      lastLoadingTry: 0,                  // timestamp of the last try to load data (milliseconds)
-      intervals: {}                       // list of all registered timer intervals, indexed by their name
     }
   },
 
@@ -67,11 +52,9 @@ export const useApiStore = defineStore('api', {
 
     isLoading: state => state.lastLoadingTry > 0,
 
-    isForReviewOrStitch: state => state.isReview || state.isStitchDecision,
+    storedItemKey: state => localStorage.getItem('xlasCorrectorItemKey'),
 
-    storedItemKey: state => localStorage.getItem('correctorItemKey'),
-
-    getRequestConfig: state => {
+    getRequestConfig(state) {
 
       /**
        * Get the config object for REST requests
@@ -93,11 +76,10 @@ export const useApiStore = defineStore('api', {
 
         // add authentication info as url parameters
         // use signature instead of token because it is visible
-        params.append('LongEssayUser', state.userKey);
-        params.append('LongEssayEnvironment', state.environmentKey);
-        params.append('LongEssayIsReview', state.isReview ? '1' : '0');
-        params.append('LongEssayIsStitchDecision', state.isStitchDecision ? '1' : '0');
-        params.append('LongEssaySignature', md5(state.userKey + state.environmentKey + token));
+        params.append('user_id', state.userId);
+        params.append('ass_id', state.assId);
+        params.append('context_id', state.contextId);
+        params.append('signature', md5(state.userId + state.assId + state.contextId + token));
 
         return {
           baseURL: baseURL,
@@ -108,20 +90,20 @@ export const useApiStore = defineStore('api', {
         }
       }
       return fn;
-
     },
 
     getResourceUrl: state => {
 
       /**
        * Get the Url for loading a file ressource
+       * todo user resource as parameter (see writer)
        *
        * @param {string} resourceKey
        * @returns {string}
        */
       const fn = function (resourceKey) {
         const config = this.getRequestConfig(this.fileToken);
-        return config.baseURL + '/file/' + resourceKey + '?' + config.params.toString();
+        return config.baseURL + '/corrector/file/task/resource/' + resourceKey + '?' + config.params.toString();
       }
       return fn;
     },
@@ -168,12 +150,14 @@ export const useApiStore = defineStore('api', {
        * @returns {number}
        */
       const fn = function (clientTime) {
-        return Math.floor((clientTime - state.timeOffset) / 1000);
+        return clientTime == 0 ? 0 : Math.floor((clientTime - state.timeOffset) / 1000);
       }
       return fn;
     },
 
-
+    /**
+     * todo: refactor (see writer)
+     */
     getChangeDataToSend: state => {
 
       /**
@@ -194,7 +178,6 @@ export const useApiStore = defineStore('api', {
 
   },
 
-
   actions: {
 
     /**
@@ -208,48 +191,49 @@ export const useApiStore = defineStore('api', {
       let newItem = false;
 
       // take values formerly stored
-      this.backendUrl = localStorage.getItem('correctorBackendUrl');
-      this.returnUrl = localStorage.getItem('correctorReturnUrl');
-      this.userKey = localStorage.getItem('correctorUserKey');
-      this.environmentKey = localStorage.getItem('correctorEnvironmentKey');
-      this.correctorKey = localStorage.getItem('correctorCorrectorKey');
+      this.backendUrl = localStorage.getItem('xlasCorrectorBackendUrl');
+      this.returnUrl = localStorage.getItem('xlasCorrectorReturnUrl');
+      this.userId = localStorage.getItem('xlasCorrectorUserId');
+      this.assId = localStorage.getItem('xlasWriterAssId');
+      this.contextId = localStorage.getItem('xlasCorrectorContextId');
       this.itemKey = localStorage.getItem('correctorItemKey');
-      this.dataToken = localStorage.getItem('correctorDataToken');
-      this.fileToken = localStorage.getItem('correctorFileToken');
-      this.timeOffset = Math.floor(localStorage.getItem('correctorTimeOffset') ?? 0);
-      this.isReview = !!localStorage.getItem('correctorIsReview'); // boolean is stored as '1' or ''
-      this.isStitchDecision = !!localStorage.getItem('correctorIsStitchDecision');
+      this.correctorKey = localStorage.getItem('correctorCorrectorKey');
+      this.dataToken = localStorage.getItem('xlasCorrectorDataToken');
+      this.fileToken = localStorage.getItem('xlasCorrectorFileToken');
+      this.timeOffset = Math.floor(localStorage.getItem('xlasCorrectorTimeOffset') ?? 0);
+      this.isReview = !!localStorage.getItem('xlasCorrectorIsReview'); // boolean is stored as '1' or ''
+      this.isStitchDecision = !!localStorage.getItem('xlasCorrectorIsStitchDecision');
 
       // check if context given by cookies differs and force a reload if neccessary
-      if (Cookies.get('LongEssayUser') != undefined && Cookies.get('LongEssayUser') !== this.userKey) {
-        this.userKey = Cookies.get('LongEssayUser');
+      if (Cookies.get('xlasUserId') != undefined && Cookies.get('xlasUserId') !== this.userId) {
+        this.userId = Cookies.get('xlasUserId');
         newContext = true;
       }
-      if (Cookies.get('LongEssayEnvironment') != undefined && Cookies.get('LongEssayEnvironment') !== this.environmentKey) {
-        this.environmentKey = Cookies.get('LongEssayEnvironment');
+      if (!!Cookies.get('xlasAssId') && Cookies.get('xlasAssId') !== this.assId) {
+        this.assId = Cookies.get('xlasAssId');
         newContext = true;
       }
-      if (Cookies.get('LongEssayCorrector') != undefined && Cookies.get('LongEssayCorrector') !== this.correctorKey) {
-        this.correctorKey = Cookies.get('LongEssayCorrector');
+      if (Cookies.get('xlasContextId') != undefined && Cookies.get('xlasContextId') !== this.contextId) {
+        this.contextId = Cookies.get('xlasContextId');
         newContext = true;
-      }
-      if (Cookies.get('LongEssayIsReview') != undefined && (Cookies.get('LongEssayIsReview') == '1') !== this.isReview) {
-        this.isReview = (Cookies.get('LongEssayIsReview') == '1');
-        newContext = true;
-      }
-      if (Cookies.get('LongEssayIsReview') != undefined && (Cookies.get('LongEssayIsStitchDecision') == '1') !== this.isStitchDecision) {
-        this.isStitchDecision = (Cookies.get('LongEssayIsStitchDecision') == '1');
-        newContext = true;
-      }
-      if (this.isForReviewOrStitch) {
-        this.correctorKey = '';
       }
 
-      // these values can be changed without forcing a reload
-      if (Cookies.get('LongEssayItem') != undefined && Cookies.get('LongEssayItem') !== this.itemKey) {
-        this.itemKey = Cookies.get('LongEssayItem');
+      // these values just need a reload of the item
+      let task_id = Item.extractTaskId(this.itemKey);
+      let writer_id = Item.extractWriterId(this.itemKey);
+      if (Cookies.get('xlasTaskId') != undefined && Cookies.get('xlasTaskId') !== task_id) {
+        task_id = Cookies.get('xlasTaskId');
         newItem = true;
       }
+      if (Cookies.get('xlasWriterId') != undefined && Cookies.get('xlasWriterId') !== writer_id) {
+        writer_id = Cookies.get('xlasWriterId');
+        newItem = true;
+      }
+      if (newItem) {
+        this.itemKey = Item.buildKey(task_id, writer_id);
+      }
+
+      // these values can be changed without forcing a whole reload
       if (Cookies.get('LongEssayBackend') != undefined && Cookies.get('LongEssayBackend') !== this.backendUrl) {
         this.backendUrl = Cookies.get('LongEssayBackend');
       }
@@ -260,12 +244,12 @@ export const useApiStore = defineStore('api', {
         this.dataToken = Cookies.get('LongEssayToken');
       }
 
-      if (!this.backendUrl || !this.returnUrl || !this.userKey || !this.environmentKey || !this.dataToken) {
+      if (!this.backendUrl || !this.returnUrl || !this.userId || !this.assId || !this.contextId || !this.dataToken) {
         this.showInitFailure = true;
         return;
       }
 
-      const changesStore = useChangesStore();
+      const changesStore = stores.changes();
       if (await changesStore.hasChangesInStorage()) {
         if (newContext) {
           console.log('init: open saving, new context');
@@ -306,16 +290,15 @@ export const useApiStore = defineStore('api', {
      */
     async initAfterKeepDataConfirmed() {
       console.log('initAfterKeepDataConfirmed');
-      const itemsStore = useItemsStore();
       this.showDataReplaceConfirmation = false;
       this.showItemReplaceConfirmation = false;
 
-      this.itemKey = localStorage.getItem('correctorItemKey');
+      this.itemKey = localStorage.getItem('xlasCorrectorItemKey');
       await this.loadItemFromStorage(this.itemKey);
-      const item = itemsStore.getItem(this.itemKey);
+      const item = stores.items().getItem(this.itemKey);
 
       if (await this.loadDataFromBackend()) {
-        await itemsStore.addItem(item);
+        await stores.items().addItem(item);
         await this.loadItemFromStorage(this.itemKey);
         this.finishInitialisation();
       }
@@ -329,18 +312,15 @@ export const useApiStore = defineStore('api', {
      * start the sending timer
      */
     finishInitialisation() {
-      const commentsStore = useCommentsStore();
-      const layoutStore = useLayoutStore();
-      const correctorsStore = useCorrectorsStore();
 
       if (this.isForReviewOrStitch) {
-        commentsStore.setShowOtherCorrectors(true);
+        stores.comments().setShowOtherCorrectors(true);
       }
 
       if (this.isStitchDecision) {
         let i = 0;
-        for (const corrector of correctorsStore.correctors) {
-          layoutStore.selectCorrector(corrector.corrector_key);
+        for (const corrector of stores.correctors().correctors) {
+          stores.layout().selectCorrector(corrector.corrector_key);
           i++;
           if (i == 2) {
             break;
@@ -361,24 +341,23 @@ export const useApiStore = defineStore('api', {
       // needed to distinct the call from the backend from a later reload
       Cookies.remove('LongEssayBackend');
       Cookies.remove('LongEssayReturn');
-      Cookies.remove('LongEssayUser');
-      Cookies.remove('LongEssayEnvironment');
-      Cookies.remove('LongEssayCorrector');
+      Cookies.remove('xlasUserId');
+      Cookies.remove('xlasAssId');
+      Cookies.remove('xlasContextId');
+      Cookies.remove('xlasTaskId');
+      Cookies.remove('xlasWriterId');
       Cookies.remove('LongEssayItem');
       Cookies.remove('LongEssayToken');
-      Cookies.remove('LongEssayIsReview');
-      Cookies.remove('LongEssayIsStitchDecision');
 
-      localStorage.setItem('correctorBackendUrl', this.backendUrl);
-      localStorage.setItem('correctorReturnUrl', this.returnUrl);
-      localStorage.setItem('correctorUserKey', this.userKey);
-      localStorage.setItem('correctorEnvironmentKey', this.environmentKey);
-      localStorage.setItem('correctorCorrectorKey', this.correctorKey);
-      localStorage.setItem('correctorItemKey', this.itemKey);
-      localStorage.setItem('correctorDataToken', this.dataToken);
-      localStorage.setItem('correctorFileToken', this.fileToken);
-      localStorage.setItem('correctorIsReview', this.isReview ? '1' : '');    // storage of boolean
-      localStorage.setItem('correctorIsStitchDecision', this.isStitchDecision ? '1' : '');
+      localStorage.setItem('xlasCorrectorBackendUrl', this.backendUrl);
+      localStorage.setItem('xlasCorrectorReturnUrl', this.returnUrl);
+      localStorage.setItem('xlasCorrectorUserId', this.userId);
+      localStorage.setItem('xlasCorrectorAssId', this.assId);
+      localStorage.setItem('xlasCorrectorContextId', this.contextId);
+      localStorage.setItem('xlasCorrectorCorrectorKey', this.correctorKey);
+      localStorage.setItem('xlasCorrectorItemKey', this.itemKey);
+      localStorage.setItem('xlasCorrectorDataToken', this.dataToken);
+      localStorage.setItem('xlasCorrectorFileToken', this.fileToken);
     },
 
 
@@ -390,25 +369,16 @@ export const useApiStore = defineStore('api', {
       this.setLoading(true);
       this.clearAllIntervals();
 
-      const criteriaStore = useCriteriaStore();
-      const itemsStore = useItemsStore();
-      const layoutStore = useLayoutStore();
-      const levelsStore = useLevelsStore();
-      const preferencesStore = usePreferencesStore();
-      const resourcesStore = useResourcesStore();
-      const settingsStore = useSettingsStore();
-      const taskStore = useTaskStore();
-      const snippetsStore = useSnippetsStore();
+      await stores.criteria().loadFromStorage();
+      await stores.items().loadFromStorage();
+      await stores.layout().loadFromStorage();
+      await stores.levels().loadFromStorage();
+      await stores.preferences().loadFromStorage();
+      await stores.resources().loadFromStorage();
+      await stores.settings().loadFromStorage();
+      await stores.snippets().loadFromStorage();
+      await stores.tasks().loadFromStorage();
 
-      await criteriaStore.loadFromStorage();
-      await itemsStore.loadFromStorage();
-      await layoutStore.loadFromStorage();
-      await levelsStore.loadFromStorage();
-      await preferencesStore.loadFromStorage();
-      await resourcesStore.loadFromStorage();
-      await settingsStore.loadFromStorage();
-      await taskStore.loadFromStorage();
-      await snippetsStore.loadFromStorage();
 
       this.setLoading(false);
       return true;
@@ -423,7 +393,7 @@ export const useApiStore = defineStore('api', {
       this.setLoading(true);
       this.clearAllIntervals();
 
-      const itemsStore = useItemsStore();
+      const itemsStore = stores.items();
       if (itemKey == '' || itemsStore.getItem(itemKey) == undefined) {
         itemKey = itemsStore.firstKey
       }
@@ -431,23 +401,16 @@ export const useApiStore = defineStore('api', {
       this.itemKey = itemKey;
       localStorage.setItem('itemKey', this.itemKey);
 
-      const changesStore = useChangesStore();
-      const commentsStore = useCommentsStore();
-      const correctorsStore = useCorrectorsStore();
-      const essayStore = useEssayStore();
-      const pagesStore = usePagesStore();
-      const pointsStore = usePointsStore();
-      const summariesStore = useSummariesStore();
+      await stores.changes().loadFromStorage();
+      await stores.comments().loadFromStorage();
+      await stores.correctors().loadFromStorage();
+      await stores.essay().loadFromStorage();
+      await stores.pages().loadFromStorage();
+      await stores.points().loadFromStorage();
+      await stores.summaries().loadFromStorage();
 
-      await changesStore.loadFromStorage();
-      await commentsStore.loadFromStorage();
-      await correctorsStore.loadFromStorage();
-      await essayStore.loadFromStorage();
-      await pagesStore.loadFromStorage();
-      await pointsStore.loadFromStorage();
-      await summariesStore.loadFromStorage();
 
-      commentsStore.setMarkerChange();
+      stores.comments().setMarkerChange();
       this.setLoading(false);
       if (itemsStore.correctionAllowed) {
         this.setInterval('apiStore.saveChangesToBackend', this.saveChangesToBackend, sendInterval);
@@ -461,7 +424,9 @@ export const useApiStore = defineStore('api', {
      */
     async loadDataFromBackend() {
       console.log("loadDataFromBackend...");
+
       this.setLoading(true);
+      await clearAllStores();
       this.clearAllIntervals();
 
       let response = {};
@@ -476,26 +441,15 @@ export const useApiStore = defineStore('api', {
         this.setLoading(false);
         return false;
       }
-
-      const criteriaStore = useCriteriaStore();
-      const itemsStore = useItemsStore();
-      const layoutStore = useLayoutStore();
-      const levelsStore = useLevelsStore();
-      const preferencesStore = usePreferencesStore();
-      const resourcesStore = useResourcesStore();
-      const settingsStore = useSettingsStore();
-      const taskStore = useTaskStore();
-      const snippetsStore = useSnippetsStore();
-
-      await criteriaStore.loadFromData(response.data.criteria);
-      await itemsStore.loadFromData(response.data.items);
-      await layoutStore.clearStorage();
-      await levelsStore.loadFromData(response.data.levels);
-      await preferencesStore.loadFromData(response.data.preferences);
-      await resourcesStore.loadFromData(response.data.resources);
-      await settingsStore.loadFromData(response.data.settings);
-      await taskStore.loadFromData(response.data.task);
-      await snippetsStore.loadFromData(response.data.snippets);
+      
+      await stores.layout().clearStorage();
+      await stores.items().loadFromBackend(response.data.items);
+      await stores.levels().loadFromBackend(response.data.levels);
+      await stores.preferences().loadFromBackend(response.data.preferences);
+      await stores.resources().loadFromBackend(response.data.resources);
+      await stores.settings().loadFromBackend(response.data.settings);
+      await stores.tasks().loadFromBackend(response.data.tasks);
+      await stores.snippets().loadFromBackend(response.data.snippets);
 
       this.setLoading(false);
       return true;
@@ -510,14 +464,16 @@ export const useApiStore = defineStore('api', {
       this.setLoading(true);
       this.clearAllIntervals();
 
-      const itemsStore = useItemsStore();
-      if (itemKey == '' || itemsStore.getItem(itemKey) == undefined) {
+      const itemsStore = stores.items();
+      if (itemKey == '' || stores.items().getItem(itemKey) == undefined) {
         itemKey = itemsStore.firstKey
       }
 
       let response = {};
+      const task_id = Item.extractTaskId(itemKey);
+      const writer_id = Item.extractWriterId(itemKey);
       try {
-        response = await axios.get('/item/' + itemKey, this.getRequestConfig(this.dataToken));
+        response = await axios.get('/item/' + task_id + '/' + writer_id, this.getRequestConfig(this.dataToken));
         this.setTimeOffset(response);
         this.refreshToken(response);
       }
@@ -528,29 +484,23 @@ export const useApiStore = defineStore('api', {
         return false;
       }
 
-      // set the itemKey here before loading and check it in the loadFromData() functions
+      // set the itemKey here before loading and check it in the loadFromBackend() functions
       // otherwise a fast navigation between writers may cause wrong assignments (race condition)
       this.itemKey = itemKey;
       localStorage.setItem('itemKey', this.itemKey);
       itemsStore.updateItem(new Item(response.data.item));
-
-      const changesStore = useChangesStore();
-      const correctorsStore = useCorrectorsStore();
-      const commentsStore = useCommentsStore();
-      const essayStore = useEssayStore();
-      const pagesStore = usePagesStore();
-      const pointsStore = usePointsStore();
-      const summariesStore = useSummariesStore();
+      
 
       // dismiss open changes from other items
       // this avoids a race condition on quick navigation between writers
-      await changesStore.clearStorage();
-      await correctorsStore.loadFromData(response.data.correctors);
-      await commentsStore.loadFromData(response.data.comments);
-      await essayStore.loadFromData(response.data.essay);
-      await pagesStore.loadFromData(response.data.pages);
-      await pointsStore.loadFromData(response.data.points);
-      await summariesStore.loadFromData(response.data.summaries);
+      await stores.changes().clearStorage();
+      await stores.correctors().loadFromBackend(response.data.correctors);
+      await stores.criteria().loadFromBackend(response.data.criteria);
+      await stores.comments().loadFromBackend(response.data.comments);
+      await stores.essay().loadFromBackend(response.data.essay);
+      await stores.pages().loadFromBackend(response.data.pages);
+      await stores.points().loadFromBackend(response.data.points);
+      await stores.summaries().loadFromBackend(response.data.summaries);
 
       commentsStore.setMarkerChange();
       this.setLoading(false);
@@ -569,53 +519,45 @@ export const useApiStore = defineStore('api', {
      * @return bool
      */
     async saveChangesToBackend(wait = false) {
-      const changesStore = useChangesStore();
-      const commentsStore = useCommentsStore();
-      const pointsStore = usePointsStore();
-      const summariesStore = useSummariesStore();
-      const snippetsStore = useSnippetsStore();
-      const preferencesStore = usePreferencesStore();
 
       // don't interfer with a running request
       if (!(await this.isSending(true))) {
         this.setSending(true);
         try {
           const data = {
-            comments: await commentsStore.getChangedData(this.lastSendingTry),
-            points: await pointsStore.getChangedData(this.lastSendingTry),
-            summaries: await summariesStore.getChangedData(this.lastSendingTry),
-            snippets: await snippetsStore.getChangedData(this.lastSendingTry),
-            preferences: await preferencesStore.getChangedData(this.lastSendingTry),
+            comments: await stores.comments().getChangedData(this.lastSendingTry),
+            points: await stores.points().getChangedData(this.lastSendingTry),
+            summaries: await stores.summaries().getChangedData(this.lastSendingTry),
+            snippets: await stores.snippets().getChangedData(this.lastSendingTry),
+            preferences: await stores.preferences().getChangedData(this.lastSendingTry),
           };
 
-          const response = await axios.put('/changes/' + this.itemKey,
-            data,
-            this.getRequestConfig(this.dataToken));
+          const response = await axios.put('/corrector/changes/', data, this.getRequestConfig(this.dataToken));
           this.setTimeOffset(response);
           this.refreshToken(response);
 
-          const newSelectedKey = await commentsStore.updateKeys(response.data.comments);
-          await pointsStore.changeCommentKeys(response.data.comments);
-          await pointsStore.updateKeys(response.data.points);
+          const newSelectedKey = await stores.comments().updateKeys(response.data.comments);
+          await stores.points().changeCommentKeys(response.data.comments);
+          await stores.points().updateKeys(response.data.points);
 
           // trigger selection change for the comment
           if (newSelectedKey !== null) {
-            await commentsStore.selectComment(newSelectedKey, true);
+            await stores.comments().selectComment(newSelectedKey, true);
           }
 
-          await changesStore.setChangesSent(Change.TYPE_COMMENT,
+          await stores.changes().setChangesSent(Change.TYPE_COMMENT,
             response.data.comments,
             this.lastSendingTry);
-          await changesStore.setChangesSent(Change.TYPE_POINTS,
+          await stores.changes().setChangesSent(Change.TYPE_POINTS,
             response.data.points,
             this.lastSendingTry);
-          await changesStore.setChangesSent(Change.TYPE_SUMMARY,
+          await stores.changes().setChangesSent(Change.TYPE_SUMMARY,
             response.data.summaries,
             this.lastSendingTry);
-          await changesStore.setChangesSent(Change.TYPE_SNIPPETS,
+          await stores.changes().setChangesSent(Change.TYPE_SNIPPETS,
               response.data.snippets,
               this.lastSendingTry);
-          await changesStore.setChangesSent(Change.TYPE_PREFERENCES,
+          await stores.changes().setChangesSent(Change.TYPE_PREFERENCES,
             response.data.preferences,
             this.lastSendingTry);
         }
@@ -676,12 +618,12 @@ export const useApiStore = defineStore('api', {
     refreshToken(response) {
       if (response.headers['longessaydatatoken']) {
         this.dataToken = response.headers['longessaydatatoken'];
-        localStorage.setItem('correctorDataToken', this.dataToken);
+        localStorage.setItem('xlasCorrectorDataToken', this.dataToken);
       }
 
       if (response.headers['longessayfiletoken']) {
         this.fileToken = response.headers['longessayfiletoken'];
-        localStorage.setItem('correctorFileToken', this.fileToken);
+        localStorage.setItem('xlasCorrectorFileToken', this.fileToken);
       }
     },
 

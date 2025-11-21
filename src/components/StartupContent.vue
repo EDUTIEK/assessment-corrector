@@ -1,11 +1,9 @@
 <script setup>
-import { useApiStore } from '@/store/api';
-import { useTaskStore } from '@/store/task';
-import { useItemsStore } from '@/store/items';
+import {stores} from "@/store";
 
-const apiStore = useApiStore();
-const taskStore = useTaskStore();
-const itemsStore = useItemsStore();
+const apiStore = stores.api();
+const taskStore = stores.tasks();
+const itemsStore = stores.items();
 </script>
 
 <template>

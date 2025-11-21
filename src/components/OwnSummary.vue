@@ -2,10 +2,9 @@
 import SummaryCriteria from '@/components/SummaryCriteria.vue';
 import OwnSummaryPoints from "@/components/OwnSummaryPoints.vue";
 import OwnSummaryText from "@/components/OwnSummaryText.vue";
+import {stores} from "@/store";
 
-import { useApiStore } from "@/store/api";
-
-const apiStore = useApiStore();
+const apiStore = stores.api();
 
 const props = defineProps(['showCriteria', 'showText']);
 

@@ -1,17 +1,13 @@
-import { defineStore } from 'pinia';
-import localForage from "localforage";
-import Criterion from '@/data/Criterion'
-import { useApiStore } from '@/store/api';
-import { useCorrectorsStore } from '@/store/correctors';
-
-const storage = localForage.createInstance({
-  storeName: "corrector-criteria",
-  description: "Rating criterion data",
-});
-
 /**
  * Criteria Store
  */
+import {getStorage} from "@/lib/Storage";
+import {defineStore} from 'pinia';
+import {stores} from "@/store/index";
+import Criterion from '@/data/Criterion'
+
+const storage = getStorage('criteria');
+
 export const useCriteriaStore = defineStore('criteria', {
   state: () => {
     return {
@@ -26,29 +22,29 @@ export const useCriteriaStore = defineStore('criteria', {
    */
   getters: {
     hasCommentCriteria: state => {
-      const correctorsStore = useCorrectorsStore();
+      const correctorsStore = stores.correctors();
       const correctorKeys = correctorsStore.correctorKeys;
       return !!state.criteria.find(criterion => !criterion.is_general && (criterion.corrector_key == '' || correctorKeys.includes(
           criterion.corrector_key)));
     },
 
     hasOwnCriteria: state => {
-      const apiStore = useApiStore();
+      const apiStore = stores.api();
       return !!state.criteria.find(criterion => criterion.corrector_key == '' || criterion.corrector_key == apiStore.correctorKey);
     },
 
     hasOwnGeneralCriteria: state => {
-      const apiStore = useApiStore();
+      const apiStore = stores.api();
       return !!state.criteria.find(criterion => criterion.is_general && (criterion.corrector_key == '' || criterion.corrector_key == apiStore.correctorKey));
     },
 
     hasOwnCommentCriteria: state => {
-      const apiStore = useApiStore();
+      const apiStore = stores.api();
       return !!state.criteria.find(criterion => !criterion.is_general && (criterion.corrector_key == '' || criterion.corrector_key == apiStore.correctorKey));
     },
 
     ownCriteria: state => {
-      const apiStore = useApiStore();
+      const apiStore = stores.api();
       return state.criteria.filter((criterion => criterion.corrector_key == '' || criterion.corrector_key == apiStore.correctorKey));
     },
 
@@ -177,7 +173,7 @@ export const useCriteriaStore = defineStore('criteria', {
       }
     },
 
-    async loadFromData(data) {
+    async loadFromBackend(data) {
       try {
         await storage.clear();
         this.$reset();

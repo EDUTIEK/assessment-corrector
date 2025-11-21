@@ -1,12 +1,10 @@
-import { defineStore } from 'pinia';
-import localForage from "localforage";
+import {getStorage} from "@/lib/Storage";
+import {defineStore} from 'pinia';
+import {stores} from "@/store/index";
 import Summary from '@/data/Summary';
 import i18n from "@/plugins/i18n";
 
-const storage = localForage.createInstance({
-  storeName: "corrector-settings",
-  description: "Settings data",
-});
+const storage = getStorage('settings');
 
 const { t } = i18n.global;
 
@@ -81,7 +79,7 @@ export const useSettingsStore = defineStore('settings', {
       }
     },
 
-    async loadFromData(data) {
+    async loadFromBackend(data) {
       try {
         await storage.setItem('settings', data);
         this.$patch(data);

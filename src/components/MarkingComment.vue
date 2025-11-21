@@ -1,24 +1,17 @@
 <script setup xmlns="http://www.w3.org/1999/html">
-import { useApiStore } from '@/store/api';
-import { useCommentsStore } from "@/store/comments";
-import { useSummariesStore } from '@/store/summaries';
-import { useSettingsStore } from '@/store/settings';
-import { useCriteriaStore } from '@/store/criteria';
-import { usePointsStore } from '@/store/points';
-import { useLayoutStore } from '@/store/layout';
-import {useSnippetsStore} from "@/store/snippets";
+import {stores} from "@/store";
 import {nextTick, onMounted, ref, watch} from 'vue';
 import i18n from "@/plugins/i18n";
 import Snippet from "@/data/Snippet";
 
-const apiStore = useApiStore();
-const commentsStore = useCommentsStore();
-const summariesStore = useSummariesStore();
-const settingsStore = useSettingsStore();
-const criteriaStore = useCriteriaStore();
-const pointsStore = usePointsStore();
-const layoutStore = useLayoutStore();
-const snippetsStore = useSnippetsStore();
+const apiStore = stores.api();
+const commentsStore = stores.comments();
+const summariesStore = stores.summaries();
+const settingsStore = stores.settings();
+const criteriaStore = stores.criteria();
+const pointsStore = stores.points();
+const layoutStore = stores.layout();
+const snippetsStore = stores.snippets();
 
 const { t } = i18n.global;
 const props = defineProps(['comment']);

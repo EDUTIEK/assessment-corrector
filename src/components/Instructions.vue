@@ -1,10 +1,9 @@
 <script setup>
-import { useTaskStore } from '@/store/task';
-import { useLayoutStore } from '@/store/layout';
+import {stores} from "@/store";
 import { nextTick, watch } from 'vue';
 
-const taskStore = useTaskStore();
-const layoutStore = useLayoutStore();
+const taskStore = stores.tasks();
+const layoutStore = stores.layout();
 
 function handleBeforeinput(event) {
   event.preventDefault();

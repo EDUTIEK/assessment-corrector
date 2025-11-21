@@ -1,16 +1,13 @@
-import { defineStore } from 'pinia';
-import localForage from "localforage";
-import { useApiStore } from "./api";
-import axios from 'axios'
-
-const storage = localForage.createInstance({
-  storeName: "corrector-resources",
-  description: "Resource data",
-});
-
 /**
  * Resources Store
  */
+import {getStorage} from "@/lib/Storage";
+import {defineStore} from 'pinia';
+import {stores} from "@/store/index";
+import axios from 'axios'
+
+const storage = getStorage('resources');
+
 export const useResourcesStore = defineStore('resources', {
   state: () => {
     return {
@@ -124,8 +121,8 @@ export const useResourcesStore = defineStore('resources', {
       }
     },
 
-    async loadFromData(data) {
-      const apiStore = useApiStore();
+    async loadFromBackend(data) {
+      const apiStore = stores.api();
 
       try {
         await storage.clear();

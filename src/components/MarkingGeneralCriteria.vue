@@ -1,20 +1,14 @@
 <script setup>
-import { useCriteriaStore } from "@/store/criteria";
-import { useCommentsStore } from "@/store/comments";
-import { usePointsStore } from "@/store/points";
-import { useApiStore } from "@/store/api";
-import { useSettingsStore } from '@/store/settings';
-import { useSummariesStore } from '@/store/summaries';
-import { useLayoutStore } from '@/store/layout';
+import {stores} from "@/store";
 import {nextTick, ref, watch} from 'vue';
 
-const criteriaStore = useCriteriaStore();
-const commentsStore = useCommentsStore();
-const pointsStore = usePointsStore();
-const apiStore = useApiStore();
-const settingStore = useSettingsStore();
-const summariesStore = useSummariesStore();
-const layoutStore = useLayoutStore();
+const criteriaStore = stores.criteria();
+const commentsStore = stores.comments();
+const pointsStore = stores.points();
+const apiStore = stores.api();
+const settingStore = stores.settings();
+const summariesStore = stores.summaries();
+const layoutStore = stores.layout();
 
 let corrector_key = ref('');
 let criteriaPoints = ref({});

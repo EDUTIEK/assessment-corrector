@@ -1,11 +1,11 @@
 <script setup>
+import {stores} from "@/store";
 import SummaryCriteria from '@/components/SummaryCriteria.vue';
 import SummaryPoints from "@/components/SummaryPoints.vue";
 import SummaryText from "@/components/SummaryText.vue";
-import { useSummariesStore } from '@/store/summaries';
 
 const props = defineProps(['corrector_key', 'showCriteria', 'showText']);
-const summariesStore = useSummariesStore();
+const summariesStore = stores.summaries();
 
 function expansionClass() {
   const sum = (props.showCriteria ? 1 : 0) + (props.showText ? 1 : 0);

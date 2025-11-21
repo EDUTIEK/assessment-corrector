@@ -1,20 +1,14 @@
 <script setup>
-import { useApiStore } from '@/store/api';
-import { useItemsStore } from '@/store/items';
-import { useSummariesStore } from "@/store/summaries";
-import { useEssayStore } from "@/store/essay";
-import { useCorrectorsStore } from '@/store/correctors';
-import { useChangesStore } from '@/store/changes';
+import {stores} from "@/store";
 import { nextTick, ref } from 'vue';
-import { useLayoutStore } from '@/store/layout';
 
-const apiStore = useApiStore();
-const itemsStore = useItemsStore();
-const summariesStore = useSummariesStore();
-const essayStore = useEssayStore();
-const correctorsStore = useCorrectorsStore();
-const changesStore = useChangesStore();
-const layoutStore = useLayoutStore();
+const apiStore = stores.api();
+const itemsStore = stores.items();
+const summariesStore = stores.summaries();
+const essayStore = stores.essay();
+const correctorsStore = stores.correctors();
+const changesStore = stores.changes();
+const layoutStore = stores.layout();
 
 const menuOpen = ref(false);
 const selectionShown = ref(false);

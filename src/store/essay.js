@@ -1,17 +1,13 @@
-import { defineStore } from 'pinia';
-import localForage from "localforage";
-import { useApiStore } from "./api";
-import { useLevelsStore } from '@/store/levels';
-
-const storage = localForage.createInstance({
-  storeName: "corrector-essay",
-  description: "Essay data",
-});
-
 /**
  * Essay Store
  * Handles the essay to be corrected
  */
+import {getStorage} from "@/lib/Storage";
+import {defineStore} from 'pinia';
+import {stores} from "@/store/index";
+
+const storage = getStorage('essay');
+
 export const useEssayStore = defineStore('essay', {
   state: () => {
     return {
@@ -36,7 +32,7 @@ export const useEssayStore = defineStore('essay', {
     isFinalized: state => state.correction_finalized,
 
     grade: state => {
-      const levelsStore = useLevelsStore();
+      const levelsStore = stores.levels();
       let level = levelsStore.getLevelForPoints(state.final_points);
       if (level !== null) {
         return level.title
@@ -45,7 +41,7 @@ export const useEssayStore = defineStore('essay', {
     },
 
     gradeKey: state => {
-      const levelsStore = useLevelsStore();
+      const levelsStore = stores.levels();
       let level = levelsStore.getLevelForPoints(state.final_points);
       if (level !== null) {
         return level.key
@@ -76,7 +72,7 @@ export const useEssayStore = defineStore('essay', {
       }
     },
 
-    async loadFromData(data) {
+    async loadFromBackend(data) {
       try {
         await storage.setItem('settings', data);
         this.$patch(data);
@@ -89,7 +85,7 @@ export const useEssayStore = defineStore('essay', {
 
     async saveStitchDecision() {
 
-      const apiStore = useApiStore();
+      const apiStore = stores.api();
       const correction_finalized = apiStore.getServerTime(Date.now());
       const data = {
         'final_points': this.final_points,

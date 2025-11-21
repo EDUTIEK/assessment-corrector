@@ -1,8 +1,8 @@
 <script setup>
 
-import { useLayoutStore } from "../store/layout";
+import {stores} from "@/store";
 
-const layoutStore = useLayoutStore();
+const layoutStore = stores.layout();
 
 </script>
 

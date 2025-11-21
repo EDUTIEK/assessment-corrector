@@ -1,18 +1,13 @@
 <script setup>
-
-import { useApiStore } from '@/store/api';
-import { useItemsStore } from '@/store/items';
-import { useSummariesStore } from '@/store/summaries';
-import { useSettingsStore } from '@/store/settings';
-import { useLayoutStore} from "@/store/layout";
+import {stores} from "@/store";
 import OwnSummaryIncludes from '@/components/OwnSummaryIncludes.vue';
 import SumOfPoints from "@/components/SumOfPoints.vue";
 
-const apiStore = useApiStore();
-const itemsStore = useItemsStore();
-const summariesStore = useSummariesStore();
-const settingsStore = useSettingsStore();
-const layoutStore = useLayoutStore();
+const apiStore = stores.api();
+const itemsStore = stores.items();
+const summariesStore = stores.summaries();
+const settingsStore = stores.settings();
+const layoutStore = stores.layout();
 
 </script>
 

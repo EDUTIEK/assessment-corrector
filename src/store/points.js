@@ -1,19 +1,14 @@
-import { defineStore } from 'pinia';
-import localForage from "localforage";
-import { useApiStore } from '@/store/api';
-import { useCommentsStore } from '@/store/comments';
-import { useChangesStore } from "@/store/changes";
-import Points from '@/data/Points'
-import Change from '@/data/Change';
-
-const storage = localForage.createInstance({
-  storeName: "corrector-points",
-  description: "Corrector points data",
-});
-
 /**
  * Points Store
  */
+import {getStorage} from "@/lib/Storage";
+import {defineStore} from 'pinia';
+import {stores} from "@/store/index";
+import Points from '@/data/Points'
+import Change from '@/data/Change';
+
+const storage = getStorage('points');
+
 export const usePointsStore = defineStore('points', {
   state: () => {
     return {
@@ -189,7 +184,7 @@ export const usePointsStore = defineStore('points', {
      * @public
      */
     async setValueByCommentOrCriterion(comment_key, criterion_key, points_value) {
-      const apiStore = useApiStore();
+      const apiStore = stores.api();
       let pointsObject = this.getObjectByData(apiStore.correctorKey, comment_key, criterion_key);
       if (pointsObject) {
         if (points_value) {
@@ -211,7 +206,7 @@ export const usePointsStore = defineStore('points', {
      * @public
      */
     async createPoints(comment_key, criterion_key, points_value) {
-      const apiStore = useApiStore();
+      const apiStore = stores.api();
       const pointsObject = new Points({
         item_key: apiStore.itemKey,
         corrector_key: apiStore.correctorKey,
@@ -225,7 +220,7 @@ export const usePointsStore = defineStore('points', {
       await storage.setItem(pointsObject.key, JSON.stringify(pointsObject.getData()));
       await storage.setItem('keys', JSON.stringify(this.keys));
 
-      const changesStore = useChangesStore();
+      const changesStore = stores.changes();
       await changesStore.setChange(new Change({
         type: Change.TYPE_POINTS,
         action: Change.ACTION_SAVE,
@@ -243,7 +238,7 @@ export const usePointsStore = defineStore('points', {
 
       if (this.keys.includes(pointsObject.key)) {
         await storage.setItem(pointsObject.key, JSON.stringify(pointsObject.getData()));
-        const changesStore = useChangesStore();
+        const changesStore = stores.changes();
         await changesStore.setChange(new Change({
           type: Change.TYPE_POINTS,
           action: Change.ACTION_SAVE,
@@ -268,7 +263,7 @@ export const usePointsStore = defineStore('points', {
         await storage.removeItem(remove_key);
       }
 
-      const changesStore = useChangesStore();
+      const changesStore = stores.changes();
       const change = new Change({
         type: Change.TYPE_POINTS,
         action: Change.ACTION_DELETE,
@@ -314,7 +309,7 @@ export const usePointsStore = defineStore('points', {
      * @public
      */
     async loadFromStorage() {
-      const apiStore = useApiStore();
+      const apiStore = stores.api();
       try {
         this.$reset();
 
@@ -346,8 +341,8 @@ export const usePointsStore = defineStore('points', {
      * @param {array} data - array of plain objects
      * @public
      */
-    async loadFromData(data) {
-      const apiStore = useApiStore();
+    async loadFromBackend(data) {
+      const apiStore = stores.api();
       try {
         await storage.clear();
         this.$reset();
@@ -376,8 +371,8 @@ export const usePointsStore = defineStore('points', {
      * @return {array} Change objects
      */
     async getChangedData(sendingTime = 0) {
-      const apiStore = useApiStore();
-      const changesStore = useChangesStore();
+      const apiStore = stores.api();
+      const changesStore = stores.changes();
       const changes = [];
       for (const change of changesStore.getChangesFor(Change.TYPE_POINTS, sendingTime)) {
         const data = await storage.getItem(change.key);

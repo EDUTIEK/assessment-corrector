@@ -1,14 +1,11 @@
 <script setup>
 import { ref } from 'vue'
-import { useApiStore } from '@/store/api';
-import { useEssayStore } from '@/store/essay';
-import { useItemsStore } from '@/store/items';
-import { useSummariesStore } from '@/store/summaries';
+import {stores} from "@/store";
 
-const apiStore = useApiStore();
-const essayStore = useEssayStore();
-const itemsStore = useItemsStore();
-const summariesStore = useSummariesStore();
+const apiStore = stores.api();
+const essayStore = stores.essay();
+const itemsStore = stores.items();
+const summariesStore = stores.summaries();
 
 let dialogOpen = ref(false);
 let showSendFailure = ref(false);

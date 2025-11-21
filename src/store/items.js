@@ -1,16 +1,13 @@
-import { defineStore } from 'pinia';
-import localForage from "localforage";
-import { useApiStore } from '@/store/api';
-import Item from '@/data/Item';
-
-const storage = localForage.createInstance({
-  storeName: "corrector-items",
-  description: "Items data",
-});
-
 /**
  * Items Store
  */
+import {getStorage} from "@/lib/Storage";
+import {defineStore} from 'pinia';
+import {stores} from "@/store/index";
+import Item from '@/data/Item';
+
+const storage = getStorage('items');
+
 export const useItemsStore = defineStore('items', {
   state: () => {
     return {
@@ -30,9 +27,10 @@ export const useItemsStore = defineStore('items', {
 
     correctionAllowed: state => state.currentItem.correction_allowed,
     authorizationAllowed: state => state.currentItem.authorization_allowed,
+    revisionAllowed: state => state.currentItem.revision_allowed,
 
     currentItem: state => {
-      const apiStore = useApiStore();
+      const apiStore = stores.api();
       return state.items.find(element => element.key == apiStore.itemKey);
     },
 
@@ -128,7 +126,7 @@ export const useItemsStore = defineStore('items', {
       }
     },
 
-    async loadFromData(data) {
+    async loadFromBackend(data) {
       try {
         await storage.clear();
         this.$reset();

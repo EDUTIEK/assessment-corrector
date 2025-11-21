@@ -1,25 +1,13 @@
-import { defineStore } from "pinia";
-import localForage from "localforage";
-import { useApiStore } from "@/store/api";
-import { useCriteriaStore } from "@/store/criteria";
-import { useCommentsStore } from "@/store/comments";
-import { useTaskStore } from "@/store/task";
-import { useSettingsStore } from "@/store/settings";
-import { useLevelsStore } from "@/store/levels";
-import { useChangesStore } from "@/store/changes";
-import { usePreferencesStore } from '@/store/preferences';
-
+import {getStorage} from "@/lib/Storage";
+import {defineStore} from 'pinia';
+import {stores} from "@/store/index";
 import Summary from "@/data/Summary";
 import Change from "@/data/Change";
 import i18n from "@/plugins/i18n";
 
 const { t } = i18n.global;
 
-const storage = localForage.createInstance({
-  storeName: "corrector-summaries",
-  description: "Corrector summaries data",
-});
-
+const storage = getStorage('summaries');
 
 // set check interval very short to update the grade level according the points
 const checkInterval = 200;      // time (ms) to wait for a new update check (e.g. 0.2s to 1s)
@@ -93,7 +81,7 @@ export const useSummariesStore = defineStore('summaries', {
      * @return {float}
      */
     currentPartialPointsAreIncluded: state => {
-      const criteriaStore = useCriteriaStore();
+      const criteriaStore = stores.criteria();
       if (criteriaStore.hasOwnCriteria) {
         return (state.currentInclusionSettings.include_criteria_points > Summary.INCLUDE_NOT);
       } else {
@@ -108,7 +96,7 @@ export const useSummariesStore = defineStore('summaries', {
      */
     currentGradeTitle(state) {
       if (state.editSummary.grade_key) {
-        const levelsStore = useLevelsStore();
+        const levelsStore = stores.levels();
         let level = levelsStore.getLevel(state.editSummary.grade_key);
         if (level) {
           return level.title;
@@ -123,8 +111,8 @@ export const useSummariesStore = defineStore('summaries', {
      * @return {{include_comment_points, include_comment_ratings, include_criteria_points, include_comments}}
      */
     currentInclusionSettings: state => {
-      const settingsStore = useSettingsStore();
-      const preferencesStore = usePreferencesStore();
+      const settingsStore = stores.settings();
+      const preferencesStore = stores.preferences();
 
       if (settingsStore.fixed_inclusions) {
         return settingsStore.summaryInclusions
@@ -172,8 +160,8 @@ export const useSummariesStore = defineStore('summaries', {
 
 
     getInclusionText: state => {
-      const settingsStore = useSettingsStore();
-      const criteriaStore = useCriteriaStore();
+      const settingsStore = stores.settings();
+      const criteriaStore = stores.criteria();
 
       /**
        *
@@ -256,7 +244,7 @@ export const useSummariesStore = defineStore('summaries', {
         return '';
       }
 
-      const settingsStore = useSettingsStore();
+      const settingsStore = stores.settings();
       if (settingsStore.stitch_when_distance) {
         if (max_points - min_points > settingsStore.max_auto_distance) {
           return t('summariesPointsDifferenceExceedsN', [settingsStore.max_auto_distance]);
@@ -326,7 +314,7 @@ export const useSummariesStore = defineStore('summaries', {
      * @public
      */
     async loadFromStorage() {
-      const apiStore = useApiStore();
+      const apiStore = stores.api();
       try {
         this.$reset();
 
@@ -363,8 +351,8 @@ export const useSummariesStore = defineStore('summaries', {
      * @param {array} data - array of plain objects
      * @public
      */
-    async loadFromData(data) {
-      const apiStore = useApiStore();
+    async loadFromBackend(data) {
+      const apiStore = stores.api();
       try {
         await storage.clear();
         this.$reset();
@@ -421,13 +409,13 @@ export const useSummariesStore = defineStore('summaries', {
       }
 
       // don't accept changes after correction end
-      const taskStore = useTaskStore();
+      const taskStore = stores.tasks();
       if (taskStore.correctionEndReached) {
         return;
       }
 
       // limit the points
-      const settingsStore = useSettingsStore();
+      const settingsStore = stores.settings();
       if (isNaN(this.editSummary.points)) {
         this.editSummary.points = null;
       } else if (this.editSummary.points < 0) {
@@ -437,7 +425,7 @@ export const useSummariesStore = defineStore('summaries', {
       }
 
       // set the grade key for the points
-      const levelsStore = useLevelsStore();
+      const levelsStore = stores.levels();
       let level = levelsStore.getLevelForPoints(this.editSummary.points);
       if (level) {
         this.editSummary.grade_key = level.key
@@ -450,8 +438,8 @@ export const useSummariesStore = defineStore('summaries', {
         const clonedSummary = this.editSummary.getClone();
 
         if (!clonedSummary.isEqual(storedSummary) && this.keys.includes(clonedSummary.getKey())) {
-          const apiStore = useApiStore();
-          const changesStore = useChangesStore();
+          const apiStore = stores.api();
+          const changesStore = stores.changes();
 
           clonedSummary.last_change = apiStore.getServerTime(Date.now());
 
@@ -491,8 +479,8 @@ export const useSummariesStore = defineStore('summaries', {
      * @return {array} Change objects
      */
     async getChangedData(sendingTime = 0) {
-      const apiStore = useApiStore();
-      const changesStore = useChangesStore();
+      const apiStore = stores.api();
+      const changesStore = stores.changes();
       const changes = [];
       for (const change of changesStore.getChangesFor(Change.TYPE_SUMMARY, sendingTime)) {
         const data = await storage.getItem(change.key);

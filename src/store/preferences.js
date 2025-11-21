@@ -1,21 +1,16 @@
-import { defineStore } from 'pinia';
-import localForage from "localforage";
-import Summary from '@/data/Summary';
-import { useChangesStore } from "@/store/changes";
-import { useApiStore } from '@/store/api';
-import Change from '@/data/Change';
-
-
-const storage = localForage.createInstance({
-  storeName: "corrector-preferences",
-  description: "Preferences data",
-});
-
 /**
  * Preferences Store
  * Stores local setings done by the corrector
  * These settings are not yet sent to the backend
  */
+import {getStorage} from "@/lib/Storage";
+import {defineStore} from 'pinia';
+import {stores} from "@/store/index";
+import Summary from '@/data/Summary';
+import Change from '@/data/Change';
+
+const storage = getStorage('preferences');
+
 export const usePreferencesStore = defineStore('preferences', {
   state: () => {
     return {
@@ -87,7 +82,7 @@ export const usePreferencesStore = defineStore('preferences', {
       }
     },
 
-    async loadFromData(data) {
+    async loadFromBackend(data) {
       try {
         this.$patch(data);
         this.sent = true;
@@ -103,8 +98,8 @@ export const usePreferencesStore = defineStore('preferences', {
      * Update the preferences in the sorage and mark them as changed
      */
     async update() {
-      const changesStore = useChangesStore();
-      const apiStore = useApiStore();
+      const changesStore = stores.changes();
+      const apiStore = stores.api();
 
       await this.saveToStorage();
       if (apiStore.correctorKey) {
@@ -124,8 +119,8 @@ export const usePreferencesStore = defineStore('preferences', {
      * @return {array} Change objects
      */
     async getChangedData(sendingTime = 0) {
-      const apiStore = useApiStore();
-      const changesStore = useChangesStore();
+      const apiStore = stores.api();
+      const changesStore = stores.changes();
       const changes = [];
       for (const change of changesStore.getChangesFor(Change.TYPE_PREFERENCES, sendingTime)) {
         // preferences exist only once, will be the same for all changes

@@ -1,9 +1,9 @@
 <script setup>
-import { useCommentsStore } from "@/store/comments";
+import {stores} from "@/store";
 import MarkingComment from '@/components/MarkingComment.vue';
 import { nextTick, watch } from 'vue';
 
-const commentsStore = useCommentsStore();
+const commentsStore = stores.comments();
 
 /**
  * Focus the currently selected comment

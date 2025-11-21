@@ -1,12 +1,10 @@
 <script setup>
-import {useSettingsStore} from "@/store/settings";
-import {usePointsStore} from "@/store/points";
-import {useCriteriaStore} from "@/store/criteria";
+import {stores} from "@/store";
 import i18n from "@/plugins/i18n";
 
-const settingsStore = useSettingsStore();
-const pointsStore = usePointsStore();
-const criteriaStore = useCriteriaStore();
+const settingsStore = stores.settings();
+const pointsStore = stores.points();
+const criteriaStore = stores.criteria();
 
 const props = defineProps(['corrector_key']);
 const { t } = i18n.global;

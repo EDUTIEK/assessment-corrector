@@ -1,17 +1,13 @@
 <script setup>
-import { useApiStore } from '@/store/api';
-import { useLayoutStore } from "@/store/layout";
-import { useResourcesStore } from "@/store/resources";
-import { useCorrectorsStore } from "@/store/correctors";
-import { useTaskStore } from '@/store/task';
+import {stores} from "@/store";
 import { nextTick, watch } from 'vue';
 import SendingStatus from "@/components/SendingStatus.vue";
 
-const apiStore = useApiStore();
-const layoutStore = useLayoutStore();
-const resourcesStore = useResourcesStore();
-const correctorsStore = useCorrectorsStore();
-const taskStore = useTaskStore();
+const apiStore = stores.api();
+const layoutStore = stores.layout();
+const resourcesStore = stores.resources();
+const correctorsStore = stores.correctors();
+const taskStore = stores.tasks();
 
 async function handleFocusChange() {
   if (layoutStore.focusTarget == 'navigation') {

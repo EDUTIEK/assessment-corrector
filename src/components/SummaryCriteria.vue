@@ -1,18 +1,13 @@
 <script setup>
 import { nextTick, reactive, ref, watch } from 'vue';
-import { useApiStore } from '@/store/api';
-import { useCriteriaStore } from "@/store/criteria";
-import { useCommentsStore } from "@/store/comments";
-import { usePointsStore } from "@/store/points";
-import { useLayoutStore } from '@/store/layout';
-import { useSettingsStore } from '@/store/settings';
+import {stores} from "@/store";
 
-const apiStore = useApiStore();
-const criteriaStore = useCriteriaStore();
-const commentsStore = useCommentsStore();
-const pointsStore = usePointsStore();
-const layoutStore = useLayoutStore();
-const settingsStore = useSettingsStore();
+const apiStore = stores.api();
+const criteriaStore = stores.criteria();
+const commentsStore = stores.comments();
+const pointsStore = stores.points();
+const layoutStore = stores.layout();
+const settingsStore = stores.settings();
 
 const props = defineProps(['corrector_key']);
 watch(() => props, loadCriteria);

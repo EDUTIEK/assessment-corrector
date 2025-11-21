@@ -34,17 +34,14 @@ import TinyHelper from '@/lib/TinyHelper';
 import contentLocalCss from '@/styles/content.css?inline';
 import headlinesThreeCss from '@/styles/headlines-three.css?inline';
 
-import { useSummariesStore } from '@/store/summaries';
-import { usePreferencesStore } from '@/store/preferences';
-import { useLayoutStore } from '@/store/layout';
-import {useSnippetsStore} from "@/store/snippets";
+import {stores} from "@/store";
 import { nextTick, watch } from 'vue';
 import Snippet from "@/data/Snippet";
 
-const summariesStore = useSummariesStore();
-const preferencesStore = usePreferencesStore();
-const layoutStore = useLayoutStore();
-const snippetsStore = useSnippetsStore();
+const summariesStore = stores.summaries();
+const preferencesStore = stores.preferences();
+const layoutStore = stores.layout();
+const snippetsStore = stores.snippets();
 
 // editorId used for retrieving the editor instance using the tinymce.get('ID') method.
 const props = defineProps(['editorId']);

@@ -1,8 +1,7 @@
 <script setup>
+import {stores} from "@/store";
 
-import { useSummariesStore } from '@/store/summaries';
-
-const summariesStore = useSummariesStore();
+const summariesStore = stores.summaries();
 
 const props = defineProps(['corrector_key']);
 

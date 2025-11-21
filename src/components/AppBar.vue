@@ -6,16 +6,13 @@ import Help from "@/components/Help.vue";
 import Items from "@/components/Items.vue";
 import StitchDecision from "@/components/StitchDecision.vue";
 import Authorization from '@/components/Authorization.vue';
-import { useApiStore } from '@/store/api';
-import { useTaskStore } from '@/store/task';
-import { useChangesStore } from '@/store/changes';
-import { useLayoutStore } from '@/store/layout';
+import {stores} from "@/store";
 import { nextTick, watch } from 'vue';
 
-const apiStore = useApiStore();
-const taskStore = useTaskStore();
-const changesStore = useChangesStore();
-const layoutStore = useLayoutStore();
+const apiStore = stores.api();
+const taskStore = stores.tasks();
+const changesStore = stores.changes();
+const layoutStore = stores.layout();
 
 async function handleFocusChange() {
   if (layoutStore.focusTarget == 'header') {

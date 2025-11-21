@@ -1,20 +1,14 @@
 <script setup>
-import { useEssayStore } from '@/store/essay';
-import { useCommentsStore } from "@/store/comments";
-import { useSummariesStore } from '@/store/summaries';
-import { usePreferencesStore } from '@/store/preferences';
-import { useSettingsStore } from '@/store/settings';
-import { useLayoutStore } from '@/store/layout';
-
+import {stores} from "@/store";
 import TextMarker from '@/lib/TextMarker';
 import { onMounted,  nextTick, watch } from 'vue';
 
-const essayStore = useEssayStore();
-const commentsStore = useCommentsStore();
-const summariesStore = useSummariesStore();
-const preferencesStore = usePreferencesStore();
-const settingsStore = useSettingsStore();
-const layoutStore = useLayoutStore();
+const essayStore = stores.essay();
+const commentsStore = stores.comments();
+const summariesStore = stores.summaries();
+const preferencesStore = stores.preferences();
+const settingsStore = stores.settings();
+const layoutStore = stores.layout();
 
 let marker;
 

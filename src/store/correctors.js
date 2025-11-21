@@ -1,19 +1,16 @@
-import { defineStore } from 'pinia';
-import localForage from "localforage";
-import { useApiStore } from '@/store/api';
-import Corrector from '@/data/Corrector';
-import i18n from "@/plugins/i18n";
-
-const storage = localForage.createInstance({
-  storeName: "corrector-correctors",
-  description: "Correctors data",
-});
-
-const { t } = i18n.global;
-
 /**
  * Correctors Store
  */
+import {getStorage} from "@/lib/Storage";
+import {defineStore} from 'pinia';
+import {stores} from "@/store/index";
+import Corrector from '@/data/Corrector';
+import i18n from "@/plugins/i18n";
+
+const storage = getStorage('correctors');
+
+const { t } = i18n.global;
+
 export const useCorrectorsStore = defineStore('correctors', {
   state: () => {
     return {
@@ -44,7 +41,7 @@ export const useCorrectorsStore = defineStore('correctors', {
      * @returns {Corrector[]}
      */
     otherCorrectors: state => {
-      const apiStore = useApiStore();
+      const apiStore = stores.api();
       return state.correctors
         .filter(element => element.corrector_key != apiStore.correctorKey)
         .sort((a, b) => a.position - b.position);
@@ -112,7 +109,7 @@ export const useCorrectorsStore = defineStore('correctors', {
      * @public
      */
     async loadFromStorage() {
-      const apiStore = useApiStore();
+      const apiStore = stores.api();
       try {
         this.$reset();
 
@@ -134,9 +131,9 @@ export const useCorrectorsStore = defineStore('correctors', {
       }
     },
 
-    async loadFromData(data) {
+    async loadFromBackend(data) {
 
-      const apiStore = useApiStore();
+      const apiStore = stores.api();
       try {
         await storage.clear();
         this.$reset();

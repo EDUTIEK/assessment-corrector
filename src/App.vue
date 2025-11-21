@@ -10,7 +10,7 @@ import StartupContent from "@/components/StartupContent.vue";
 import { useApiStore } from '@/store/api';
 import { useLayoutStore } from "@/store/layout";
 
-const apiStore = useApiStore();
+const apiStore = stores.api();
 apiStore.init();
 
 </script>

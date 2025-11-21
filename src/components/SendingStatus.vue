@@ -1,9 +1,8 @@
 <script setup>
-import {useApiStore} from "@/store/api";
-import {useChangesStore} from "@/store/changes";
+import {stores} from "@/store";
 
-const apiStore = useApiStore();
-const changesStore = useChangesStore();
+const apiStore = stores.api();
+const changesStore = stores.changes();
 
 function isSent() {
   return changesStore.countChanges == 0;

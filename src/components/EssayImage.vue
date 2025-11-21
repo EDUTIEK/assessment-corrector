@@ -1,10 +1,5 @@
 <script setup>
-import { useApiStore } from '@/store/api';
-import { useCommentsStore } from "@/store/comments";
-import { useSummariesStore } from '@/store/summaries';
-import { usePagesStore } from '@/store/pages';
-import { useLayoutStore } from '@/store/layout';
-import { usePreferencesStore } from '@/store/preferences';
+import {stores} from "@/store";
 
 // temporary dependencies for development
 // import createImageMarker from '@/dev/long-essay-image-marker/ImageMarker';
@@ -17,12 +12,12 @@ import Comment from "@/data/Comment";
 import Mark from '@/data/Mark';
 import { nextTick, onMounted, ref, watch } from 'vue';
 
-const apiStore = useApiStore();
-const commentsStore = useCommentsStore();
-const summariesStore = useSummariesStore();
-const pagesStore = usePagesStore();
-const layoutStore = useLayoutStore();
-const preferencesStore = usePreferencesStore();
+const apiStore = stores.api();
+const commentsStore = stores.comments();
+const summariesStore = stores.summaries();
+const pagesStore = stores.pages();
+const layoutStore = stores.layout();
+const preferencesStore = stores.preferences();
 
 const markerNode = ref();
 const selectedTool = ref('scroll');

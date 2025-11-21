@@ -1,18 +1,13 @@
 <script setup>
-
-import {useLayoutStore} from "@/store/layout";
-import { useSummariesStore } from '@/store/summaries';
-import { useCriteriaStore } from '@/store/criteria';
-import { usePreferencesStore } from '@/store/preferences';
-import { useSettingsStore } from '@/store/settings';
+import {stores} from "@/store";
 import Summary from '@/data/Summary';
 import {ref, nextTick, onMounted, watch} from 'vue';
 
-const layoutStore = useLayoutStore();
-const summariesStore = useSummariesStore();
-const criteriaStore = useCriteriaStore();
-const preferencesStore = usePreferencesStore();
-const settingsStore = useSettingsStore();
+const layoutStore = stores.layout();
+const summariesStore = stores.summaries();
+const criteriaStore = stores.criteria();
+const preferencesStore = stores.preferences();
+const settingsStore = stores.settings();
 
 const showIncludes = ref(false);
 const includes = ref({});

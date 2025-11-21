@@ -1,29 +1,21 @@
 <script setup>
 
-import { useApiStore } from '@/store/api';
-import { useItemsStore } from '@/store/items';
-import { useSettingsStore } from '@/store/settings';
-import { useSummariesStore } from '@/store/summaries';
-import { useLevelsStore } from '@/store/levels';
-import { useLayoutStore } from '@/store/layout';
-import { usePointsStore } from '@/store/points';
-import { useCommentsStore } from '@/store/comments';
-import { useCriteriaStore } from '@/store/criteria';
+import {stores} from "@/store";
 import OwnSummaryIncludes from '@/components/OwnSummaryIncludes.vue';
 import SumOfPoints from "@/components/SumOfPoints.vue";
 import { ref } from 'vue';
 import Summary from "@/data/Summary";
 import i18n from "@/plugins/i18n";
 
-const apiStore = useApiStore();
-const itemsStore = useItemsStore();
-const settingsStore = useSettingsStore();
-const summariesStore = useSummariesStore();
-const levelsStore = useLevelsStore();
-const layoutStore = useLayoutStore();
-const pointsStore = usePointsStore();
-const commentsStore = useCommentsStore();
-const criteriaStore = useCriteriaStore();
+const apiStore = stores.api();
+const itemsStore = stores.items();
+const settingsStore = stores.settings();
+const summariesStore = stores.summaries();
+const levelsStore = stores.levels();
+const layoutStore = stores.layout();
+const pointsStore = stores.points();
+const commentsStore = stores.comments();
+const criteriaStore = stores.criteria();
 const { t } = i18n.global
 
 const showIncludes = ref(false);

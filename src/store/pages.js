@@ -1,18 +1,14 @@
-import localForage from "localforage";
-import Page from '@/data/Page';
-import { defineStore } from 'pinia';
-import { useApiStore } from "@/store/api";
-import axios from 'axios';
-
-
-const storage = localForage.createInstance({
-  storeName: "corrector-pages",
-  description: "Corrector page data",
-});
-
 /**
- * Comments Store
+ * Pages Store
  */
+import {getStorage} from "@/lib/Storage";
+import {defineStore} from 'pinia';
+import {stores} from "@/store/index";
+import axios from 'axios';
+import Page from '@/data/Page';
+
+const storage = getStorage('pages');
+
 export const usePagesStore = defineStore('pages', {
   state: () => {
     return {
@@ -160,7 +156,7 @@ export const usePagesStore = defineStore('pages', {
      * @public
      */
     async loadFromStorage() {
-      const apiStore = useApiStore();
+      const apiStore = stores.api();
       try {
         this.purgeFiles();
         this.$reset();
@@ -195,8 +191,8 @@ export const usePagesStore = defineStore('pages', {
      * @param {array} data - array of plain objects
      * @public
      */
-    async loadFromData(data) {
-      const apiStore = useApiStore();
+    async loadFromBackend(data) {
+      const apiStore = stores.api();
       try {
         await storage.clear();
         this.purgeFiles();

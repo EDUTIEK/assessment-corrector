@@ -46,7 +46,7 @@ export const useTaskStore = defineStore('task', {
     },
 
     async loadFromStorage() {
-      const apiStore = useApiStore();
+      const apiStore = stores.api();
       try {
         const data = await storage.getItem('task');
         this.$patch(data);
@@ -58,8 +58,8 @@ export const useTaskStore = defineStore('task', {
       this.updateRemainingTime();
     },
 
-    async loadFromData(data) {
-      const apiStore = useApiStore();
+    async loadFromBackend(data) {
+      const apiStore = stores.api();
       try {
         await storage.setItem('task', data);
         this.$patch(data);
@@ -75,7 +75,7 @@ export const useTaskStore = defineStore('task', {
      * Update the remaining correction time
      */
     updateRemainingTime() {
-      const apiStore = useApiStore();
+      const apiStore = stores.api();
 
       if (this.correction_end) {
         this.remaining_time = Math.max(0, this.correction_end - apiStore.getServerTime(Date.now()));

@@ -1,12 +1,11 @@
 <script setup>
-
-import {useSnippetsStore} from "@/store/snippets";
+import {stores} from "@/store";
 import { ref, watch, nextTick } from 'vue'
 import Snippet from "@/data/Snippet";
 import i18n from "@/plugins/i18n";
 
 const { t } = i18n.global;
-const snippetsStore = useSnippetsStore();
+const snippetsStore = stores.snippets();
 const appSelect = ref();  // v-autocomplete
 const appEdit = ref();    // v-textarea
 

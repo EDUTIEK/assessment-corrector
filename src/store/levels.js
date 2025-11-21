@@ -1,14 +1,12 @@
-import { defineStore } from 'pinia';
-import localForage from "localforage";
-
-const storage = localForage.createInstance({
-  storeName: "corrector-levels",
-  description: "Grade level data",
-});
-
 /**
  * Levels Store
  */
+import {getStorage} from "@/lib/Storage";
+import {defineStore} from 'pinia';
+import {stores} from "@/store/index";
+
+const storage = getStorage('levels');
+
 export const useLevelsStore = defineStore('levels', {
   state: () => {
     return {
@@ -98,7 +96,7 @@ export const useLevelsStore = defineStore('levels', {
       }
     },
 
-    async loadFromData(data) {
+    async loadFromBackend(data) {
       try {
         await storage.clear();
         this.$reset();

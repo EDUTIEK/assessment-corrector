@@ -1,18 +1,14 @@
-import { defineStore } from 'pinia';
-import localForage from "localforage";
+/**
+ * Snippets Store
+ */
+import {getStorage} from "@/lib/Storage";
+import {defineStore} from 'pinia';
+import {stores} from "@/store/index";
 import Snippet from "@/data/Snippet";
-import {useApiStore} from "@/store/api";
-import {useChangesStore} from "@/store/changes";
 import Change from "@/data/Change";
 
-const storage = localForage.createInstance({
-  storeName: "corrector-snippets",
-  description: "Text Snippets",
-});
+const storage = getStorage('snippets');
 
-/**
- * Levels Store
- */
 export const useSnippetsStore = defineStore('snippets', {
   state: () => {
     return {
@@ -112,7 +108,7 @@ export const useSnippetsStore = defineStore('snippets', {
       }
     },
 
-    async loadFromData(data) {
+    async loadFromBackend(data) {
       try {
         await storage.clear();
         this.$reset();
@@ -146,7 +142,7 @@ export const useSnippetsStore = defineStore('snippets', {
       await storage.setItem(snippet.key, JSON.stringify(snippet.getData()));
       await storage.setItem('keys', JSON.stringify(this.keys));
 
-      const changesStore = useChangesStore();
+      const changesStore = stores.changes();
       await changesStore.setChange(new Change({
         type: Change.TYPE_SNIPPETS,
         action: Change.ACTION_SAVE,
@@ -165,7 +161,7 @@ export const useSnippetsStore = defineStore('snippets', {
         this.snippets = this.snippets.sort(Snippet.compare);
         await storage.setItem(snippet.key, JSON.stringify(snippet.getData()));
 
-        const changesStore = useChangesStore();
+        const changesStore = stores.changes();
         await changesStore.setChange(new Change({
           type: Change.TYPE_SNIPPETS,
           action: Change.ACTION_SAVE,
@@ -186,7 +182,7 @@ export const useSnippetsStore = defineStore('snippets', {
         await storage.setItem('keys', JSON.stringify(this.keys));
         await storage.removeItem(removeKey);
 
-        const changesStore = useChangesStore();
+        const changesStore = stores.changes();
         await changesStore.setChange(new Change({
           type: Change.TYPE_SNIPPETS,
           action: Change.ACTION_DELETE,
@@ -203,8 +199,8 @@ export const useSnippetsStore = defineStore('snippets', {
      * @return {array} Change objects
      */
     async getChangedData(sendingTime = 0) {
-      const apiStore = useApiStore();
-      const changesStore = useChangesStore();
+      const apiStore = stores.api();
+      const changesStore = stores.changes();
       const changes = [];
       for (const change of changesStore.getChangesFor(Change.TYPE_SNIPPETS, sendingTime)) {
         const data = await storage.getItem(change.key);

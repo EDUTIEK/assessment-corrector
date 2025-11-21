@@ -1,4 +1,5 @@
 <script setup>
+import {stores} from "@/store";
 import Instructions from "@/components/Instructions.vue";
 import InstructionsPdf from '@/components/InstructionsPdf.vue';
 import Solution from '@/components/Solution.vue';
@@ -10,20 +11,14 @@ import OwnSummary from "@/components/OwnSummary.vue";
 import OtherSummary from '@/components/OtherSummary.vue';
 import Marking from "@/components/Marking.vue";
 import Snippets from "@/components/Snippets.vue";
-import { useApiStore } from "@/store/api";
-import { useLayoutStore } from "@/store/layout";
-import { useResourcesStore } from "@/store/resources";
-import { useCommentsStore } from '@/store/comments';
-import { useCriteriaStore } from '@/store/criteria';
-import { usePagesStore } from '@/store/pages';
 import { nextTick, watch } from 'vue';
 
-const apiStore = useApiStore();
-const layoutStore = useLayoutStore();
-const resourcesStore = useResourcesStore();
-const commentsStore = useCommentsStore();
-const criteriaStore = useCriteriaStore();
-const pagesStore = usePagesStore();
+const apiStore = stores.api();
+const layoutStore = stores.layout();
+const resourcesStore = stores.resources();
+const commentsStore = stores.comments();
+const criteriaStore = stores.criteria();
+const pagesStore = stores.pages();
 
 async function handleFocusChange() {
   if (layoutStore.focusTarget == 'appHeadLeft') {

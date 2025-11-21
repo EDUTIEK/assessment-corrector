@@ -1,7 +1,7 @@
 <script setup>
-import { useResourcesStore } from '@/store/resources';
+import {stores} from "@/store";
 
-const resourcesStore = useResourcesStore();
+const resourcesStore = stores.resources();
 
 </script>
 

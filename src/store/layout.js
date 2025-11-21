@@ -1,19 +1,14 @@
-import { defineStore } from 'pinia';
-import localForage from "localforage";
-import { useCorrectorsStore } from '@/store/correctors';
-import { useApiStore } from '@/store/api';
-import {nextTick} from "vue";
-
-const storage = localForage.createInstance({
-  storeName: "corrector-layout",
-  description: "Layout data",
-});
-
-
 /**
  * Layout Store
  * Handles visibility of user interface components
  */
+import {getStorage} from "@/lib/Storage";
+import {defineStore} from 'pinia';
+import {stores} from "@/store/index";
+import {nextTick} from "vue";
+
+const storage = getStorage('layout');
+
 export const useLayoutStore = defineStore('layout', {
   state: () => {
     return {
@@ -73,24 +68,24 @@ export const useLayoutStore = defineStore('layout', {
     isRightCorrectorVisible: state => (state.isRightCorrectorSelected && state.isRightVisible),
 
     isLeftVisible: state => {
-      const apiStore = useApiStore();
+      const apiStore = stores.api();
       return !apiStore.isLoading && state.expandedColumn != 'right'
     },
 
     isRightVisible: state => {
-      const apiStore = useApiStore();
+      const apiStore = stores.api();
       return !apiStore.isLoading && state.expandedColumn != 'left'
     },
 
     leftCorrectorTitle: state => {
-      const correctorsStore = useCorrectorsStore();
+      const correctorsStore = stores.correctors();
       const corrector = correctorsStore.getCorrector(state.leftCorrectorKey);
       return corrector ? 'Korrektur von ' + corrector.title + ' ' + correctorsStore.getPositionText(
         corrector.corrector_key) : ''
     },
 
     rightCorrectorTitle: state => {
-      const correctorsStore = useCorrectorsStore();
+      const correctorsStore = stores.correctors();
       const corrector = correctorsStore.getCorrector(state.rightCorrectorKey);
       return corrector ? 'Korrektur von ' + corrector.title + ' ' + correctorsStore.getPositionText(
         corrector.corrector_key) : ''
@@ -345,8 +340,8 @@ export const useLayoutStore = defineStore('layout', {
     },
 
     selectCorrector(corrector_key) {
-      const apiStore = useApiStore();
-      const correctorsStore = useCorrectorsStore();
+      const apiStore = stores.api();
+      const correctorsStore = stores.correctors();
 
       if (this.leftCorrectorKey == corrector_key) {
         this.showLeftCorrector();

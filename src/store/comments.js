@@ -1,22 +1,14 @@
-import localForage from "localforage";
-import { defineStore } from 'pinia';
-import { useApiStore } from "@/store/api";
-import { useCorrectorsStore } from "@/store/correctors";
-import { usePointsStore } from "@/store/points";
-import { useChangesStore } from "@/store/changes";
-import { useSummariesStore } from '@/store/summaries';
-import Comment from '@/data/Comment';
-import Change from "@/data/Change";
-
-
-const storage = localForage.createInstance({
-  storeName: "corrector-comments",
-  description: "Corrector comments data",
-});
-
 /**
  * Comments Store
  */
+import {getStorage} from "@/lib/Storage";
+import {defineStore} from 'pinia';
+import {stores} from "@/store/index";
+import Comment from '@/data/Comment';
+import Change from "@/data/Change";
+
+const storage = getStorage('comments');
+
 export const useCommentsStore = defineStore('comments', {
   state: () => {
     return {
@@ -55,7 +47,7 @@ export const useCommentsStore = defineStore('comments', {
     },
 
     activeComments: state => {
-      const apiStore = useApiStore();
+      const apiStore = stores.api();
       return state.comments.filter(comment =>
         (state.showOtherCorrectors || comment.corrector_key == apiStore.correctorKey)
         && (state.filterKeys.length == 0 || state.filterKeys.includes(comment.key))
@@ -258,8 +250,8 @@ export const useCommentsStore = defineStore('comments', {
      * @public
      */
     async addComment(comment) {
-      const apiStore = useApiStore();
-      const changesStore = useChangesStore();
+      const apiStore = stores.api();
+      const changesStore = stores.changes();
 
       comment.item_key = apiStore.itemKey;
       comment.corrector_key = apiStore.correctorKey;
@@ -295,9 +287,9 @@ export const useCommentsStore = defineStore('comments', {
      * @public
      */
     async updateComment(comment, sort = false) {
-      const apiStore = useApiStore();
-      const summariesStore = useSummariesStore();
-      const changesStore = useChangesStore();
+      const apiStore = stores.api();
+      const summariesStore = stores.summaries();
+      const changesStore = stores.changes();
 
       if (this.keys.includes(comment.key)
         && comment.corrector_key == apiStore.correctorKey
@@ -337,8 +329,8 @@ export const useCommentsStore = defineStore('comments', {
      * @private
      */
     async removeComment(removeKey) {
-      const changesStore = useChangesStore();
-      const pointsStore = usePointsStore();
+      const changesStore = stores.changes();
+      const pointsStore = stores.points();
       await pointsStore.deletePointsOfComment(removeKey);
 
       if (this.selectedKey == removeKey) {
@@ -374,8 +366,8 @@ export const useCommentsStore = defineStore('comments', {
      * @private
      */
     async sortAndLabelComments() {
-      const apiStore = useApiStore();
-      const correctorsStore = useCorrectorsStore();
+      const apiStore = stores.api();
+      const correctorsStore = stores.correctors();
 
       this.comments = this.comments.sort(compareComments);
 
@@ -426,7 +418,7 @@ export const useCommentsStore = defineStore('comments', {
      * @param {bool} rating_cardinal
      */
     setFilterByPoints(corrector_key) {
-      const pointsStore = usePointsStore();
+      const pointsStore = stores.points();
       this.filterKeys = [];
       for (const comment of this.comments) {
         if (comment.corrector_key == corrector_key) {
@@ -445,7 +437,7 @@ export const useCommentsStore = defineStore('comments', {
      * @param {string} criterion_key
      */
     setFilterByCriterion(corrector_key, criterion_key) {
-      const pointsStore = usePointsStore();
+      const pointsStore = stores.points();
       this.filterKeys = [];
       for (const comment of this.comments) {
         if (comment.corrector_key == corrector_key) {
@@ -496,7 +488,7 @@ export const useCommentsStore = defineStore('comments', {
      * @public
      */
     async loadFromStorage() {
-      const apiStore = useApiStore();
+      const apiStore = stores.api();
       try {
         this.$reset();
 
@@ -529,9 +521,9 @@ export const useCommentsStore = defineStore('comments', {
      * @param {array} data - array of plain objects
      * @public
      */
-    async loadFromData(data) {
+    async loadFromBackend(data) {
 
-      const apiStore = useApiStore();
+      const apiStore = stores.api();
       try {
         this.$reset();
         this.showOtherCorrectors = !!JSON.parse(await storage.getItem('showOtherCorrectors'));
@@ -565,8 +557,8 @@ export const useCommentsStore = defineStore('comments', {
      * @return {array} Change objects
      */
     async getChangedData(sendingTime = 0) {
-      const apiStore = useApiStore();
-      const changesStore = useChangesStore();
+      const apiStore = stores.api();
+      const changesStore = stores.changes();
       const changes = [];
       for (const change of changesStore.getChangesFor(Change.TYPE_COMMENT, sendingTime)) {
         const data = await storage.getItem(change.key);

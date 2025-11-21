@@ -28,9 +28,9 @@ export default class TinyHelper {
     constructor(editor_id) {
         this.editor_id = editor_id;
 
-        settingsStore = useSettingsStore();
-        preferencesStore = usePreferencesStore();
-        snippetsStore = useSnippetsStore();
+        settingsStore = stores.settings();
+        preferencesStore = stores.preferences();
+        snippetsStore = stores.snippets();
     }
 
     getInit() {
