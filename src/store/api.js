@@ -311,7 +311,7 @@ export const useApiStore = defineStore('api', {
       this.showItemReplaceConfirmation = false;
 
       this.itemKey = localStorage.getItem('correctorItemKey');
-      await await this.loadItemFromStorage(this.itemKey);
+      await this.loadItemFromStorage(this.itemKey);
       const item = itemsStore.getItem(this.itemKey);
 
       if (await this.loadDataFromBackend()) {
