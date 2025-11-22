@@ -30,7 +30,7 @@ const layoutStore = stores.layout();
         </v-col>
         <v-col cols="2">
           <v-btn density="compact" variant="text" v-show="!summariesStore.isOwnDisabled" :disabled="!itemsStore.authorizationAllowed"
-                 @click="apiStore.setShowAuthorization(true)">
+                 @click="stores.layout().showAuthorization = true;">
             <v-icon left icon="mdi-file-certificate-outline"></v-icon>
             <span>{{ $t('allAuthorize') }}</span>
           </v-btn>

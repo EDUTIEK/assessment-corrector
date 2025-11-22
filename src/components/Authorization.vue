@@ -56,14 +56,14 @@ async function setAuthorizedAndContinue() {
 
   await summariesStore.setOwnAuthorized();
   if (await apiStore.saveChangesToBackend(true)) {
-    apiStore.setShowAuthorization(false);
+    stores.layout().showAuthorization = false;
     let newKey = itemsStore.getNextKey(apiStore.itemKey);
     if (newKey != '') {
       apiStore.loadItemFromBackend(newKey);
     }
   } else {
-    apiStore.setShowAuthorization(false);
-    apiStore.setShowSendFailure(true);
+    stores.layout().showAuthorization = false;
+    stores.layout().showSendFailure = true;
   }
 }
 
@@ -71,17 +71,17 @@ async function setAuthorizedAndClose() {
 
   await summariesStore.setOwnAuthorized();
   if (await apiStore.saveChangesToBackend(true)) {
-    apiStore.setShowAuthorization(false);
+    stores.layout().showAuthorization = false;
     window.location = apiStore.returnUrl;
   } else {
-    apiStore.setShowAuthorization(false);
-    apiStore.setShowSendFailure(true);
+    stores.layout().showAuthorization = false;
+    stores.layout().showSendFailure = true;
     return;
   }
 }
 
 function editSummary() {
-  apiStore.showAuthorization = false;
+  stores.layout().showAuthorization = false;
   layoutStore.showOwnSummaryText();
 }
 
@@ -91,12 +91,12 @@ function editSummary() {
   <div id="app-authorization-wrapper">
 
     <v-btn class="app-header-item" v-show="!summariesStore.isOwnDisabled" :disabled="apiStore.isLoading || !itemsStore.authorizationAllowed"
-           @click="apiStore.setShowAuthorization(true)">
+           @click="stores.layout().showAuthorization = true;">
       <v-icon left icon="mdi-file-certificate-outline"></v-icon>
       <span>{{ $t('authorizationButton') }}</span>
     </v-btn>
 
-    <v-dialog max-width="60em" persistent v-model="apiStore.showAuthorization">
+    <v-dialog max-width="60em" persistent v-model="stores.layout().showAuthorization">
       <v-card>
         <v-card-title>{{ $t('authorizationTitle', [itemsStore.currentItem.title]) }}</v-card-title>
         <v-card-text>
@@ -167,7 +167,7 @@ function editSummary() {
             <v-icon left icon="mdi-check"></v-icon>
             <span>{{ $t('authorizationAuthorizeAndClose') }}</span>
           </v-btn>
-          <v-btn @click="apiStore.setShowAuthorization(false);">
+          <v-btn @click="stores.layout().showAuthorization = false;">
             <v-icon left icon="mdi-close"></v-icon>
             <span>{{ $t('allCancel') }}</span>
           </v-btn>

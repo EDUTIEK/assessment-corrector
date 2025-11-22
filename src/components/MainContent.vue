@@ -236,7 +236,7 @@ document.addEventListener('keydown', layoutStore.handleKeyDown);
   </v-main>
 
 
-  <v-dialog persistent v-model="apiStore.showSendFailure">
+  <v-dialog persistent v-model="stores.layout().showSendFailure">
     <v-card>
       <v-card-text>
         <p>{{ $t('mainContentSendFailureLine1') }}</p>
@@ -245,7 +245,7 @@ document.addEventListener('keydown', layoutStore.handleKeyDown);
         <p>{{ $t('mainContentSendFailureLine3')}}</p>
       </v-card-text>
       <v-card-actions>
-        <v-btn @click="apiStore.setShowSendFailure(false)">
+        <v-btn @click="stores.layout().showSendFailure = false;">
           <v-icon left icon="mdi-close"></v-icon>
           <span>{{ $t('allCloseMessage') }}</span>
         </v-btn>

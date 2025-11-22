@@ -3,24 +3,22 @@
 /**
  * Main Application
  */
+import {stores} from "@/store";
 import AppBar from "@/components/AppBar.vue";
 import NavBar from "@/components/NavBar.vue";
 import MainContent from "@/components/MainContent.vue";
 import StartupContent from "@/components/StartupContent.vue";
-import { useApiStore } from '@/store/api';
-import { useLayoutStore } from "@/store/layout";
 
-const apiStore = stores.api();
-apiStore.init();
+stores.api.init();
 
 </script>
 
 <template>
   <v-app fill-height>
-    <startup-content v-if="!apiStore.initialized"/>
-    <app-bar v-if="apiStore.initialized"/>
-    <nav-bar v-if="apiStore.initialized"/>
-    <main-content v-if="apiStore.initialized"/>
+    <startup-content v-if="!stores.layout().initialized"/>
+    <app-bar v-if="stores.layout().initialized"/>
+    <nav-bar v-if="stores.layout().initialized"/>
+    <main-content v-if="stores.layout().initialized"/>
   </v-app>
 </template>
 

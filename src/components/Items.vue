@@ -36,7 +36,7 @@ async function changeItem(newKey) {
     if (!(await changesStore.hasChangesInStorage()) || await apiStore.saveChangesToBackend(true)) {
       await apiStore.loadItemFromBackend(newKey);
     } else {
-      apiStore.setShowSendFailure(true);
+      stores.layout().showSendFailure = true;
     }
   }
 }

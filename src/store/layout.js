@@ -18,8 +18,8 @@ export const useLayoutStore = defineStore('layout', {
       rightContent: 'marking',            // summary|marking|corrector
 
       showMarkingComments: true,          // display of the comments on marking column
-      showMarkingGeneralCriteria: true,            // display of the general criteria on marking column
-      showMarkingCommentCriteria: true,            // display of the comment criteria on marking column
+      showMarkingGeneralCriteria: true,   // display of the general criteria on marking column
+      showMarkingCommentCriteria: true,   // display of the comment criteria on marking column
       showMarkingText: false,             // display of the summary text on marking column
 
       showLeftSummaryCriteria: true,      // display of the criteria table on the left summary column
@@ -32,6 +32,14 @@ export const useLayoutStore = defineStore('layout', {
       leftCorrectorKey: '',               // key of the corrector shown on the left side
       rightCorrectorKey: '',              // key of the corrector shown on the right side
       showIncludesPopup: false,           // show the popup to set the included elements
+
+      initialized: false,                 // used to switch from startup screen to the editing view
+      showInitFailure: false,             // show a message that the initialisation failed
+      showItemLoadFailure: false,         // show a message that the loading if an item failed
+      showAuthorization: false,           // show the dialog for authorization
+      showSendFailure: false,             // show a message about a sending failure
+      showDataReplaceConfirmation: false, // show a confirmation that the stored data should be replaced by another task or user
+      showItemReplaceConfirmation: false, // show a confirmation that the stored item should be replaced by another item
 
       focusTarget: '',                    // target for setting the focus (header|navigation|left|right|ownSummary)
       focusChange: 0                      // indicator to set the focus to the target

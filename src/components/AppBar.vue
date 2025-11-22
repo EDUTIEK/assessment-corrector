@@ -33,7 +33,7 @@ async function returnToBackend() {
   if (!(await changesStore.hasChangesInStorage()) || await apiStore.saveChangesToBackend(true)) {
     window.location = apiStore.returnUrl;
   } else {
-    apiStore.setShowSendFailure(true);
+    stores.layout().showSendFailure = true;
   }
 }
 

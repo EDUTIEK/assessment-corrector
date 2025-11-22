@@ -33,15 +33,6 @@ export const useApiStore = defineStore('api', {
       intervals: {},                       // list of all registered timer intervals, indexed by their name
       lastSendingTry: 0,                  // timestamp of the last try to send changes (milliseconds)
       lastLoadingTry: 0,                  // timestamp of the last try to load data (milliseconds)
-
-      // todo: move to layout store
-      initialized: false,                 // used to switch from startup screen to the editing view
-      showInitFailure: false,             // show a message that the initialisation failed
-      showItemLoadFailure: false,         // show a message that the loading if an item failed
-      showAuthorization: false,           // show the dialog for authorization
-      showSendFailure: false,             // show a message about a sending failure
-      showDataReplaceConfirmation: false, // show a confirmation that the stored data should be replaced by another task or user
-      showItemReplaceConfirmation: false, // show a confirmation that the stored item should be replaced by another item
     }
   },
 
@@ -121,7 +112,7 @@ export const useApiStore = defineStore('api', {
        */
       const fn = function (pageKey, itemKey) {
         const config = this.getRequestConfig(this.fileToken);
-        return config.baseURL + '/image/' + itemKey + '/' + pageKey + '?' + config.params.toString();
+        return config.baseURL + '/corrector/file/essaytask/image/' + itemKey + '/' + pageKey + '?' + config.params.toString();
       }
       return fn;
     },
@@ -136,7 +127,7 @@ export const useApiStore = defineStore('api', {
        */
       const fn = function (pageKey, itemKey) {
         const config = this.getRequestConfig(this.fileToken);
-        return config.baseURL + '/thumb/' + itemKey + '/' + pageKey + '?' + config.params.toString();
+        return config.baseURL + '/corrector/file/essaytask/thumb/' + itemKey + '/' + pageKey + '?' + config.params.toString();
       }
       return fn;
     },
@@ -245,7 +236,7 @@ export const useApiStore = defineStore('api', {
       }
 
       if (!this.backendUrl || !this.returnUrl || !this.userId || !this.assId || !this.contextId || !this.dataToken) {
-        this.showInitFailure = true;
+        stores.layout().showInitFailure = true;
         return;
       }
 
@@ -254,11 +245,11 @@ export const useApiStore = defineStore('api', {
         if (newContext) {
           console.log('init: open saving, new context');
           await this.loadDataFromStorage();
-          this.showDataReplaceConfirmation = true;
+          stores.layout().showDataReplaceConfirmation = true;
         } else if (newItem) {
           console.log('init: open saving, same context, new item');
           await this.loadDataFromStorage();
-          this.showItemReplaceConfirmation = true;
+          stores.layout().showItemReplaceConfirmation = true;
         } else {
           console.log('init: open saving, same context, same item');
           await this.loadDataFromStorage();
@@ -275,8 +266,8 @@ export const useApiStore = defineStore('api', {
      */
     async initAfterReplaceDataConfirmed() {
       console.log('initAfterReplaceDataConfirmed');
-      this.showDataReplaceConfirmation = false;
-      this.showItemReplaceConfirmation = false;
+      stores.layout().showDataReplaceConfirmation = false;
+      stores.layout().showItemReplaceConfirmation = false;
 
       if (await this.loadDataFromBackend()) {
         await this.loadItemFromBackend(this.itemKey);
@@ -290,8 +281,8 @@ export const useApiStore = defineStore('api', {
      */
     async initAfterKeepDataConfirmed() {
       console.log('initAfterKeepDataConfirmed');
-      this.showDataReplaceConfirmation = false;
-      this.showItemReplaceConfirmation = false;
+      stores.layout().showDataReplaceConfirmation = false;
+      stores.layout().showItemReplaceConfirmation = false;
 
       this.itemKey = localStorage.getItem('xlasCorrectorItemKey');
       await this.loadItemFromStorage(this.itemKey);
@@ -328,7 +319,7 @@ export const useApiStore = defineStore('api', {
         }
       }
 
-      this.initialized = true;
+      stores.layout().initialized = true;
     },
 
     /**
@@ -437,7 +428,7 @@ export const useApiStore = defineStore('api', {
       }
       catch (error) {
         console.error(error);
-        this.showInitFailure = true;
+        stores.layout().showInitFailure = true;
         this.setLoading(false);
         return false;
       }
@@ -479,7 +470,7 @@ export const useApiStore = defineStore('api', {
       }
       catch (error) {
         console.error(error);
-        this.showItemLoadFailure = true;
+        stores.layout().showItemLoadFailure = true;
         this.setLoading(false);
         return false;
       }
@@ -667,21 +658,6 @@ export const useApiStore = defineStore('api', {
       } else {
         this.lastLoadingTry = 0;
       }
-    },
-
-
-    /**
-     * Set the activation for showing the authorization dialogue
-     */
-    setShowAuthorization(active) {
-      this.showAuthorization = active
-    },
-
-    /**
-     * Set the activation for showing a sending failure
-     */
-    setShowSendFailure(active) {
-      this.showSendFailure = active
     },
 
     /**
