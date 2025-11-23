@@ -5,6 +5,7 @@
 import {getStorage} from "@/lib/Storage";
 import {defineStore} from 'pinia';
 import Task from "@/data/Task";
+import Item from "@/data/Item";
 
 const storage = getStorage('tasks');
 const startState = {
@@ -14,7 +15,6 @@ const startState = {
   // not saved
   firstKey: null,
   lastKey: null,
-  currentKey: null,      // key of the currently active task
   previousKey: null,
   nextKey: null,
 };
@@ -25,6 +25,10 @@ export const useTasksStore = defineStore('tasks', {
   },
 
   getters: {
+    currentKey(state) {
+      return Task.buildKey(Item.extractTaskId(stores.api().itemKey));
+    },
+
     countTasks(state) {
       return Object.keys(state.tasks).length;
     },
@@ -114,10 +118,8 @@ export const useTasksStore = defineStore('tasks', {
 
         this.firstKey = sorted[first].getKey();
         this.lastKey = sorted[last].getKey();
-
-        if (this.currentKey === null) {
-          this.currentKey = this.firstKey;
-        };
+        this.previousKey = null;
+        this.nextKey = null;
 
         for (let i = first; i <= last; i++) {
           let task = sorted[i];

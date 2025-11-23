@@ -12,8 +12,13 @@ export const useItemsStore = defineStore('items', {
   state: () => {
     return {
       // saved in storage
-      keys: [],               // list of all items string keys
-      items: [],              // list of all items objects
+      items: {},              // list of all items objects
+
+      // not saved
+      firstKey: null,
+      lastKey: null,
+      previousKey: null,
+      nextKey: null,
     }
   },
 
@@ -21,7 +26,26 @@ export const useItemsStore = defineStore('items', {
    * Getter functions (with params) start with 'get', simple state queries not
    */
   getters: {
-    hasItems: state => state.keys.length > 0,
+    currentKey(state) {
+      return stores.api().itemKey;
+    },
+
+    currentItem(state) {
+      return state.items[stores.api().itemKey];
+    },
+
+    countItems(state) {
+      return Object.keys(state.items).length;
+    },
+
+    hasItems(state) {
+      return state.countItems > 0;
+    },
+
+    sortedItems(state) {
+      return this.getSortedItemsOfTask(Item.extractTaskId(stores.api().itemKey));
+    },
+
     firstKey: state => state.keys.length > 0 ? state.keys[0] : '',
     lastKey: state => state.keys.length > 0 ? state.keys[state.keys.length - 1] : '',
 
@@ -29,51 +53,19 @@ export const useItemsStore = defineStore('items', {
     authorizationAllowed: state => state.currentItem.authorization_allowed,
     revisionAllowed: state => state.currentItem.revision_allowed,
 
-    currentItem: state => {
-      const apiStore = stores.api();
-      return state.items.find(element => element.key == apiStore.itemKey);
-    },
-
-    getPreviousKey: state => {
-
+    getSortedItemsOfTask(state) {
       /**
-       * Get the key of the previous item
-       *
-       * @param {string} key
-       * @returns {string}
+       * Get the sorted items of a task
        */
-      const fn = function (key) {
-        for (let i = 1; i < state.keys.length; i++) {
-          if (state.keys[i] == key) {
-            return state.keys[i - 1];
-          }
-        }
-        return '';
+      const fn = function (task_id) {
+        return Object.values(state.items)
+            .filter(item => item.task_id == task_id)
+            .toSorted(Item.order);
       }
       return fn;
     },
 
-    getNextKey: state => {
-
-      /**
-       * Get the key of the next item
-       *
-       * @param {string} key
-       * @returns {string}
-       */
-      const fn = function (key) {
-        for (let i = 0; i < state.keys.length - 1; i++) {
-          if (state.keys[i] == key) {
-            return state.keys[i + 1];
-          }
-        }
-        return '';
-      }
-      return fn;
-    },
-
-
-    getItem: state => {
+    getItem(state) {
 
       /**
        * Get the item of a key
@@ -83,12 +75,7 @@ export const useItemsStore = defineStore('items', {
        * @return Item
        */
       const fn = function (key, dummy = null) {
-        for (const item of state.items) {
-          if (item.key == key) {
-            return item;
-          }
-        }
-        return dummy;
+        return state.items[key] ?? dummy;
       }
       return fn;
     },
@@ -98,73 +85,80 @@ export const useItemsStore = defineStore('items', {
 
     async clearStorage() {
       try {
+        this.$reset();
         await storage.clear();
       }
       catch (err) {
         console.log(err);
       }
-      this.$reset();
     },
 
     async loadFromStorage() {
       try {
         this.$reset();
 
-        const keys = await storage.getItem('itemKeys');
-        if (keys) {
-          this.keys = JSON.parse(keys);
+        const keys = await storage.getItem('keys') ?? [];
+        for (const key of keys) {
+          this.items[key] = new Item(await storage.getItem(key));
         }
-
-        for (const key of this.keys) {
-          const item = new Item(JSON.parse(await storage.getItem(key)));
-          this.items.push(item);
-        }
-
+        this.updateCurrentKeys();
       }
       catch (err) {
         console.log(err);
       }
     },
 
-    async loadFromBackend(data) {
+    async loadFromBackend(data = []) {
       try {
         await storage.clear();
         this.$reset();
 
         for (const item_data of data) {
-          const item = new Item(item_data)
-          this.items.push(item);
-          this.keys.push(item.key);
-          await storage.setItem(item.key, JSON.stringify(item.getData()));
+          const item = new Item(item_data);
+          this.items[item.getKey()] = item;
+          await storage.setItem(item.getKey(), item.getData());
         }
-
-        await storage.setItem('itemKeys', JSON.stringify(this.keys));
+        await storage.setItem('keys', Object.keys(this.items));
+        this.updateCurrentKeys();
       }
       catch (err) {
         console.log(err);
       }
     },
 
-    async addItem(item) {
+    async saveItem(item) {
       try {
-        if (!this.keys.includes(item.key)) {
-          this.items.unshift(item);           // add to beginning
-          this.keys.unshift(item.key);
-          await storage.setItem(item.key, JSON.stringify(item.getData()));
-          await storage.setItem('itemKeys', JSON.stringify(this.keys));
-        }
+        this.items[item.getKey()] = item;
+        await storage.setItem(item.getKey(), JSON.stringify(item.getData()));
+        await storage.setItem('keys', Object.keys(this.items));
       }
       catch (err) {
         console.log(err);
       }
     },
 
-    async updateItem(item) {
-      const index = this.items.findIndex(element => element.key === item.key);
-      if (index !== -1) {
-        this.items[index] = item;
-        await storage.setItem(item.key, JSON.stringify(item.getData()));
-        return;
+    /**
+     * Update the first, last, previous and next key
+     */
+    updateCurrentKeys() {
+      if (this.countItems) {
+        const sorted = this.sortedItems;
+        const first = 0;
+        const last = sorted.length -1;
+
+        this.firstKey = sorted[first].getKey();
+        this.lastKey = sorted[last].getKey();
+        this.previousKey = null;
+        this.nextKey = null;
+
+        for (let i = first; i <= last; i++) {
+          let item = sorted[i];
+          if (item.getKey() == this.currentKey) {
+            this.previousKey = i > first ? sorted[i - 1].getKey() : null;
+            this.nextKey = i < last ? sorted[i + 1].getKey() : null;
+            break;
+          }
+        }
       }
     }
   }

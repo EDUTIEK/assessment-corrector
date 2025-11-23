@@ -6,6 +6,14 @@
  */
 class Item {
 
+  static order(item1, item2) {
+    return task1.position < task2.position ? -1
+        : task1.position > task2.position ? 1
+            : task1.title < task2.title ? -1
+                : task1.title > task2.title ? 1
+                    : 0
+  }
+
   /**
    * Build an item key from its components
    * @param {number|null} task_id

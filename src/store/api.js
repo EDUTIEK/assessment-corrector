@@ -289,7 +289,7 @@ export const useApiStore = defineStore('api', {
       const item = stores.items().getItem(this.itemKey);
 
       if (await this.loadDataFromBackend()) {
-        await stores.items().addItem(item);
+        await stores.items().saveItem(item);
         await this.loadItemFromStorage(this.itemKey);
         this.finishInitialisation();
       }
@@ -400,12 +400,11 @@ export const useApiStore = defineStore('api', {
       await stores.points().loadFromStorage();
       await stores.summaries().loadFromStorage();
 
-
       stores.comments().setMarkerChange();
+      stores.items().updateCurrentKeys();
+      stores.tasks().updateCurrentKeys();
       this.setLoading(false);
-      if (itemsStore.correctionAllowed) {
-        this.setInterval('apiStore.saveChangesToBackend', this.saveChangesToBackend, sendInterval);
-      }
+      this.setInterval('apiStore.saveChangesToBackend', this.saveChangesToBackend, sendInterval);
       return true;
     },
 
@@ -434,7 +433,7 @@ export const useApiStore = defineStore('api', {
       }
       
       await stores.layout().clearStorage();
-      await stores.items().loadFromBackend(response.data.items);
+      await stores.items().loadFromBackend(response.data['Task']['Items']);
       await stores.levels().loadFromBackend(response.data.levels);
       await stores.preferences().loadFromBackend(response.data.preferences);
       await stores.resources().loadFromBackend(response.data.resources);
@@ -479,7 +478,7 @@ export const useApiStore = defineStore('api', {
       // otherwise a fast navigation between writers may cause wrong assignments (race condition)
       this.itemKey = itemKey;
       localStorage.setItem('itemKey', this.itemKey);
-      itemsStore.updateItem(new Item(response.data.item));
+      await itemsStore.saveItem(new Item(response.data['Task']['Item']));
       
 
       // dismiss open changes from other items
@@ -493,11 +492,11 @@ export const useApiStore = defineStore('api', {
       await stores.points().loadFromBackend(response.data.points);
       await stores.summaries().loadFromBackend(response.data.summaries);
 
-      commentsStore.setMarkerChange();
+      stores.comments().setMarkerChange();
+      stores.items().updateCurrentKeys();
+      stores.tasks().updateCurrentKeys();
       this.setLoading(false);
-      if (itemsStore.correctionAllowed) {
-        this.setInterval('apiStore.saveChangesToBackend', this.saveChangesToBackend, sendInterval);
-      }
+      this.setInterval('apiStore.saveChangesToBackend', this.saveChangesToBackend, sendInterval);
       return true;
     },
 

@@ -47,7 +47,7 @@ async function changeItem(newKey) {
 <template>
 
   <v-btn class="app-header-item" :disabled="apiStore.isLoading || apiStore.itemKey == itemsStore.firstKey"
-         @click="changeItem(itemsStore.getPreviousKey(apiStore.itemKey))">
+         @click="changeItem(itemsStore.previousKey)">
     <v-icon left icon="mdi-arrow-left-bold"></v-icon>
     <span class="sr-only">{{ $t('itemsPreviousWriter') }}</span>
   </v-btn>
@@ -93,7 +93,7 @@ async function changeItem(newKey) {
   </v-menu>
 
   <v-btn class="app-header-item" :disabled="apiStore.isLoading || apiStore.itemKey == itemsStore.lastKey"
-         @click="changeItem(itemsStore.getNextKey(apiStore.itemKey))">
+         @click="changeItem(itemsStore.nextKey)">
     <v-icon left icon="mdi-arrow-right-bold"></v-icon>
     <span class="sr-only">{{ $t('itemsNextWriter') }}</span>
   </v-btn>
