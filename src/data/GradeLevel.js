@@ -3,7 +3,7 @@
  *
  * This provides basic data for a list of tasks to be taken
  */
-export default class Task {
+export default class GradeLevel {
 
     static order(level1, level2) {
         return level1.min_points < level2.min_points ? -1

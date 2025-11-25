@@ -10,7 +10,7 @@ export default class Snippet {
     return 'SNIP_' + Math.random().toString();
   }
 
-  static compare(snippet1, snippet2) {
+  static order(snippet1, snippet2) {
     if (snippet1.text < snippet2.text) {
       return -1;
     } else if (snippet1.text > snippet2.text) {
@@ -19,13 +19,6 @@ export default class Snippet {
       return 0;
     }
   }
-
-  /**
-   * Database identifier if th snippet
-   * Will be updated when change is saved
-   * @type {integer}
-   */
-  id = null;
 
   /**
    * Unique identifier of the snippet
@@ -64,9 +57,6 @@ export default class Snippet {
    */
   constructor(data = {}) {
 
-    if (data.id !== undefined && data.id !== null) {
-      this.id = data.id;
-    }
     if (data.key !== undefined && data.key !== null) {
       this.key = data.key.toString()
     } else {

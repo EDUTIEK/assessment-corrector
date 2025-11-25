@@ -33,15 +33,15 @@ export const useSnippetsStore = defineStore('snippets', {
    */
   getters: {
 
-    forComment: state => {
+    forComment(state) {
       return state.snippets.filter(element => element.purpose == Snippet.FOR_COMMENT);
     },
 
-    forSummary: state => {
+    forSummary(state) {
       return state.snippets.filter(element => element.purpose == Snippet.FOR_SUMMARY);
     },
 
-    has: state => {
+    has(state) {
 
       /**
        * Get a snippet by its key
@@ -55,7 +55,7 @@ export const useSnippetsStore = defineStore('snippets', {
       return fn;
     },
 
-    get: state => {
+    get(state) {
 
       /**
        * Get a snippet by its key
@@ -100,7 +100,7 @@ export const useSnippetsStore = defineStore('snippets', {
         }
         for (const key of this.keys) {
           this.snippets.push(new Snippet(await storage.getItem(key)));
-          this.snippets = this.snippets.sort(Snippet.compare);
+          this.snippets = this.snippets.sort(Snippet.order);
         }
 
       }
@@ -119,7 +119,7 @@ export const useSnippetsStore = defineStore('snippets', {
           this.keys.push(snippet.key);
           await storage.setItem(snippet.key, snippet.getData());
           this.snippets.push(snippet);
-          this.snippets = this.snippets.sort(Snippet.compare);
+          this.snippets = this.snippets.sort(Snippet.order);
         }
         await storage.setItem('keys', this.keys);
       }
@@ -137,7 +137,7 @@ export const useSnippetsStore = defineStore('snippets', {
       // first do state changes (trigger watchers)
       this.keys.push(snippet.key);
       this.snippets.push(snippet);
-      this.snippets = this.snippets.sort(Snippet.compare);
+      this.snippets = this.snippets.sort(Snippet.order);
 
       // then save the snippet
       await storage.setItem(snippet.key, snippet.getData());
@@ -159,7 +159,7 @@ export const useSnippetsStore = defineStore('snippets', {
     async updateSnippet(snippet) {
 
       if (this.has(snippet.key)) {
-        this.snippets = this.snippets.sort(Snippet.compare);
+        this.snippets = this.snippets.sort(Snippet.order);
         await storage.setItem(snippet.key, snippet.getData());
 
         const changesStore = stores.changes();
@@ -178,7 +178,7 @@ export const useSnippetsStore = defineStore('snippets', {
      */
     async deleteSnippet(removeKey) {
       if (this.has(removeKey)) {
-        this.snippets = this.snippets.filter(element => element.key != removeKey).sort(Snippet.compare);
+        this.snippets = this.snippets.filter(element => element.key != removeKey).sort(Snippet.order);
         this.keys = this.keys.filter(key => key != removeKey)
         await storage.setItem('keys', this.keys);
         await storage.removeItem(removeKey);

@@ -104,8 +104,8 @@ export default class Points {
     if (!this.item_key && this.task_id && this.writer_id) {
       this.item_key = Item.buildKey(this.task_id, this.writer_id)
     }
-    if (!this.correction_key && this.task_id && this.corrector_id && this.writer_id) {
-      this.correction_key = Correction.buildKey(this.task_id, this.corrector_id, this.writer_id)
+    if (!this.correction_key && this.task_id && this.writer_id && this.corrector_id) {
+      this.correction_key = Correction.buildKey(this.task_id,  this.writer_id, this.corrector_id)
     }
     if (!this.criterion_key && this.criterion_id) {
       this.criterion_key = Criterion.buildKey(this.criterion_id)

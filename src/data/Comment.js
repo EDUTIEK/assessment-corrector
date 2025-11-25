@@ -189,8 +189,8 @@ export default class Comment {
     if (!this.item_key && this.task_id && this.writer_id) {
       this.item_key = Item.buildKey(this.task_id, this.writer_id)
     }
-    if (!this.correction_key && this.task_id && this.corrector_id && this.writer_id) {
-      this.correction_key = Correction.buildKey(this.task_id, this.corrector_id, this.writer_id)
+    if (!this.correction_key && this.task_id && this.writer_id && this.corrector_id) {
+      this.correction_key = Correction.buildKey(this.task_id, this.writer_id, this.corrector_id)
     }
   }
 

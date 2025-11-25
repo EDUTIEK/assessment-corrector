@@ -18,8 +18,8 @@ export default class Correction {
         : 0
   }
 
-  static buildKey(task_id, corrector_id, writer_id) {
-    return 'C' + task_id + '_' + corrector_id + '_' + writer_id;
+  static buildKey(task_id, writer_id, corrector_id) {
+    return 'C' + task_id + '_' + writer_id + '_' + corrector_id;
   }
 
   /**
@@ -39,7 +39,7 @@ export default class Correction {
    * @param {string} key
    * @returns {number|null}
    */
-  static extractCorrectorId(key) {
+  static extractWriterId(key) {
     const start = key.indexOf('_');
     if (start > 1) {
       const end = key.indexOf('_', start) + 1;
@@ -52,7 +52,7 @@ export default class Correction {
    * @param {string} key
    * @returns {number|null}
    */
-  static extractWriterId(key) {
+  static extractCorrectorId(key) {
     const start1 = key.indexOf('_');
     if (start1 > 1) {
       const start2 = key.indexOf('_', start1) + 1;
@@ -144,7 +144,7 @@ export default class Correction {
       this.position = parseInt(data.position);
     }
 
-    this.key = Correction.buildKey(this.task_id, this.corrector_id, this.writer_id);
+    this.key = Correction.buildKey(this.task_id, this.writer_id, this.corrector_id);
     this.item_key = Item.buildKey(this.task_id, this.writer_id);
   }
 

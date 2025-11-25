@@ -480,7 +480,7 @@ export const useApiStore = defineStore('api', {
       await stores.criteria().loadFromBackend(response.data.data['Task']['Criteria']);
       await stores.comments().loadFromBackend(response.data['Task']['Comments']);
       await stores.points().loadFromBackend(response.data['Task']['Points']);
-      await stores.summaries().loadFromBackend(response.data.summaries);
+      await stores.summaries().loadFromBackend(response.data['Task']['Summaries']);
 
       await stores.essay().loadFromBackend(response.data.essay);
       await stores.pages().loadFromBackend(response.data.pages);
