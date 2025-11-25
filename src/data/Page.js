@@ -1,7 +1,22 @@
+import Item from "@/data/Item";
+
 /**
  * Essay Page
  */
-class Page {
+export default class Page {
+
+  /**
+   * @return {string}
+   */
+  static buildKey(id) {
+    return 'P' + id;
+  }
+
+  static order(page1, page2) {
+    return page1.position < page2.position ? -1
+        : page1.position > page2.position ? 1
+            : 0
+  }
 
   /**
    * Unique identifier of the page
@@ -14,6 +29,24 @@ class Page {
    * @type {string}
    */
   item_key = '';
+
+  /**
+   * Database id of the page
+   * @type {integer}
+   */
+  id = null;
+
+  /**
+   * Task to which this page belongs
+   * @type {integer}
+   */
+  task_id = null;
+
+  /**
+   * Writer to which this page belongs
+   * @type {integer}
+   */
+  writer_id = null;
 
   /**
    * Number of the page in the sequence
@@ -57,7 +90,6 @@ class Page {
    */
   thumb_url = null;
 
-
   /**
    * Object url to use a fetched page image
    * Will be set separately and is not provided by getData()
@@ -74,18 +106,20 @@ class Page {
    */
   thumbObjectUrl = null;
 
-
   /**
    * Constructor - gets properties from a data object
    * @param {object} data
    */
   constructor(data = {}) {
 
-    if (data.key !== undefined && data.key !== null) {
-      this.key = data.key.toString();
+    if (data.id !== undefined && data.id !== null) {
+      this.id = parseInt(data.id);
     }
-    if (data.item_key !== undefined && data.item_key !== null) {
-      this.item_key = data.item_key.toString();
+    if (data.task_id !== undefined && data.task_id !== null) {
+      this.task_id = parseInt(data.task_id);
+    }
+    if (data.writer_id !== undefined && data.writer_id !== null) {
+      this.writer_id = parseInt(data.writer_id);
     }
     if (data.page_no !== undefined && data.page_no !== null) {
       this.page_no = parseInt(data.page_no);
@@ -109,24 +143,19 @@ class Page {
       this.thumb_url = data.thumb_url.toString();
     }
 
+    this.key = Page.buildKey(this.id);
+    this.item_key = Item.buildKey(this.task_id, this.writer_id);
+  }
+
+  getKey() {
+    return this.key;
   }
 
   /**
    * Get a plain data object from the public properties
    */
   getData() {
-    return {
-      key: this.key,
-      item_key: this.item_key,
-      page_no: this.page_no,
-      width: this.width,
-      height: this.height,
-      url: this.url,
-      thumb_width: this.thumb_width,
-      thumb_height: this.thumb_height,
-      thumb_url: this.url
-    }
+    return Object.assign({}, this);
   }
 }
 
-export default Page;

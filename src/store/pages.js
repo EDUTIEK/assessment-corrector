@@ -8,21 +8,21 @@ import axios from 'axios';
 import Page from '@/data/Page';
 
 const storage = getStorage('pages');
+const startState = {
+  // saved in storage
+  pages: {},                      // collection of page objects for the currrent correction item, indexed by key
+
+  // not saved in storage
+  selectedKey: '',                // key of the currently selected page
+  minPage: 0,                     // minimum page number
+  maxPage: 0,                     // maximum page number
+  loadedThumbs: 0,                // counter of loaded thumbnails
+  loadedImages: 0,                // counter of loaded images
+}
 
 export const usePagesStore = defineStore('pages', {
   state: () => {
-    return {
-      // saved in storage
-      keys: [],                       // list of string keys of all pages in the storage
-      pages: {},                      // collection of page objects for the currrent correction item, indexed by key
-
-      // not saved in storage
-      selectedKey: '',                // key of the currently selected page
-      minPage: 0,                     // minimum page number
-      maxPage: 0,                     // maximum page number
-      loadedThumbs: 0,               // counter of loaded thumbnails
-      loadedImages: 0,                // counter of loaded imagesd
-    }
+    return startState;
   },
 
   /**
@@ -30,25 +30,23 @@ export const usePagesStore = defineStore('pages', {
    */
   getters: {
 
-    hasPages: state => Object.keys(state.pages).length > 0,
+    hasPages(state) {
+      return Object.keys(state.pages).length > 0;
+    },
 
-    selectedPage: state => {
+    selectedPage(state) {
       return state.pages[state.selectedKey] ?? null;
     },
 
-    selectedPageNo: state => {
-      return state.selectedPage ? state.selectedPage.page_no : null;
+    selectedPageNo(state) {
+      return state.selectedPage?.page_no ?? null;
     },
 
-    currentPages: state => {
-      let pages = [];
-      for (const key in state.pages) {
-        pages.push(state.pages[key]);
-      }
-      return pages
+    currentPages(state) {
+      return Object.values(state.pages);
     },
 
-    getPage: state => {
+    getPage(state) {
 
       /**
        * Get a page by its key
@@ -63,7 +61,7 @@ export const usePagesStore = defineStore('pages', {
 
     },
 
-    getPageByPageNo: state => {
+    getPageByPageNo(state) {
 
       /**
        * Get a page by its page number
@@ -72,12 +70,7 @@ export const usePagesStore = defineStore('pages', {
        * @returns {Page|null}
        */
       const fn = function (number) {
-        for (const key in state.pages) {
-          if (state.pages[key].page_no == number) {
-            return state.pages[key];
-          }
-        }
-        return null;
+        return state.currentPages.find(page => page.page_no == number) ?? null;
       }
       return fn;
     }
@@ -104,9 +97,9 @@ export const usePagesStore = defineStore('pages', {
      * @param number
      */
     selectByPageNo(number) {
-      for (const key in this.pages) {
-        if (this.pages[key].page_no == number) {
-          this.selectedKey = key;
+      for (const page of this.currentPages) {
+        if (page.page_no == number) {
+          this.selectedKey = page.key;
           return true;
         }
       }
@@ -117,12 +110,12 @@ export const usePagesStore = defineStore('pages', {
 
       let min = null;
       let max = null;
-      for (const key in this.pages) {
-        if (min === null || this.pages[key].page_no < min) {
-          min = this.pages[key].page_no;
+      for (const page of this.currentPages) {
+        if (min === null || page.page_no < min) {
+          min = page.page_no;
         }
-        if (max === null || this.pages[key].page_no > max) {
-          max = this.pages[key].page_no;
+        if (max === null || page.page_no > max) {
+          max = page.page_no;
         }
       }
 
@@ -162,12 +155,8 @@ export const usePagesStore = defineStore('pages', {
         this.$reset();
 
         const keys = await storage.getItem('keys');
-        if (keys) {
-          this.keys = JSON.parse(keys);
-        }
-
         for (const key of this.keys) {
-          const page = new Page(JSON.parse(await storage.getItem(key)));
+          const page = new Page(await storage.getItem(key));
           if (page.item_key == apiStore.itemKey) {
             this.pages[key] = page;
           }
@@ -200,17 +189,14 @@ export const usePagesStore = defineStore('pages', {
 
         for (const page_data of data) {
           const page = new Page(page_data);
-          page.url = apiStore.getImageUrl(page.key, page.item_key);
-          page.thumb_url = apiStore.getThumbUrl(page.key, page.item_key);
-          this.keys.push(page.key);
-          await storage.setItem(page.key, JSON.stringify(page.getData()));
+          page.url = apiStore.getImageUrl(page);
+          page.thumb_url = apiStore.getThumbUrl(page);
+          await storage.setItem(page.getKey(), page.getData());
           if (page.item_key == apiStore.itemKey) {
             this.pages[page.key] = page;
           }
         }
-        ;
-
-        await storage.setItem('keys', JSON.stringify(this.keys));
+        await storage.setItem('keys', Object.keys(this.pages));
 
         this.calculateMinMaxPage();
         this.selectByPageNo(this.minPage);

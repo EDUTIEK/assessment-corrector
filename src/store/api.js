@@ -82,18 +82,17 @@ export const useApiStore = defineStore('api', {
       return fn;
     },
 
-    getResourceUrl: state => {
+    getResourceUrl(state) {
 
       /**
        * Get the Url for loading a file ressource
-       * todo user resource as parameter (see writer)
        *
-       * @param {string} resourceKey
+       * @param {Resource} resource
        * @returns {string}
        */
-      const fn = function (resourceKey) {
+      const fn = function (resource) {
         const config = this.getRequestConfig(this.fileToken);
-        return config.baseURL + '/correction/file/task/resource/' + resourceKey + '?' + config.params.toString();
+        return config.baseURL + '/correction/file/task/resource/' + resource.id + '?' + config.params.toString();
       }
       return fn;
     },
@@ -101,38 +100,36 @@ export const useApiStore = defineStore('api', {
     /**
      * Get the Url for loading a page image
      */
-    getImageUrl: state => {
+    getImageUrl(state) {
 
       /**
        * Get the Url for loading a page image
-       * @param {string} pageKey
-       * @param {string} itemKey
+       * @param {Page} page
        * @returns {string}
        */
-      const fn = function (pageKey, itemKey) {
+      const fn = function (page) {
         const config = this.getRequestConfig(this.fileToken);
-        return config.baseURL + '/correction/file/essaytask/image/' + itemKey + '/' + pageKey + '?' + config.params.toString();
+        return config.baseURL + '/correction/file/essaytask/image/' + page.id + '?' + config.params.toString();
       }
       return fn;
     },
 
-    getThumbUrl: state => {
+    getThumbUrl(state) {
 
       /**
        * Get the Url for loading a page thumbnail
-       * @param {string} pageKey
-       * @param {string} itemKey
+       * @param {Page} page
        * @returns {string}
        */
-      const fn = function (pageKey, itemKey) {
+      const fn = function (page) {
         const config = this.getRequestConfig(this.fileToken);
-        return config.baseURL + '/correction/file/essaytask/thumb/' + itemKey + '/' + pageKey + '?' + config.params.toString();
+        return config.baseURL + '/correction/file/essaytask/thumb/' + page.id + '?' + config.params.toString();
       }
       return fn;
     },
 
 
-    getServerTime: state => {
+    getServerTime(state) {
 
       /**
        * Get the server unix timestamp (s) corresponding to a client timestamp (ms)
@@ -148,7 +145,7 @@ export const useApiStore = defineStore('api', {
     /**
      * todo: refactor (see writer)
      */
-    getChangeDataToSend: state => {
+    getChangeDataToSend(state) {
 
       /**
        * Get the data of a change to be sent to the backend
@@ -482,8 +479,8 @@ export const useApiStore = defineStore('api', {
       await stores.points().loadFromBackend(response.data['Task']['Points']);
       await stores.summaries().loadFromBackend(response.data['Task']['Summaries']);
 
-      await stores.essay().loadFromBackend(response.data.essay);
-      await stores.pages().loadFromBackend(response.data.pages);
+      await stores.essay().loadFromBackend(response.data['EssayTask']['Essay']);
+      await stores.pages().loadFromBackend(response.data['EssayTask']['Pages']);
 
       stores.comments().setMarkerChange();
       stores.items().updateCurrentKeys();

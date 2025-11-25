@@ -9,9 +9,6 @@ const resourcesStore = stores.resources();
   <div class="resources">
     <template v-for="resource in resourcesStore.fileOrUrlResources" :key="resource.key">
       <div v-if="resource.type == 'file'" v-show="resourcesStore.getResourceIsActive(resource)">
-        <!--
-        <p><a :target= "'long-essay-writer-resource-' + resource.key" :href="apiStore.getResourceUrl(resource.key)">{{ resource.title }}</a></p>
-        -->
         <object
             v-if="resource.mimetype =='application/pdf'"
             type="application/pdf"

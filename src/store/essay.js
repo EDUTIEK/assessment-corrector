@@ -13,14 +13,6 @@ export const useEssayStore = defineStore('essay', {
     return {
       // saved in storage
       text: null,             // processed essay text
-      started: null,          // unix timestamp of writing start
-      ended: null,            // unix timestamp of writing end
-      authorized: null,       // essay is authorized by the writer
-
-      // for stitch decision
-      correction_finalized: null,
-      final_points: null,
-      stitch_comment: null
     }
   },
 
@@ -28,43 +20,23 @@ export const useEssayStore = defineStore('essay', {
    * Getter functions (with params) start with 'get', simple state queries not
    */
   getters: {
-
-    isFinalized: state => state.correction_finalized,
-
-    grade: state => {
-      const levelsStore = stores.levels();
-      let level = levelsStore.getLevelForPoints(state.final_points);
-      if (level !== null) {
-        return level.title
-      }
-      return '';
-    },
-
-    gradeKey: state => {
-      const levelsStore = stores.levels();
-      let level = levelsStore.getLevelForPoints(state.final_points);
-      if (level !== null) {
-        return level.key
-      }
-      return '';
-    }
   },
 
   actions: {
     async clearStorage() {
       try {
         await storage.clear();
+        this.$reset();
       }
       catch (err) {
         console.log(err);
       }
-      this.$reset();
-    },
 
+    },
 
     async loadFromStorage() {
       try {
-        const data = await storage.getItem('settings');
+        const data = await storage.getItem('essay');
         this.$patch(data);
       }
       catch (err) {
@@ -74,39 +46,11 @@ export const useEssayStore = defineStore('essay', {
 
     async loadFromBackend(data) {
       try {
-        await storage.setItem('settings', data);
+        await storage.setItem('essay', data);
         this.$patch(data);
       }
       catch (err) {
         console.log(err);
-      }
-    },
-
-
-    async saveStitchDecision() {
-
-      const apiStore = stores.api();
-      const correction_finalized = apiStore.getServerTime(Date.now());
-      const data = {
-        'final_points': this.final_points,
-        'stitch_comment': this.stitch_comment,
-        'grade_key': this.gradeKey,
-        'correction_finalized': correction_finalized,
-      }
-
-      if (await apiStore.saveStitchDecisionToBackend(data)) {
-        this.correction_finalized = correction_finalized;
-
-        await storage.setItem('settings', {
-          text: this.text,
-          started: this.started,
-          ended: this.ended,
-          authorized: this.authorized,
-
-          correction_finalized: this.correction_finalized,
-          final_points: this.final_points,
-          stitch_comment: this.stitch_comment
-        });
       }
     },
   }
