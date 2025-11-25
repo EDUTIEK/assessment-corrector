@@ -111,7 +111,6 @@ export const useItemsStore = defineStore('items', {
         for (const key of keys) {
           this.items[key] = new Item(await storage.getItem(key));
         }
-        this.updateCurrentKeys();
       }
       catch (err) {
         console.log(err);
@@ -129,7 +128,6 @@ export const useItemsStore = defineStore('items', {
           await storage.setItem(item.getKey(), item.getData());
         }
         await storage.setItem('keys', Object.keys(this.items));
-        this.updateCurrentKeys();
       }
       catch (err) {
         console.log(err);

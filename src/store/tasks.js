@@ -75,7 +75,6 @@ export const useTasksStore = defineStore('tasks', {
         for (const key of keys) {
           this.tasks[key] = new Task(await storage.getItem(key));
         }
-        this.updateCurrentKeys();
       }
       catch (err) {
         console.log(err);
@@ -93,20 +92,10 @@ export const useTasksStore = defineStore('tasks', {
           await storage.setItem(task.getKey(), task.getData());
         }
         await storage.setItem('keys', Object.keys(this.tasks));
-        this.updateCurrentKeys();
       }
       catch (err) {
         console.log(err);
       }
-    },
-
-    /**
-     * Select the current task
-     * @param string key of the current task
-     */
-    selectTask(key) {
-      this.currentKey = key;
-      this.updateCurrentKeys();
     },
 
     /**

@@ -402,7 +402,9 @@ export const useApiStore = defineStore('api', {
       stores.items().updateCurrentKeys();
       stores.tasks().updateCurrentKeys();
       this.setLoading(false);
-      this.setInterval('apiStore.saveChangesToBackend', this.saveChangesToBackend, sendInterval);
+
+      // todo activate changes interval
+      //this.setInterval('apiStore.saveChangesToBackend', this.saveChangesToBackend, sendInterval);
       return true;
     },
 
@@ -431,15 +433,18 @@ export const useApiStore = defineStore('api', {
       }
       
       await stores.layout().clearStorage();
-      await stores.items().loadFromBackend(response.data['Task']['Items']);
+
       await stores.levels().loadFromBackend(response.data['Assessment']['GradeLevels']);
-      await stores.preferences().loadFromBackend(response.data['Task']['Preferences']);
       await stores.resources().loadFromBackend(response.data['Assessment']['Resources']);
       await stores.settings().loadFromBackend('Assessment', response.data['Assessment']['Settings']);
+
+      await stores.items().loadFromBackend(response.data['Task']['Items']);
+      await stores.preferences().loadFromBackend(response.data['Task']['Preferences']);
       await stores.settings().loadFromBackend('Task', response.data['Task']['Settings']);
+      await stores.snippets().loadFromBackend(response.data['Task']['Snippets']);
+      await stores.tasks().loadFromBackend(response.data['Task']['Tasks']);
+
       await stores.settings().loadFromBackend('EssayTask', response.data['EssayTask']['Settings']);
-      await stores.tasks().loadFromBackend(response.data.tasks);
-      await stores.snippets().loadFromBackend(response.data.snippets);
 
       this.setLoading(false);
       return true;
@@ -484,7 +489,7 @@ export const useApiStore = defineStore('api', {
       // dismiss open changes from other items
       // this avoids a race condition on quick navigation between writers
       await stores.changes().clearStorage();
-      await stores.correctors().loadFromBackend(response.data.correctors);
+      await stores.correctors().loadFromBackend(response.data.data['Task']['Correctors']);
       await stores.criteria().loadFromBackend(response.data.criteria);
       await stores.comments().loadFromBackend(response.data.comments);
       await stores.essay().loadFromBackend(response.data.essay);

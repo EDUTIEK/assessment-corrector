@@ -1,7 +1,7 @@
 /**
  * Text Snippet
  */
-class Snippet {
+export default class Snippet {
 
   static FOR_COMMENT = 'for_comment';
   static FOR_SUMMARY = 'for_summary';
@@ -21,6 +21,13 @@ class Snippet {
   }
 
   /**
+   * Database identifier if th snippet
+   * Will be updated when change is saved
+   * @type {integer}
+   */
+  id = null;
+
+  /**
    * Unique identifier of the snippet
    * Will be auto-generated for a new snippet
    * @type {string}
@@ -34,6 +41,12 @@ class Snippet {
   purpose = '';
 
   /**
+   * Snippet title
+   * @type {string}
+   */
+  title = '';
+
+  /**
    * Snippet text
    * @type {string}
    */
@@ -45,13 +58,15 @@ class Snippet {
    */
   deleted = false;
 
-
   /**
    * Constructor - gets properties from a data object
    * @param {object} data
    */
   constructor(data = {}) {
 
+    if (data.id !== undefined && data.id !== null) {
+      this.id = data.id;
+    }
     if (data.key !== undefined && data.key !== null) {
       this.key = data.key.toString()
     } else {
@@ -60,6 +75,9 @@ class Snippet {
     }
     if (data.purpose !== undefined && data.purpose !== null) {
       this.purpose = data.purpose.toString()
+    }
+    if (data.title !== undefined && data.title !== null) {
+      this.title = data.title.toString()
     }
     if (data.text !== undefined && data.text !== null) {
       this.text = data.text.toString()
@@ -70,13 +88,7 @@ class Snippet {
    * Get a plain data object from the public properties
    */
   getData() {
-
-    return {
-      key: this.key,
-      purpose: this.purpose,
-      text: this.text,
-    }
+    return Object.assign({}, this);
   }
 }
 
-export default Snippet;

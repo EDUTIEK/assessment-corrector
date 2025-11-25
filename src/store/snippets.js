@@ -16,6 +16,7 @@ export const useSnippetsStore = defineStore('snippets', {
       keys: [],                 // list of string keys
       snippets: [],             // list of snippet objects
 
+      // not saved in storage
       selection_open: false,          // selection dialog is open
       open_for_purpose: null,         // purpose for which the selection is opened
       open_for_key: null,             // comment key for which the selection is opened
@@ -95,10 +96,10 @@ export const useSnippetsStore = defineStore('snippets', {
 
         const keys = await storage.getItem('keys');
         if (keys) {
-          this.keys = JSON.parse(keys);
+          this.keys = keys;
         }
         for (const key of this.keys) {
-          this.snippets.push(new Snippet(JSON.parse(await storage.getItem(key))));
+          this.snippets.push(new Snippet(await storage.getItem(key)));
           this.snippets = this.snippets.sort(Snippet.compare);
         }
 
@@ -116,11 +117,11 @@ export const useSnippetsStore = defineStore('snippets', {
         for (const snippet_data of data) {
           const snippet = new Snippet(snippet_data);
           this.keys.push(snippet.key);
-          await storage.setItem(snippet.key, JSON.stringify(snippet.getData()));
+          await storage.setItem(snippet.key, snippet.getData());
           this.snippets.push(snippet);
           this.snippets = this.snippets.sort(Snippet.compare);
         }
-        await storage.setItem('keys', JSON.stringify(this.keys));
+        await storage.setItem('keys', this.keys);
       }
       catch (err) {
         console.log(err);
@@ -139,8 +140,8 @@ export const useSnippetsStore = defineStore('snippets', {
       this.snippets = this.snippets.sort(Snippet.compare);
 
       // then save the snippet
-      await storage.setItem(snippet.key, JSON.stringify(snippet.getData()));
-      await storage.setItem('keys', JSON.stringify(this.keys));
+      await storage.setItem(snippet.key, snippet.getData());
+      await storage.setItem('keys', this.keys);
 
       const changesStore = stores.changes();
       await changesStore.setChange(new Change({
@@ -159,7 +160,7 @@ export const useSnippetsStore = defineStore('snippets', {
 
       if (this.has(snippet.key)) {
         this.snippets = this.snippets.sort(Snippet.compare);
-        await storage.setItem(snippet.key, JSON.stringify(snippet.getData()));
+        await storage.setItem(snippet.key, snippet.getData());
 
         const changesStore = stores.changes();
         await changesStore.setChange(new Change({
@@ -179,7 +180,7 @@ export const useSnippetsStore = defineStore('snippets', {
       if (this.has(removeKey)) {
         this.snippets = this.snippets.filter(element => element.key != removeKey).sort(Snippet.compare);
         this.keys = this.keys.filter(key => key != removeKey)
-        await storage.setItem('keys', JSON.stringify(this.keys));
+        await storage.setItem('keys', this.keys);
         await storage.removeItem(removeKey);
 
         const changesStore = stores.changes();
@@ -192,8 +193,7 @@ export const useSnippetsStore = defineStore('snippets', {
     },
 
     /**
-     * Get all changed summaries from the storage as flat data objects
-     * These may include summaries of other items that are only in the storage
+     * Get all changed snippets from the storage as flat data objects
      * This is called for sending the summaries to the backend
      * @param {integer} sendingTime - timestamp of the sending or 0 to get all
      * @return {array} Change objects
@@ -205,7 +205,7 @@ export const useSnippetsStore = defineStore('snippets', {
       for (const change of changesStore.getChangesFor(Change.TYPE_SNIPPETS, sendingTime)) {
         const data = await storage.getItem(change.key);
         if (data) {
-          changes.push(apiStore.getChangeDataToSend(change, JSON.parse(data)));
+          changes.push(apiStore.getChangeDataToSend(change, data));
         } else {
           changes.push(apiStore.getChangeDataToSend(change));
         }
