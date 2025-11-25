@@ -10,10 +10,10 @@ class Criterion {
   key = '';
 
   /**
-   * Key of the corrector to which this criterion belongs (empty for fixed criteria)
+   * Key of the correction to which this criterion belongs (empty for fixed criteria)
    * @type {string}
    */
-  corrector_key = '';
+  correction_key = '';
 
   /**
    * Short title of the criterion which is displayed in one line
@@ -48,8 +48,8 @@ class Criterion {
     if (data.key !== undefined && data.key !== null) {
       this.key = data.key.toString()
     }
-    if (data.corrector_key !== undefined && data.corrector_key !== null) {
-      this.corrector_key = data.corrector_key.toString()
+    if (data.correction_key !== undefined && data.correction_key !== null) {
+      this.correction_key = data.correction_key.toString()
     }
     if (data.title !== undefined && data.title !== null) {
       this.title = data.title.toString()
@@ -71,7 +71,7 @@ class Criterion {
   getData() {
     return {
       key: this.key,
-      corrector_key: this.corrector_key,
+      correction_key: this.correction_key,
       title: this.title,
       description: this.description,
       points: this.points,

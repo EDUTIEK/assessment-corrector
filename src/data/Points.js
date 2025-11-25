@@ -18,13 +18,13 @@ class Points {
   item_key = '';
 
   /**
-   * Key of the corrector to which the points belong
+   * Key of the correction to which the points belong
    * @type {string}
    */
-  corrector_key = '';
+  correction_key = '';
 
   /**
-   * Key of the corrector comment for which the points are given
+   * Key of the correction comment for which the points are given
    * @type {string}
    */
   comment_key = '';
@@ -56,8 +56,8 @@ class Points {
     if (data.item_key !== undefined && data.item_key !== null) {
       this.item_key = data.item_key.toString()
     }
-    if (data.corrector_key !== undefined && data.corrector_key !== null) {
-      this.corrector_key = data.corrector_key.toString()
+    if (data.correction_key !== undefined && data.correction_key !== null) {
+      this.correction_key = data.correction_key.toString()
     }
     if (data.comment_key !== undefined && data.comment_key !== null) {
       this.comment_key = data.comment_key.toString()
@@ -85,7 +85,7 @@ class Points {
     return {
       key: this.key,
       item_key: this.item_key,
-      corrector_key: this.corrector_key,
+      correction_key: this.correction_key,
       comment_key: this.comment_key,
       criterion_key: this.criterion_key,
       points: this.points

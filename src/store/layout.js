@@ -14,8 +14,8 @@ export const useLayoutStore = defineStore('layout', {
     return {
       // saved in storage
       expandedColumn: 'none',             // left|right|none
-      leftContent: 'essay',               // instructions|instructionsPdf|solution|solutionPdf|resources|essay|corrector
-      rightContent: 'marking',            // summary|marking|corrector
+      leftContent: 'essay',               // instructions|instructionsPdf|solution|solutionPdf|resources|essay|correction
+      rightContent: 'marking',            // summary|marking|correction
 
       showMarkingComments: true,          // display of the comments on marking column
       showMarkingGeneralCriteria: true,   // display of the general criteria on marking column
@@ -29,8 +29,8 @@ export const useLayoutStore = defineStore('layout', {
       showRightSummaryText: true,         // display of the summary text on the right summary column
 
       // not stored
-      leftCorrectorKey: '',               // key of the corrector shown on the left side
-      rightCorrectorKey: '',              // key of the corrector shown on the right side
+      leftCorrectionKey: '',               // key of the correction shown on the left side
+      rightCorrectionKey: '',              // key of the correction shown on the right side
       showIncludesPopup: false,           // show the popup to set the included elements
 
       initialized: false,                 // used to switch from startup screen to the editing view
@@ -61,8 +61,8 @@ export const useLayoutStore = defineStore('layout', {
     isEssaySelected: state => state.leftContent == 'essay',
     isSummarySelected: state => state.rightContent == 'summary',
     isMarkingSelected: state => state.rightContent == 'marking',
-    isLeftCorrectorSelected: state => state.leftContent == 'corrector',
-    isRightCorrectorSelected: state => state.rightContent == 'corrector',
+    isLeftCorrectionSelected: state => state.leftContent == 'correction',
+    isRightCorrectionSelected: state => state.rightContent == 'correction',
 
     isInstructionsVisible: state => (state.isInstructionsSelected && state.isLeftVisible),
     isInstructionsPdfVisible: state => (state.isInstructionsPdfSelected && state.isLeftVisible),
@@ -72,8 +72,8 @@ export const useLayoutStore = defineStore('layout', {
     isEssayVisible: state => (state.isEssaySelected && state.isLeftVisible),
     isSummaryVisible: state => (state.isSummarySelected && state.isRightVisible),
     isMarkingVisible: state => (state.isMarkingSelected && state.isRightVisible),
-    isLeftCorrectorVisible: state => (state.isLeftCorrectorSelected && state.isLeftVisible),
-    isRightCorrectorVisible: state => (state.isRightCorrectorSelected && state.isRightVisible),
+    isLeftCorrectionVisible: state => (state.isLeftCorrectionSelected && state.isLeftVisible),
+    isRightCorrectionVisible: state => (state.isRightCorrectionSelected && state.isRightVisible),
 
     isLeftVisible: state => {
       const apiStore = stores.api();
@@ -85,31 +85,31 @@ export const useLayoutStore = defineStore('layout', {
       return !apiStore.isLoading && state.expandedColumn != 'left'
     },
 
-    leftCorrectorTitle: state => {
-      const correctorsStore = stores.correctors();
-      const corrector = correctorsStore.getCorrector(state.leftCorrectorKey);
-      return corrector ? 'Korrektur von ' + corrector.title + ' ' + correctorsStore.getPositionText(
-        corrector.corrector_key) : ''
+    leftCorrectionTitle: state => {
+      const correctionsStore = stores.corrections();
+      const correction = correctionsStore.getCorrection(state.leftCorrectionKey);
+      return correction ? 'Korrektur von ' + correction.title + ' ' + correctionsStore.getPositionText(
+        correction.correction_key) : ''
     },
 
-    rightCorrectorTitle: state => {
-      const correctorsStore = stores.correctors();
-      const corrector = correctorsStore.getCorrector(state.rightCorrectorKey);
-      return corrector ? 'Korrektur von ' + corrector.title + ' ' + correctorsStore.getPositionText(
-        corrector.corrector_key) : ''
+    rightCorrectionTitle: state => {
+      const correctionsStore = stores.corrections();
+      const correction = correctionsStore.getCorrection(state.rightCorrectionKey);
+      return correction ? 'Korrektur von ' + correction.title + ' ' + correctionsStore.getPositionText(
+        correction.correction_key) : ''
     },
 
-    getCorrectorIsVisible: state => {
+    getCorrectionIsVisible: state => {
 
       /**
-       * Get if a corrector's summary is visible
+       * Get if a correction's summary is visible
        *
-       * @param {string} corrector_key
+       * @param {string} correction_key
        * @returns {boolean}
        */
-      const fn = function (corrector_key) {
-        return state.leftCorrectorKey == corrector_key && state.isLeftCorrectorVisible
-          || state.rightCorrectorKey == corrector_key && state.isRightCorrectorVisible
+      const fn = function (correction_key) {
+        return state.leftCorrectionKey == correction_key && state.isLeftCorrectionVisible
+          || state.rightCorrectionKey == correction_key && state.isRightCorrectionVisible
       }
       return fn;
     },
@@ -211,14 +211,14 @@ export const useLayoutStore = defineStore('layout', {
       this.saveToStorage();
     },
 
-    showLeftCorrector() {
-      this.leftContent = 'corrector';
+    showLeftCorrection() {
+      this.leftContent = 'correction';
       this.setLeftVisible();
       this.saveToStorage();
     },
 
-    showRightCorrector() {
-      this.rightContent = 'corrector';
+    showRightCorrection() {
+      this.rightContent = 'correction';
       this.setRightVisible();
       this.saveToStorage();
     },
@@ -347,29 +347,29 @@ export const useLayoutStore = defineStore('layout', {
       this.saveToStorage()
     },
 
-    selectCorrector(corrector_key) {
+    selectCorrection(correction_key) {
       const apiStore = stores.api();
-      const correctorsStore = stores.correctors();
+      const correctionsStore = stores.corrections();
 
-      if (this.leftCorrectorKey == corrector_key) {
-        this.showLeftCorrector();
-      } else if (this.rightCorrectorKey == corrector_key) {
-        this.showRightCorrector();
-      } else if (apiStore.correctorKey) {
-        this.leftCorrectorKey = corrector_key;
-        this.showLeftCorrector();
-      } else if (correctorsStore.countCorrectors == 1) {
-        this.rightCorrectorKey = corrector_key;
-        this.showRightCorrector();
-      } else if (this.leftCorrectorKey == '') {
-        this.leftCorrectorKey = corrector_key;
-        this.showLeftCorrector();
-      } else if (this.rightCorrectorKey == '') {
-        this.rightCorrectorKey = corrector_key;
-        this.showRightCorrector();
+      if (this.leftCorrectionKey == correction_key) {
+        this.showLeftCorrection();
+      } else if (this.rightCorrectionKey == correction_key) {
+        this.showRightCorrection();
+      } else if (stores.corrections().ownKey) {
+        this.leftCorrectionKey = correction_key;
+        this.showLeftCorrection();
+      } else if (correctionsStore.countCorrections == 1) {
+        this.rightCorrectionKey = correction_key;
+        this.showRightCorrection();
+      } else if (this.leftCorrectionKey == '') {
+        this.leftCorrectionKey = correction_key;
+        this.showLeftCorrection();
+      } else if (this.rightCorrectionKey == '') {
+        this.rightCorrectionKey = correction_key;
+        this.showRightCorrection();
       } else {
-        this.leftCorrectorKey = corrector_key;
-        this.showLeftCorrector();
+        this.leftCorrectionKey = correction_key;
+        this.showLeftCorrection();
       }
     },
 

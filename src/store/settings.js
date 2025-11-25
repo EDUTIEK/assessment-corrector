@@ -12,15 +12,15 @@ import Procedure from '@/data/Procedure';
 const storage = getStorage('settings');
 const startState = {
   Assessment: {
-    multiple_correctors: false,     // has a submission multiple correctors
-    mutual_visibility: false,       // corrector sees other correctors
+    multiple_correctors: false,     // has a submission multiple corrections
+    mutual_visibility: false,       // correction sees other corrections
     procedure_when_distance: false, // should a revision procedure follow when points differ
     procedure: Procedure.NONE,      // type of procedure that follows
     max_auto_distance: 0,           // maximum distance between points to allow an automated points calculation
-    revision_between: false,        // points given in a revision must be between the original points of both correctors
+    revision_between: false,        // points given in a revision must be between the original points of both corrections
     stitch_after_procedure: false,  // the procedure is followed by a stich decision when needed
     max_points: 0,                  // maximum points that can be given
-    no_manual_decimals: false,      // nanually given points must not have decimals
+    no_manual_decimals: false,      // manually given points must not have decimals
   },
   Task: {
     positive_rating: t('settingsRatingPositive'),     // label of a positive rating

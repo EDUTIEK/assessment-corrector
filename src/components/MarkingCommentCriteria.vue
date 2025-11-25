@@ -11,17 +11,17 @@ const summariesStore = stores.summaries();
 const layoutStore = stores.layout();
 
 let comment_key = ref('');
-let corrector_key = ref('');
+let correction_key = ref('');
 let criteriaPoints = ref({});
 
 async function loadPoints() {
   const comment = commentsStore.getComment(commentsStore.selectedKey);
   comment_key.value = comment ? comment.key : '';
-  corrector_key.value = comment ? comment.corrector_key : apiStore.correctorKey;
+  correction_key.value = comment ? comment.correction_key : stores.corrections().ownKey;
 
   criteriaPoints.value = {};
-  for (const criterion of criteriaStore.getCorrectorCommentCriteria(corrector_key.value)) {
-    const pointsObject = pointsStore.getObjectByData(corrector_key.value, comment_key.value, criterion.key);
+  for (const criterion of criteriaStore.getCorrectionCommentCriteria(correction_key.value)) {
+    const pointsObject = pointsStore.getObjectByData(correction_key.value, comment_key.value, criterion.key);
     criteriaPoints.value[criterion.key] = (pointsObject ? pointsObject.points : 0);
   }
 }
@@ -75,21 +75,21 @@ async function handleKeyDown(event) {
       </tr>
       </thead>
       <tbody>
-      <tr v-for="criterion in criteriaStore.getCorrectorCommentCriteria(corrector_key)" :key="criterion.key">
+      <tr v-for="criterion in criteriaStore.getCorrectionCommentCriteria(correction_key)" :key="criterion.key">
         <td class="col-left">
           <label tabindex="0" @keydown="handleKeyDown" :for="'app-points-input-' + criterion.key">{{ criterion.title }}</label>
         </td>
         <td class="col-mid text-right">
           <input class="appPoints" type="number" v-model="criteriaPoints[criterion.key]"
                  :id="'app-points-input-' + criterion.key"
-                 :disabled="summariesStore.isOwnDisabled || comment_key == '' || corrector_key != apiStore.correctorKey"
+                 :disabled="summariesStore.isOwnDisabled || comment_key == '' || correction_key != stores.corrections().ownKey"
                  :max="criterion.points"
                  @change="savePoints(criterion.key)"
                  @keydown="handleKeyDown"
           />
         </td>
-        <td :class="'col-right text-right ' + (pointsStore.getPointsOfCriterionExceeded(criterion, corrector_key) ? 'red' : '')">
-          {{ pointsStore.getSumOfPointsForCriterion(criterion, corrector_key) }} / {{ criterion.points }}
+        <td :class="'col-right text-right ' + (pointsStore.getPointsOfCriterionExceeded(criterion, correction_key) ? 'red' : '')">
+          {{ pointsStore.getSumOfPointsForCriterion(criterion, correction_key) }} / {{ criterion.points }}
         </td>
       </tr>
        </tbody>

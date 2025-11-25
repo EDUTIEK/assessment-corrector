@@ -16,7 +16,7 @@ const layoutStore = stores.layout();
     <v-container>
       <v-row dense>
         <v-col cols="10">
-          <sum-of-points class='sumOfPoints' :corrector_key="apiStore.correctorKey"></sum-of-points>
+          <sum-of-points class='sumOfPoints' :correction_key="stores.corrections().ownKey"></sum-of-points>
         </v-col>
       </v-row>
       <v-row dense>

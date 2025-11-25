@@ -9,7 +9,7 @@ const pointsStore = stores.points();
 const layoutStore = stores.layout();
 const settingsStore = stores.settings();
 
-const props = defineProps(['corrector_key']);
+const props = defineProps(['correction_key']);
 watch(() => props, loadCriteria);
 watch(() => apiStore.itemKey, loadCriteria);
 
@@ -20,7 +20,7 @@ const commentCriteriaPoints = reactive({});
 async function loadCriteria() {
   await nextTick();
 
-  criteriaStore.getCorrectorCommentCriteria(props.corrector_key).forEach(criterion => {
+  criteriaStore.getCorrectionCommentCriteria(props.correction_key).forEach(criterion => {
     commentCriteriaPoints[criterion.key] = {
       key: criterion.key,
       title: criterion.title,
@@ -29,7 +29,7 @@ async function loadCriteria() {
     }
   });
 
-  criteriaStore.getCorrectorGeneralCriteria(props.corrector_key).forEach(criterion => {
+  criteriaStore.getCorrectionGeneralCriteria(props.correction_key).forEach(criterion => {
     generalCriteriaPoints[criterion.key] = {
       key: criterion.key,
       title: criterion.title,
@@ -38,7 +38,7 @@ async function loadCriteria() {
     }
   });
 
-  pointsStore.getObjectsForCorrector(props['corrector_key']).forEach(points => {
+  pointsStore.getObjectsForCorrection(props['correction_key']).forEach(points => {
     if (commentCriteriaPoints[points.criterion_key] !== undefined) {
       commentCriteriaPoints[points.criterion_key].sum_points += points.points;
     }
@@ -48,14 +48,14 @@ async function loadCriteria() {
   });
 }
 
-if (criteriaStore.getCorrectorHasCriteria(props.corrector_key)) {
+if (criteriaStore.getCorrectionHasCriteria(props.correction_key)) {
   loadCriteria();
 }
 
 async function filterByRating(rating_excellent, rating_cardinal) {
-  commentsStore.setFilterByRating(props.corrector_key, rating_excellent, rating_cardinal);
-  if (!props.corrector_key == apiStore.correctorKey) {
-    commentsStore.setShowOtherCorrectors(true);
+  commentsStore.setFilterByRating(props.correction_key, rating_excellent, rating_cardinal);
+  if (!props.correction_key == stores.corrections().ownKey) {
+    commentsStore.setShowOtherCorrections(true);
   }
   await nextTick();
   layoutStore.showEssay();
@@ -63,9 +63,9 @@ async function filterByRating(rating_excellent, rating_cardinal) {
 }
 
 async function filterByPoints() {
-  commentsStore.setFilterByPoints(props.corrector_key);
-  if (!props.corrector_key == apiStore.correctorKey) {
-    commentsStore.setShowOtherCorrectors(true);
+  commentsStore.setFilterByPoints(props.correction_key);
+  if (!props.correction_key == stores.corrections().ownKey) {
+    commentsStore.setShowOtherCorrections(true);
   }
   await nextTick();
   layoutStore.showEssay();
@@ -73,9 +73,9 @@ async function filterByPoints() {
 }
 
 async function filterByCriterion(criterion_key) {
-  commentsStore.setFilterByCriterion(props.corrector_key, criterion_key);
-  if (!props.corrector_key == apiStore.correctorKey) {
-    commentsStore.setShowOtherCorrectors(true);
+  commentsStore.setFilterByCriterion(props.correction_key, criterion_key);
+  if (!props.correction_key == stores.corrections().ownKey) {
+    commentsStore.setShowOtherCorrections(true);
   }
   await nextTick();
   layoutStore.showEssay();
@@ -98,7 +98,7 @@ async function filterByCriterion(criterion_key) {
       <tr>
         <td>
           <v-btn density="compact" size="small" variant="text" prepend-icon="mdi-filter-outline"
-                 :disabled="commentsStore.getCountOfExcellent(props.corrector_key) == 0"
+                 :disabled="commentsStore.getCountOfExcellent(props.correction_key) == 0"
                  @click="filterByRating(true, false)">
             <span class="sr-only">{{ settingsStore.Task.positive_rating }}</span>
           </v-btn>
@@ -106,27 +106,27 @@ async function filterByCriterion(criterion_key) {
 
         </td>
         <td class="text-right">
-          {{ commentsStore.getCountOfExcellent(props.corrector_key) }}
+          {{ commentsStore.getCountOfExcellent(props.correction_key) }}
         </td>
       </tr>
       <tr>
         <td>
           <v-btn density="compact" size="small" variant="text" prepend-icon="mdi-filter-outline"
-                 :disabled="commentsStore.getCountOfCardinal(props.corrector_key) == 0"
+                 :disabled="commentsStore.getCountOfCardinal(props.correction_key) == 0"
                  @click="filterByRating(false, true)">
             <span class="sr-only">{{ settingsStore.Task.negative_rating }}</span>
           </v-btn>
           <span aria-hidden="true">{{ settingsStore.Task.negative_rating }}</span>
         </td>
         <td class="text-right">
-          {{ commentsStore.getCountOfCardinal(props.corrector_key) }}
+          {{ commentsStore.getCountOfCardinal(props.correction_key) }}
         </td>
       </tr>
       </tbody>
     </v-table>
 
     <!-- Points for comments directly -->
-    <v-table v-if="!criteriaStore.getCorrectorHasCommentCriteria(props.corrector_key)" class="table" density="compact">
+    <v-table v-if="!criteriaStore.getCorrectionHasCommentCriteria(props.correction_key)" class="table" density="compact">
       <thead>
       <tr>
         <th><strong>{{ $t('summaryCriteriaRating') }}</strong></th>
@@ -137,21 +137,21 @@ async function filterByCriterion(criterion_key) {
       <tr>
         <td>
           <v-btn density="compact" size="small" variant="text" prepend-icon="mdi-filter-outline"
-                 :disabled="pointsStore.getSumOfPointsForCorrector(props.corrector_key, true, false) == 0"
+                 :disabled="pointsStore.getSumOfPointsForCorrection(props.correction_key, true, false) == 0"
                  @click="filterByPoints()">
             <span class="sr-only">{{ $t('summaryCriteriaPointsInComments') }}</span>
           </v-btn>
           <span aria-hidden="true">{{ $t('summaryCriteriaPointsInComments') }}</span>
         </td>
         <td class="text-right">
-          {{ pointsStore.getSumOfPointsForCorrector(props.corrector_key, true, false) }}
+          {{ pointsStore.getSumOfPointsForCorrection(props.correction_key, true, false) }}
         </td>
       </tr>
       </tbody>
     </v-table>
 
     <!-- Points for criteria in comments -->
-    <v-table v-if="criteriaStore.getCorrectorHasCommentCriteria(props.corrector_key)" class="table" density="compact">
+    <v-table v-if="criteriaStore.getCorrectionHasCommentCriteria(props.correction_key)" class="table" density="compact">
       <thead>
       <tr>
         <th>{{ $t('summaryCriteriaInComments') }}</th>
@@ -174,7 +174,7 @@ async function filterByCriterion(criterion_key) {
     </v-table>
 
     <!-- Points for general criteria -->
-    <v-table v-if="criteriaStore.getCorrectorHasGeneralCriteria(props.corrector_key)" class="table" density="compact">
+    <v-table v-if="criteriaStore.getCorrectionHasGeneralCriteria(props.correction_key)" class="table" density="compact">
       <thead>
       <tr>
         <th>{{ $t('summaryCriteriaGeneralCriteria') }}</th>

@@ -1,7 +1,7 @@
 import { useApiStore } from '@/store/api';
 import { useChangesStore } from "@/store/changes";
 import { useCommentsStore } from "@/store/comments";
-import { useCorrectorsStore } from "@/store/correctors";
+import { useCorrectionsStore } from "@/store/corrections";
 import { useCriteriaStore } from "@/store/criteria";
 import { useEssayStore } from "@/store/essay";
 import { useItemsStore } from "@/store/items";
@@ -23,7 +23,7 @@ export const stores = {
     api: () => useApiStore(),
     changes: () => useChangesStore(),
     comments: () => useCommentsStore(),
-    correctors: () => useCorrectorsStore(),
+    corrections: () => useCorrectionsStore(),
     criteria: () => useCriteriaStore(),
     essay: () => useEssayStore(),
     items: () => useItemsStore(),

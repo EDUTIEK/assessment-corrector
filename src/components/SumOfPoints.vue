@@ -6,15 +6,15 @@ const settingsStore = stores.settings();
 const pointsStore = stores.points();
 const criteriaStore = stores.criteria();
 
-const props = defineProps(['corrector_key']);
+const props = defineProps(['correction_key']);
 const { t } = i18n.global;
 
-const has_general_criteria = criteriaStore.getCorrectorHasGeneralCriteria(props.corrector_key);
-const has_comment_criteria = criteriaStore.getCorrectorHasCommentCriteria(props.corrector_key);
+const has_general_criteria = criteriaStore.getCorrectionHasGeneralCriteria(props.correction_key);
+const has_comment_criteria = criteriaStore.getCorrectionHasCommentCriteria(props.correction_key);
 
 function pointsNote() {
-  const with_comment = pointsStore.getSumOfPointsForCorrector(props.corrector_key, true);
-  const without_comment = pointsStore.getSumOfPointsForCorrector(props.corrector_key, false);
+  const with_comment = pointsStore.getSumOfPointsForCorrection(props.correction_key, true);
+  const without_comment = pointsStore.getSumOfPointsForCorrection(props.correction_key, false);
 
   if (without_comment + with_comment == 0) {
     return '';
@@ -34,8 +34,8 @@ function pointsNote() {
 <template>
   <span>
     <strong>{{ $t('sumOfPointsLabel')}}</strong>
-    <span :class="pointsStore.getSumOfPointsForCorrector(props.corrector_key) > settingsStore.Assessment.max_points ? 'red' : ''">
-      {{ pointsStore.getSumOfPointsForCorrector(props.corrector_key) }} von max. {{ settingsStore.Assessment.max_points }}</span> {{ pointsNote() }}
+    <span :class="pointsStore.getSumOfPointsForCorrection(props.correction_key) > settingsStore.Assessment.max_points ? 'red' : ''">
+      {{ pointsStore.getSumOfPointsForCorrection(props.correction_key) }} von max. {{ settingsStore.Assessment.max_points }}</span> {{ pointsNote() }}
   </span>
 </template>
 

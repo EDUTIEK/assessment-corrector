@@ -98,7 +98,7 @@ function onSelection(selected, event) {
     if (comment) {
       commentsStore.selectComment(comment.key);
       const oldData = comment.getData();
-      if (comment.corrector_key == apiStore.correctorKey && !summariesStore.isOwnDisabled) {
+      if (comment.correction_key == stores.corrections().ownKey && !summariesStore.isOwnDisabled) {
         // comment can be updated, mark may nave been moved
         selected.symbol = selected.symbol == '' ? null : selected.symbol;
         comment.updateMarkData(selected);
@@ -115,7 +115,7 @@ function onSelection(selected, event) {
             label: showLabels.value ? comment.label : '',
             color: comment.getMarkColor(mark),
             selectedColor: comment.getMarkSelectedColor(mark),
-            locked: comment.corrector_key != apiStore.correctorKey || summariesStore.isOwnDisabled
+            locked: comment.correction_key != stores.corrections().ownKey || summariesStore.isOwnDisabled
           }
           marker.updateMark(mark_data);
         }
@@ -201,7 +201,7 @@ function refreshMarks() {
           label: showLabels.value ? comment.label : '',
           color: comment.getMarkColor(mark),
           selectedColor: comment.getMarkSelectedColor(mark),
-          locked: comment.corrector_key != apiStore.correctorKey || summariesStore.isOwnDisabled
+          locked: comment.correction_key != stores.corrections().ownKey || summariesStore.isOwnDisabled
         }
         if (currentKeys.includes(mark.key)) {
           marker.updateMark(mark_data);

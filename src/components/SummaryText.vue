@@ -3,10 +3,10 @@ import {stores} from "@/store";
 
 const summariesStore = stores.summaries();
 
-const props = defineProps(['corrector_key']);
+const props = defineProps(['correction_key']);
 
 function text() {
-  let summary = summariesStore.getForCorrector(props.corrector_key);
+  let summary = summariesStore.getForCorrection(props.correction_key);
   if (summary) {
     return summary.text;
   }

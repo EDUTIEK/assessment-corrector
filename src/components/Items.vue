@@ -8,7 +8,7 @@ const apiStore = stores.api();
 const itemsStore = stores.items();
 const summariesStore = stores.summaries();
 const essayStore = stores.essay();
-const correctorsStore = stores.correctors();
+const correctionsStore = stores.corrections();
 const changesStore = stores.changes();
 const layoutStore = stores.layout();
 
@@ -81,7 +81,7 @@ async function changeItem(newKey) {
       </span>
     <span v-show="!apiStore.isLoading && itemsStore.currentItem !== undefined">
         {{ itemsStore.currentItem.title }}
-        {{ correctorsStore.getPositionText(apiStore.correctorKey) }}
+        {{ correctionsStore.getPositionText(stores.corrections().ownKey) }}
         {{ currentStatusText() }}
       </span>
   </v-btn>

@@ -6,12 +6,12 @@ const settingsStore = stores.settings();
 const levelsStore = stores.levels();
 const summariesStore = stores.summaries();
 
-const props = defineProps(['corrector_key']);
+const props = defineProps(['correction_key']);
 
 const points = ref(0);
 const grade = ref('');
 
-const summary = summariesStore.getForCorrector(props.corrector_key);
+const summary = summariesStore.getForCorrection(props.correction_key);
 if (summary) {
   points.value = summary.points;
   const level = levelsStore.getLevel(summary.grade_key);

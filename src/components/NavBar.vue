@@ -7,7 +7,7 @@ const apiStore = stores.api();
 const layoutStore = stores.layout();
 const itemsStore = stores.items();
 const resourcesStore = stores.resources();
-const correctorsStore = stores.correctors();
+const correctionsStore = stores.corrections();
 const taskStore = stores.tasks();
 
 async function handleFocusChange() {
@@ -46,8 +46,8 @@ function selectResource(resource) {
   }
 }
 
-function selectCorrector(corrector) {
-  layoutStore.selectCorrector(corrector.corrector_key);
+function selectCorrection(correction) {
+  layoutStore.selectCorrection(correction.correction_key);
 }
 
 function getResourceIcon(resource) {
@@ -59,8 +59,8 @@ function getResourceIcon(resource) {
   }
 }
 
-function getCorrectorTitle(corrector) {
-  return (corrector.title + ' - ' + corrector.initials + ' ' + correctorsStore.getPositionText(corrector.corrector_key));
+function getCorrectionTitle(correction) {
+  return (correction.title + ' - ' + correction.initials + ' ' + correctionsStore.getPositionText(correction.key));
 }
 
 </script>
@@ -175,16 +175,16 @@ function getCorrectorTitle(corrector) {
       <v-divider class="border-opacity-75"></v-divider>
 
       <v-list-item aria-role="button" class="app-navigation-item" tabindex="0"
-                   v-for="corrector in correctorsStore.otherCorrectors"
-                   @click="closeNavigation; selectCorrector(corrector);"
-                   :aria-label="getCorrectorTitle(corrector) + (layoutStore.getCorrectorIsVisible(corrector.corrector_key) ? $t('navBarSelectedAria') : '')"
-                   :title="getCorrectorTitle(corrector) + (layoutStore.getCorrectorIsVisible(corrector.corrector_key) ? $t('navBarSelected') : '')"
-                   :key="corrector.corrector_key"
+                   v-for="correction in correctionsStore.otherCorrections"
+                   @click="closeNavigation; selectCorrection(correction);"
+                   :aria-label="getCorrectionTitle(correction) + (layoutStore.getCorrectionIsVisible(correction.key) ? $t('navBarSelectedAria') : '')"
+                   :title="getCorrectionTitle(correction) + (layoutStore.getCorrectionIsVisible(correction.key) ? $t('navBarSelected') : '')"
+                   :key="correction.correction_key"
                    :ripple="false"
       >
         <template v-slot:prepend>
           <v-icon aria-role="hidden"
-                  :icon="layoutStore.getCorrectorIsVisible(corrector.corrector_key) ? 'mdi-account-school' : 'mdi-account-school-outline'"></v-icon>
+                  :icon="layoutStore.getCorrectionIsVisible(correction.correction_key) ? 'mdi-account-school' : 'mdi-account-school-outline'"></v-icon>
         </template>
       </v-list-item>
 

@@ -4,7 +4,7 @@ import SummaryCriteria from '@/components/SummaryCriteria.vue';
 import SummaryPoints from "@/components/SummaryPoints.vue";
 import SummaryText from "@/components/SummaryText.vue";
 
-const props = defineProps(['corrector_key', 'showCriteria', 'showText']);
+const props = defineProps(['correction_key', 'showCriteria', 'showText']);
 const summariesStore = stores.summaries();
 
 function expansionClass() {
@@ -23,22 +23,22 @@ function expansionClass() {
 <template>
   <div id="app-other-summary-wrapper">
 
-    <div v-if="props.showCriteria && summariesStore.getAuthorizationForCorrector(props.corrector_key)"
+    <div v-if="props.showCriteria && summariesStore.getAuthorizationForCorrection(props.correction_key)"
          :class="expansionClass()">
       <div class="headline">{{ $t('allOverview') }}</div>
-      <summary-criteria class="content" :corrector_key="props.corrector_key"></summary-criteria>
+      <summary-criteria class="content" :correction_key="props.correction_key"></summary-criteria>
     </div>
-    <div v-if="props.showText && summariesStore.getAuthorizationForCorrector(props.corrector_key)"
+    <div v-if="props.showText && summariesStore.getAuthorizationForCorrection(props.correction_key)"
          :class="expansionClass()">
       <div class="headline">{{ $t('allSummary') }}</div>
-      <summary-text class="content" :corrector_key="props.corrector_key"></summary-text>
+      <summary-text class="content" :correction_key="props.correction_key"></summary-text>
     </div>
-    <div v-if="summariesStore.getAuthorizationForCorrector(props.corrector_key)">
+    <div v-if="summariesStore.getAuthorizationForCorrection(props.correction_key)">
       <div class="headline">{{ $t('allTotalRating') }}</div>
-      <summary-points class="content" :corrector_key="props.corrector_key"></summary-points>
+      <summary-points class="content" :correction_key="props.correction_key"></summary-points>
     </div>
 
-    <div v-if="!summariesStore.getAuthorizationForCorrector(props.corrector_key)">
+    <div v-if="!summariesStore.getAuthorizationForCorrection(props.correction_key)">
       {{ $t('otherSummaryNotAuthorized') }}
     </div>
   </div>

@@ -12,10 +12,6 @@ class Item {
   static STATUS_STITCH = 'stitch';
   static STATUS_FINALIZED = 'finalized';
 
-  static POSITION_FIRST = 0;
-  static POSITION_SECOND = 1;
-  static POSITION_STITCH = 2;
-
   static order(item1, item2) {
     return item1.position < item2.position ? -1
         : item1.position > item2.position ? 1
@@ -81,8 +77,9 @@ class Item {
   writer_id = null;
 
   /**
-   * Position of the current corrector in the correction process
+   * Position of the current correction in the correction process for this item
    * @type {integer}
+   * @see Correction
    */
   position = null;
 

@@ -26,7 +26,7 @@ function getPartialPointsMessage() {
   let note = '';
 
   if (settingsStore.Task.enable_partial_points) {
-    points = pointsStore.getSumOfPointsForCorrector(apiStore.correctorKey);
+    points = pointsStore.getSumOfPointsForCorrection(stores.corrections().ownKey);
     note = t('authorizationPartialPoints', points);
   }
   else {
@@ -98,7 +98,7 @@ function editSummary() {
           </div>
 
           <div class="appRow">
-            <sum-of-points class='sumOfPoints' :corrector_key="apiStore.correctorKey"></sum-of-points>
+            <sum-of-points class='sumOfPoints' :correction_key="stores.corrections().ownKey"></sum-of-points>
           </div>
 
           <div class="appRow">

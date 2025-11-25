@@ -1,5 +1,5 @@
 /**
- * Corrector Summary
+ * Correction Summary
  */
 class Summary {
 
@@ -10,10 +10,10 @@ class Summary {
   item_key = '';
 
   /**
-   * Key of the corrector to which the summary belongs
+   * Key of the correction to which the summary belongs
    * @type {string}
    */
-  corrector_key = '';
+  correction_key = '';
 
 
   /**
@@ -63,8 +63,8 @@ class Summary {
     if (data.item_key !== undefined && data.item_key !== null) {
       this.item_key = data.item_key.toString()
     }
-    if (data.corrector_key !== undefined && data.corrector_key !== null) {
-      this.corrector_key = data.corrector_key.toString()
+    if (data.correction_key !== undefined && data.correction_key !== null) {
+      this.correction_key = data.correction_key.toString()
     }
     if (data.text !== undefined && data.text !== null) {
       this.text = data.text.toString()
@@ -95,7 +95,7 @@ class Summary {
    * @return {string}
    */
   getKey() {
-    return 'ITM-' + this.item_key + '-COR-' + this.corrector_key
+    return 'ITM-' + this.item_key + '-COR-' + this.correction_key
   }
 
   /**

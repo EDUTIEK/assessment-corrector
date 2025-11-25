@@ -6,7 +6,7 @@ import localForage from "localforage";
 
 export function getStorage(name) {
     return localForage.createInstance({
-        name: 'xlas-assessment-corrector',
+        name: 'xlas-assessment-correction',
         storeName: name,
     });
 }

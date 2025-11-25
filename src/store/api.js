@@ -19,11 +19,10 @@ export const useApiStore = defineStore('api', {
     return {
       // saved in storage
       backendUrl: '',                     // url to be used for REST calls
-      returnUrl: '',                      // url to be called when the corrector is closed
+      returnUrl: '',                      // url to be called when the correction is closed
       userId: '',                         // identifying id of the current user
       assId: '',                          // identifying id of the assesment
       contextId: '',                      // identifying id of the context for permission checks
-      correctorKey: '',                   // identifying corrector key of the correcting user
       itemKey: '',                        // identifying key of the correction item
       dataToken: '',                      // authentication token for transmission if data
       fileToken: '',                      // authentication token for loading files
@@ -43,7 +42,7 @@ export const useApiStore = defineStore('api', {
 
     isLoading: state => state.lastLoadingTry > 0,
 
-    storedItemKey: state => localStorage.getItem('xlasCorrectorItemKey'),
+    storedItemKey: state => localStorage.getItem('xlasCorrectionItemKey'),
 
     getRequestConfig(state) {
 
@@ -94,7 +93,7 @@ export const useApiStore = defineStore('api', {
        */
       const fn = function (resourceKey) {
         const config = this.getRequestConfig(this.fileToken);
-        return config.baseURL + '/corrector/file/task/resource/' + resourceKey + '?' + config.params.toString();
+        return config.baseURL + '/correction/file/task/resource/' + resourceKey + '?' + config.params.toString();
       }
       return fn;
     },
@@ -112,7 +111,7 @@ export const useApiStore = defineStore('api', {
        */
       const fn = function (pageKey, itemKey) {
         const config = this.getRequestConfig(this.fileToken);
-        return config.baseURL + '/corrector/file/essaytask/image/' + itemKey + '/' + pageKey + '?' + config.params.toString();
+        return config.baseURL + '/correction/file/essaytask/image/' + itemKey + '/' + pageKey + '?' + config.params.toString();
       }
       return fn;
     },
@@ -127,7 +126,7 @@ export const useApiStore = defineStore('api', {
        */
       const fn = function (pageKey, itemKey) {
         const config = this.getRequestConfig(this.fileToken);
-        return config.baseURL + '/corrector/file/essaytask/thumb/' + itemKey + '/' + pageKey + '?' + config.params.toString();
+        return config.baseURL + '/correction/file/essaytask/thumb/' + itemKey + '/' + pageKey + '?' + config.params.toString();
       }
       return fn;
     },
@@ -182,16 +181,15 @@ export const useApiStore = defineStore('api', {
       let newItem = false;
 
       // take values formerly stored
-      this.backendUrl = localStorage.getItem('xlasCorrectorBackendUrl');
-      this.returnUrl = localStorage.getItem('xlasCorrectorReturnUrl');
-      this.userId = localStorage.getItem('xlasCorrectorUserId');
+      this.backendUrl = localStorage.getItem('xlasCorrectionBackendUrl');
+      this.returnUrl = localStorage.getItem('xlasCorrectionReturnUrl');
+      this.userId = localStorage.getItem('xlasCorrectionUserId');
       this.assId = localStorage.getItem('xlasWriterAssId');
-      this.contextId = localStorage.getItem('xlasCorrectorContextId');
-      this.itemKey = localStorage.getItem('correctorItemKey');
-      this.correctorKey = localStorage.getItem('correctorCorrectorKey');
-      this.dataToken = localStorage.getItem('xlasCorrectorDataToken');
-      this.fileToken = localStorage.getItem('xlasCorrectorFileToken');
-      this.timeOffset = Math.floor(localStorage.getItem('xlasCorrectorTimeOffset') ?? 0);
+      this.contextId = localStorage.getItem('xlasCorrectionContextId');
+      this.itemKey = localStorage.getItem('correctionItemKey');
+      this.dataToken = localStorage.getItem('xlasCorrectionDataToken');
+      this.fileToken = localStorage.getItem('xlasCorrectionFileToken');
+      this.timeOffset = Math.floor(localStorage.getItem('xlasCorrectionTimeOffset') ?? 0);
 
       // check if context given by cookies differs and force a reload if neccessary
       if (Cookies.get('xlasUserId') != undefined && Cookies.get('xlasUserId') !== this.userId) {
@@ -282,7 +280,7 @@ export const useApiStore = defineStore('api', {
       stores.layout().showDataReplaceConfirmation = false;
       stores.layout().showItemReplaceConfirmation = false;
 
-      this.itemKey = localStorage.getItem('xlasCorrectorItemKey');
+      this.itemKey = localStorage.getItem('xlasCorrectionItemKey');
       await this.loadItemFromStorage(this.itemKey);
       const item = stores.items().getItem(this.itemKey);
 
@@ -303,18 +301,7 @@ export const useApiStore = defineStore('api', {
     finishInitialisation() {
 
       if (stores.summaries().isOneAuthorized) {
-        stores.comments().setShowOtherCorrectors(true);
-      }
-
-      if (stores.items().currentItem?.position === Item.POSITION_STITCH) {
-        let i = 0;
-        for (const corrector of stores.correctors().correctors) {
-          stores.layout().selectCorrector(corrector.corrector_key);
-          i++;
-          if (i == 2) {
-            break;
-          }
-        }
+        stores.comments().setShowOtherCorrections(true);
       }
 
       stores.layout().initialized = true;
@@ -338,15 +325,14 @@ export const useApiStore = defineStore('api', {
       Cookies.remove('LongEssayItem');
       Cookies.remove('LongEssayToken');
 
-      localStorage.setItem('xlasCorrectorBackendUrl', this.backendUrl);
-      localStorage.setItem('xlasCorrectorReturnUrl', this.returnUrl);
-      localStorage.setItem('xlasCorrectorUserId', this.userId);
-      localStorage.setItem('xlasCorrectorAssId', this.assId);
-      localStorage.setItem('xlasCorrectorContextId', this.contextId);
-      localStorage.setItem('xlasCorrectorCorrectorKey', this.correctorKey);
-      localStorage.setItem('xlasCorrectorItemKey', this.itemKey);
-      localStorage.setItem('xlasCorrectorDataToken', this.dataToken);
-      localStorage.setItem('xlasCorrectorFileToken', this.fileToken);
+      localStorage.setItem('xlasCorrectionBackendUrl', this.backendUrl);
+      localStorage.setItem('xlasCorrectionReturnUrl', this.returnUrl);
+      localStorage.setItem('xlasCorrectionUserId', this.userId);
+      localStorage.setItem('xlasCorrectionAssId', this.assId);
+      localStorage.setItem('xlasCorrectionContextId', this.contextId);
+      localStorage.setItem('xlasCorrectionItemKey', this.itemKey);
+      localStorage.setItem('xlasCorrectionDataToken', this.dataToken);
+      localStorage.setItem('xlasCorrectionFileToken', this.fileToken);
     },
 
 
@@ -392,7 +378,7 @@ export const useApiStore = defineStore('api', {
 
       await stores.changes().loadFromStorage();
       await stores.comments().loadFromStorage();
-      await stores.correctors().loadFromStorage();
+      await stores.corrections().loadFromStorage();
       await stores.essay().loadFromStorage();
       await stores.pages().loadFromStorage();
       await stores.points().loadFromStorage();
@@ -489,7 +475,7 @@ export const useApiStore = defineStore('api', {
       // dismiss open changes from other items
       // this avoids a race condition on quick navigation between writers
       await stores.changes().clearStorage();
-      await stores.correctors().loadFromBackend(response.data.data['Task']['Correctors']);
+      await stores.corrections().loadFromBackend(response.data.data['Task']['Corrections']);
       await stores.criteria().loadFromBackend(response.data.criteria);
       await stores.comments().loadFromBackend(response.data.comments);
       await stores.essay().loadFromBackend(response.data.essay);
@@ -527,7 +513,7 @@ export const useApiStore = defineStore('api', {
             preferences: await stores.preferences().getChangedData(this.lastSendingTry),
           };
 
-          const response = await axios.put('/corrector/changes/', data, this.getRequestConfig(this.dataToken));
+          const response = await axios.put('/correction/changes/', data, this.getRequestConfig(this.dataToken));
           this.setTimeOffset(response);
           this.refreshToken(response);
 
@@ -592,12 +578,12 @@ export const useApiStore = defineStore('api', {
     refreshToken(response) {
       if (response.headers['longessaydatatoken']) {
         this.dataToken = response.headers['longessaydatatoken'];
-        localStorage.setItem('xlasCorrectorDataToken', this.dataToken);
+        localStorage.setItem('xlasCorrectionDataToken', this.dataToken);
       }
 
       if (response.headers['longessayfiletoken']) {
         this.fileToken = response.headers['longessayfiletoken'];
-        localStorage.setItem('xlasCorrectorFileToken', this.fileToken);
+        localStorage.setItem('xlasCorrectionFileToken', this.fileToken);
       }
     },
 

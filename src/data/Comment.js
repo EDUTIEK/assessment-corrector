@@ -1,7 +1,7 @@
 import Mark from '@/data/Mark';
 
 /**
- * Corrector Comment
+ * Correction Comment
  */
 class Comment {
 
@@ -25,10 +25,10 @@ class Comment {
   item_key = '';
 
   /**
-   * Key of the corrector to which the comment belongs
+   * Key of the correction to which the comment belongs
    * @type {string}
    */
-  corrector_key = '';
+  correction_key = '';
 
   /**
    * Text mark: Number of the first word from the marked text to which the comment belongs
@@ -76,7 +76,7 @@ class Comment {
   label = '';
 
   /**
-   * 'own' for own comment, 'other' for comments of other correctors (not stored, dynamically assigned)
+   * 'own' for own comment, 'other' for comments of other corrections (not stored, dynamically assigned)
    * @type {string}
    */
   prefix = '';
@@ -109,8 +109,8 @@ class Comment {
     if (data.item_key !== undefined && data.item_key !== null) {
       this.item_key = data.item_key.toString()
     }
-    if (data.corrector_key !== undefined && data.corrector_key !== null) {
-      this.corrector_key = data.corrector_key.toString()
+    if (data.correction_key !== undefined && data.correction_key !== null) {
+      this.correction_key = data.correction_key.toString()
     }
     if (data.start_position !== undefined && data.start_position !== null) {
       this.start_position = parseInt(data.start_position);
@@ -268,7 +268,7 @@ class Comment {
     return {
       key: this.key,
       item_key: this.item_key,
-      corrector_key: this.corrector_key,
+      correction_key: this.correction_key,
       start_position: this.start_position,
       end_position: this.end_position,
       parent_number: this.parent_number,

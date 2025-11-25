@@ -15,7 +15,7 @@ export const useCommentsStore = defineStore('comments', {
       // saved in storage
       keys: [],                       // list of string keys of all comments in the storage
       comments: [],                   // list of comment objects for the currrent correction item
-      showOtherCorrectors: true,      // show the comments of other correctors
+      showOtherCorrections: true,      // show the comments of other corrections
 
       // not saved in storage
       markerChange: 0,                // for watchers: timestamp of the last change that affects the text markers (not the selection)
@@ -49,13 +49,13 @@ export const useCommentsStore = defineStore('comments', {
     activeComments: state => {
       const apiStore = stores.api();
       return state.comments.filter(comment =>
-        (state.showOtherCorrectors || comment.corrector_key == apiStore.correctorKey)
+        (state.showOtherCorrections || comment.correction_key == stores.corrections().ownKey)
         && (state.filterKeys.length == 0 || state.filterKeys.includes(comment.key))
       );
     },
 
-    isOtherCorrectorsShown: state => {
-      return state.showOtherCorrectors
+    isOtherCorrectionsShown: state => {
+      return state.showOtherCorrections
     },
 
     isFilterActive: state => {
@@ -142,14 +142,14 @@ export const useCommentsStore = defineStore('comments', {
     getCountOfExcellent: state => {
 
       /**
-       * Get the number of comments of a corrector marked as excellent
+       * Get the number of comments of a correction marked as excellent
        *
-       * @param {string} corrector_key
+       * @param {string} correction_key
        * @returns {number}
        */
-      const fn = function (corrector_key) {
+      const fn = function (correction_key) {
         return state.comments
-          .filter(comment => comment.corrector_key == corrector_key && comment.rating_excellent)
+          .filter(comment => comment.correction_key == correction_key && comment.rating_excellent)
           .length
       }
       return fn;
@@ -159,14 +159,14 @@ export const useCommentsStore = defineStore('comments', {
     getCountOfCardinal: state => {
 
       /**
-       * Get the number of comments of a corrector marked as cardinal failure
+       * Get the number of comments of a correction marked as cardinal failure
        *
-       * @param {string} corrector_key
+       * @param {string} correction_key
        * @returns {number}
        */
-      const fn = function (corrector_key) {
+      const fn = function (correction_key) {
         return state.comments
-          .filter(comment => comment.corrector_key == corrector_key && comment.rating_cardinal)
+          .filter(comment => comment.correction_key == correction_key && comment.rating_cardinal)
           .length
       }
       return fn;
@@ -254,7 +254,7 @@ export const useCommentsStore = defineStore('comments', {
       const changesStore = stores.changes();
 
       comment.item_key = apiStore.itemKey;
-      comment.corrector_key = apiStore.correctorKey;
+      comment.correction_key = stores.corrections().ownKey;
 
       // first do state changes (trigger watchers)
       this.keys.push(comment.key);
@@ -292,7 +292,7 @@ export const useCommentsStore = defineStore('comments', {
       const changesStore = stores.changes();
 
       if (this.keys.includes(comment.key)
-        && comment.corrector_key == apiStore.correctorKey
+        && comment.correction_key == stores.corrections().ownKey
         && !summariesStore.isOwnDisabled
       ) {
         await storage.setItem(comment.key, JSON.stringify(comment.getData()));
@@ -367,7 +367,7 @@ export const useCommentsStore = defineStore('comments', {
      */
     async sortAndLabelComments() {
       const apiStore = stores.api();
-      const correctorsStore = stores.correctors();
+      const correctionsStore = stores.corrections();
 
       this.comments = this.comments.sort(compareComments);
 
@@ -375,34 +375,34 @@ export const useCommentsStore = defineStore('comments', {
       let numbers = {};
 
       for (const comment of this.comments) {
-        const corrector = correctorsStore.getCorrector(comment.corrector_key);
-        const initials = corrector ? corrector.initials : '??';
+        const correction = correctionsStore.getCorrection(comment.correction_key);
+        const initials = correction ? correction.initials : '??';
 
         if (comment.parent_number > parent) {
           parent = comment.parent_number;
-          for (const key of correctorsStore.correctorKeys) {
+          for (const key of correctionsStore.correctionKeys) {
             numbers[key] = 0;                   // reset all numbers for the new parent
           }
-          numbers[comment.corrector_key] = 1;     // set the number of the first comment
+          numbers[comment.correction_key] = 1;     // set the number of the first comment
 
         } else {
-          numbers[comment.corrector_key]++;
+          numbers[comment.correction_key]++;
         }
-        comment.label = initials + ' ' + parent.toString() + '.' + numbers[comment.corrector_key].toString();
-        comment.prefix = (comment.corrector_key == apiStore.correctorKey) ? 'own' : 'other';
+        comment.label = initials + ' ' + parent.toString() + '.' + numbers[comment.correction_key].toString();
+        comment.prefix = (comment.correction_key == stores.corrections().ownKey) ? 'own' : 'other';
       }
     },
 
     /**
-     * Filter the displayed comments by a corrector and rating
-     * @param {string} corrector_key
+     * Filter the displayed comments by a correction and rating
+     * @param {string} correction_key
      * @param {bool} rating_excellent
      * @param {bool} rating_cardinal
      */
-    setFilterByRating(corrector_key, rating_excellent, rating_cardinal) {
+    setFilterByRating(correction_key, rating_excellent, rating_cardinal) {
       this.filterKeys = [];
       for (const comment of this.comments) {
-        if (comment.corrector_key == corrector_key
+        if (comment.correction_key == correction_key
           && comment.rating_excellent == rating_excellent
           && comment.rating_cardinal == rating_cardinal) {
           this.filterKeys.push(comment.key);
@@ -413,15 +413,15 @@ export const useCommentsStore = defineStore('comments', {
 
     /**
      * Filter the displayed comments by given points (directly, not per criterion)
-     * @param {string} corrector_key
+     * @param {string} correction_key
      * @param {bool} rating_excellent
      * @param {bool} rating_cardinal
      */
-    setFilterByPoints(corrector_key) {
+    setFilterByPoints(correction_key) {
       const pointsStore = stores.points();
       this.filterKeys = [];
       for (const comment of this.comments) {
-        if (comment.corrector_key == corrector_key) {
+        if (comment.correction_key == correction_key) {
           if (pointsStore.getCommentHasPoints(comment.key)) {
             this.filterKeys.push(comment.key);
           }
@@ -432,15 +432,15 @@ export const useCommentsStore = defineStore('comments', {
 
 
     /**
-     * Filter the displayed comments by a corrector and points for a criterion
-     * @param {string} corrector_key
+     * Filter the displayed comments by a correction and points for a criterion
+     * @param {string} correction_key
      * @param {string} criterion_key
      */
-    setFilterByCriterion(corrector_key, criterion_key) {
+    setFilterByCriterion(correction_key, criterion_key) {
       const pointsStore = stores.points();
       this.filterKeys = [];
       for (const comment of this.comments) {
-        if (comment.corrector_key == corrector_key) {
+        if (comment.correction_key == correction_key) {
           if (pointsStore.getCommentHasPointsForCriterion(comment.key, criterion_key)) {
             this.filterKeys.push(comment.key);
           }
@@ -458,12 +458,12 @@ export const useCommentsStore = defineStore('comments', {
     },
 
     /**
-     * Set if comments from other correctors should be shown
+     * Set if comments from other corrections should be shown
      */
-    async setShowOtherCorrectors(show) {
-      this.showOtherCorrectors = !!show;
+    async setShowOtherCorrections(show) {
+      this.showOtherCorrections = !!show;
       this.markerChange = Date.now();
-      await storage.setItem('showOtherCorrectors', JSON.stringify(this.showOtherCorrectors));
+      await storage.setItem('showOtherCorrections', JSON.stringify(this.showOtherCorrections));
     },
 
 
@@ -496,7 +496,7 @@ export const useCommentsStore = defineStore('comments', {
         if (keys) {
           this.keys = JSON.parse(keys);
         }
-        this.showOtherCorrectors = !!JSON.parse(await storage.getItem('showOtherCorrectors'));
+        this.showOtherCorrections = !!JSON.parse(await storage.getItem('showOtherCorrections'));
 
         for (const key of this.keys) {
           const comment = new Comment(JSON.parse(await storage.getItem(key)));
@@ -526,7 +526,7 @@ export const useCommentsStore = defineStore('comments', {
       const apiStore = stores.api();
       try {
         this.$reset();
-        this.showOtherCorrectors = !!JSON.parse(await storage.getItem('showOtherCorrectors'));
+        this.showOtherCorrections = !!JSON.parse(await storage.getItem('showOtherCorrections'));
         await storage.clear();
 
         for (const comment_data of data) {
@@ -541,7 +541,7 @@ export const useCommentsStore = defineStore('comments', {
         await this.sortAndLabelComments();
 
         await storage.setItem('keys', JSON.stringify(this.keys));
-        await storage.setItem('showOtherCorrectors', JSON.stringify(this.showOtherCorrectors));
+        await storage.setItem('showOtherCorrections', JSON.stringify(this.showOtherCorrections));
 
       }
       catch (err) {

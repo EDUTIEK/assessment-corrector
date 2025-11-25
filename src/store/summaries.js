@@ -20,7 +20,7 @@ function startState() {
     summaries: {},              // list of all summary objects for the current item, indexed by key
 
     // not saved in storage
-    editSummary: new Summary(), // summary of the currector corrector that is actively edited
+    editSummary: new Summary(), // summary of the currector correction that is actively edited
     lastCheck: 0,               // timestamp (ms) of the last check if an update needs a storage
   }
 }
@@ -42,20 +42,20 @@ export const useSummariesStore = defineStore('summaries', {
   getters: {
 
     /**
-     * Is an editing of the current corrector and item isabled
+     * Is an editing of the current correction and item isabled
      * @param state
      * @return {bool|boolean|*}
      */
-    isOwnDisabled: state => state.editSummary.corrector_key == '' || state.editSummary.is_authorized,
+    isOwnDisabled: state => state.editSummary.correction_key == '' || state.editSummary.is_authorized,
 
     /**
-     * todo: Is the summary of the current corrector and item pre-graded
+     * todo: Is the summary of the current correction and item pre-graded
      * @returns {bool}
      */
     isOwnPregraded: state => false,
 
     /**
-     * Is the summary of the current corrector and item authorized
+     * Is the summary of the current correction and item authorized
      * @returns {bool}
      */
     isOwnAuthorized: state => state.editSummary.is_authorized,
@@ -82,7 +82,7 @@ export const useSummariesStore = defineStore('summaries', {
 
 
     /**
-     * Resulting grade title from the summary of the current corrector and item
+     * Resulting grade title from the summary of the current correction and item
      * @returns {string}
      */
     currentGradeTitle(state) {
@@ -97,16 +97,16 @@ export const useSummariesStore = defineStore('summaries', {
     },
 
 
-    getAuthorizationForCorrector: state => {
+    getAuthorizationForCorrection: state => {
       /**
-       * Get a summary of a specific corrector for the current item
-       * @param {string} corrector_key
+       * Get a summary of a specific correction for the current item
+       * @param {string} correction_key
        * @returns {bool}
        */
-      const fn = function (corrector_key) {
+      const fn = function (correction_key) {
         for (const key in state.summaries) {
           const summary = state.summaries[key];
-          if (summary.corrector_key == corrector_key) {
+          if (summary.correction_key == correction_key) {
             return summary.is_authorized;
           }
         }
@@ -116,17 +116,17 @@ export const useSummariesStore = defineStore('summaries', {
     },
 
 
-    getForCorrector: state => {
+    getForCorrection: state => {
 
       /**
-       * Get a summary of a specific corrector for the current item
-       * @param {string} corrector_key
+       * Get a summary of a specific correction for the current item
+       * @param {string} correction_key
        * @returns {Summary}
        */
-      const fn = function (corrector_key) {
+      const fn = function (correction_key) {
         for (const key in state.summaries) {
           const summary = state.summaries[key];
-          if (summary.corrector_key == corrector_key) {
+          if (summary.correction_key == correction_key) {
             return summary;
           }
         }
@@ -244,7 +244,7 @@ export const useSummariesStore = defineStore('summaries', {
           if (summary.item_key == apiStore.itemKey) {
             this.summaries[key] = summary;
           }
-          if (summary.corrector_key == apiStore.correctorKey) {
+          if (summary.correction_key == stores.corrections().ownKey) {
             this.editSummary = summary.getClone();
           }
         }
@@ -280,7 +280,7 @@ export const useSummariesStore = defineStore('summaries', {
           if (summary.item_key == apiStore.itemKey) {
             this.summaries[summary.getKey()] = summary;
           }
-          if (summary.corrector_key == apiStore.correctorKey) {
+          if (summary.correction_key == stores.corrections().ownKey) {
             this.editSummary = summary.getClone();
           }
         }

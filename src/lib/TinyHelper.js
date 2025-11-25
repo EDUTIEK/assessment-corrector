@@ -71,7 +71,7 @@ export default class TinyHelper {
     }
 
     toolbar() {
-        // corrector always has full formatting options
+        // correction always has full formatting options
         return 'zoomOut zoomIn undo redo styles bold italic underline bullist numlist removeformat charmap openSnippets';
     }
 
@@ -79,7 +79,7 @@ export default class TinyHelper {
      * @see https://www.tiny.cloud/docs/configure/content-filtering/#valid_elements
      */
     validElements() {
-        // corrector always has full formatting options
+        // correction always has full formatting options
         return 'p/div,br,strong/b,em/i,u,ol,ul,li,h1,h2,h3,h4,h5,h6,pre';
     }
 

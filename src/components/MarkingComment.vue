@@ -21,7 +21,7 @@ const comment = props.comment;
 const textRef = ref();
 
 let comment_points = ref(0);
-const pointsObject = pointsStore.getObjectByData(comment.corrector_key, comment.key, '');
+const pointsObject = pointsStore.getObjectByData(comment.correction_key, comment.key, '');
 comment_points.value = pointsObject ? pointsObject.points : 0;
 
 function isSelected(comment) {
@@ -29,7 +29,7 @@ function isSelected(comment) {
 }
 
 function hasTrash(comment) {
-  return comment.corrector_key == apiStore.correctorKey && !summariesStore.isOwnDisabled
+  return comment.correction_key == stores.corrections().ownKey && !summariesStore.isOwnDisabled
 }
 
 function hasDetails(comment) {
@@ -87,7 +87,7 @@ function getBgColor(comment) {
 }
 
 function getPointsInputStyle(comment) {
-  const sum = pointsStore.getSumOfPointsForCorrector(comment.corrector_key);
+  const sum = pointsStore.getSumOfPointsForCorrection(comment.correction_key);
   if (sum > settingsStore.Assessment.max_points) {
     return 'color: red;';
   }
@@ -225,7 +225,7 @@ watch(() => snippetsStore.selection_open, handleSnippet);
                           :id="'app-comment-' + comment.key"
                           :label="$t('markingCommentsCommentForLabel', [comment.label])"
                           rows="1" auto-grow
-                          :readonly="summariesStore.isOwnDisabled || comment.corrector_key != apiStore.correctorKey"
+                          :readonly="summariesStore.isOwnDisabled || comment.correction_key != stores.corrections().ownKey"
                           @change="commentsStore.updateComment(comment)"
                           @keyup="commentsStore.updateComment(comment)"
                           @keydown="handleTextKeydown()"
@@ -251,19 +251,19 @@ watch(() => snippetsStore.selection_open, handleSnippet);
 
             <!-- enter points -->
             <v-col cols="3">
-              <span v-if="criteriaStore.getCorrectorHasCommentCriteria(comment.corrector_key)">
+              <span v-if="criteriaStore.getCorrectionHasCommentCriteria(comment.correction_key)">
                   <span tabindex="0" class="pointsSum"
                         :id="'pointsInput' + comment.key"
                         @keydown="handleSumOfPointsKeydown()"
                   >{{ $t('markingCommentSum')}} {{ getPointsDisplay(comment) }} {{ getPointsLabel(comment) }}</span>
               </span>
-              <span v-if="!criteriaStore.getCorrectorHasCommentCriteria(comment.corrector_key)">
+              <span v-if="!criteriaStore.getCorrectionHasCommentCriteria(comment.correction_key)">
                 <input class="pointsInput"
                        type="number"
                        :style=getPointsInputStyle(comment)
                        :id="'pointsInput' + comment.key"
                        :max="settingsStore.Assessment.max_points"
-                       :disabled="summariesStore.isOwnDisabled || comment.corrector_key != apiStore.correctorKey"
+                       :disabled="summariesStore.isOwnDisabled || comment.correction_key != stores.corrections().ownKey"
                        @change="pointsStore.setValueByCommentOrCriterion(comment.key, '', comment_points)"
                        @keydown="handleTextKeydown()"
                        v-model="comment_points"/>
@@ -279,7 +279,7 @@ watch(() => snippetsStore.selection_open, handleSnippet);
                       class="ratingInput"
                       v-model="comment.rating_excellent"
                       :id="'ratingExcellent' + comment.key"
-                      :disabled="summariesStore.isOwnDisabled || comment.corrector_key != apiStore.correctorKey"
+                      :disabled="summariesStore.isOwnDisabled || comment.correction_key != stores.corrections().ownKey"
                       @change="toggleExcellent(comment)"
                       @keydown="handleTextKeydown()"
                />
@@ -295,7 +295,7 @@ watch(() => snippetsStore.selection_open, handleSnippet);
                        class="ratingInput"
                        v-model="comment.rating_cardinal"
                        :id="'ratingCardinal' + comment.key"
-                       :disabled="summariesStore.isOwnDisabled || comment.corrector_key != apiStore.correctorKey"
+                       :disabled="summariesStore.isOwnDisabled || comment.correction_key != stores.corrections().ownKey"
                        @change="toggleCardinal(comment)"
                        @keydown="handleTextKeydown()"
                 />
@@ -326,10 +326,10 @@ watch(() => snippetsStore.selection_open, handleSnippet);
             <v-col cols=3>
             </v-col>
             <v-col cols=3>
-              <span v-if="criteriaStore.getCorrectorHasCommentCriteria(comment.corrector_key)" v-show="getPointsDisplay(comment) > 0">
+              <span v-if="criteriaStore.getCorrectionHasCommentCriteria(comment.correction_key)" v-show="getPointsDisplay(comment) > 0">
                 <span class="pointsSum">{{ $t('markingCommentSum')}} {{ getPointsDisplay(comment) }} {{ getPointsLabel(comment) }}</span>
               </span>
-              <span v-if="!criteriaStore.getCorrectorHasCommentCriteria(comment.corrector_key)" v-show="getPointsDisplay(comment) > 0">
+              <span v-if="!criteriaStore.getCorrectionHasCommentCriteria(comment.correction_key)" v-show="getPointsDisplay(comment) > 0">
                 <span class="pointsInput">{{ getPointsDisplay(comment) }}</span>&nbsp;{{ getPointsLabel(comment) }}
               </span>
             </v-col>

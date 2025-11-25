@@ -1,6 +1,6 @@
 /**
  * Preferences Store
- * Stores local setings done by the corrector
+ * Stores local setings done by the correction
  * These settings are not yet sent to the backend
  */
 import {getStorage} from "@/lib/Storage";
@@ -78,7 +78,7 @@ export const usePreferencesStore = defineStore('preferences', {
       const apiStore = stores.api();
 
       await this.saveToStorage();
-      if (apiStore.correctorKey) {
+      if (stores.corrections().ownKey) {
         await changesStore.setChange(new Change({
           type: Change.TYPE_PREFERENCES,
           action: Change.ACTION_SAVE,

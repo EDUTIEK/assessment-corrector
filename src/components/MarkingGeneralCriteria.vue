@@ -10,14 +10,14 @@ const settingStore = stores.settings();
 const summariesStore = stores.summaries();
 const layoutStore = stores.layout();
 
-let corrector_key = ref('');
+let correction_key = ref('');
 let criteriaPoints = ref({});
 
 async function loadPoints() {
-  corrector_key.value = apiStore.correctorKey;
+  correction_key.value = stores.corrections().ownKey;
   criteriaPoints.value = {};
-  for (const criterion of criteriaStore.getCorrectorGeneralCriteria(corrector_key.value)) {
-    const pointsObject = pointsStore.getObjectByData( corrector_key.value, '', criterion.key);
+  for (const criterion of criteriaStore.getCorrectionGeneralCriteria(correction_key.value)) {
+    const pointsObject = pointsStore.getObjectByData( correction_key.value, '', criterion.key);
     criteriaPoints.value[criterion.key] = (pointsObject ? pointsObject.points : 0);
   }
 }
@@ -67,14 +67,14 @@ async function handleKeyDown(event) {
       </tr>
       </thead>
       <tbody>
-      <tr v-for="criterion in criteriaStore.getCorrectorGeneralCriteria(corrector_key)" :key="criterion.key">
+      <tr v-for="criterion in criteriaStore.getCorrectionGeneralCriteria(correction_key)" :key="criterion.key">
         <td class="col-left">
           <label tabindex="0" @keydown="handleKeyDown" :for="'app-points-input-' + criterion.key">{{ criterion.title }}</label>
         </td>
         <td class="col-mid text-right">
           <input class="appPoints" type="number" v-model="criteriaPoints[criterion.key]"
                  :id="'app-points-input-' + criterion.key"
-                 :disabled="summariesStore.isOwnDisabled || corrector_key != apiStore.correctorKey"
+                 :disabled="summariesStore.isOwnDisabled || correction_key != stores.corrections().ownKey"
                  :max="criterion.points"
                  @change="savePoints(criterion.key)"
                  @keydown="handleKeyDown"

@@ -57,13 +57,13 @@ document.addEventListener('keydown', layoutStore.handleKeyDown);
                             : layoutStore.isSolutionPdfVisible ? $t('allSolutionPdf')
                                 : layoutStore.isEssayVisible ? $t('allEssay')
                                     : layoutStore.isResourcesVisible ? resourcesStore.activeResource?.title
-                                        : layoutStore.isLeftCorrectorVisible ? layoutStore.leftCorrectorTitle : $t('mainContentLeftColumn')
+                                        : layoutStore.isLeftCorrectionVisible ? layoutStore.leftCorrectionTitle : $t('mainContentLeftColumn')
               }}
             </h1>
           <v-btn-group density="comfortable">
 
             <!-- toggle left summary criteria  -->
-            <v-btn size="small" v-show="layoutStore.isLeftCorrectorVisible"
+            <v-btn size="small" v-show="layoutStore.isLeftCorrectionVisible"
                    @click="layoutStore.toggleLeftSummaryCriteria()">
               <v-icon v-show="layoutStore.showLeftSummaryCriteria" icon="mdi-checkbox-outline"></v-icon>
               <v-icon v-show="!layoutStore.showLeftSummaryCriteria" icon="mdi-checkbox-blank-outline"></v-icon>
@@ -71,7 +71,7 @@ document.addEventListener('keydown', layoutStore.handleKeyDown);
             </v-btn>
 
             <!-- toggle left summary text  -->
-            <v-btn size="small" v-show="layoutStore.isLeftCorrectorVisible"
+            <v-btn size="small" v-show="layoutStore.isLeftCorrectionVisible"
                    @click="layoutStore.toggleLeftSummaryText()">
               <v-icon v-show="layoutStore.showLeftSummaryText" icon="mdi-checkbox-outline"></v-icon>
               <v-icon v-show="!layoutStore.showLeftSummaryText" icon="mdi-checkbox-blank-outline"></v-icon>
@@ -84,7 +84,7 @@ document.addEventListener('keydown', layoutStore.handleKeyDown);
               <span> {{
                   layoutStore.isMarkingSelected ? $t('allCorrection')
                       : layoutStore.isSummarySelected ? $t('allSummary')
-                          : layoutStore.isRightCorrectorSelected ? layoutStore.rightCorrectorTitle : $t('mainContentExpandRightColumn')
+                          : layoutStore.isRightCorrectionSelected ? layoutStore.rightCorrectionTitle : $t('mainContentExpandRightColumn')
                 }}
                 </span>
             </v-btn>
@@ -105,8 +105,8 @@ document.addEventListener('keydown', layoutStore.handleKeyDown);
           <essay v-if="layoutStore.isEssayVisible && !pagesStore.hasPages"/>
           <essay-image v-if="layoutStore.isEssayVisible && pagesStore.hasPages"/>
           <resources v-if="layoutStore.isResourcesVisible"/>
-          <other-summary v-if="layoutStore.isLeftCorrectorVisible"
-                         :corrector_key="layoutStore.leftCorrectorKey"
+          <other-summary v-if="layoutStore.isLeftCorrectionVisible"
+                         :correction_key="layoutStore.leftCorrectionKey"
                          :showCriteria="layoutStore.showLeftSummaryCriteria"
                          :showText="layoutStore.showLeftSummaryText"
           />
@@ -123,18 +123,18 @@ document.addEventListener('keydown', layoutStore.handleKeyDown);
             <h1 id="appHeadRight" tabindex="0" class="headline"> {{
                 layoutStore.isMarkingVisible ? $t("allCorrection")
                     : layoutStore.isSummaryVisible ? $t("allOwnSummaryAndRating")
-                        : layoutStore.isRightCorrectorVisible ? layoutStore.rightCorrectorTitle : $t('mainContentRightColumn')
+                        : layoutStore.isRightCorrectionVisible ? layoutStore.rightCorrectionTitle : $t('mainContentRightColumn')
               }}
             </h1>
 
           <v-btn-group density="comfortable">
 
-            <!-- show other correctors -->
+            <!-- show other corrections -->
             <v-btn size="small" variant="plain" v-if="layoutStore.isMarkingVisible"
-                   @click="commentsStore.setShowOtherCorrectors(!commentsStore.isOtherCorrectorsShown)">
+                   @click="commentsStore.setShowOtherCorrections(!commentsStore.isOtherCorrectionsShown)">
               <v-icon
-                  :icon="commentsStore.isOtherCorrectorsShown ? 'mdi-account-school' : 'mdi-account-school-outline'"></v-icon>
-              <span class="sr-only">{{$t('mainContentShowOtherCorrectors') + (commentsStore.isOtherCorrectorsShown ? $t('allIsSelected') : '')}}</span>
+                  :icon="commentsStore.isOtherCorrectionsShown ? 'mdi-account-school' : 'mdi-account-school-outline'"></v-icon>
+              <span class="sr-only">{{$t('mainContentShowOtherCorrections') + (commentsStore.isOtherCorrectionsShown ? $t('allIsSelected') : '')}}</span>
             </v-btn>
 
             <!-- reset comments filter -->
@@ -181,7 +181,7 @@ document.addEventListener('keydown', layoutStore.handleKeyDown);
             </v-btn>
 
             <!-- toggle right summary criteria  -->
-            <v-btn size="small" v-show="layoutStore.isSummaryVisible || layoutStore.isRightCorrectorVisible"
+            <v-btn size="small" v-show="layoutStore.isSummaryVisible || layoutStore.isRightCorrectionVisible"
                    @click="layoutStore.toggleRightSummaryCriteria()">
               <v-icon v-show="layoutStore.showRightSummaryCriteria" icon="mdi-checkbox-outline"></v-icon>
               <v-icon v-show="!layoutStore.showRightSummaryCriteria" icon="mdi-checkbox-blank-outline"></v-icon>
@@ -190,7 +190,7 @@ document.addEventListener('keydown', layoutStore.handleKeyDown);
             </v-btn>
 
             <!-- toggle right summary text  -->
-            <v-btn size="small" v-show="layoutStore.isSummaryVisible || layoutStore.isRightCorrectorVisible"
+            <v-btn size="small" v-show="layoutStore.isSummaryVisible || layoutStore.isRightCorrectionVisible"
                    @click="layoutStore.toggleRightSummaryText()">
               <v-icon v-show="layoutStore.showRightSummaryText" icon="mdi-checkbox-outline"></v-icon>
               <v-icon v-show="!layoutStore.showRightSummaryText" icon="mdi-checkbox-blank-outline"></v-icon>
@@ -204,7 +204,7 @@ document.addEventListener('keydown', layoutStore.handleKeyDown);
                     layoutStore.isInstructionsSelected ? $t('allInstructions')
                         : layoutStore.isEssaySelected ? $t('allEssay')
                             : layoutStore.isResourcesSelected ? resourcesStore.activeResource?.title
-                                : layoutStore.isLeftCorrectorSelected ? layoutStore.leftCorrectorTitle : $t('mainContentExpandLeftColumn')
+                                : layoutStore.isLeftCorrectionSelected ? layoutStore.leftCorrectionTitle : $t('mainContentExpandLeftColumn')
                   }}
                 </span>
               <v-icon icon="mdi-chevron-right"></v-icon>
@@ -225,8 +225,8 @@ document.addEventListener('keydown', layoutStore.handleKeyDown);
                        :showCriteria="layoutStore.showRightSummaryCriteria"
                        :showText="layoutStore.showRightSummaryText"
           />
-          <other-summary v-if="layoutStore.isRightCorrectorVisible"
-                         :corrector_key="layoutStore.rightCorrectorKey"
+          <other-summary v-if="layoutStore.isRightCorrectionVisible"
+                         :correction_key="layoutStore.rightCorrectionKey"
                          :showCriteria="layoutStore.showRightSummaryCriteria"
                          :showText="layoutStore.showRightSummaryText"
           />

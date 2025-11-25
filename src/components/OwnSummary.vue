@@ -26,7 +26,7 @@ function expansionClass() {
   <div id="app-own-summary-wrapper">
     <div v-if="props.showCriteria" :class="expansionClass()">
       <h2 class="headline">{{ $t('allOverview') }}</h2>
-      <summary-criteria class="content" :corrector_key="apiStore.correctorKey"></summary-criteria>
+      <summary-criteria class="content" :correction_key="stores.corrections().ownKey"></summary-criteria>
     </div>
     <div v-if="props.showText" :class="expansionClass()">
       <h2 class="headline">{{ $t('allSummary') }}</h2>

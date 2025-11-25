@@ -59,20 +59,20 @@ export const usePointsStore = defineStore('points', {
       return fn;
     },
     
-    getSumOfPointsForCorrector: state => {
+    getSumOfPointsForCorrection: state => {
 
       /**
-       * Get the sum of points given by a corrector
+       * Get the sum of points given by a correction
        *
-       * @param {string} corrector_key
+       * @param {string} correction_key
        * @param {bool} with_comment
        * @param {bool} with_criterion
        * @returns {number}
        */
-      const fn = function (corrector_key, with_comment = null, with_criterion = null) {
+      const fn = function (correction_key, with_comment = null, with_criterion = null) {
         let sum = 0;
         state.points
-            .filter(points => points.corrector_key == corrector_key &&
+            .filter(points => points.correction_key == correction_key &&
                 (with_comment === null || with_comment == (points.comment_key != '')) &&
                  (with_criterion === null ||  with_criterion == (points.criterion_key != ''))
             )
@@ -104,16 +104,16 @@ export const usePointsStore = defineStore('points', {
     getSumOfPointsForCriterion: state => {
 
       /**
-       * Get the sum of points given to a criterion by a corrector
+       * Get the sum of points given to a criterion by a correction
        *
        * @param {Criterion} criterion
-       * @param {string} corrector_key
+       * @param {string} correction_key
        * @returns {number}
        */
-      const fn = function (criterion, corrector_key) {
+      const fn = function (criterion, correction_key) {
         let sum = 0;
         state.points
-          .filter(points => points.criterion_key == criterion.key && points.corrector_key == corrector_key)
+          .filter(points => points.criterion_key == criterion.key && points.correction_key == correction_key)
           .forEach(points => sum += points.points);
         return sum;
       }
@@ -123,32 +123,32 @@ export const usePointsStore = defineStore('points', {
     getPointsOfCriterionExceeded: state => {
 
       /**
-       * Get if the sum of points given to a criterion by a corrector exceeds the maximum points of this criterion
+       * Get if the sum of points given to a criterion by a correction exceeds the maximum points of this criterion
        *
        * @param {Criterion} criterion
        * @param {string} comment_key
        * @returns {number}
        */
-      const fn = function (criterion, corrector_key) {
+      const fn = function (criterion, correction_key) {
         let sum = 0;
         state.points
-          .filter(points => points.criterion_key == criterion.key && points.corrector_key == corrector_key)
+          .filter(points => points.criterion_key == criterion.key && points.correction_key == correction_key)
           .forEach(points => sum += points.points);
         return sum > criterion.points;
       }
       return fn;
     },
 
-    getObjectsForCorrector: state => {
+    getObjectsForCorrection: state => {
 
       /**
-       * Get the points for a corrector
+       * Get the points for a correction
        *
-       * @param {string[]} corrector_key
+       * @param {string[]} correction_key
        * @returns {Points[]}
        */
-      const fn = function (corrector_key) {
-        return state.points.filter(points => points.corrector_key == corrector_key);
+      const fn = function (correction_key) {
+        return state.points.filter(points => points.correction_key == correction_key);
       }
       return fn;
     },
@@ -159,13 +159,13 @@ export const usePointsStore = defineStore('points', {
       /**
        * Get a points object by comment and/or criteriony key
        *
-       * @param {string} corrector_key
+       * @param {string} correction_key
        * @param {string} comment_key
        * @param {string} criterion_key
        * @returns {Point|undefined}
        */
-      const fn = function (corrector_key, comment_key, criterion_key) {
-        return state.points.find(points => points.corrector_key == corrector_key
+      const fn = function (correction_key, comment_key, criterion_key) {
+        return state.points.find(points => points.correction_key == correction_key
             && points.comment_key == comment_key
             && points.criterion_key == criterion_key);
       }
@@ -185,7 +185,7 @@ export const usePointsStore = defineStore('points', {
      */
     async setValueByCommentOrCriterion(comment_key, criterion_key, points_value) {
       const apiStore = stores.api();
-      let pointsObject = this.getObjectByData(apiStore.correctorKey, comment_key, criterion_key);
+      let pointsObject = this.getObjectByData(stores.corrections().ownKey, comment_key, criterion_key);
       if (pointsObject) {
         if (points_value) {
           pointsObject.setPoints(points_value);
@@ -209,7 +209,7 @@ export const usePointsStore = defineStore('points', {
       const apiStore = stores.api();
       const pointsObject = new Points({
         item_key: apiStore.itemKey,
-        corrector_key: apiStore.correctorKey,
+        correction_key: stores.corrections().ownKey,
         comment_key: comment_key,
         criterion_key: criterion_key,
         points: points_value

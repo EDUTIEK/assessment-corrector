@@ -22,30 +22,30 @@ export const useCriteriaStore = defineStore('criteria', {
    */
   getters: {
     hasCommentCriteria: state => {
-      const correctorsStore = stores.correctors();
-      const correctorKeys = correctorsStore.correctorKeys;
-      return !!state.criteria.find(criterion => !criterion.is_general && (criterion.corrector_key == '' || correctorKeys.includes(
-          criterion.corrector_key)));
+      const correctionsStore = stores.corrections();
+      const correctionKeys = correctionsStore.correctionKeys;
+      return !!state.criteria.find(criterion => !criterion.is_general && (criterion.correction_key == '' || correctionKeys.includes(
+          criterion.correction_key)));
     },
 
     hasOwnCriteria: state => {
       const apiStore = stores.api();
-      return !!state.criteria.find(criterion => criterion.corrector_key == '' || criterion.corrector_key == apiStore.correctorKey);
+      return !!state.criteria.find(criterion => criterion.correction_key == '' || criterion.correction_key == stores.corrections().ownKey);
     },
 
     hasOwnGeneralCriteria: state => {
       const apiStore = stores.api();
-      return !!state.criteria.find(criterion => criterion.is_general && (criterion.corrector_key == '' || criterion.corrector_key == apiStore.correctorKey));
+      return !!state.criteria.find(criterion => criterion.is_general && (criterion.correction_key == '' || criterion.correction_key == stores.corrections().ownKey));
     },
 
     hasOwnCommentCriteria: state => {
       const apiStore = stores.api();
-      return !!state.criteria.find(criterion => !criterion.is_general && (criterion.corrector_key == '' || criterion.corrector_key == apiStore.correctorKey));
+      return !!state.criteria.find(criterion => !criterion.is_general && (criterion.correction_key == '' || criterion.correction_key == stores.corrections().ownKey));
     },
 
     ownCriteria: state => {
       const apiStore = stores.api();
-      return state.criteria.filter((criterion => criterion.corrector_key == '' || criterion.corrector_key == apiStore.correctorKey));
+      return state.criteria.filter((criterion => criterion.correction_key == '' || criterion.correction_key == stores.corrections().ownKey));
     },
 
     getCriterion: state => {
@@ -62,80 +62,80 @@ export const useCriteriaStore = defineStore('criteria', {
       return fn;
     },
 
-    getCorrectorHasCriteria: state => {
+    getCorrectionHasCriteria: state => {
 
       /**
-       * Get if a corrector has criteria at all
+       * Get if a correction has criteria at all
        *
-       * @param {string} corrector_key
+       * @param {string} correction_key
        * @returns {boolean}
        */
-      const fn = function (corrector_key) {
+      const fn = function (correction_key) {
         return !!state.criteria.find(criterion =>
-            (criterion.corrector_key == '' || criterion.corrector_key == corrector_key));
+            (criterion.correction_key == '' || criterion.correction_key == correction_key));
       };
       return fn;
     },
 
 
-    getCorrectorHasGeneralCriteria: state => {
+    getCorrectionHasGeneralCriteria: state => {
 
       /**
-       * Get if a corrector has general criteria defined
+       * Get if a correction has general criteria defined
        *
-       * @param {string} corrector_key
+       * @param {string} correction_key
        * @returns {boolean}
        */
-      const fn = function (corrector_key) {
+      const fn = function (correction_key) {
         return !!state.criteria.find(criterion => criterion.is_general &&
-            (criterion.corrector_key == '' || criterion.corrector_key == corrector_key));
+            (criterion.correction_key == '' || criterion.correction_key == correction_key));
       };
       return fn;
     },
 
-    getCorrectorHasCommentCriteria: state => {
+    getCorrectionHasCommentCriteria: state => {
 
       /**
-       * Get if a corrector has comments related criteria defined
+       * Get if a correction has comments related criteria defined
        *
-       * @param {string} corrector_key
+       * @param {string} correction_key
        * @returns {boolean}
        */
-      const fn = function (corrector_key) {
+      const fn = function (correction_key) {
         return !!state.criteria.find(criterion => !criterion.is_general &&
-            (criterion.corrector_key == '' || criterion.corrector_key == corrector_key));
+            (criterion.correction_key == '' || criterion.correction_key == correction_key));
       };
       return fn;
     },
 
 
-    getCorrectorGeneralCriteria: state => {
+    getCorrectionGeneralCriteria: state => {
 
       /**
-       * Get the general criteria of a corrector
+       * Get the general criteria of a correction
        *
-       * @param corrector_key
+       * @param correction_key
        * @returns {Criterion[]}
        */
-      const fn = function (corrector_key) {
+      const fn = function (correction_key) {
         return state.criteria.filter(criterion => criterion.is_general &&
-            (criterion.corrector_key == '' || criterion.corrector_key == corrector_key));
+            (criterion.correction_key == '' || criterion.correction_key == correction_key));
       };
       return fn;
     },
 
 
-    getCorrectorCommentCriteria: state => {
+    getCorrectionCommentCriteria: state => {
 
       /**
-       * Get the comments related criteria of a corrector
+       * Get the comments related criteria of a correction
        *
-       * @param corrector_key
+       * @param correction_key
        * @returns {Criterion[]}
        */
-      const fn = function (corrector_key) {
+      const fn = function (correction_key) {
         return state.criteria.filter(criterion => !criterion.is_general &&
-            (criterion.corrector_key == '' || criterion.corrector_key == corrector_key));
+            (criterion.correction_key == '' || criterion.correction_key == correction_key));
       };
       return fn;
     },

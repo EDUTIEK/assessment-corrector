@@ -113,7 +113,7 @@ watch(() => snippetsStore.selection_open, handleSnippet);
         :init="helper.getInit()"
     />
 
-    <div class="app-summary-text-display long-essay-content corrector-summary"
+    <div class="app-summary-text-display long-essay-content correction-summary"
          v-if="summariesStore.isOwnDisabled"
          v-html="summariesStore.editSummary.text">
     </div>
