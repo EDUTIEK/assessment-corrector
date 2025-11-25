@@ -25,12 +25,11 @@ export const useTasksStore = defineStore('tasks', {
   },
 
   getters: {
-    currentKey(state) {
-      return Task.buildKey(Item.extractTaskId(stores.api().itemKey));
-    },
-
     countTasks(state) {
       return Object.keys(state.tasks).length;
+    },
+    currentKey(state) {
+      return Task.buildKey(Item.extractTaskId(stores.api().itemKey));
     },
     currentTask(state) {
       return state.tasks[state.currentKey];
@@ -40,6 +39,9 @@ export const useTasksStore = defineStore('tasks', {
     },
     hasInstructions(state) {
       return !!state.currentTask?.instructions;
+    },
+    hasSolution(state) {
+      return !!state.currentTask?.solution;
     },
     sortedTasks(state) {
       return Object.values(state.tasks).toSorted(Task.order);

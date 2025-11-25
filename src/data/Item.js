@@ -6,11 +6,21 @@
  */
 class Item {
 
+  static STATUS_OPEN = 'open';
+  static STATUS_APPROXIMATION = 'approximation';
+  static STATUS_CONSULTING = 'consulting';
+  static STATUS_STITCH = 'stitch';
+  static STATUS_FINALIZED = 'finalized';
+
+  static POSITION_FIRST = 0;
+  static POSITION_SECOND = 1;
+  static POSITION_STITCH = 2;
+
   static order(item1, item2) {
-    return task1.position < task2.position ? -1
-        : task1.position > task2.position ? 1
-            : task1.title < task2.title ? -1
-                : task1.title > task2.title ? 1
+    return item1.position < item2.position ? -1
+        : item1.position > item2.position ? 1
+            : item1.title < item2.title ? -1
+                : item1.title > item2.title ? 1
                     : 0
   }
 
@@ -56,7 +66,7 @@ class Item {
    * Key of correction item
    * @type {string}
    */
-  key = '';
+  key = null;
 
   /**
    * Id of the task that is corrected
@@ -92,19 +102,19 @@ class Item {
    * Is a correction allowed for the item
    * @type {boolean}
    */
-  correction_allowed = false;
+  can_correct = false;
 
   /**
    * Is an authorization allowed for the item
    * @type {boolean}
    */
-  authorization_allowed = false;
+  can_authorize = false;
 
   /**
    * Is an review allowed for the item
    * @type {boolean}
    */
-  revision_allowed = false;
+  can_revise = false;
 
   /**
    * Constructor - gets properties from a data object
@@ -129,16 +139,16 @@ class Item {
     if (data.correction_status !== undefined && data.correction_status !== null) {
       this.correction_status = data.correction_status.toString();
     }
-    if (data.correction_allowed !== undefined && data.correction_allowed !== null) {
-      this.correction_allowed = !!data.correction_allowed;
+    if (data.can_correct !== undefined && data.can_correct !== null) {
+      this.can_correct = !!data.can_correct;
     }
-    if (data.authorization_allowed !== undefined && data.authorization_allowed !== null) {
-      this.authorization_allowed = !!data.authorization_allowed;
+    if (data.can_authorize !== undefined && data.can_authorize !== null) {
+      this.can_authorize = !!data.can_authorize;
     }
-    if (data.revision_allowed !== undefined && data.revision_allowed !== null) {
-      this.revision_allowed = !!data.revision_allowed;
+    if (data.can_revise !== undefined && data.can_revise !== null) {
+      this.can_revise = !!data.can_revise;
     }
-    if (this.key === '') {
+    if (this.key === null) {
       this.key = Item.buildKey(this.task_id, this.writer_id);
     }
   }

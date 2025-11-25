@@ -15,6 +15,7 @@ import { nextTick, watch } from 'vue';
 
 const apiStore = stores.api();
 const layoutStore = stores.layout();
+const itemsStore = stores.items();
 const resourcesStore = stores.resources();
 const commentsStore = stores.comments();
 const criteriaStore = stores.criteria();
@@ -171,7 +172,7 @@ document.addEventListener('keydown', layoutStore.handleKeyDown);
             </v-btn>
 
             <!-- toggle marking text -->
-            <v-btn size="small" v-show="!apiStore.isForReviewOrStitch && layoutStore.isMarkingVisible"
+            <v-btn size="small" v-show="itemsStore.canAct || layoutStore.isMarkingVisible"
                    @click="layoutStore.toggleMarkingText()">
               <v-icon v-show="layoutStore.showMarkingText" icon="mdi-checkbox-outline"></v-icon>
               <v-icon v-show="!layoutStore.showMarkingText" icon="mdi-checkbox-blank-outline"></v-icon>

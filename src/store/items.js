@@ -7,19 +7,20 @@ import {stores} from "@/store/index";
 import Item from '@/data/Item';
 
 const storage = getStorage('items');
+const startState = {
+  // saved in storage
+  items: {},              // list of all items objects
+
+  // not saved
+  firstKey: null,
+  lastKey: null,
+  previousKey: null,
+  nextKey: null,
+}
 
 export const useItemsStore = defineStore('items', {
   state: () => {
-    return {
-      // saved in storage
-      items: {},              // list of all items objects
-
-      // not saved
-      firstKey: null,
-      lastKey: null,
-      previousKey: null,
-      nextKey: null,
-    }
+    return startState;
   },
 
   /**
@@ -46,12 +47,21 @@ export const useItemsStore = defineStore('items', {
       return this.getSortedItemsOfTask(Item.extractTaskId(stores.api().itemKey));
     },
 
-    firstKey: state => state.keys.length > 0 ? state.keys[0] : '',
-    lastKey: state => state.keys.length > 0 ? state.keys[state.keys.length - 1] : '',
+    canAct(state) {
+      return state.canCorrect || state.canAuthorize || state.canRevise;
+    },
 
-    correctionAllowed: state => state.currentItem.correction_allowed,
-    authorizationAllowed: state => state.currentItem.authorization_allowed,
-    revisionAllowed: state => state.currentItem.revision_allowed,
+    canCorrect(state) {
+      return state.currentItem?.can_correct;
+    },
+
+    canAuthorize(state) {
+      return state.currentItem?.can_authorize;
+    },
+
+    canRevise(state) {
+      return state.currentItem?.can_revise;
+    },
 
     getSortedItemsOfTask(state) {
       /**

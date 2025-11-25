@@ -1,6 +1,8 @@
 <script setup>
 import {stores} from "@/store";
 import { nextTick, ref } from 'vue';
+import i18n from "@/plugins/i18n";
+import Item from "@/data/Item";
 
 const apiStore = stores.api();
 const itemsStore = stores.items();
@@ -15,6 +17,27 @@ const selectionShown = ref(false);
 const selectedKey = ref('');
 const loading = ref(false);
 
+const { t } = i18n.global;
+
+function currentStatusText() {
+  const status = itemsStore.currentItem?.correction_status;
+  switch (status) {
+    case Item.STATUS_OPEN:
+      return summariesStore.isOwnAuthorized ? t('itemsSuffixAuthorized')
+          : summariesStore.isOwnPregraded ?  t('itemsSuffixPregraded')
+            : t('itemsSuffixOpen');
+    case Item.STATUS_APPROXIMATION:
+      return t('itemsSuffixApproximation');
+    case Item.STATUS_CONSULTING:
+      return t('itemsSuffixConsulting');
+    case Item.STATUS_STITCH:
+      return t('itemsSuffixStitch');
+    case Item.STATUS_FINALIZED:
+      return t('itemsSuffixFinalized');
+  }
+
+
+}
 
 async function showSelection() {
   await nextTick();
@@ -57,14 +80,9 @@ async function changeItem(newKey) {
         {{ $t('itemsLoadData') }}
       </span>
     <span v-show="!apiStore.isLoading && itemsStore.currentItem !== undefined">
-       {{ itemsStore.currentItem.title }}
+        {{ itemsStore.currentItem.title }}
         {{ correctorsStore.getPositionText(apiStore.correctorKey) }}
-        {{
-        apiStore.isForReviewOrStitch
-            ? (essayStore.isFinalized ? $t('itemsSuffixFinalised') : $t('itemsSuffixOpen'))
-            : (summariesStore.isOwnAuthorized ? $t('itemsSuffixAuthorized') : $t('itemsSuffixOpen'))
-      }}
-
+        {{ currentStatusText() }}
       </span>
   </v-btn>
 

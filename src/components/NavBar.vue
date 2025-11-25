@@ -5,6 +5,7 @@ import SendingStatus from "@/components/SendingStatus.vue";
 
 const apiStore = stores.api();
 const layoutStore = stores.layout();
+const itemsStore = stores.items();
 const resourcesStore = stores.resources();
 const correctorsStore = stores.correctors();
 const taskStore = stores.tasks();
@@ -188,7 +189,7 @@ function getCorrectorTitle(corrector) {
       </v-list-item>
 
       <v-list-item aria-role="button" class="app-navigation-item" tabindex="0"
-                   v-if="!apiStore.isForReviewOrStitch"
+                   v-if="itemsStore.canAct"
                    @click="closeNavigation; layoutStore.showSummary();"
                    :aria-label="$t('allOwnSummaryAndRating') + (layoutStore.isSummaryVisible ? $t('navBarSelectedAria') : '')"
                    :title="$t('allOwnSummaryAndRating') + (layoutStore.isSummaryVisible ? $t('navBarSelected') : '')"

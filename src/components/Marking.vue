@@ -9,24 +9,25 @@ import {stores} from "@/store";
 
 const apiStore = stores.api();
 const layoutStore = stores.layout();
+const itemsStore = stores.items();
 const commentsStore = stores.comments();
 const criteriaStore = stores.criteria();
 const summariesStore = stores.summaries();
 
 function markingCommentsShown() {
-  return layoutStore.showMarkingComments && (!apiStore.isForReviewOrStitch || summariesStore.isOneAuthorized)
+  return layoutStore.showMarkingComments && (itemsStore.canAct || summariesStore.isOneAuthorized)
 }
 
 function markingGeneralCriteriaShown() {
-  return layoutStore.showMarkingGeneralCriteria && criteriaStore.hasOwnGeneralCriteria && (!apiStore.isForReviewOrStitch || summariesStore.isOneAuthorized)
+  return layoutStore.showMarkingGeneralCriteria && criteriaStore.hasOwnGeneralCriteria && (itemsStore.canAct || summariesStore.isOneAuthorized)
 }
 
 function markingCommentCriteriaShown() {
-  return layoutStore.showMarkingCommentCriteria && criteriaStore.hasCommentCriteria && (!apiStore.isForReviewOrStitch || summariesStore.isOneAuthorized)
+  return layoutStore.showMarkingCommentCriteria && criteriaStore.hasCommentCriteria && (!itemsStore.canAct || summariesStore.isOneAuthorized)
 }
 
 function markingTextShown() {
-  return layoutStore.showMarkingText && (!apiStore.isForReviewOrStitch || summariesStore.isOneAuthorized)
+  return layoutStore.showMarkingText && (itemsStore.canAct || summariesStore.isOneAuthorized)
 }
 
 function expansionClass() {
@@ -75,7 +76,7 @@ function expansionClass() {
       <own-summary-text class="content" :editorId="'marking'"></own-summary-text>
     </div>
 
-    <div v-if="apiStore.isForReviewOrStitch && !summariesStore.isOneAuthorized">
+    <div v-if="!itemsStore.canAct && !summariesStore.isOneAuthorized">
       {{ $t('allEssayNoCorrectionAuthorized') }}
     </div>
     <sum-of-points class='sumOfPoints' :corrector_key="apiStore.correctorKey"></sum-of-points>

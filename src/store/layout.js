@@ -355,7 +355,7 @@ export const useLayoutStore = defineStore('layout', {
         this.showLeftCorrector();
       } else if (this.rightCorrectorKey == corrector_key) {
         this.showRightCorrector();
-      } else if (!apiStore.isForReviewOrStitch) {
+      } else if (apiStore.correctorKey) {
         this.leftCorrectorKey = corrector_key;
         this.showLeftCorrector();
       } else if (correctorsStore.countCorrectors == 1) {

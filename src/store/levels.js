@@ -4,25 +4,27 @@
 import {getStorage} from "@/lib/Storage";
 import {defineStore} from 'pinia';
 import {stores} from "@/store/index";
+import GradeLevel from "@/data/GradeLevel";
 
 const storage = getStorage('levels');
+const startState = {
+  // saved in storage
+  levels: {},             // list of level objects
+};
 
 export const useLevelsStore = defineStore('levels', {
   state: () => {
-    return {
-      // saved in storage
-      keys: [],               // list of string keys
-      levels: [],             // list of level objects
-    }
+    return startState;
   },
 
   /**
    * Getter functions (with params) start with 'get', simple state queries not
    */
   getters: {
-    hasLevels: state => state.levels.length > 0,
+    hasLevels: state => Object.keys(state.levels).length > 0,
+    sortedLevels: state => Object.values(state.levels).toSorted(GradeLevel.order),
 
-    getLevel: state => {
+    getLevel(state) {
 
       /**
        * Get a level by its key
@@ -31,12 +33,12 @@ export const useLevelsStore = defineStore('levels', {
        * @returns {object|null}
        */
       const fn = function (key) {
-        return state.levels.find(element => element.key == key);
+        return state.levels[key];
       }
       return fn;
     },
 
-    getLevelForPoints: state => {
+    getLevelForPoints(state) {
 
       /**
        * Get the level for reached points
@@ -49,16 +51,14 @@ export const useLevelsStore = defineStore('levels', {
           return null;
         }
 
-        let level = null;
-        let last_points = 0;
-        for (let i = 0; i < state.levels.length; i++) {
-          if (state.levels[i].min_points <= points
-            && state.levels[i].min_points >= last_points) {
-            level = state.levels[i];
-            last_points = level.points;
+        let found = null;
+        for (const level of state.sortedLevels) {
+          if (level.min_points > points) {
+            break;
           }
+          found = level;
         }
-        return level;
+        return found;
       }
       return fn;
     },
@@ -68,50 +68,43 @@ export const useLevelsStore = defineStore('levels', {
 
     async clearStorage() {
       try {
+        this.$reset();
         await storage.clear();
       }
       catch (err) {
         console.log(err);
       }
-      this.$reset();
     },
 
     async loadFromStorage() {
       try {
         this.$reset();
 
-        const keys = await storage.getItem('levelKeys');
-        if (keys) {
-          this.keys = JSON.parse(keys);
+        const keys = await storage.getItem('keys') ?? [];
+        for (const key of keys) {
+          this.levels[key] = new GradeLevel(await storage.getItem(key));
         }
-
-        for (const key of this.keys) {
-          const level = await storage.getItem(key);
-          this.levels.push(level);
-        }
-
       }
       catch (err) {
         console.log(err);
       }
     },
 
-    async loadFromBackend(data) {
+    async loadFromBackend(data = []) {
       try {
         await storage.clear();
         this.$reset();
 
-        for (const level of data) {
-          this.levels.push(level);
-          this.keys.push(level.key);
-          await storage.setItem(level.key, level);
+        for (const item of data) {
+          const level = new GradeLevel(item);
+          this.levels[level.getKey()] = level;
+          await storage.setItem(level.getKey(), level.getData());
         }
-
-        await storage.setItem('levelKeys', JSON.stringify(this.keys));
+        await storage.setItem('keys', Object.keys(this.levels));
       }
       catch (err) {
         console.log(err);
       }
-    }
+    },
   }
 });

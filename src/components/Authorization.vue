@@ -90,7 +90,7 @@ function editSummary() {
 <template>
   <div id="app-authorization-wrapper">
 
-    <v-btn class="app-header-item" v-show="!summariesStore.isOwnDisabled" :disabled="apiStore.isLoading || !itemsStore.authorizationAllowed"
+    <v-btn class="app-header-item" v-show="!summariesStore.isOwnDisabled" :disabled="apiStore.isLoading || !itemsStore.canAuthorize"
            @click="stores.layout().showAuthorization = true;">
       <v-icon left icon="mdi-file-certificate-outline"></v-icon>
       <span>{{ $t('authorizationButton') }}</span>
@@ -123,7 +123,6 @@ function editSummary() {
           </div>
 
           <div class="appRow">
-            <own-summary-includes v-if="settingsStore.inclusionsPossible"></own-summary-includes>
             <v-btn density="compact" v-if="settingsStore.inclusionsChangeable" variant="text" :disabled="summariesStore.isOwnDisabled"
                    @click="layoutStore.showIncludesPopup = true">
               <v-icon left icon="mdi-pencil"></v-icon>

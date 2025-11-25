@@ -45,8 +45,7 @@ async function returnToBackend() {
     <v-spacer></v-spacer>
     <items/>
     <help></help>
-    <authorization v-if="!apiStore.isReview && !apiStore.isStitchDecision"/>
-    <stitch-decision v-if="apiStore.isStitchDecision"/>
+    <authorization v-if="stores.items().canAuthorize"/>
     <v-btn class="app-header-item" @click="returnToBackend()">
       <v-icon left icon="mdi-logout-variant"></v-icon>
       <span>{{ $t('appBarReturn') }}</span>

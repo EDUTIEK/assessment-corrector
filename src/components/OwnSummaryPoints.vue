@@ -29,7 +29,7 @@ const layoutStore = stores.layout();
           <strong>{{ $t('OwnSummaryPointsGrade') }}</strong> {{ summariesStore.currentGradeTitle }}
         </v-col>
         <v-col cols="2">
-          <v-btn density="compact" variant="text" v-show="!summariesStore.isOwnDisabled" :disabled="!itemsStore.authorizationAllowed"
+          <v-btn density="compact" variant="text" v-show="!summariesStore.isOwnDisabled" :disabled="!itemsStore.canAuthorize"
                  @click="stores.layout().showAuthorization = true;">
             <v-icon left icon="mdi-file-certificate-outline"></v-icon>
             <span>{{ $t('allAuthorize') }}</span>
@@ -38,7 +38,6 @@ const layoutStore = stores.layout();
       </v-row>
       <v-row dense>
         <v-col cols="10">
-          <own-summary-includes v-if="settingsStore.inclusionsPossible"></own-summary-includes>
         </v-col>
         <v-col cols="2">
           <v-btn density="compact" v-if="settingsStore.inclusionsChangeable" variant="text" :disabled="summariesStore.isOwnDisabled"

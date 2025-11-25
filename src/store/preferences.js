@@ -10,43 +10,19 @@ import Summary from '@/data/Summary';
 import Change from '@/data/Change';
 
 const storage = getStorage('preferences');
+const startState = {
+  // saved in storage
+  essay_page_zoom: 0.25,                              // zoom of a pdf page display
+  essay_text_zoom: 1,                                 // zoom of an essay text display
+  summary_text_zoom: 1,                               // zoom in the editor of the correction summary
+}
 
 export const usePreferencesStore = defineStore('preferences', {
   state: () => {
-    return {
-      // saved in storage
-      essay_page_zoom: 0.25,                              // zoom of a pdf page display
-      essay_text_zoom: 1,                                 // zoom of an essay text display
-      summary_text_zoom: 1,                               // zoom in the editor of the correction summary
-      include_comments: Summary.INCLUDE_INFO,             // include comments in the authorized correction
-      include_comment_ratings: Summary.INCLUDE_INFO,      // include comment ratings in the authorized correction
-      include_comment_points: Summary.INCLUDE_INFO,       // include comment points in the authorized correction
-      include_criteria_points: Summary.INCLUDE_INFO,      // include criteria points in the authorized correction
-    }
+    return startState;
   },
 
   getters: {
-
-    allData: state => {
-      return {
-        essay_page_zoom: state.essay_page_zoom,
-        essay_text_zoom: state.essay_text_zoom,
-        summary_text_zoom: state.summary_text_zoom,
-        include_comments: state.include_comments,
-        include_comment_ratings: state.include_comment_ratings,
-        include_comment_points: state.include_comment_points,
-        include_criteria_points: state.include_criteria_points,
-      }
-    },
-
-    summaryInclusions: state => {
-      return {
-        include_comments: state.include_comments,
-        include_comment_ratings: state.include_comment_ratings,
-        include_comment_points: state.include_comment_points,
-        include_criteria_points: state.include_criteria_points,
-      }
-    }
   },
 
   actions: {
@@ -75,7 +51,7 @@ export const usePreferencesStore = defineStore('preferences', {
 
     async saveToStorage() {
       try {
-        await storage.setItem('preferences', this.allData);
+        await storage.setItem('preferences', Object.assign({}, this.$state));
       }
       catch (err) {
         console.log(err);
@@ -95,7 +71,7 @@ export const usePreferencesStore = defineStore('preferences', {
     },
 
     /**
-     * Update the preferences in the sorage and mark them as changed
+     * Update the preferences in the storage and mark them as changed
      */
     async update() {
       const changesStore = stores.changes();
@@ -124,19 +100,10 @@ export const usePreferencesStore = defineStore('preferences', {
       const changes = [];
       for (const change of changesStore.getChangesFor(Change.TYPE_PREFERENCES, sendingTime)) {
         // preferences exist only once, will be the same for all changes
-        changes.push(apiStore.getChangeDataToSend(change, this.allData));
+        changes.push(apiStore.getChangeDataToSend(change, Object.assign({}, this.$state)));
+        break;
       }
-      ;
       return changes;
-    },
-
-
-    setSummaryInclusions(data) {
-      this.include_comments = data.include_comments;
-      this.include_comment_ratings = data.include_comment_ratings;
-      this.include_comment_points = data.include_comment_points;
-      this.include_criteria_points = data.include_criteria_points;
-      this.update();
     },
 
     zoomEssayPageIn() {
@@ -168,6 +135,5 @@ export const usePreferencesStore = defineStore('preferences', {
       this.summary_text_zoom = this.summary_text_zoom * 0.9;
       this.update();
     }
-
   },
 });

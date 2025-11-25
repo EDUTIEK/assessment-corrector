@@ -192,8 +192,6 @@ export const useApiStore = defineStore('api', {
       this.dataToken = localStorage.getItem('xlasCorrectorDataToken');
       this.fileToken = localStorage.getItem('xlasCorrectorFileToken');
       this.timeOffset = Math.floor(localStorage.getItem('xlasCorrectorTimeOffset') ?? 0);
-      this.isReview = !!localStorage.getItem('xlasCorrectorIsReview'); // boolean is stored as '1' or ''
-      this.isStitchDecision = !!localStorage.getItem('xlasCorrectorIsStitchDecision');
 
       // check if context given by cookies differs and force a reload if neccessary
       if (Cookies.get('xlasUserId') != undefined && Cookies.get('xlasUserId') !== this.userId) {
@@ -304,11 +302,11 @@ export const useApiStore = defineStore('api', {
      */
     finishInitialisation() {
 
-      if (this.isForReviewOrStitch) {
+      if (stores.summaries().isOneAuthorized) {
         stores.comments().setShowOtherCorrectors(true);
       }
 
-      if (this.isStitchDecision) {
+      if (stores.items().currentItem?.position === Item.POSITION_STITCH) {
         let i = 0;
         for (const corrector of stores.correctors().correctors) {
           stores.layout().selectCorrector(corrector.corrector_key);
@@ -434,8 +432,8 @@ export const useApiStore = defineStore('api', {
       
       await stores.layout().clearStorage();
       await stores.items().loadFromBackend(response.data['Task']['Items']);
-      await stores.levels().loadFromBackend(response.data.levels);
-      await stores.preferences().loadFromBackend(response.data.preferences);
+      await stores.levels().loadFromBackend(response.data['Assessment']['GradeLevels']);
+      await stores.preferences().loadFromBackend(response.data['Task']['Preferences']);
       await stores.resources().loadFromBackend(response.data.resources);
       await stores.settings().loadFromBackend(response.data.settings);
       await stores.tasks().loadFromBackend(response.data.tasks);
@@ -561,27 +559,6 @@ export const useApiStore = defineStore('api', {
 
       return true;
     },
-
-
-    /**
-     * Save the stitch descision to the backend
-     */
-    async saveStitchDecisionToBackend(data) {
-      let response = {};
-      try {
-        response = await axios.put('/stitch/' + this.itemKey,
-          data,
-          this.getRequestConfig(this.dataToken));
-        this.setTimeOffset(response);
-        this.refreshToken(response);
-        return true;
-      }
-      catch (error) {
-        console.error(error);
-        return false;
-      }
-    },
-
 
     /**
      * Set the offset between server time and client time

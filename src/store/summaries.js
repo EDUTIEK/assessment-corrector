@@ -49,6 +49,12 @@ export const useSummariesStore = defineStore('summaries', {
     isOwnDisabled: state => state.editSummary.corrector_key == '' || state.editSummary.is_authorized,
 
     /**
+     * todo: Is the summary of the current corrector and item pre-graded
+     * @returns {bool}
+     */
+    isOwnPregraded: state => false,
+
+    /**
      * Is the summary of the current corrector and item authorized
      * @returns {bool}
      */
@@ -112,12 +118,7 @@ export const useSummariesStore = defineStore('summaries', {
      */
     currentInclusionSettings: state => {
       const settingsStore = stores.settings();
-      const preferencesStore = stores.preferences();
-
-      if (settingsStore.fixed_inclusions) {
-        return settingsStore.summaryInclusions
-      }
-      return state.editSummary.getInclusionSettings(preferencesStore.summaryInclusions);
+      return settingsStore.summaryInclusions;
     },
 
     getAuthorizationForCorrector: state => {
@@ -405,12 +406,6 @@ export const useSummariesStore = defineStore('summaries', {
       // no need to wait because updateContent is called by interval
       // use post-increment for test-and set
       if (lockUpdate++ && !force) {
-        return;
-      }
-
-      // don't accept changes after correction end
-      const taskStore = stores.tasks();
-      if (taskStore.correctionEndReached) {
         return;
       }
 

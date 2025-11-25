@@ -50,6 +50,12 @@ export default class Task {
     instructions = null;
 
     /**
+     * Html solution of the task
+     * @type {string}
+     */
+    solution = null;
+
+    /**
      * Calculated key (needed as item key in v-autocomple)
      * @type {string}
      */
@@ -75,6 +81,9 @@ export default class Task {
         }
         if (data.instructions !== undefined && data.instructions !== null) {
             this.instructions = data.instructions.toString();
+        }
+        if (data.solution !== undefined && data.solution !== null) {
+            this.solution = data.solution.toString();
         }
 
         this.key = Task.buildKey(this.task_id);
