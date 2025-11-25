@@ -29,12 +29,24 @@ export const useCorrectionsStore = defineStore('corrections', {
    */
   getters: {
 
+    allCorrections(state) {
+      return Object.values(state.corrections)
+    },
+
     countCorrections(state) {
-      return Object.keys(state.corrections).length
+      return state.allCorrections.length
     },
 
     correctionKeys(state) {
       return Object.keys(state.corrections)
+    },
+
+    /**
+     * Get the correction of the current user for the current item
+     * @returns {Correction|null}
+     */
+    ownCorrection(state) {
+      return state.allCorrections.find(element => element.key != state.ownKey) ?? null
     },
 
     /**
@@ -43,8 +55,7 @@ export const useCorrectionsStore = defineStore('corrections', {
      * @returns {Correction[]}
      */
     otherCorrections(state) {
-      const apiStore = stores.api();
-      return Object.values(state.corrections)
+      return state.allCorrections
         .filter(element => element.key != state.ownKey)
         .sort(Correction.order);
     },

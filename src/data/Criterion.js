@@ -1,7 +1,17 @@
 /**
  * Rating Criterion
  */
-class Criterion {
+export default class Criterion {
+
+  static order(criterion1, criterion2) {
+    return criterion1.title < criterion2.title ? -1
+        : criterion1.title > criterion2.title ? 1
+            : 0
+  }
+
+  static buildKey(id) {
+    return 'C' + id;
+  }
 
   /**
    * Unique identifier of the criterion
@@ -10,10 +20,23 @@ class Criterion {
   key = '';
 
   /**
-   * Key of the correction to which this criterion belongs (empty for fixed criteria)
-   * @type {string}
+   * Database ID of the criterion
+   * @type {integer}
    */
-  correction_key = '';
+  id = null;
+
+  /**
+   * Task to which this criterion belongs
+   * @type {integer}
+   */
+  task_id = null;
+
+  /**
+   * Corrector to which this criterion belongs
+   * @type {integer}
+   */
+  corrector_id = null;
+
 
   /**
    * Short title of the criterion which is displayed in one line
@@ -45,12 +68,19 @@ class Criterion {
    * @param {object} data
    */
   constructor(data = {}) {
-    if (data.key !== undefined && data.key !== null) {
-      this.key = data.key.toString()
+
+    if (data.id !== undefined && data.id !== null) {
+      this.id = parseInt(data.id);
     }
-    if (data.correction_key !== undefined && data.correction_key !== null) {
-      this.correction_key = data.correction_key.toString()
+
+    if (data.task_id !== undefined && data.task_id !== null) {
+      this.task_id = parseInt(data.task_id);
     }
+
+    if (data.corrector_id !== undefined && data.corrector_id !== null) {
+      this.corrector_id = parseInt(data.corrector_id);
+    }
+
     if (data.title !== undefined && data.title !== null) {
       this.title = data.title.toString()
     }
@@ -63,21 +93,22 @@ class Criterion {
     if (data.is_general !== undefined && data.is_general !== null) {
       this.is_general = !!data.is_general;
     }
+
+    this.key = Criterion.buildKey(this.id);
+  }
+
+  /**
+   * @return {string}
+   */
+  getKey() {
+    return this.key;
   }
 
   /**
    * Get a plain data object from the public properties
    */
   getData() {
-    return {
-      key: this.key,
-      correction_key: this.correction_key,
-      title: this.title,
-      description: this.description,
-      points: this.points,
-      is_general: this.is_general
-    }
+    return Object.assign({}, this)
   }
 }
 
-export default Criterion;

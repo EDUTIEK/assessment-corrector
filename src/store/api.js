@@ -476,7 +476,7 @@ export const useApiStore = defineStore('api', {
       // this avoids a race condition on quick navigation between writers
       await stores.changes().clearStorage();
       await stores.corrections().loadFromBackend(response.data.data['Task']['Corrections']);
-      await stores.criteria().loadFromBackend(response.data.criteria);
+      await stores.criteria().loadFromBackend(response.data.data['Task']['Criteria']);
       await stores.comments().loadFromBackend(response.data.comments);
       await stores.essay().loadFromBackend(response.data.essay);
       await stores.pages().loadFromBackend(response.data.pages);

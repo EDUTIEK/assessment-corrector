@@ -5,111 +5,70 @@ import {getStorage} from "@/lib/Storage";
 import {defineStore} from 'pinia';
 import {stores} from "@/store/index";
 import Criterion from '@/data/Criterion'
+import Correction from "@/data/Correction";
 
 const storage = getStorage('criteria');
+const startState = {
+  criteria: {},             // list of criterion objects
+}
 
 export const useCriteriaStore = defineStore('criteria', {
   state: () => {
-    return {
-      // saved in storage
-      keys: [],                 // list of string keys
-      criteria: [],             // list of criterion objects
-    }
+    return startState;
   },
 
   /**
    * Getter functions (with params) start with 'get', simple state queries not
    */
   getters: {
-    hasCommentCriteria: state => {
-      const correctionsStore = stores.corrections();
-      const correctionKeys = correctionsStore.correctionKeys;
-      return !!state.criteria.find(criterion => !criterion.is_general && (criterion.correction_key == '' || correctionKeys.includes(
-          criterion.correction_key)));
+    allCriteria(state) {
+      return Object.values(state.criteria)
     },
 
-    hasOwnCriteria: state => {
-      const apiStore = stores.api();
-      return !!state.criteria.find(criterion => criterion.correction_key == '' || criterion.correction_key == stores.corrections().ownKey);
-    },
-
-    hasOwnGeneralCriteria: state => {
-      const apiStore = stores.api();
-      return !!state.criteria.find(criterion => criterion.is_general && (criterion.correction_key == '' || criterion.correction_key == stores.corrections().ownKey));
-    },
-
-    hasOwnCommentCriteria: state => {
-      const apiStore = stores.api();
-      return !!state.criteria.find(criterion => !criterion.is_general && (criterion.correction_key == '' || criterion.correction_key == stores.corrections().ownKey));
-    },
-
-    ownCriteria: state => {
-      const apiStore = stores.api();
-      return state.criteria.filter((criterion => criterion.correction_key == '' || criterion.correction_key == stores.corrections().ownKey));
-    },
-
-    getCriterion: state => {
-
-      /**
-       * Get a criterion by its key
-       *
-       * @param {string }key
-       * @returns {Criterion|null}
-       */
-      const fn = function (key) {
-        return state.criteria.find(element => element.key == key)
+    ownCriteria(state) {
+      const correction = stores.corrections().ownCorrection;
+      if (correction) {
+        return state.allCriteria.filter(criterion => criterion.task_id === correction.task_id
+            && (criterion.corrector_id === null || criterion.corrector_id === correction.corrector_id))
       }
-      return fn;
+      return [];
     },
 
-    getCorrectionHasCriteria: state => {
+    hasCommentCriteria(state) {
+      return !!state.allCriteria.find(criterion => !criterion.is_general);
+    },
+
+    hasOwnCriteria(state) {
+      return !!state.ownCriteria;
+    },
+
+    hasOwnGeneralCriteria(state) {
+      return !!state.ownCriteria.find(criterion => criterion.is_general);
+    },
+
+    hasOwnCommentCriteria(state) {
+      return !!state.ownCriteria.find(criterion => !criterion.is_general);
+    },
+
+    getCorrectionCriteria(state) {
 
       /**
-       * Get if a correction has criteria at all
+       * Get all criteria of a correction
        *
        * @param {string} correction_key
        * @returns {boolean}
        */
       const fn = function (correction_key) {
-        return !!state.criteria.find(criterion =>
-            (criterion.correction_key == '' || criterion.correction_key == correction_key));
+        const task_id = Correction.extractTaskId(correction_key);
+        const corrector_id = Correction.extractCorrectorId(correction_key);
+
+        return state.allCriteria.filter(criterion => criterion.task_id === task_id
+            && (criterion.corrector_id === null || criterion.corrector_id === corrector_id))
       };
       return fn;
     },
 
-
-    getCorrectionHasGeneralCriteria: state => {
-
-      /**
-       * Get if a correction has general criteria defined
-       *
-       * @param {string} correction_key
-       * @returns {boolean}
-       */
-      const fn = function (correction_key) {
-        return !!state.criteria.find(criterion => criterion.is_general &&
-            (criterion.correction_key == '' || criterion.correction_key == correction_key));
-      };
-      return fn;
-    },
-
-    getCorrectionHasCommentCriteria: state => {
-
-      /**
-       * Get if a correction has comments related criteria defined
-       *
-       * @param {string} correction_key
-       * @returns {boolean}
-       */
-      const fn = function (correction_key) {
-        return !!state.criteria.find(criterion => !criterion.is_general &&
-            (criterion.correction_key == '' || criterion.correction_key == correction_key));
-      };
-      return fn;
-    },
-
-
-    getCorrectionGeneralCriteria: state => {
+    getCorrectionGeneralCriteria(state) {
 
       /**
        * Get the general criteria of a correction
@@ -118,12 +77,10 @@ export const useCriteriaStore = defineStore('criteria', {
        * @returns {Criterion[]}
        */
       const fn = function (correction_key) {
-        return state.criteria.filter(criterion => criterion.is_general &&
-            (criterion.correction_key == '' || criterion.correction_key == correction_key));
+        return state.getCorrectionCriteria(correction_key).filter(criterion => criterion.is_general)
       };
       return fn;
     },
-
 
     getCorrectionCommentCriteria: state => {
 
@@ -134,62 +91,97 @@ export const useCriteriaStore = defineStore('criteria', {
        * @returns {Criterion[]}
        */
       const fn = function (correction_key) {
-        return state.criteria.filter(criterion => !criterion.is_general &&
-            (criterion.correction_key == '' || criterion.correction_key == correction_key));
+        return state.getCorrectionCriteria(correction_key).filter(criterion => !criterion.is_general)
       };
       return fn;
     },
+
+
+    getCorrectionHasCriteria(state) {
+
+      /**
+       * Get if a correction has criteria at all
+       *
+       * @param {string} correction_key
+       * @returns {boolean}
+       */
+      const fn = function (correction_key) {
+        return !!state.getCorrectionCriteria(correction_key)
+      };
+      return fn;
+    },
+
+    getCorrectionHasGeneralCriteria(state) {
+
+      /**
+       * Get if a correction has general criteria defined
+       *
+       * @param {string} correction_key
+       * @returns {boolean}
+       */
+      const fn = function (correction_key) {
+        return !!state.getCorrectionGeneralCriteria(correction_key)
+      };
+      return fn;
+    },
+
+    getCorrectionHasCommentCriteria(state) {
+
+      /**
+       * Get if a correction has comments related criteria defined
+       *
+       * @param {string} correction_key
+       * @returns {boolean}
+       */
+      const fn = function (correction_key) {
+        return !!state.getCorrectionCommentCriteria(correction_key)
+      };
+      return fn;
+    },
+
   },
 
   actions: {
 
     async clearStorage() {
       try {
+        this.$reset();
         await storage.clear();
       }
       catch (err) {
         console.log(err);
       }
-      this.$reset();
     },
 
     async loadFromStorage() {
       try {
         this.$reset();
 
-        const keys = await storage.getItem('criterionKeys');
-        if (keys) {
-          this.keys = JSON.parse(keys);
+        const keys = await storage.getItem('keys') ?? [];
+        for (const key of keys) {
+          this.criteria[key] = new Criterion(await storage.getItem(key));
         }
-
-        for (const key of this.keys) {
-          const criterion = await storage.getItem(key);
-          this.criteria.push(criterion);
-        }
-
       }
       catch (err) {
         console.log(err);
       }
     },
 
-    async loadFromBackend(data) {
+    async loadFromBackend(data = []) {
       try {
         await storage.clear();
         this.$reset();
 
-        for (const criterion_data of data) {
-          const criterion = new Criterion(criterion_data);
-          this.criteria.push(criterion);
-          this.keys.push(criterion.key);
-          await storage.setItem(criterion.key, criterion.getData());
+        for (const item of data) {
+          const criterion = new Criterion(item);
+          this.criteria[criterion.getKey()] = criterion;
+          await storage.setItem(criterion.getKey(), criterion.getData());
         }
-
-        await storage.setItem('criterionKeys', JSON.stringify(this.keys));
+        await storage.setItem('keys', Object.keys(this.criteria));
       }
       catch (err) {
         console.log(err);
       }
-    }
+    },
   }
 });

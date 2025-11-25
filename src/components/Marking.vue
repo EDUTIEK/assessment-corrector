@@ -23,7 +23,7 @@ function markingGeneralCriteriaShown() {
 }
 
 function markingCommentCriteriaShown() {
-  return layoutStore.showMarkingCommentCriteria && criteriaStore.hasCommentCriteria && (!itemsStore.canAct || summariesStore.isOneAuthorized)
+  return layoutStore.showMarkingCommentCriteria && criteriaStore.hasCommentCriteria && (itemsStore.canAct || summariesStore.isOneAuthorized)
 }
 
 function markingTextShown() {
