@@ -14,6 +14,14 @@ export default class Criterion {
   }
 
   /**
+   * @param {string} key
+   * @returns {number|null}
+   */
+  static extractCriterionId(key) {
+    return parseInt(key.substring(1));
+  }
+
+  /**
    * Unique identifier of the criterion
    * @type {string}
    */

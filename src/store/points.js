@@ -25,7 +25,7 @@ export const usePointsStore = defineStore('points', {
    */
   getters: {
 
-    getCommentHasPoints: state => {
+    getCommentHasPoints(state) {
 
       /**
        * Check if a comment has points
@@ -41,7 +41,7 @@ export const usePointsStore = defineStore('points', {
       return fn;
     },
 
-    getCommentHasPointsForCriterion: state => {
+    getCommentHasPointsForCriterion(state) {
 
       /**
        * Check if points for a comment and criterion exist
@@ -59,7 +59,7 @@ export const usePointsStore = defineStore('points', {
       return fn;
     },
     
-    getSumOfPointsForCorrection: state => {
+    getSumOfPointsForCorrection(state) {
 
       /**
        * Get the sum of points given by a correction
@@ -82,7 +82,7 @@ export const usePointsStore = defineStore('points', {
       return fn;
     },
     
-    getSumOfPointsForComment: state => {
+    getSumOfPointsForComment(state) {
 
       /**
        * Get the sum of points given to criteria for a comment
@@ -101,7 +101,7 @@ export const usePointsStore = defineStore('points', {
     },
 
 
-    getSumOfPointsForCriterion: state => {
+    getSumOfPointsForCriterion(state) {
 
       /**
        * Get the sum of points given to a criterion by a correction
@@ -120,7 +120,7 @@ export const usePointsStore = defineStore('points', {
       return fn;
     },
 
-    getPointsOfCriterionExceeded: state => {
+    getPointsOfCriterionExceeded(state) {
 
       /**
        * Get if the sum of points given to a criterion by a correction exceeds the maximum points of this criterion
@@ -139,7 +139,7 @@ export const usePointsStore = defineStore('points', {
       return fn;
     },
 
-    getObjectsForCorrection: state => {
+    getObjectsForCorrection(state) {
 
       /**
        * Get the points for a correction
@@ -154,7 +154,7 @@ export const usePointsStore = defineStore('points', {
     },
 
     
-    getObjectByData: state => {
+    getObjectByData(state) {
 
       /**
        * Get a points object by comment and/or criteriony key
@@ -206,14 +206,14 @@ export const usePointsStore = defineStore('points', {
      * @public
      */
     async createPoints(comment_key, criterion_key, points_value) {
-      const apiStore = stores.api();
+      const correctionsStore = stores.corrections();
       const pointsObject = new Points({
-        item_key: apiStore.itemKey,
-        correction_key: stores.corrections().ownKey,
-        comment_key: comment_key,
-        criterion_key: criterion_key,
         points: points_value
       });
+
+      // this also sets the item key and the ids
+      pointsObject.setKeys(correctionsStore.ownKey, comment_key, criterion_key);
+
       this.keys.push(pointsObject.key);
       this.points.push(pointsObject);
 

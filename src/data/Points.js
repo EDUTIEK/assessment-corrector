@@ -1,7 +1,11 @@
+import Item from "@/data/Item";
+import Correction from "@/data/Correction";
+import Criterion from "@/data/Criterion";
+
 /**
  * Partial Points given for croteria or comments
  */
-class Points {
+export default class Points {
 
   /**
    * Unique identifier of the points
@@ -36,6 +40,30 @@ class Points {
   criterion_key = '';
 
   /**
+   * Task in which the points are set
+   * @type {integer}
+   */
+  task_id = null;
+
+  /**
+   * Writer for which the points are set
+   * @type {integer}
+   */
+  writer_id = null;
+
+  /**
+   * Corrector that sets the points
+   * @type {integer}
+   */
+  corrector_id = null;
+
+  /**
+   * Criterion for which the pounts are set
+   * @type {integer}
+   */
+  criterion_id = null;
+
+  /**
    * Points given
    * @type {float}
    */
@@ -53,21 +81,50 @@ class Points {
       // get a temporary random key
       this.key = 'temp' + Math.random().toString();
     }
-    if (data.item_key !== undefined && data.item_key !== null) {
-      this.item_key = data.item_key.toString()
-    }
-    if (data.correction_key !== undefined && data.correction_key !== null) {
-      this.correction_key = data.correction_key.toString()
-    }
     if (data.comment_key !== undefined && data.comment_key !== null) {
-      this.comment_key = data.comment_key.toString()
+      this.comment_key = data.comment_key.toString();
     }
-    if (data.criterion_key !== undefined && data.criterion_key !== null) {
-      this.criterion_key = data.criterion_key.toString()
+
+    if (data.task_id !== undefined && data.task_id !== null) {
+      this.task_id = parseInt(data.task_id);
+    }
+    if (data.writer_id !== undefined && data.writer_id !== null) {
+      this.writer_id = parseInt(data.writer_id);
+    }
+    if (data.corrector_id !== undefined && data.corrector_id !== null) {
+      this.corrector_id = parseInt(data.corrector_id);
+    }
+    if (data.criterion_id !== undefined && data.criterion_id !== null) {
+      this.criterion_id = parseInt(data.criterion_id);
     }
     if (data.points !== undefined && data.points !== null) {
       this.points = parseFloat(data.points);
     }
+
+    if (!this.item_key && this.task_id && this.writer_id) {
+      this.item_key = Item.buildKey(this.task_id, this.writer_id)
+    }
+    if (!this.correction_key && this.task_id && this.corrector_id && this.writer_id) {
+      this.correction_key = Correction.buildKey(this.task_id, this.corrector_id, this.writer_id)
+    }
+    if (!this.criterion_key && this.criterion_id) {
+      this.criterion_key = Criterion.buildKey(this.criterion_id)
+    }
+  }
+
+  /**
+   * Set the keys and change the ids accordingly
+   * @param {string} correction_key
+   */
+  setKeys(correction_key, comment_key, criterion_key) {
+    this.correction_key = correction_key;
+    this.comment_key = comment_key;
+    this.criterion_key = criterion_key;
+    this.task_id = Correction.extractTaskId(this.correction_key);
+    this.writer_id = Correction.extractWriterId(this.correction_key);
+    this.corrector_id = Correction.extractCorrectorId(this.correction_key);
+    this.criterion_id = Criterion.extractCriterionId(this.criterion_key);
+    this.item_key = Item.buildKey(this.task_id, this.writer_id)
   }
 
   /**
@@ -82,15 +139,7 @@ class Points {
    * Get a plain data object from the public properties
    */
   getData() {
-    return {
-      key: this.key,
-      item_key: this.item_key,
-      correction_key: this.correction_key,
-      comment_key: this.comment_key,
-      criterion_key: this.criterion_key,
-      points: this.points
-    }
+    return Object.assign({}, this);
   }
 }
 
-export default Points;

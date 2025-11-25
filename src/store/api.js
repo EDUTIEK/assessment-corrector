@@ -475,13 +475,15 @@ export const useApiStore = defineStore('api', {
       // dismiss open changes from other items
       // this avoids a race condition on quick navigation between writers
       await stores.changes().clearStorage();
+
       await stores.corrections().loadFromBackend(response.data.data['Task']['Corrections']);
       await stores.criteria().loadFromBackend(response.data.data['Task']['Criteria']);
       await stores.comments().loadFromBackend(response.data['Task']['Comments']);
+      await stores.points().loadFromBackend(response.data['Task']['Points']);
+      await stores.summaries().loadFromBackend(response.data.summaries);
+
       await stores.essay().loadFromBackend(response.data.essay);
       await stores.pages().loadFromBackend(response.data.pages);
-      await stores.points().loadFromBackend(response.data.points);
-      await stores.summaries().loadFromBackend(response.data.summaries);
 
       stores.comments().setMarkerChange();
       stores.items().updateCurrentKeys();

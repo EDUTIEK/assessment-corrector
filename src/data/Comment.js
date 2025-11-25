@@ -31,6 +31,12 @@ export default class Comment {
     }
   }
 
+  static buildKey(id) {
+    if (id) {
+      return 'C' + id;
+    }
+  }
+
   /**
    * Unique identifier of the comment
    * Will be auto-generated for a new comment with random alpanumeric key (starting with 'temp')
@@ -145,14 +151,8 @@ export default class Comment {
       // get a temporary random key
       this.key = 'temp' + Math.random().toString();
     }
-    if (data.item_key !== undefined && data.item_key !== null) {
-      this.item_key = data.item_key.toString()
-    }
-    if (data.correction_key !== undefined && data.correction_key !== null) {
-      this.correction_key = data.correction_key.toString()
-    }
-    if (data.start_position !== undefined && data.start_position !== null) {
-      this.start_position = parseInt(data.start_position);
+    if (data.task_id !== undefined && data.task_id !== null) {
+      this.task_id = parseInt(data.task_id);
     }
     if (data.task_id !== undefined && data.task_id !== null) {
       this.task_id = parseInt(data.task_id);
@@ -162,6 +162,9 @@ export default class Comment {
     }
     if (data.corrector_id !== undefined && data.corrector_id !== null) {
       this.corrector_id = parseInt(data.corrector_id);
+    }
+    if (data.start_position !== undefined && data.start_position !== null) {
+      this.start_position = parseInt(data.start_position);
     }
     if (data.end_position !== undefined && data.end_position !== null) {
       this.end_position = parseInt(data.end_position);
@@ -182,6 +185,7 @@ export default class Comment {
         this.addMarkData(mark_data);
       }
     }
+
     if (!this.item_key && this.task_id && this.writer_id) {
       this.item_key = Item.buildKey(this.task_id, this.writer_id)
     }

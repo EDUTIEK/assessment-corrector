@@ -253,6 +253,7 @@ export const useCommentsStore = defineStore('comments', {
       const correctionsStore = stores.corrections();
       const changesStore = stores.changes();
 
+      // this also sets the item key and the ids
       comment.setCorrectionKey(correctionsStore.ownKey);
 
       // first do state changes (trigger watchers)
