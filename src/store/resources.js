@@ -1,89 +1,66 @@
 /**
  * Resources Store
+ * stores the definition of exam resources (PDFs, media)
  */
 import {getStorage} from "@/lib/Storage";
 import {defineStore} from 'pinia';
-import {stores} from "@/store/index";
-import axios from 'axios'
+import {stores} from "@/store";
+import axios from 'axios';
+import Resource from "@/data/Resource";
 
 const storage = getStorage('resources');
+const startState = {
+  resources: {},
+
+  /** @private  key of the active resource, may be outdated if the active task changes */
+  activeKey: ''
+};
 
 export const useResourcesStore = defineStore('resources', {
   state: () => {
-    return {
-      // saved in storage
-      keys: [],               // list of string keys
-      resources: [],          // list of resource objects
-      activeKey: ''           // key of the active resource
-    }
+    return startState;
   },
 
-  /**
-   * Getter functions (with params) start with 'get', simple state queries not
-   */
   getters: {
-    hasResources: state => state.resources.length > 0,
 
-    hasInstruction: state => {
-      const resource = state.resources.find(element => element.type == 'instruct');
-      return resource ? true : false;
+    currentResources(state) {
+      const taskStore = stores.tasks();
+      return Object.values(state.resources).filter(element =>
+          element.task_id === taskStore.currentTask?.task_id || element.task_id === null)
+          .sort(Resource.order);
     },
 
-    hasSolution: state => {
-      const resource = state.resources.find(element => element.type == 'solution');
-      return resource ? true : false;
+    hasInstruction(state) {
+      return !! state.currentResources.find(element => element.type === Resource.TYPE_INSTRUCTION);
     },
 
-
-    instruction: state => {
-      return state.resources.find(element => element.type == 'instruct');
+    hasSolution(state) {
+      return !! state.currentResources.find(element => element.type === Resource.TYPE_SOLUTION);
     },
 
-    solution: state => {
-      return state.resources.find(element => element.type == 'solution');
-
+    instruction(state) {
+      return state.currentResources.find(element => element.type === Resource.TYPE_INSTRUCTION);
     },
 
-    hasFileOrUrlResources: state => {
-      const resource = state.resources.find(element => element.type == 'file' || element.type == 'url');
-      return resource ? true : false;
+    solution(state) {
+      return state.currentResources.find(element => element.type === Resource.TYPE_SOLUTION);
     },
 
-    fileOrUrlResources: state => {
-      return state.resources.filter(element => element.type == 'file' || element.type == 'url');
+   fileOrUrlResources(state) {
+      return state.currentResources.filter(element =>
+          element.type == Resource.TYPE_FILE || element.type === Resource.TYPE_URL);
     },
 
-    activeTitle: state => {
-      const resource = state.resources.find(element => element.key == state.activeKey);
-      return resource ? resource.title : ""
+    activeResource(state) {
+      return state.currentResources.find(element => element.key === state.activeKey);
     },
 
-    getResource: state => {
-
-      /**
-       * Get a resource by its key
-       *
-       * @param {string} key
-       * @returns {object|null}
-       */
-      const fn = function (key) {
-        return state.resources.find(element => element.key == key);
-      }
-      return fn;
+    getResourceIsActive(state) {
+      return (resource) => resource.key === state.activeKey;
     },
 
-    getResourceIsActive: state => {
-
-      /**
-       * Get if a resource is active
-       *
-       * @param {object} resource
-       * @returns {boolean}
-       */
-      const fn = function (resource) {
-        return state.activeKey == resource.key;
-      }
-      return fn;
+    getResourceIsAvailable(state) {
+      return (resource) => !! state.currentResources.find(element => element.key === resource.key);
     }
   },
 
@@ -91,56 +68,50 @@ export const useResourcesStore = defineStore('resources', {
 
     async clearStorage() {
       try {
+        this.$reset();
         await storage.clear();
       }
       catch (err) {
         console.log(err);
       }
-      this.$reset();
     },
 
     async loadFromStorage() {
       try {
         this.$reset();
 
-        const keys = await storage.getItem('resourceKeys');
-        if (keys) {
-          this.keys = JSON.parse(keys);
+        const keys = await storage.getItem('keys') ?? [];
+        for (const key of keys) {
+          this.resources[key] = new Resource(await storage.getItem(key));
         }
         this.activeKey = await storage.getItem('activeKey') ?? '';
-
-        for (const key of this.keys) {
-          const resource = await storage.getItem(key);
-          this.resources.push(resource);
-        }
-
-        this.loadFiles();
+        await this.loadFiles();
       }
       catch (err) {
         console.log(err);
       }
     },
 
-    async loadFromBackend(data) {
+    async loadFromBackend(data = []) {
       const apiStore = stores.api();
 
       try {
         await storage.clear();
         this.$reset();
 
-        for (const resource of data) {
-          if (resource.type != 'url') {
-            resource.url = apiStore.getResourceUrl(resource.key);
+        for (const item of data) {
+          const resource = new Resource(item);
+          if (resource.hasFileToLoad()) {
+            resource.url = apiStore.getResourceUrl(resource);
           }
-          this.resources.push(resource);
-          this.keys.push(resource.key);
-          await storage.setItem(resource.key, resource);
+          this.resources[resource.getKey()] = resource;
+          await storage.setItem(resource.getKey(), resource.getData());
         }
+        await storage.setItem('keys', Object.keys(this.resources));
 
-        await storage.setItem('resourceKeys', JSON.stringify(this.keys));
-        await storage.setItem('activeKey', this.activeKey);
-
+        // proload files in the background (don't wait)
         this.loadFiles();
+        this.selectFirstEmbeddedResource();
       }
       catch (err) {
         console.log(err);
@@ -148,8 +119,22 @@ export const useResourcesStore = defineStore('resources', {
     },
 
     async selectResource(resource) {
-      this.activeKey = resource.key;
-      await storage.setItem('activeKey', this.activeKey);
+
+      if (this.getResourceIsAvailable(resource)) {
+        this.activeKey = resource.key;
+        await storage.setItem('activeKey', this.activeKey);
+      }
+    },
+
+    async selectFirstEmbeddedResource() {
+
+      if (!this.activeResource) {
+        for (const resource of this.currentResources) {
+          if (resource.isEmbeddedSelectable) {
+            await this.selectResource(resource);
+          }
+        }
+      }
     },
 
     /**
@@ -160,21 +145,20 @@ export const useResourcesStore = defineStore('resources', {
      * https://stackoverflow.com/a/50387899
      */
     async loadFiles() {
-      for (const key of this.keys) {
-        let resource = this.getResource(key);
+      for (const resource of Object.values(this.resources)) {
         let response = null;
-        if (resource.type != 'url') {
+        if (resource.hasFileToLoad()) {
           try {
+            console.log('preload ' + resource.title + '...');
             response = await axios(resource.url, { responseType: 'blob', timeout: 60000 });
             // resource.objectUrl = URL.createObjectURL(response.data)
+            console.log('finished. ');
           }
           catch (error) {
             console.error(error);
-            // return false;
           }
         }
       }
     }
-
   }
 });

@@ -34,8 +34,8 @@ function pointsNote() {
 <template>
   <span>
     <strong>{{ $t('sumOfPointsLabel')}}</strong>
-    <span :class="pointsStore.getSumOfPointsForCorrector(props.corrector_key) > settingsStore.max_points ? 'red' : ''">
-      {{ pointsStore.getSumOfPointsForCorrector(props.corrector_key) }} von max. {{ settingsStore.max_points }}</span> {{ pointsNote() }}
+    <span :class="pointsStore.getSumOfPointsForCorrector(props.corrector_key) > settingsStore.Assessment.max_points ? 'red' : ''">
+      {{ pointsStore.getSumOfPointsForCorrector(props.corrector_key) }} von max. {{ settingsStore.Assessment.max_points }}</span> {{ pointsNote() }}
   </span>
 </template>
 

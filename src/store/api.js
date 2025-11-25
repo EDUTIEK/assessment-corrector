@@ -434,8 +434,10 @@ export const useApiStore = defineStore('api', {
       await stores.items().loadFromBackend(response.data['Task']['Items']);
       await stores.levels().loadFromBackend(response.data['Assessment']['GradeLevels']);
       await stores.preferences().loadFromBackend(response.data['Task']['Preferences']);
-      await stores.resources().loadFromBackend(response.data.resources);
-      await stores.settings().loadFromBackend(response.data.settings);
+      await stores.resources().loadFromBackend(response.data['Assessment']['Resources']);
+      await stores.settings().loadFromBackend('Assessment', response.data['Assessment']['Settings']);
+      await stores.settings().loadFromBackend('Task', response.data['Task']['Settings']);
+      await stores.settings().loadFromBackend('EssayTask', response.data['EssayTask']['Settings']);
       await stores.tasks().loadFromBackend(response.data.tasks);
       await stores.snippets().loadFromBackend(response.data.snippets);
 

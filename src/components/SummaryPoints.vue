@@ -10,7 +10,6 @@ const props = defineProps(['corrector_key']);
 
 const points = ref(0);
 const grade = ref('');
-const text = ref('');
 
 const summary = summariesStore.getForCorrector(props.corrector_key);
 if (summary) {
@@ -19,9 +18,7 @@ if (summary) {
   if (level) {
     grade.value = level.title;
   }
-  text.value = summariesStore.getInclusionText(summary);
 }
-
 
 </script>
 
@@ -29,11 +26,11 @@ if (summary) {
   <div id="app-summary-points-wrapper">
     <label for="appSummaryPoints"><strong>{{ $t('summaryPointsRating') }}</strong></label>
     <input :disabled="true" id="appSummaryPoints" class="appPoints" type="number" min="0"
-           :max="settingsStore.max_points" v-model="points"/> {{ $t('allPoints') }}
+           :max="settingsStore.Assessment.max_points" v-model="points"/> {{ $t('allPoints') }}
     &nbsp;
     <strong>{{ $t('summaryPointsGrade') }}</strong> {{ grade }}
 
-    <p><strong>{{ $t('summaryPointsInclude') }}</strong> {{ text }}</p>
+    <p><strong>{{ $t('summaryPointsInclude') }}</strong> {{ settingsStore.inclusionText }}</p>
   </div>
 </template>
 

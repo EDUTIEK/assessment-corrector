@@ -3,13 +3,6 @@
  */
 class Summary {
 
-  static INCLUDE_NOT = 0;          // don't conclude to documentation
-  static INCLUDE_INFO = 1;         // include to documentation as info
-  static INCLUDE_RELEVANT = 2;     // include to documentation as relevant for the result
-
-  static ALLOWED_INCLUSIONS = [Summary.INCLUDE_NOT, Summary.INCLUDE_INFO, Summary.INCLUDE_RELEVANT];
-
-
   /**
    * Key of the correction item to which the summary belongs
    * @type {string}
@@ -55,32 +48,6 @@ class Summary {
   is_authorized = false;
 
   /**
-   * level of including comments to the documentation
-   * @type {integer}
-   */
-  include_comments = null;
-
-
-  /**
-   * level of including comment ratings to the documentation
-   * @type {integer}
-   */
-  include_comment_ratings = null;
-
-
-  /**
-   * level of including comment points to the documentation
-   * @type {integer}
-   */
-  include_comment_points = null;
-
-  /**
-   * level of including criteria points to the documentation
-   * @type {integer}
-   */
-  include_criteria_points = null;
-
-  /**
    * Constructor - gets properties from a data object
    * @param {object} data
    */
@@ -114,35 +81,6 @@ class Summary {
     if (data.is_authorized !== undefined && data.is_authorized !== null) {
       this.is_authorized = !!data.is_authorized;
     }
-    if (data.include_comments !== undefined && data.include_comments !== null) {
-      this.include_comments = this.transformInclusion(data.include_comments);
-    }
-    if (data.include_comment_ratings !== undefined && data.include_comment_ratings !== null) {
-      this.include_comment_ratings = this.transformInclusion(data.include_comment_ratings);
-    }
-    if (data.include_comment_points !== undefined && data.include_comment_points !== null) {
-      this.include_comment_points = this.transformInclusion(data.include_comment_points);
-    }
-    if (data.include_criteria_points !== undefined && data.include_criteria_points !== null) {
-      this.include_criteria_points = this.transformInclusion(data.include_criteria_points);
-    }
-  }
-
-  transformInclusion(inclusion) {
-    if (inclusion === null) {
-      return null;
-    }
-
-    inclusion = parseInt(inclusion);
-    if (inclusion <= Summary.INCLUDE_NOT) {
-      return Summary.INCLUDE_NOT;
-    }
-    if (inclusion == Summary.INCLUDE_INFO) {
-      return Summary.INCLUDE_INFO;
-    }
-    if (inclusion >= Summary.INCLUDE_RELEVANT) {
-      return Summary.INCLUDE_RELEVANT;
-    }
   }
 
   /**
@@ -150,32 +88,7 @@ class Summary {
    * @returns {object}
    */
   getData() {
-    return {
-      item_key: this.item_key,
-      corrector_key: this.corrector_key,
-      text: this.text,
-      points: this.points,
-      grade_key: this.grade_key,
-      last_change: this.last_change,
-      is_authorized: this.is_authorized,
-      include_comments: this.include_comments,
-      include_comment_ratings: this.include_comment_ratings,
-      include_comment_points: this.include_comment_points,
-      include_criteria_points: this.include_criteria_points,
-    }
-  }
-
-  /**
-   * Get the inclusion setting with defaults
-   * @param {object} defaults
-   */
-  getInclusionSettings(defaults = {}) {
-    return {
-      include_comments: this.include_comments ?? defaults.include_comments ?? Summary.INCLUDE_INFO,
-      include_comment_ratings: this.include_comment_ratings ?? defaults.include_comment_ratings ?? Summary.INCLUDE_INFO,
-      include_comment_points: this.include_comment_points ?? defaults.include_comment_points ?? Summary.INCLUDE_INFO,
-      include_criteria_points: this.include_criteria_points ?? defaults.include_criteria_points ?? Summary.INCLUDE_INFO,
-    };
+    return Object.assign({}, this);
   }
 
   /**
@@ -184,7 +97,6 @@ class Summary {
   getKey() {
     return 'ITM-' + this.item_key + '-COR-' + this.corrector_key
   }
-
 
   /**
    * Get a clone of the object

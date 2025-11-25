@@ -56,7 +56,7 @@ document.addEventListener('keydown', layoutStore.handleKeyDown);
                         : layoutStore.isSolutionVisible ? $t('allSolution')
                             : layoutStore.isSolutionPdfVisible ? $t('allSolutionPdf')
                                 : layoutStore.isEssayVisible ? $t('allEssay')
-                                    : layoutStore.isResourcesVisible ? resourcesStore.activeTitle
+                                    : layoutStore.isResourcesVisible ? resourcesStore.activeResource?.title
                                         : layoutStore.isLeftCorrectorVisible ? layoutStore.leftCorrectorTitle : $t('mainContentLeftColumn')
               }}
             </h1>
@@ -203,7 +203,7 @@ document.addEventListener('keydown', layoutStore.handleKeyDown);
                 <span> {{
                     layoutStore.isInstructionsSelected ? $t('allInstructions')
                         : layoutStore.isEssaySelected ? $t('allEssay')
-                            : layoutStore.isResourcesSelected ? resourcesStore.activeTitle
+                            : layoutStore.isResourcesSelected ? resourcesStore.activeResource?.title
                                 : layoutStore.isLeftCorrectorSelected ? layoutStore.leftCorrectorTitle : $t('mainContentExpandLeftColumn')
                   }}
                 </span>

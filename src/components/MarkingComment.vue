@@ -88,7 +88,7 @@ function getBgColor(comment) {
 
 function getPointsInputStyle(comment) {
   const sum = pointsStore.getSumOfPointsForCorrector(comment.corrector_key);
-  if (sum > settingsStore.max_points) {
+  if (sum > settingsStore.Assessment.max_points) {
     return 'color: red;';
   }
   return '';
@@ -262,7 +262,7 @@ watch(() => snippetsStore.selection_open, handleSnippet);
                        type="number"
                        :style=getPointsInputStyle(comment)
                        :id="'pointsInput' + comment.key"
-                       :max="settingsStore.max_points"
+                       :max="settingsStore.Assessment.max_points"
                        :disabled="summariesStore.isOwnDisabled || comment.corrector_key != apiStore.correctorKey"
                        @change="pointsStore.setValueByCommentOrCriterion(comment.key, '', comment_points)"
                        @keydown="handleTextKeydown()"
@@ -284,7 +284,7 @@ watch(() => snippetsStore.selection_open, handleSnippet);
                       @keydown="handleTextKeydown()"
                />
 
-                <label :for="'ratingExcellent' + comment.key">&nbsp;{{ settingsStore.positive_rating }}</label>
+                <label :for="'ratingExcellent' + comment.key">&nbsp;{{ settingsStore.Task.positive_rating }}</label>
               </span>
             </v-col>
 
@@ -299,7 +299,7 @@ watch(() => snippetsStore.selection_open, handleSnippet);
                        @change="toggleCardinal(comment)"
                        @keydown="handleTextKeydown()"
                 />
-                <label :for="'ratingCardinal' + comment.key">&nbsp;{{ settingsStore.negative_rating }}</label>
+                <label :for="'ratingCardinal' + comment.key">&nbsp;{{ settingsStore.Task.negative_rating }}</label>
               </span>
             </v-col>
 
@@ -337,14 +337,14 @@ watch(() => snippetsStore.selection_open, handleSnippet);
             <!-- show excellent -->
             <v-col cols=3>
               <span v-show="comment.rating_excellent">
-                 <v-icon icon="mdi-checkbox-outline"></v-icon> {{ settingsStore.positive_rating }}
+                 <v-icon icon="mdi-checkbox-outline"></v-icon> {{ settingsStore.Task.positive_rating }}
               </span>
             </v-col>
 
             <!-- show cardinal -->
             <v-col cols=3>
               <span v-show="comment.rating_cardinal">
-                <v-icon icon="mdi-checkbox-outline"></v-icon> {{ settingsStore.negative_rating }}
+                <v-icon icon="mdi-checkbox-outline"></v-icon> {{ settingsStore.Task.negative_rating }}
               </span>
             </v-col>
           </v-row>

@@ -82,21 +82,6 @@ export const useSummariesStore = defineStore('summaries', {
 
 
     /**
-     * Partial points of the current corrector and item are included
-     * These may be summed up from comment or criteria related points
-     * @return {float}
-     */
-    currentPartialPointsAreIncluded: state => {
-      const criteriaStore = stores.criteria();
-      if (criteriaStore.hasOwnCriteria) {
-        return (state.currentInclusionSettings.include_criteria_points > Summary.INCLUDE_NOT);
-      } else {
-        return (state.currentInclusionSettings.include_comment_points > Summary.INCLUDE_NOT);
-      }
-    },
-
-
-    /**
      * Resulting grade title from the summary of the current corrector and item
      * @returns {string}
      */
@@ -111,15 +96,6 @@ export const useSummariesStore = defineStore('summaries', {
       return t('summariesNoGrade');
     },
 
-    /**
-     * Get the effective inclusion settings for the current summary (with defaults)
-     * @param state
-     * @return {{include_comment_points, include_comment_ratings, include_criteria_points, include_comments}}
-     */
-    currentInclusionSettings: state => {
-      const settingsStore = stores.settings();
-      return settingsStore.summaryInclusions;
-    },
 
     getAuthorizationForCorrector: state => {
       /**
@@ -160,66 +136,11 @@ export const useSummariesStore = defineStore('summaries', {
     },
 
 
-    getInclusionText: state => {
-      const settingsStore = stores.settings();
-      const criteriaStore = stores.criteria();
-
-      /**
-       *
-       * @param {Summary} summary
-       * @return {string}
-       */
-      const fn = function (summary) {
-        let text = '';
-        let settings = {};
-
-        if (summary.corrector_key == state.editSummary.corrector_key) {
-          settings = state.currentInclusionSettings;
-        } else {
-          settings = summary.getInclusionSettings();
-        }
-
-        if (settings.include_comments == Summary.INCLUDE_INFO) {
-          text = (text ? text + ', ' : '') + t('summariesIncludeComments') + t('summariesIncludeInformative');
-        } else if (settings.include_comments == Summary.INCLUDE_RELEVANT) {
-          text = (text ? text + ', ' : '') + t('summariesIncludeComments') + t('summariesIncludeRelevant');
-        }
-
-        if (settings.include_comment_ratings == Summary.INCLUDE_INFO) {
-          text = (text ? text + ', ' : '') + settingsStore.ratingLabels + ' (i)';
-        } else if (settings.include_comment_ratings == Summary.INCLUDE_RELEVANT) {
-          text = (text ? text + ', ' : '') + settingsStore.ratingLabels + ' (r)';
-        }
-
-        if (settings.include_comment_points == Summary.INCLUDE_INFO) {
-          text = (text ? text + ', ' : '') + t('summariesIncludePointsToComments') + t('summariesIncludeInformative');
-        } else if (settings.include_comment_points == Summary.INCLUDE_RELEVANT) {
-          text = (text ? text + ', ' : '') + t('summariesIncludePointsToComments') + t('summariesIncludeRelevant');
-        }
-
-        if (criteriaStore.hasOwnCriteria) {
-          if (settings.include_criteria_points == Summary.INCLUDE_INFO) {
-            text = (text ? text + ', ' : '') + t('summariesIncludePointsToCriteria') + t('summariesIncludeInformative');
-          } else if (settings.include_criteria_points == Summary.INCLUDE_RELEVANT) {
-            text = (text ? text + ', ' : '') + t('summariesIncludePointsToCriteria') + t('summariesIncludeRelevant');
-          }
-        }
-
-
-        if (text == '') {
-          text = t('summariesIncludeNoDetails')
-        }
-
-        return text;
-      }
-      return fn;
-    },
-
     /**
      * Text why a stitch decision will be needed the current item
      * @returns {string}
      */
-    stitchReasonText: state => {
+    stitchReasonText(state) {
       let min_points = null;
       let max_points = null;
       let sum_points = 0;
@@ -246,15 +167,9 @@ export const useSummariesStore = defineStore('summaries', {
       }
 
       const settingsStore = stores.settings();
-      if (settingsStore.stitch_when_distance) {
-        if (max_points - min_points > settingsStore.max_auto_distance) {
-          return t('summariesPointsDifferenceExceedsN', [settingsStore.max_auto_distance]);
-        }
-      }
-      if (settingsStore.stitch_when_decimals) {
-        let average = sum_points / count_points;
-        if (Math.floor(average) < average) {
-          return t('summariesPointsAverageIsNotInteger', [average]);
+      if (settingsStore.Assessment.procedure_when_distance) {
+        if (max_points - min_points > settingsStore.Assessment.max_auto_distance) {
+          return t('summariesPointsDifferenceExceedsN', [settingsStore.Assessment.max_auto_distance]);
         }
       }
 
@@ -415,8 +330,8 @@ export const useSummariesStore = defineStore('summaries', {
         this.editSummary.points = null;
       } else if (this.editSummary.points < 0) {
         this.editSummary.points = 0;
-      } else if (this.editSummary.points > settingsStore.max_points) {
-        this.editSummary.points = settingsStore.max_points;
+      } else if (this.editSummary.points > settingsStore.Assessment.max_points) {
+        this.editSummary.points = settingsStore.Assessment.max_points;
       }
 
       // set the grade key for the points
@@ -494,8 +409,6 @@ export const useSummariesStore = defineStore('summaries', {
      */
     async setOwnAuthorized() {
       this.editSummary.is_authorized = true;
-      // ensure that the default inclusion settings are set
-      this.editSummary.setData(this.currentInclusionSettings);
       await this.updateContent(false, true);
     },
 

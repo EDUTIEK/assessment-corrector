@@ -1,88 +1,106 @@
-import {getStorage} from "@/lib/Storage";
-import {defineStore} from 'pinia';
-import {stores} from "@/store/index";
-import Summary from '@/data/Summary';
-import i18n from "@/plugins/i18n";
-
-const storage = getStorage('settings');
-
-const { t } = i18n.global;
-
 /**
  * Settings Store
  * Handles the editor settings of the writing task
  */
+import {getStorage} from "@/lib/Storage";
+import {defineStore} from 'pinia';
+import {stores} from "@/store/index";
+import i18n from "@/plugins/i18n";
+import Summary from '@/data/Summary';
+import Procedure from '@/data/Procedure';
+
+const storage = getStorage('settings');
+const startState = {
+  Assessment: {
+    multiple_correctors: false,     // has a submission multiple correctors
+    mutual_visibility: false,       // corrector sees other correctors
+    procedure_when_distance: false, // should a revision procedure follow when points differ
+    procedure: Procedure.NONE,      // type of procedure that follows
+    max_auto_distance: 0,           // maximum distance between points to allow an automated points calculation
+    revision_between: false,        // points given in a revision must be between the original points of both correctors
+    stitch_after_procedure: false,  // the procedure is followed by a stich decision when needed
+    max_points: 0,                  // maximum points that can be given
+    no_manual_decimals: false,      // nanually given points must not have decimals
+  },
+  Task: {
+    positive_rating: t('settingsRatingPositive'),     // label of a positive rating
+    negative_rating: t('settingsRatingNegative'),     // label of a negative rating
+    enable_comments: false,                           // enable comments on the text
+    enable_comment_ratings: false,                    // enable ratings given for the comments
+    enable_partial_points: false,                     // enable giving partial points
+    enable_summary_pdf: false,                        // enable the upload of a PDF instead of a textual summary
+    summary_pdf_advice: null,                         // advice given for the summary
+  },
+  EssayTask: {
+    headline_scheme: null,                            // headline scheme of the essay
+  }
+}
+
+const { t } = i18n.global;
+
 export const useSettingsStore = defineStore('settings', {
   state: () => {
-    return {
-      // saved in storage
-      mutual_visibility: false,       // corrector sees other correctors
-      multi_color_highlight: false,   // text can be highlightes in multi colors
-      max_points: 0,                  // maximum points that can be given
-      max_auto_distance: 0,           // maximum distance between points to allow an automated points calculation
-      stitch_when_distance: false,    // stitch decision is needed when the distance is higher than the max_auto_distance
-      stitch_when_decimals: false,    // stitch decision is needed when the average points have decimals
-      positive_rating: t('settingsRatingPositive'),   // label of a positive rating
-      negative_rating: t('settingsRatingNegative'),    // label of a negative rating
-      headline_scheme: null,          // headline scheme of the essay
-      fixed_inclusions: false,                        // fix the inclusion settings (don't allow a change)
-      include_comments: Summary.INCLUDE_INFO,          // include comments in the authorized correction
-      include_comment_ratings: Summary.INCLUDE_INFO,   // include comment ratings in the authorized correction
-      include_comment_points: Summary.INCLUDE_INFO,    // include comment points in the authorized correction
-      include_criteria_points: Summary.INCLUDE_INFO   // include criteria points in the authorized correction
-    }
+    return startState
   },
 
   getters: {
-    ratingLabels: state => '"' + state.positive_rating + '" und "' + state.negative_rating + '"',
-    headlineClass: state => state.headline_scheme === 'three' ? 'headlines-three' : '',
 
-    summaryInclusions: state => {
-      return {
-        include_comments: state.include_comments,
-        include_comment_ratings: state.include_comment_ratings,
-        include_comment_points: state.include_comment_points,
-        include_criteria_points: state.include_criteria_points
-      };
+    headlineClass(state) {
+      return state.EssayTask.headline_scheme === 'three' ? 'headlines-three' : ''
     },
 
-    inclusionsChangeable: state => state.fixed_inclusions == false,
+    inclusionText(state) {
 
-    inclusionsPossible: state => {
-      return state.fixed_inclusions == false
-        || state.include_comments != Summary.INCLUDE_NOT
-        || state.include_comment_ratings != Summary.INCLUDE_NOT
-        || state.include_comment_points != Summary.INCLUDE_NOT
-        || state.include_criteria_points != Summary.INCLUDE_NOT;
-    }
+      let text = '';
+      if (state.Task.enable_comments) {
+        text = (text ? text + ', ' : '') + t('summariesIncludeComments');
+      }
+      if (state.Task.include_comment_ratings) {
+        text = (text ? text + ', ' : '') + t('summariesIncludeCommentRatings');
+      }
+      if (state.Task.enable_partial_points) {
+        text = (text ? text + ', ' : '') + t('summariesIncludePartialPoints');
+      }
+      if (text == '') {
+        text = t('summariesIncludeNoDetails')
+      }
+
+      return text;
+    },
+
   },
 
   actions: {
     async clearStorage() {
+      this.$reset();
       try {
         await storage.clear();
       }
       catch (err) {
         console.log(err);
       }
-      this.$reset();
     },
 
-
     async loadFromStorage() {
+      this.$reset();
       try {
-        const data = await storage.getItem('settings');
-        this.$patch(data);
+        for (const component in this.$state) {
+          const data = await storage.getItem(component);
+          this.$patch(data);
+        }
       }
       catch (err) {
         console.log(err);
       }
     },
 
-    async loadFromBackend(data) {
+    /**
+     * Load component settings (don't reset before)
+     */
+    async loadFromBackend(component, data) {
+      this.$state[component] = Object.assign(this.$state[component], data);
       try {
-        await storage.setItem('settings', data);
-        this.$patch(data);
+        await storage.setItem(component, this.$state[component]);
       }
       catch (err) {
         console.log(err);

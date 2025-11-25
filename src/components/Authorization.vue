@@ -22,24 +22,12 @@ const showIncludes = ref(false);
 
 
 function getPartialPointsMessage() {
-  const settings = summariesStore.currentInclusionSettings;
-  const with_comments = settings.include_comment_points > Summary.INCLUDE_NOT;
-  const with_criteria = criteriaStore.hasOwnCriteria && settings.include_criteria_points > Summary.INCLUDE_NOT;
-
   let points = 0;
   let note = '';
 
-  if (with_comments && with_criteria) {
+  if (settingsStore.Task.enable_partial_points) {
     points = pointsStore.getSumOfPointsForCorrector(apiStore.correctorKey);
-    note = t('authorizationPointsToCommentsAndCriteria', points);
-  }
-  else if (with_comments) {
-    points = pointsStore.getSumOfPointsForCorrector(apiStore.correctorKey, true);
-    note = t('authorizationPointsToComments', points);
-  }
-  else if (with_criteria) {
-    points = pointsStore.getSumOfPointsForCorrector(apiStore.correctorKey, null, true);
-    note = t('authorizationPointsToCriteria', points);
+    note = t('authorizationPartialPoints', points);
   }
   else {
     return '';
@@ -115,19 +103,10 @@ function editSummary() {
 
           <div class="appRow">
             <label for="appAuthorizationPoints"><strong>{{ $t('authorizationPointsLabel') }}</strong></label>
-            <input id="appAuthorizationPoints" class="appPoints" type="number" min="0" :max="settingsStore.max_points"
+            <input id="appAuthorizationPoints" class="appPoints" type="number" min="0" :max="settingsStore.Assessment.max_points"
                    v-model="summariesStore.editSummary.points"/>{{ $t('authorizationPointsSuffix' ) }}
             &nbsp;
             <strong>{{ $t('authorizationGradeTitle') }}</strong> {{ summariesStore.currentGradeTitle }}
-
-          </div>
-
-          <div class="appRow">
-            <v-btn density="compact" v-if="settingsStore.inclusionsChangeable" variant="text" :disabled="summariesStore.isOwnDisabled"
-                   @click="layoutStore.showIncludesPopup = true">
-              <v-icon left icon="mdi-pencil"></v-icon>
-              <span class="sr-only">{{ $t('authorizationEditIncludes') }}</span>
-            </v-btn>
 
           </div>
 

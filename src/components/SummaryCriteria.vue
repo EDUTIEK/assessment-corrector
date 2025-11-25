@@ -100,9 +100,9 @@ async function filterByCriterion(criterion_key) {
           <v-btn density="compact" size="small" variant="text" prepend-icon="mdi-filter-outline"
                  :disabled="commentsStore.getCountOfExcellent(props.corrector_key) == 0"
                  @click="filterByRating(true, false)">
-            <span class="sr-only">{{ settingsStore.positive_rating }}</span>
+            <span class="sr-only">{{ settingsStore.Task.positive_rating }}</span>
           </v-btn>
-          <span aria-hidden="true">{{ settingsStore.positive_rating }}</span>
+          <span aria-hidden="true">{{ settingsStore.Task.positive_rating }}</span>
 
         </td>
         <td class="text-right">
@@ -114,9 +114,9 @@ async function filterByCriterion(criterion_key) {
           <v-btn density="compact" size="small" variant="text" prepend-icon="mdi-filter-outline"
                  :disabled="commentsStore.getCountOfCardinal(props.corrector_key) == 0"
                  @click="filterByRating(false, true)">
-            <span class="sr-only">{{ settingsStore.negative_rating }}</span>
+            <span class="sr-only">{{ settingsStore.Task.negative_rating }}</span>
           </v-btn>
-          <span aria-hidden="true">{{ settingsStore.negative_rating }}</span>
+          <span aria-hidden="true">{{ settingsStore.Task.negative_rating }}</span>
         </td>
         <td class="text-right">
           {{ commentsStore.getCountOfCardinal(props.corrector_key) }}
