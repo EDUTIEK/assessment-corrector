@@ -1,14 +1,35 @@
 import Mark from '@/data/Mark';
+import Item from "@/data/Item";
+import Correction from "@/data/Correction";
 
 /**
  * Correction Comment
  */
-class Comment {
+export default class Comment {
 
   static RATING_CARDINAL = 'cardinal';
   static RAITNG_EXCELLENT = 'excellent';
 
   static ALLOWED_RATING = [Comment.RATING_CARDINAL, Comment.RAITNG_EXCELLENT];
+
+  /**
+   * Compare two comments for sorting
+   * @param {Comment} comment1
+   * @param {Comment} comment2
+   */
+  static order(comment1, comment2) {
+    if (comment1.parent_number < comment2.parent_number) {
+      return -1;
+    } else if (comment1.parent_number > comment2.parent_number) {
+      return 1;
+    } else if (comment1.start_position < comment2.start_position) {
+      return -1;
+    } else if (comment1.start_position > comment2.start_position) {
+      return 1;
+    } else {
+      return 0;
+    }
+  }
 
   /**
    * Unique identifier of the comment
@@ -29,6 +50,24 @@ class Comment {
    * @type {string}
    */
   correction_key = '';
+
+  /**
+   * Task to which this comment belongs
+   * @type {integer}
+   */
+  task_id = null;
+
+  /**
+   * Writer to which this comment belongs
+   * @type {integer}
+   */
+  writer_id = null;
+
+  /**
+   * Corrector to which this comment belongs
+   * @type {integer}
+   */
+  corrector_id = null;
 
   /**
    * Text mark: Number of the first word from the marked text to which the comment belongs
@@ -115,6 +154,15 @@ class Comment {
     if (data.start_position !== undefined && data.start_position !== null) {
       this.start_position = parseInt(data.start_position);
     }
+    if (data.task_id !== undefined && data.task_id !== null) {
+      this.task_id = parseInt(data.task_id);
+    }
+    if (data.writer_id !== undefined && data.writer_id !== null) {
+      this.writer_id = parseInt(data.writer_id);
+    }
+    if (data.corrector_id !== undefined && data.corrector_id !== null) {
+      this.corrector_id = parseInt(data.corrector_id);
+    }
     if (data.end_position !== undefined && data.end_position !== null) {
       this.end_position = parseInt(data.end_position);
     }
@@ -134,6 +182,24 @@ class Comment {
         this.addMarkData(mark_data);
       }
     }
+    if (!this.item_key && this.task_id && this.writer_id) {
+      this.item_key = Item.buildKey(this.task_id, this.writer_id)
+    }
+    if (!this.correction_key && this.task_id && this.corrector_id && this.writer_id) {
+      this.correction_key = Correction.buildKey(this.task_id, this.corrector_id, this.writer_id)
+    }
+  }
+
+  /**
+   * Set the correction key and change the ids accordingly
+   * @param {string} correction_key
+   */
+  setCorrectionKey(correction_key) {
+    this.correction_key = correction_key;
+    this.task_id = Correction.extractTaskId(this.correction_key);
+    this.writer_id = Correction.extractWriterId(this.correction_key);
+    this.corrector_id = Correction.extractCorrectorId(this.correction_key);
+    this.item_key = Item.buildKey(this.task_id, this.writer_id)
   }
 
   /**
@@ -269,6 +335,9 @@ class Comment {
       key: this.key,
       item_key: this.item_key,
       correction_key: this.correction_key,
+      task_id: this.task_id,
+      writer_id: this.writer_id,
+      corrector_id: this.corrector_id,
       start_position: this.start_position,
       end_position: this.end_position,
       parent_number: this.parent_number,
@@ -278,5 +347,3 @@ class Comment {
     }
   }
 }
-
-export default Comment;

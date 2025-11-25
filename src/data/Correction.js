@@ -49,6 +49,20 @@ export default class Correction {
   }
 
   /**
+   * @param {string} key
+   * @returns {number|null}
+   */
+  static extractWriterId(key) {
+    const start1 = key.indexOf('_');
+    if (start1 > 1) {
+      const start2 = key.indexOf('_', start1) + 1;
+      if (start2 > start1)
+        return parseInt(key.substring(start2));
+    }
+    return null;
+  }
+
+  /**
    * Key of this correction
    * @type {string}
    */
@@ -111,19 +125,15 @@ export default class Correction {
     if (data.task_id !== undefined && data.task_id !== null) {
       this.task_id = parseInt(data.task_id);
     }
-
     if (data.writer_id !== undefined && data.writer_id !== null) {
       this.writer_id = parseInt(data.writer_id);
     }
-
     if (data.corrector_id !== undefined && data.corrector_id !== null) {
       this.corrector_id = parseInt(data.corrector_id);
     }
-
     if (data.user_id !== undefined && data.user_id !== null) {
       this.user_id = parseInt(data.user_id);
     }
-
     if (data.title !== undefined && data.title !== null) {
       this.title = data.title.toString();
     }

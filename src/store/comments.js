@@ -46,7 +46,7 @@ export const useCommentsStore = defineStore('comments', {
       return '';
     },
 
-    activeComments: state => {
+    activeComments(state) {
       const apiStore = stores.api();
       return state.comments.filter(comment =>
         (state.showOtherCorrections || comment.correction_key == stores.corrections().ownKey)
@@ -54,15 +54,15 @@ export const useCommentsStore = defineStore('comments', {
       );
     },
 
-    isOtherCorrectionsShown: state => {
+    isOtherCorrectionsShown(state) {
       return state.showOtherCorrections
     },
 
-    isFilterActive: state => {
+    isFilterActive(state) {
       return state.filterKeys.length > 0;
     },
 
-    getComment: state => {
+    getComment(state) {
 
       /**
        * Get a comment by its key
@@ -76,7 +76,7 @@ export const useCommentsStore = defineStore('comments', {
       return fn;
     },
 
-    getCommentByMarkKey: state => {
+    getCommentByMarkKey(state) {
 
       /**
        * Get a comment by the key if its mark key
@@ -90,7 +90,7 @@ export const useCommentsStore = defineStore('comments', {
       return fn;
     },
 
-    getActiveCommentsInRange: state => {
+    getActiveCommentsInRange(state) {
 
       /**
        * Get the active comments in a range of marked text
@@ -107,7 +107,7 @@ export const useCommentsStore = defineStore('comments', {
       return fn;
     },
 
-    getActiveCommentsByStartPosition: state => {
+    getActiveCommentsByStartPosition(state) {
 
       /**
        * Get the active comments with a start position
@@ -123,7 +123,7 @@ export const useCommentsStore = defineStore('comments', {
       return fn;
     },
 
-    getActiveCommentsByParentNumber: state => {
+    getActiveCommentsByParentNumber(state) {
 
       /**
        * Get the active comments with a parent number
@@ -139,7 +139,7 @@ export const useCommentsStore = defineStore('comments', {
       return fn;
     },
 
-    getCountOfExcellent: state => {
+    getCountOfExcellent(state) {
 
       /**
        * Get the number of comments of a correction marked as excellent
@@ -156,7 +156,7 @@ export const useCommentsStore = defineStore('comments', {
 
     },
 
-    getCountOfCardinal: state => {
+    getCountOfCardinal(state) {
 
       /**
        * Get the number of comments of a correction marked as cardinal failure
@@ -250,11 +250,10 @@ export const useCommentsStore = defineStore('comments', {
      * @public
      */
     async addComment(comment) {
-      const apiStore = stores.api();
+      const correctionsStore = stores.corrections();
       const changesStore = stores.changes();
 
-      comment.item_key = apiStore.itemKey;
-      comment.correction_key = stores.corrections().ownKey;
+      comment.setCorrectionKey(correctionsStore.ownKey);
 
       // first do state changes (trigger watchers)
       this.keys.push(comment.key);
@@ -369,7 +368,7 @@ export const useCommentsStore = defineStore('comments', {
       const apiStore = stores.api();
       const correctionsStore = stores.corrections();
 
-      this.comments = this.comments.sort(compareComments);
+      this.comments = this.comments.sort(Comment.order());
 
       let parent = 0;
       let numbers = {};
@@ -537,7 +536,7 @@ export const useCommentsStore = defineStore('comments', {
             this.comments.push(comment);
           }
         }
-        ;
+
         await this.sortAndLabelComments();
 
         await storage.setItem('keys', JSON.stringify(this.keys));
@@ -643,22 +642,3 @@ export const useCommentsStore = defineStore('comments', {
   }
 });
 
-
-/**
- * Compare two comments for sorting
- * @param {Comment} comment1
- * @param {Comment} comment2
- */
-const compareComments = function (comment1, comment2) {
-  if (comment1.parent_number < comment2.parent_number) {
-    return -1;
-  } else if (comment1.parent_number > comment2.parent_number) {
-    return 1;
-  } else if (comment1.start_position < comment2.start_position) {
-    return -1;
-  } else if (comment1.start_position > comment2.start_position) {
-    return 1;
-  } else {
-    return 0;
-  }
-}
