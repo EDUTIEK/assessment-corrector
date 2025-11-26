@@ -148,8 +148,8 @@ export const useCorrectionsStore = defineStore('corrections', {
     updateOwnKey() {
         const apiStore = stores.api();
         for (const correction of Object.values(this.corrections)) {
-          if (correction.item_key === apiStore.itemKey
-            && correction.user_id === parseInt(apiStore.userId)) {
+          if (correction.item_key == apiStore.itemKey
+            && correction.user_id == parseInt(apiStore.userId)) {
             this.ownKey = correction.key;
             break;
           }

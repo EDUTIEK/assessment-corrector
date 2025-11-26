@@ -42,7 +42,7 @@ export const useApiStore = defineStore('api', {
 
     isLoading: state => state.lastLoadingTry > 0,
 
-    storedItemKey: state => localStorage.getItem('xlasCorrectionItemKey'),
+    storedItemKey: state => localStorage.getItem('xlasCorrectorItemKey'),
 
     getRequestConfig(state) {
 
@@ -186,15 +186,15 @@ export const useApiStore = defineStore('api', {
       let newItem = false;
 
       // take values formerly stored
-      this.backendUrl = localStorage.getItem('xlasCorrectionBackendUrl');
-      this.returnUrl = localStorage.getItem('xlasCorrectionReturnUrl');
-      this.userId = localStorage.getItem('xlasCorrectionUserId');
-      this.assId = localStorage.getItem('xlasCorrectionAssId');
-      this.contextId = localStorage.getItem('xlasCorrectionContextId');
+      this.backendUrl = localStorage.getItem('xlasCorrectorBackendUrl');
+      this.returnUrl = localStorage.getItem('xlasCorrectorReturnUrl');
+      this.userId = localStorage.getItem('xlasCorrectorUserId');
+      this.assId = localStorage.getItem('xlasCorrectorAssId');
+      this.contextId = localStorage.getItem('xlasCorrectorContextId');
       this.itemKey = localStorage.getItem('correctionItemKey') ?? '';
-      this.dataToken = localStorage.getItem('xlasCorrectionDataToken');
-      this.fileToken = localStorage.getItem('xlasCorrectionFileToken');
-      this.timeOffset = Math.floor(localStorage.getItem('xlasCorrectionTimeOffset') ?? 0);
+      this.dataToken = localStorage.getItem('xlasCorrectorDataToken');
+      this.fileToken = localStorage.getItem('xlasCorrectorFileToken');
+      this.timeOffset = Math.floor(localStorage.getItem('xlasCorrectorTimeOffset') ?? 0);
 
       // check if context given by cookies differs and force a reload if neccessary
       if (Cookies.get('xlasUserId') != undefined && Cookies.get('xlasUserId') !== this.userId) {
@@ -285,7 +285,7 @@ export const useApiStore = defineStore('api', {
       stores.layout().showDataReplaceConfirmation = false;
       stores.layout().showItemReplaceConfirmation = false;
 
-      this.itemKey = localStorage.getItem('xlasCorrectionItemKey');
+      this.itemKey = localStorage.getItem('xlasCorrectorItemKey');
       await this.loadItemFromStorage(this.itemKey);
       const item = stores.items().getItem(this.itemKey);
 
@@ -329,14 +329,14 @@ export const useApiStore = defineStore('api', {
       Cookies.remove('xlasWriterId');
       Cookies.remove('xlasToken');
 
-      localStorage.setItem('xlasCorrectionBackendUrl', this.backendUrl);
-      localStorage.setItem('xlasCorrectionReturnUrl', this.returnUrl);
-      localStorage.setItem('xlasCorrectionUserId', this.userId);
-      localStorage.setItem('xlasCorrectionAssId', this.assId);
-      localStorage.setItem('xlasCorrectionContextId', this.contextId);
-      localStorage.setItem('xlasCorrectionItemKey', this.itemKey);
-      localStorage.setItem('xlasCorrectionDataToken', this.dataToken);
-      localStorage.setItem('xlasCorrectionFileToken', this.fileToken);
+      localStorage.setItem('xlasCorrectorBackendUrl', this.backendUrl);
+      localStorage.setItem('xlasCorrectorReturnUrl', this.returnUrl);
+      localStorage.setItem('xlasCorrectorUserId', this.userId);
+      localStorage.setItem('xlasCorrectorAssId', this.assId);
+      localStorage.setItem('xlasCorrectorContextId', this.contextId);
+      localStorage.setItem('xlasCorrectorItemKey', this.itemKey);
+      localStorage.setItem('xlasCorrectorDataToken', this.dataToken);
+      localStorage.setItem('xlasCorrectorFileToken', this.fileToken);
     },
 
 
@@ -378,7 +378,7 @@ export const useApiStore = defineStore('api', {
       }
 
       this.itemKey = itemKey;
-      localStorage.setItem('itemKey', this.itemKey);
+      localStorage.setItem('xlasCorrectorItemKey', this.itemKey);
 
       await stores.changes().loadFromStorage();
       await stores.comments().loadFromStorage();

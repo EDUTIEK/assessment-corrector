@@ -1,6 +1,5 @@
 import tinymce from "tinymce";
-import {useSettingsStore} from "@/store/settings";
-import {usePreferencesStore} from "@/store/preferences";
+import {stores} from "@/store/index";
 import {nextTick, ref, watch} from 'vue';
 import i18n from "@/plugins/i18n";
 

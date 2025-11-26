@@ -182,11 +182,8 @@ export const usePagesStore = defineStore('pages', {
         await storage.clear();
         this.purgeFiles();
         this.$reset();
-        console.log(this.pages);
-        console.log('load pages');
 
         for (const page_data of data) {
-          console.log(data);
           const page = new Page(page_data);
           page.url = apiStore.getImageUrl(page);
           page.thumb_url = apiStore.getThumbUrl(page);
