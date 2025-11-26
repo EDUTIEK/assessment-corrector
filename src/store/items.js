@@ -130,6 +130,10 @@ export const useItemsStore = defineStore('items', {
       }
     },
 
+    /**
+     * Update a single item when it is loaded from the backend
+     * Its status and permissions may have changed
+     */
     async saveItem(item) {
       try {
         this.items[item.getKey()] = item;
@@ -167,3 +171,24 @@ export const useItemsStore = defineStore('items', {
     }
   }
 });
+
+
+function statusText(item) {
+  const status = itemsStore.currentItem?.correction_status;
+  switch (status) {
+    case Item.STATUS_OPEN:
+      return summariesStore.isOwnAuthorized ? t('itemsSuffixAuthorized')
+          : summariesStore.isOwnPregraded ?  t('itemsSuffixPregraded')
+              : t('itemsSuffixOpen');
+    case Item.STATUS_APPROXIMATION:
+      return t('itemsSuffixApproximation');
+    case Item.STATUS_CONSULTING:
+      return t('itemsSuffixConsulting');
+    case Item.STATUS_STITCH:
+      return t('itemsSuffixStitch');
+    case Item.STATUS_FINALIZED:
+      return t('itemsSuffixFinalized');
+  }
+
+
+}

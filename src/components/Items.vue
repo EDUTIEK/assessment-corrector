@@ -19,26 +19,6 @@ const loading = ref(false);
 
 const { t } = i18n.global;
 
-function currentStatusText() {
-  const status = itemsStore.currentItem?.correction_status;
-  switch (status) {
-    case Item.STATUS_OPEN:
-      return summariesStore.isOwnAuthorized ? t('itemsSuffixAuthorized')
-          : summariesStore.isOwnPregraded ?  t('itemsSuffixPregraded')
-            : t('itemsSuffixOpen');
-    case Item.STATUS_APPROXIMATION:
-      return t('itemsSuffixApproximation');
-    case Item.STATUS_CONSULTING:
-      return t('itemsSuffixConsulting');
-    case Item.STATUS_STITCH:
-      return t('itemsSuffixStitch');
-    case Item.STATUS_FINALIZED:
-      return t('itemsSuffixFinalized');
-  }
-
-
-}
-
 async function showSelection() {
   await nextTick();
   if (menuOpen.value) {
@@ -64,7 +44,6 @@ async function changeItem(newKey) {
   }
 }
 
-
 </script>
 
 <template>
@@ -81,8 +60,6 @@ async function changeItem(newKey) {
       </span>
     <span v-show="!apiStore.isLoading && itemsStore.currentItem !== undefined">
         {{ itemsStore.currentItem.title }}
-        {{ correctionsStore.getPositionText(stores.corrections().ownKey) }}
-        {{ currentStatusText() }}
       </span>
   </v-btn>
 

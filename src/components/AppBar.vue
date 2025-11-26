@@ -40,9 +40,8 @@ async function returnToBackend() {
 
 <template>
   <v-app-bar elevation="1" color="white" density="compact">
-    <v-app-bar-title>{{ taskStore.title }}</v-app-bar-title>
-    <v-spacer></v-spacer>
     <items/>
+    <v-spacer></v-spacer>
     <help></help>
     <authorization v-if="stores.items().canAuthorize"/>
     <v-btn class="app-header-item" @click="returnToBackend()">

@@ -2,6 +2,7 @@
 import {stores} from "@/store";
 import { nextTick, watch } from 'vue';
 import SendingStatus from "@/components/SendingStatus.vue";
+import Item from "@/data/Item";
 
 const apiStore = stores.api();
 const layoutStore = stores.layout();
@@ -60,7 +61,7 @@ function getResourceIcon(resource) {
 }
 
 function getCorrectionTitle(correction) {
-  return (correction.title + ' - ' + correction.initials + ' ' + correctionsStore.getPositionText(correction.key));
+  return (correction.title + ' - ' + correction.initials + ' ' + Item.buildPositionText(correction.position));
 }
 
 </script>

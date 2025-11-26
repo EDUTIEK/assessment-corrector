@@ -58,33 +58,6 @@ export const useCorrectionsStore = defineStore('corrections', {
         .sort(Correction.order);
     },
 
-    getPositionText(state) {
-
-      /**
-       * Get the correction position text
-       * @param {string} correction_key
-       * @returns {string}
-       */
-      const fn = function (correction_key) {
-
-        const correction = state.corrections[correction_key];
-        if (correction) {
-          switch (correction.position) {
-            case Correction.POSITION_FIRST:
-              return t('correctionsFirstCorrection')
-            case Correction.POSITION_SECOND:
-              return t('correctionsSecondCorrection')
-            case Correction.POSITION_STITCH:
-              return t('correctionsSecondCorrection')
-            default:
-              return t('correctionsNthCorrection' [correction.position + 1]);
-          }
-        }
-        return ''
-      }
-      return fn;
-    },
-
     getCorrection(state) {
 
       /**

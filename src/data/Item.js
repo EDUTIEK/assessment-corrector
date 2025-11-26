@@ -1,10 +1,16 @@
+import i18n from "@/plugins/i18n";
+import Summary from "@/data/Summary";
+import Correction from "@/data/Correction";
+const { t } = i18n.global;
+
 /**
  * Correction Item
  *
  * This provides basic data for list of items to be corrected
  * An item is uniquelly identified by the ids of the weriter and the written task
+ * All data are related to the corrent corrector
  */
-class Item {
+export default class Item {
 
   static STATUS_OPEN = 'open';
   static STATUS_APPROXIMATION = 'approximation';
@@ -52,6 +58,67 @@ class Item {
   }
 
   /**
+   * Build the item title
+   * @param item
+   * @returns {string}
+   */
+  static buildTitle(item) {
+    return item.pseudonym + ' ' + Item.buildPositionText(item.position) + ' ' + Item.buildStatusText(item);
+  }
+
+  /**
+   * Buld the corrector posution text
+   * @param {integer} position
+   * @return {string}
+   */
+  static buildPositionText(position) {
+    switch (position) {
+      case Correction.POSITION_FIRST:
+        return t('correctionsFirstCorrection')
+      case Correction.POSITION_SECOND:
+        return t('correctionsSecondCorrection')
+      case Correction.POSITION_STITCH:
+        return t('correctionsSecondCorrection')
+      default:
+        return '';
+    }
+  }
+
+  /**
+   * Build the correction status text
+   * @param {Item} item
+   * @return {string}
+   */
+  static buildStatusText(item) {
+
+    switch (item.correction_status) {
+      case Item.STATUS_OPEN:
+        switch (item.grading_status) {
+          case Summary.STATUS_NOT_STARTED:
+          case Summary.STATUS_OPEN:
+            return t('itemsSuffixOpen');
+          case Summary.STATUS_PRE_GRADED:
+            return t('itemsSuffixPregraded');
+          case Summary.STATUS_AUTHORIZED:
+            return t('itemsSuffixAuthorized');
+          default:
+            return '';
+        }
+      case Item.STATUS_APPROXIMATION:
+        return t('itemsSuffixApproximation');
+      case Item.STATUS_CONSULTING:
+        return t('itemsSuffixConsulting');
+      case Item.STATUS_STITCH:
+        return t('itemsSuffixStitch');
+      case Item.STATUS_FINALIZED:
+        return t('itemsSuffixFinalized');
+      default:
+        return ''
+    }
+  }
+
+
+  /**
    * Key of correction item
    * @type {string}
    */
@@ -77,16 +144,29 @@ class Item {
   position = null;
 
   /**
-   * Title of the item (e.g. the writer's pseudonym)
+   * Writer's pseudonym
    * @type {string}
    */
-  title = '';
+  pseudonym = '';
+
+  /**
+   * Title of the item (is build from other data)
+   * @type {string}
+   */
+  title = null;
 
   /**
    * Whole correction status of the writer (over all tasks)
    * @type {string}
    */
   correction_status = '';
+
+  /**
+   * Whole correction status of the writer (over all tasks)
+   * @type {string}
+   * @see Summary
+   */
+  grading_status = '';
 
   /**
    * Is a correction allowed for the item
@@ -123,11 +203,14 @@ class Item {
     if (data.position !== undefined && data.position !== null) {
       this.position = parseInt(data.position);
     }
-    if (data.title !== undefined && data.title !== null) {
-      this.title = data.title.toString();
+    if (data.pseudonym !== undefined && data.pseudonym !== null) {
+      this.pseudonym = data.pseudonym.toString();
     }
     if (data.correction_status !== undefined && data.correction_status !== null) {
       this.correction_status = data.correction_status.toString();
+    }
+    if (data.grading_status !== undefined && data.grading_status !== null) {
+      this.grading_status = data.grading_status.toString();
     }
     if (data.can_correct !== undefined && data.can_correct !== null) {
       this.can_correct = !!data.can_correct;
@@ -140,6 +223,9 @@ class Item {
     }
     if (this.key === null) {
       this.key = Item.buildKey(this.task_id, this.writer_id);
+    }
+    if (this.title === null) {
+      this.title = Item.buildTitle(this);
     }
   }
 
@@ -158,5 +244,3 @@ class Item {
     return Object.assign({}, this);
   }
 }
-
-export default Item;

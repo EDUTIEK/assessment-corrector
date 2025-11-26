@@ -6,6 +6,7 @@ import {getStorage} from "@/lib/Storage";
 import {defineStore} from 'pinia';
 import {stores} from "@/store/index";
 import {nextTick} from "vue";
+import Item from "@/data/Item";
 
 const storage = getStorage('layout');
 
@@ -88,15 +89,13 @@ export const useLayoutStore = defineStore('layout', {
     leftCorrectionTitle: state => {
       const correctionsStore = stores.corrections();
       const correction = correctionsStore.getCorrection(state.leftCorrectionKey);
-      return correction ? 'Korrektur von ' + correction.title + ' ' + correctionsStore.getPositionText(
-        correction.correction_key) : ''
+      return correction ? 'Korrektur von ' + correction.title + ' ' + Item.buildPositionText(correction.position) : ''
     },
 
     rightCorrectionTitle: state => {
       const correctionsStore = stores.corrections();
       const correction = correctionsStore.getCorrection(state.rightCorrectionKey);
-      return correction ? 'Korrektur von ' + correction.title + ' ' + correctionsStore.getPositionText(
-        correction.correction_key) : ''
+      return correction ? 'Korrektur von ' + correction.title + ' '  + Item.buildPositionText(correction.position)  : ''
     },
 
     getCorrectionIsVisible: state => {
