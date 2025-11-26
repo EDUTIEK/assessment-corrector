@@ -12,15 +12,6 @@ const storage = getStorage('summaries');
 // set check interval very short to update the grade level according the points
 const checkInterval = 200;      // time (ms) to wait for a new update check (e.g. 0.2s to 1s)
 
-const startState = {
-  // saved in storage
-  summaries: {},              // list of all summary objects for the current item, indexed by key
-
-  // not saved in storage
-  editSummary: new Summary(), // summary of the currector correction that is actively edited
-  lastCheck: 0,               // timestamp (ms) of the last check if an update needs a storage
-}
-
 let lockUpdate = 0;             // prevent updates during a processing
 
 /**
@@ -28,7 +19,15 @@ let lockUpdate = 0;             // prevent updates during a processing
  */
 export const useSummariesStore = defineStore('summaries', {
   state: () => {
-    return startState;
+    return {
+      // saved in storage
+      summaries: {},              // list of all summary objects for the current item, indexed by key
+
+      // not saved in storage
+      editSummary: new Summary(), // summary of the currector correction that is actively edited
+      lastCheck: 0,               // timestamp (ms) of the last check if an update needs a storage
+    }
+
   },
 
   /**

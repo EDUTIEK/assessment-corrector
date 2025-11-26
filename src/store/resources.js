@@ -9,16 +9,15 @@ import axios from 'axios';
 import Resource from "@/data/Resource";
 
 const storage = getStorage('resources');
-const startState = {
-  resources: {},
-
-  /** @private  key of the active resource, may be outdated if the active task changes */
-  activeKey: ''
-};
 
 export const useResourcesStore = defineStore('resources', {
   state: () => {
-    return startState;
+    return {
+      resources: {},
+
+      /** @private  key of the active resource, may be outdated if the active task changes */
+      activeKey: ''
+    };
   },
 
   getters: {

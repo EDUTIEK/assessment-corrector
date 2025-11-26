@@ -8,21 +8,20 @@ import axios from 'axios';
 import Page from '@/data/Page';
 
 const storage = getStorage('pages');
-const startState = {
-  // saved in storage
-  pages: {},                      // collection of page objects for the currrent correction item, indexed by key
-
-  // not saved in storage
-  selectedKey: '',                // key of the currently selected page
-  minPage: 0,                     // minimum page number
-  maxPage: 0,                     // maximum page number
-  loadedThumbs: 0,                // counter of loaded thumbnails
-  loadedImages: 0,                // counter of loaded images
-}
 
 export const usePagesStore = defineStore('pages', {
   state: () => {
-    return startState;
+    return {
+      // saved in storage
+      pages: {},                      // collection of page objects for the current correction item, indexed by key
+
+      // not saved in storage
+      selectedKey: '',                // key of the currently selected page
+      minPage: 0,                     // minimum page number
+      maxPage: 0,                     // maximum page number
+      loadedThumbs: 0,                // counter of loaded thumbnails
+      loadedImages: 0,                // counter of loaded images
+    }
   },
 
   /**
@@ -174,9 +173,6 @@ export const usePagesStore = defineStore('pages', {
     /**
      * Load the pages data from the backend
      *
-     * All keys and pages are put to the storage
-     * Only the pages of the current item are loaded to the state
-     *
      * @param {array} data - array of plain objects
      * @public
      */
@@ -186,13 +182,16 @@ export const usePagesStore = defineStore('pages', {
         await storage.clear();
         this.purgeFiles();
         this.$reset();
+        console.log(this.pages);
+        console.log('load pages');
 
         for (const page_data of data) {
+          console.log(data);
           const page = new Page(page_data);
           page.url = apiStore.getImageUrl(page);
           page.thumb_url = apiStore.getThumbUrl(page);
-          await storage.setItem(page.getKey(), page.getData());
           if (page.item_key == apiStore.itemKey) {
+            await storage.setItem(page.getKey(), page.getData());
             this.pages[page.key] = page;
           }
         }

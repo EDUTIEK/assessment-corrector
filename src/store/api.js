@@ -92,7 +92,7 @@ export const useApiStore = defineStore('api', {
        */
       const fn = function (resource) {
         const config = this.getRequestConfig(this.fileToken);
-        return config.baseURL + '/correction/file/task/resource/' + resource.id + '?' + config.params.toString();
+        return config.baseURL + '/corrector/file/task/resource/' + resource.id + '?' + config.params.toString();
       }
       return fn;
     },
@@ -109,7 +109,7 @@ export const useApiStore = defineStore('api', {
        */
       const fn = function (page) {
         const config = this.getRequestConfig(this.fileToken);
-        return config.baseURL + '/correction/file/essaytask/image/' + page.id + '?' + config.params.toString();
+        return config.baseURL + '/corrector/file/essaytask/image/' + page.id + '?' + config.params.toString();
       }
       return fn;
     },
@@ -123,7 +123,7 @@ export const useApiStore = defineStore('api', {
        */
       const fn = function (page) {
         const config = this.getRequestConfig(this.fileToken);
-        return config.baseURL + '/correction/file/essaytask/thumb/' + page.id + '?' + config.params.toString();
+        return config.baseURL + '/corrector/file/essaytask/thumb/' + page.id + '?' + config.params.toString();
       }
       return fn;
     },

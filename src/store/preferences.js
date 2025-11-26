@@ -10,16 +10,15 @@ import Summary from '@/data/Summary';
 import Change from '@/data/Change';
 
 const storage = getStorage('preferences');
-const startState = {
-  // saved in storage
-  essay_page_zoom: 0.25,                              // zoom of a pdf page display
-  essay_text_zoom: 1,                                 // zoom of an essay text display
-  summary_text_zoom: 1,                               // zoom in the editor of the correction summary
-}
 
 export const usePreferencesStore = defineStore('preferences', {
   state: () => {
-    return startState;
+    return {
+      // saved in storage
+      essay_page_zoom: 0.25,                              // zoom of a pdf page display
+      essay_text_zoom: 1,                                 // zoom of an essay text display
+      summary_text_zoom: 1,                               // zoom in the editor of the correction summary
+    }
   },
 
   getters: {

@@ -7,20 +7,19 @@ import {stores} from "@/store/index";
 import Item from '@/data/Item';
 
 const storage = getStorage('items');
-const startState = {
-  // saved in storage
-  items: {},              // list of all items objects
-
-  // not saved
-  firstKey: null,
-  lastKey: null,
-  previousKey: null,
-  nextKey: null,
-}
 
 export const useItemsStore = defineStore('items', {
   state: () => {
-    return startState;
+    return {
+      // saved in storage
+      items: {},              // list of all items objects
+
+      // not saved
+      firstKey: null,
+      lastKey: null,
+      previousKey: null,
+      nextKey: null,
+    }
   },
 
   /**

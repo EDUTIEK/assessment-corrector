@@ -7,14 +7,12 @@ import {stores} from "@/store/index";
 import GradeLevel from "@/data/GradeLevel";
 
 const storage = getStorage('levels');
-const startState = {
-  // saved in storage
-  levels: {},             // list of level objects
-};
-
 export const useLevelsStore = defineStore('levels', {
   state: () => {
-    return startState;
+    return {
+      // saved in storage
+      levels: {},             // list of level objects
+    };
   },
 
   /**

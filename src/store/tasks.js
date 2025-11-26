@@ -9,20 +9,19 @@ import Task from "@/data/Task";
 import Item from "@/data/Item";
 
 const storage = getStorage('tasks');
-const startState = {
-  // saved in storage
-  tasks: {},              // all task objects, indexed by string key
-
-  // not saved
-  firstKey: null,
-  lastKey: null,
-  previousKey: null,
-  nextKey: null,
-};
 
 export const useTasksStore = defineStore('tasks', {
   state: () => {
-    return startState;
+    return {
+      // saved in storage
+      tasks: {},              // all task objects, indexed by string key
+
+      // not saved
+      firstKey: null,
+      lastKey: null,
+      previousKey: null,
+      nextKey: null,
+    };
   },
 
   getters: {

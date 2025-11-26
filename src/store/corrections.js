@@ -8,20 +8,18 @@ import Correction from '@/data/Correction';
 import i18n from "@/plugins/i18n";
 
 const storage = getStorage('corrections');
-const startState = {
-  // saved in storage
-  corrections: {},         // list of correction objects for the current item
-
-  // key of the correction of the current user for the current item
-  // set when data is loaded
-  ownKey: ''
-}
-
 const { t } = i18n.global;
 
 export const useCorrectionsStore = defineStore('corrections', {
   state: () => {
-    return startState;
+    return {
+      // saved in storage
+      corrections: {},         // list of correction objects for the current item
+
+      // key of the correction of the current user for the current item
+      // set when data is loaded
+      ownKey: ''
+    }
   },
 
   /**

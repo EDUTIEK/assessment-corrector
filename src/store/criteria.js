@@ -8,13 +8,12 @@ import Criterion from '@/data/Criterion'
 import Correction from "@/data/Correction";
 
 const storage = getStorage('criteria');
-const startState = {
-  criteria: {},             // list of criterion objects
-}
 
 export const useCriteriaStore = defineStore('criteria', {
   state: () => {
-    return startState;
+    return {
+      criteria: {},             // list of criterion objects
+    }
   },
 
   /**
