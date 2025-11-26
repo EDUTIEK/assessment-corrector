@@ -171,6 +171,9 @@ export const useChangesStore = defineStore('changes', {
      * @param {Change} change
      */
     async setChange(change) {
+      // todo: activate changes
+      return;
+
       if (change.isValid()) {
         this.changes[change.type][change.key] = change;
         await this.saveChangesOfTypeToStorage(change.type);

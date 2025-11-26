@@ -60,10 +60,16 @@ export const usePreferencesStore = defineStore('preferences', {
 
     async loadFromBackend(data) {
       try {
-        this.$patch(data);
-        this.sent = true;
+        if (data.essay_text_zoom) {
+          this.essay_text_zoom = data.essay_text_zoom;
+        }
+        if (data.essay_page_zoom) {
+          this.essay_page_zoom = data.essay_page_zoom;
+        }
+        if (data.summary_text_zoom) {
+          this.summary_text_zoom = data.summary_text_zoom;
+        }
         await this.saveToStorage();
-
       }
       catch (err) {
         console.log(err);

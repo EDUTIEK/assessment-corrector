@@ -44,7 +44,7 @@ export default class Correction {
    * @param {string} key
    * @returns {number|null}
    */
-  static extractCorretorId(key) {
+  static extractCorrectorId(key) {
     const matches = key.match(/C(\d+)_(\d+)_(\d+)/);
     return matches && matches[3] ? parseInt(matches[3]) : null;
   }

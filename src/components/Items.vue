@@ -92,7 +92,7 @@ async function changeItem(newKey) {
         id="app-items-autocomplete"
         v-if="selectionShown"
         v-model="selectedKey"
-        :items="itemsStore.items"
+        :items="itemsStore.sortedItems"
         :menu=true
         item-title="title"
         item-value="key"

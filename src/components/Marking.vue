@@ -79,7 +79,7 @@ function expansionClass() {
     <div v-if="!itemsStore.canAct && !summariesStore.isOneAuthorized">
       {{ $t('allEssayNoCorrectionAuthorized') }}
     </div>
-    <sum-of-points class='sumOfPoints' :correction_key="stores.corrections().ownKey"></sum-of-points>
+    <!-- <sum-of-points class='sumOfPoints' :correction_key="stores.corrections().ownKey"></sum-of-points> -->
   </div>
 </template>
 
