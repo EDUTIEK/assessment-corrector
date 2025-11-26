@@ -1,7 +1,6 @@
 <script setup>
 
 import {stores} from "@/store";
-import OwnSummaryIncludes from '@/components/OwnSummaryIncludes.vue';
 import SumOfPoints from "@/components/SumOfPoints.vue";
 import { ref } from 'vue';
 import Summary from "@/data/Summary";

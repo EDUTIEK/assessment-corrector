@@ -369,7 +369,7 @@ export const useCommentsStore = defineStore('comments', {
       const apiStore = stores.api();
       const correctionsStore = stores.corrections();
 
-      this.comments = this.comments.sort(Comment.order());
+      this.comments = this.comments.sort(Comment.order);
 
       let parent = 0;
       let numbers = {};

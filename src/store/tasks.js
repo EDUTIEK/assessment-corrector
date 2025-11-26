@@ -4,6 +4,7 @@
  */
 import {getStorage} from "@/lib/Storage";
 import {defineStore} from 'pinia';
+import {stores} from "@/store/index";
 import Task from "@/data/Task";
 import Item from "@/data/Item";
 

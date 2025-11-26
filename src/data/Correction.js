@@ -27,12 +27,8 @@ export default class Correction {
    * @returns {number|null}
    */
   static extractTaskId(key) {
-    const start = 1;
-    const end = key.indexOf('_');
-    if (end > 1) {
-      return parseInt(key.substring(start, end));
-    }
-    return null;
+    const matches = key.match(/C(\d+)_(\d+)_(\d+)/);
+    return matches && matches[1] ? parseInt(matches[1]) : null;
   }
 
   /**
@@ -40,26 +36,17 @@ export default class Correction {
    * @returns {number|null}
    */
   static extractWriterId(key) {
-    const start = key.indexOf('_');
-    if (start > 1) {
-      const end = key.indexOf('_', start) + 1;
-      return parseInt(key.substring(start, end));
-    }
-    return null;
+    const matches = key.match(/C(\d+)_(\d+)_(\d+)/);
+    return matches && matches[2] ? parseInt(matches[2]) : null;
   }
 
   /**
    * @param {string} key
    * @returns {number|null}
    */
-  static extractCorrectorId(key) {
-    const start1 = key.indexOf('_');
-    if (start1 > 1) {
-      const start2 = key.indexOf('_', start1) + 1;
-      if (start2 > start1)
-        return parseInt(key.substring(start2));
-    }
-    return null;
+  static extractCorretorId(key) {
+    const matches = key.match(/C(\d+)_(\d+)_(\d+)/);
+    return matches && matches[3] ? parseInt(matches[3]) : null;
   }
 
   /**

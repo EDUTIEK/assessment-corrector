@@ -9,6 +9,8 @@ import i18n from "@/plugins/i18n";
 import Summary from '@/data/Summary';
 import Procedure from '@/data/Procedure';
 
+const { t } = i18n.global;
+
 const storage = getStorage('settings');
 const startState = {
   Assessment: {
@@ -35,8 +37,6 @@ const startState = {
     headline_scheme: null,                            // headline scheme of the essay
   }
 }
-
-const { t } = i18n.global;
 
 export const useSettingsStore = defineStore('settings', {
   state: () => {
@@ -100,7 +100,7 @@ export const useSettingsStore = defineStore('settings', {
     async loadFromBackend(component, data) {
       this.$state[component] = Object.assign(this.$state[component], data);
       try {
-        await storage.setItem(component, this.$state[component]);
+        await storage.setItem(component, Object.assign({}, this.$state[component]));
       }
       catch (err) {
         console.log(err);

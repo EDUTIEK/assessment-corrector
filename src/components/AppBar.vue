@@ -4,7 +4,6 @@
  */
 import Help from "@/components/Help.vue";
 import Items from "@/components/Items.vue";
-import StitchDecision from "@/components/StitchDecision.vue";
 import Authorization from '@/components/Authorization.vue';
 import {stores} from "@/store";
 import { nextTick, watch } from 'vue';

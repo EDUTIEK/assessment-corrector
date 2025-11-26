@@ -44,7 +44,14 @@ export const useItemsStore = defineStore('items', {
     },
 
     sortedItems(state) {
-      return this.getSortedItemsOfTask(Item.extractTaskId(stores.api().itemKey));
+      if (stores.api().itemKey) {
+        const task_id = Item.extractTaskId(stores.api().itemKey)
+        return Object.values(state.items)
+            .filter(item => item.task_id == task_id)
+            .toSorted(Item.order);
+      } else {
+        return Object.values(state.items).toSorted(Item.order);
+      }
     },
 
     canAct(state) {
@@ -61,18 +68,6 @@ export const useItemsStore = defineStore('items', {
 
     canRevise(state) {
       return state.currentItem?.can_revise;
-    },
-
-    getSortedItemsOfTask(state) {
-      /**
-       * Get the sorted items of a task
-       */
-      const fn = function (task_id) {
-        return Object.values(state.items)
-            .filter(item => item.task_id == task_id)
-            .toSorted(Item.order);
-      }
-      return fn;
     },
 
     getItem(state) {
@@ -111,6 +106,7 @@ export const useItemsStore = defineStore('items', {
         for (const key of keys) {
           this.items[key] = new Item(await storage.getItem(key));
         }
+        this.updateCurrentKeys();
       }
       catch (err) {
         console.log(err);
@@ -128,6 +124,7 @@ export const useItemsStore = defineStore('items', {
           await storage.setItem(item.getKey(), item.getData());
         }
         await storage.setItem('keys', Object.keys(this.items));
+        this.updateCurrentKeys();
       }
       catch (err) {
         console.log(err);

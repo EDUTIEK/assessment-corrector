@@ -6,7 +6,7 @@
 
 // Plugins
 import vuetify from './vuetify'
-import pinia from '../store'
+import pinia from './pinia'
 import i18n from './i18n'
 
 export function registerPlugins(app) {

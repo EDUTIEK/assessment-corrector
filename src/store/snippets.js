@@ -121,7 +121,7 @@ export const useSnippetsStore = defineStore('snippets', {
           this.snippets.push(snippet);
           this.snippets = this.snippets.sort(Snippet.order);
         }
-        await storage.setItem('keys', this.keys);
+        await storage.setItem('keys', Object.keys(this.snippets));
       }
       catch (err) {
         console.log(err);

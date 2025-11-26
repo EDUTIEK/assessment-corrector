@@ -168,6 +168,14 @@ export const useApiStore = defineStore('api', {
   actions: {
 
     /**
+     * Clear the store
+     * Don't clear local variables of the api store
+     */
+    async clearStorage() {
+      localStorage.clear();
+    },
+
+    /**
      * Init the state
      * Take the state from the cookies or local store
      * Trigger a reload of all data if cookie values differ from local store
@@ -183,7 +191,7 @@ export const useApiStore = defineStore('api', {
       this.userId = localStorage.getItem('xlasCorrectionUserId');
       this.assId = localStorage.getItem('xlasWriterAssId');
       this.contextId = localStorage.getItem('xlasCorrectionContextId');
-      this.itemKey = localStorage.getItem('correctionItemKey');
+      this.itemKey = localStorage.getItem('correctionItemKey') ?? '';
       this.dataToken = localStorage.getItem('xlasCorrectionDataToken');
       this.fileToken = localStorage.getItem('xlasCorrectionFileToken');
       this.timeOffset = Math.floor(localStorage.getItem('xlasCorrectionTimeOffset') ?? 0);
@@ -218,14 +226,14 @@ export const useApiStore = defineStore('api', {
       }
 
       // these values can be changed without forcing a whole reload
-      if (Cookies.get('LongEssayBackend') != undefined && Cookies.get('LongEssayBackend') !== this.backendUrl) {
-        this.backendUrl = Cookies.get('LongEssayBackend');
+      if (Cookies.get('xlasBackendUrl') != undefined && Cookies.get('xlasBackendUrl') !== this.backendUrl) {
+        this.backendUrl = Cookies.get('xlasBackendUrl');
       }
-      if (Cookies.get('LongEssayReturn') != undefined && Cookies.get('LongEssayReturn') !== this.returnUrl) {
-        this.returnUrl = Cookies.get('LongEssayReturn');
+      if (Cookies.get('xlasReturnUrl') != undefined && Cookies.get('xlasReturnUrl') !== this.returnUrl) {
+        this.returnUrl = Cookies.get('xlasReturnUrl');
       }
-      if (Cookies.get('LongEssayToken') != undefined && Cookies.get('LongEssayToken') !== this.dataToken) {
-        this.dataToken = Cookies.get('LongEssayToken');
+      if (Cookies.get('xlasToken') != undefined && Cookies.get('xlasToken') !== this.dataToken) {
+        this.dataToken = Cookies.get('xlasToken');
       }
 
       if (!this.backendUrl || !this.returnUrl || !this.userId || !this.assId || !this.contextId || !this.dataToken) {
@@ -312,15 +320,14 @@ export const useApiStore = defineStore('api', {
     updateConfig() {
       // remove the cookies
       // needed to distinct the call from the backend from a later reload
-      Cookies.remove('LongEssayBackend');
-      Cookies.remove('LongEssayReturn');
+      Cookies.remove('xlasBackendUrl');
+      Cookies.remove('xlasReturnUrl');
       Cookies.remove('xlasUserId');
       Cookies.remove('xlasAssId');
       Cookies.remove('xlasContextId');
       Cookies.remove('xlasTaskId');
       Cookies.remove('xlasWriterId');
-      Cookies.remove('LongEssayItem');
-      Cookies.remove('LongEssayToken');
+      Cookies.remove('xlasToken');
 
       localStorage.setItem('xlasCorrectionBackendUrl', this.backendUrl);
       localStorage.setItem('xlasCorrectionReturnUrl', this.returnUrl);
@@ -404,7 +411,7 @@ export const useApiStore = defineStore('api', {
 
       let response = {};
       try {
-        response = await axios.get('/data', this.getRequestConfig(this.dataToken));
+        response = await axios.get('/corrector/data', this.getRequestConfig(this.dataToken));
         this.setTimeOffset(response);
         this.refreshToken(response);
       }
@@ -443,7 +450,7 @@ export const useApiStore = defineStore('api', {
       this.clearAllIntervals();
 
       const itemsStore = stores.items();
-      if (itemKey == '' || stores.items().getItem(itemKey) == undefined) {
+      if (itemKey == '' || !stores.items().getItem(itemKey)) {
         itemKey = itemsStore.firstKey
       }
 
@@ -451,7 +458,7 @@ export const useApiStore = defineStore('api', {
       const task_id = Item.extractTaskId(itemKey);
       const writer_id = Item.extractWriterId(itemKey);
       try {
-        response = await axios.get('/item/' + task_id + '/' + writer_id, this.getRequestConfig(this.dataToken));
+        response = await axios.get('/corrector/item/' + task_id + '/' + writer_id, this.getRequestConfig(this.dataToken));
         this.setTimeOffset(response);
         this.refreshToken(response);
       }
@@ -473,20 +480,21 @@ export const useApiStore = defineStore('api', {
       // this avoids a race condition on quick navigation between writers
       await stores.changes().clearStorage();
 
-      await stores.corrections().loadFromBackend(response.data.data['Task']['Corrections']);
-      await stores.criteria().loadFromBackend(response.data.data['Task']['Criteria']);
+      await stores.essay().loadFromBackend(response.data['EssayTask']['Essay']);
+      await stores.pages().loadFromBackend(response.data['EssayTask']['Pages']);
+
+      await stores.corrections().loadFromBackend(response.data['Task']['Corrections']);
+      await stores.criteria().loadFromBackend(response.data['Task']['Criteria']);
       await stores.comments().loadFromBackend(response.data['Task']['Comments']);
       await stores.points().loadFromBackend(response.data['Task']['Points']);
       await stores.summaries().loadFromBackend(response.data['Task']['Summaries']);
-
-      await stores.essay().loadFromBackend(response.data['EssayTask']['Essay']);
-      await stores.pages().loadFromBackend(response.data['EssayTask']['Pages']);
 
       stores.comments().setMarkerChange();
       stores.items().updateCurrentKeys();
       stores.tasks().updateCurrentKeys();
       this.setLoading(false);
-      this.setInterval('apiStore.saveChangesToBackend', this.saveChangesToBackend, sendInterval);
+      // todo: activete
+      // this.setInterval('apiStore.saveChangesToBackend', this.saveChangesToBackend, sendInterval);
       return true;
     },
 
@@ -575,14 +583,14 @@ export const useApiStore = defineStore('api', {
      * Within this time a new REST call must be made to get a new valid token
      */
     refreshToken(response) {
-      if (response.headers['longessaydatatoken']) {
-        this.dataToken = response.headers['longessaydatatoken'];
-        localStorage.setItem('xlasCorrectionDataToken', this.dataToken);
+      if (response.headers['xlasdatatoken']) {
+        this.dataToken = response.headers['xlasdatatoken'];
+        localStorage.setItem('xlasCorrectorDataToken', this.dataToken);
       }
 
-      if (response.headers['longessayfiletoken']) {
-        this.fileToken = response.headers['longessayfiletoken'];
-        localStorage.setItem('xlasCorrectionFileToken', this.fileToken);
+      if (response.headers['xlasfiletoken']) {
+        this.fileToken = response.headers['xlasfiletoken'];
+        localStorage.setItem('xlasCorrectorFileToken', this.fileToken);
       }
     },
 

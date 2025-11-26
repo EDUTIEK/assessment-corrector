@@ -38,12 +38,8 @@ class Item {
    * @returns {number|null}
    */
   static extractTaskId(key) {
-    const start = 1;
-    const end = key.indexOf('_');
-    if (end > 1) {
-      return parseInt(key.substring(start, end));
-    }
-    return null;
+    const matches = key.match(/I(\d+)_(\d+)/);
+    return matches && matches[1] ? parseInt(matches[1]) : null;
   }
 
   /**
@@ -51,11 +47,8 @@ class Item {
    * @returns {number|null}
    */
   static extractWriterId(key) {
-    const start = key.indexOf('_');
-    if (start > 1) {
-      return parseInt(key.substring(start));
-    }
-    return null;
+    const matches = key.match(/I(\d+)_(\d+)/);
+    return matches && matches[2] ? parseInt(matches[2]) : null;
   }
 
   /**

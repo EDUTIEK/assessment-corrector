@@ -336,7 +336,7 @@ export const useSummariesStore = defineStore('summaries', {
         // ensure it is not changed because it is bound to tiny
         const clonedSummary = this.editSummary.getClone();
 
-        if (!clonedSummary.isEqual(storedSummary) && this.keys.includes(clonedSummary.getKey())) {
+        if (!clonedSummary.isEqual(storedSummary) && Object.keys(this.summaries).includes(clonedSummary.getKey())) {
           const apiStore = stores.api();
           const changesStore = stores.changes();
 

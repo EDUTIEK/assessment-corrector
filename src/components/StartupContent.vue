@@ -55,7 +55,7 @@ import {stores} from "@/store";
           <p>{{ $t('startupContentDataReplaceInfo2') }}</p>
         </v-card-text>
         <v-card-actions>
-          <v-btn @click="stores.api().layout().initAfterReplaceDataConfirmed">
+          <v-btn @click="stores.api().initAfterReplaceDataConfirmed">
             <v-icon left icon="mdi-reload"></v-icon>
             <span>{{ $t('startupContentDeleteAndLoad') }}</span>
           </v-btn>

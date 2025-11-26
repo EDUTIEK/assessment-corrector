@@ -1,6 +1,5 @@
 <script setup>
 import {stores} from "@/store";
-import OwnSummaryIncludes from '@/components/OwnSummaryIncludes.vue';
 import SumOfPoints from "@/components/SumOfPoints.vue";
 
 const apiStore = stores.api();
