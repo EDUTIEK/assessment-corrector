@@ -1,6 +1,7 @@
 import i18n from "@/plugins/i18n";
 import Summary from "@/data/Summary";
 import Correction from "@/data/Correction";
+import Task from "@/data/Task";
 const { t } = i18n.global;
 
 /**
@@ -224,6 +225,7 @@ export default class Item {
     if (this.key === null) {
       this.key = Item.buildKey(this.task_id, this.writer_id);
     }
+
     if (this.title === null) {
       this.title = Item.buildTitle(this);
     }
@@ -234,6 +236,13 @@ export default class Item {
    */
   getKey() {
     return this.key
+  }
+
+  /**
+   * @return {string}
+   */
+  getTaskKey() {
+    return Task.buildKey(this.task_id);
   }
 
   /**

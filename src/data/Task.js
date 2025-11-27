@@ -61,7 +61,6 @@ export default class Task {
      */
     key = null;
 
-
     /**
      * Constructor - gets properties from a data object
      * @param {object} data

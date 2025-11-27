@@ -19,6 +19,7 @@
     "allInstructionsPdf": "Aufgabenstellung als PDF",
     "allIsSelected": ", ist ausgewählt",
     "allLoad": "Laden",
+    "allLoadData": "Lade Daten ...",
     "allMark": "Markieren",
     "allNotes": "Notizen",
     "allNotesWillPurged": "Notizen, werden bei der Abgabe verworfen",
@@ -146,7 +147,6 @@
     "helpToolbarNavigate": "In Symbolleiste zwischen Schaltflächen wechseln",
     "instructionsZoomOut": "Aufgabenstellung Text verkleinern",
     "instructionsZoomIn": "Aufgabenstellung Text vergrößern",
-    "itemsLoadData": "Lade Daten ...",
     "itemsPreviousWriter": "Vorheriger Teilnehmer",
     "itemsNextWriter": "Nächster Teilnehmer",
     "itemsSuffixApproximation": "- in Annäherung",
@@ -255,5 +255,8 @@
     "summaryPointsGrade": "Note:",
     "summaryPointsInclude": "Einbeziehen:",
     "summaryPointsRating": "Bewertung:",
+    "tasksNextTask": "Nächste Teilaufgabe",
+    "tasksPreviousTask": "Vorherige Teilaufgabe",
+    "tasksTask": "Teilaufgabe",
     "tinyHelperIframeAriaText": "Gutachten-Editor"
 }

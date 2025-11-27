@@ -6,6 +6,7 @@ import Item from "@/data/Item";
 
 const apiStore = stores.api();
 const itemsStore = stores.items();
+const tasksStore = stores.tasks();
 
 const menuOpen = ref(false);
 const selectionShown = ref(false);
@@ -22,43 +23,43 @@ async function showSelection() {
   }
 }
 
-async function selectItem() {
+async function selectTask() {
   menuOpen.value = false;
-  itemsStore.changeItem(selectedKey.value);
+  itemsStore.changeItem(itemsStore.getByTask(selectedKey.value)?.key);
 }
 
 </script>
 
 <template>
 
-  <v-btn :disabled="apiStore.isLoading || !itemsStore.previousKey"
-         @click="itemsStore.changeItem(itemsStore.previousKey)">
+  <v-btn :disabled="apiStore.isLoading || !tasksStore.previousKey"
+         @click="itemsStore.changeItem(itemsStore.getByTask(tasksStore.previousKey)?.key)">
     <v-icon left icon="mdi-arrow-left-bold"></v-icon>
-    <span class="sr-only">{{ $t('itemsPreviousWriter') }}</span>
+    <span class="sr-only">{{ $t('tasksPreviousTask') }}</span>
   </v-btn>
 
-  <v-btn :disabled="apiStore.isLoading" id="app-items-menu-activator">
+  <v-btn :disabled="apiStore.isLoading" id="app-tasks-menu-activator">
       <span v-show="apiStore.isLoading">
         {{ $t('allLoadData') }}
       </span>
     <span v-show="!apiStore.isLoading && itemsStore.currentItem !== undefined">
-        {{ itemsStore.currentItem.title }}
+        {{ tasksStore.currentTask?.title }}
       </span>
   </v-btn>
 
-  <v-btn :disabled="apiStore.isLoading || !itemsStore.nextKey"
-         @click="itemsStore.changeItem(itemsStore.nextKey)">
+  <v-btn :disabled="apiStore.isLoading || !tasksStore.nextKey"
+         @click="itemsStore.changeItem(itemsStore.getByTask(tasksStore.nextKey)?.key)">
     <v-icon left icon="mdi-arrow-right-bold"></v-icon>
-    <span class="sr-only">{{ $t('itemsNextWriter') }}</span>
+    <span class="sr-only">{{ $t('tasksNextTask') }}</span>
   </v-btn>
 
-  <v-menu :disabled="apiStore.isLoading" v-model="menuOpen" activator="#app-items-menu-activator"
+  <v-menu :disabled="apiStore.isLoading" v-model="menuOpen" activator="#app-tasks-menu-activator"
           :close-on-content-click="false" @update:modelValue="showSelection()">
     <v-autocomplete
-        id="app-items-autocomplete"
+        id="app-taks-autocomplete"
         v-if="selectionShown"
         v-model="selectedKey"
-        :items="itemsStore.sortedItems"
+        :items="tasksStore.sortedTasks"
         :menu=true
         item-title="title"
         item-value="key"
@@ -68,12 +69,16 @@ async function selectItem() {
         density="comfortable"
         item-props
         menu-icon=""
-        :placeholder="$t('itemsWriter')"
+        :placeholder="$t('tasksTasks')"
         prepend-inner-icon="mdi-magnify"
         theme="light"
         variant="solo"
-        @update:modelValue="selectItem()"
+        @update:modelValue="selectTask()"
     ></v-autocomplete>
   </v-menu>
-
 </template>
+
+
+<style scoped>
+
+</style>

@@ -83,6 +83,29 @@ export const useItemsStore = defineStore('items', {
       }
       return fn;
     },
+
+    getByTask(state) {
+      /**
+       * Get the first item of a task
+       *
+       * @param {string} taskKey
+       * @param {object} key
+       * @return Item
+       */
+      const fn = function (taskKey) {
+
+        const item = Object.values(state.items)
+            .find(item => item.getTaskKey() == taskKey && item.writer_id == state.currentItem?.writer_id);
+        if (item) {
+          return item;
+        }
+
+        return Object.values(state.items)
+            .toSorted(Item.order)
+            .find(item => item.getTaskKey() == taskKey);
+      }
+      return fn;
+    }
   },
 
   actions: {
@@ -146,6 +169,20 @@ export const useItemsStore = defineStore('items', {
     },
 
     /**
+     * Change to a new item
+     * @param string {newKey}
+     */
+    async changeItem(newKey) {
+      if (newKey && !stores.api().isLoading) {
+        if (!(await stores.changes().hasChangesInStorage()) || await stores.api().saveChangesToBackend(true)) {
+          await stores.api().loadItemFromBackend(newKey);
+        } else {
+          stores.layout().showSendFailure = true;
+        }
+      }
+    },
+
+    /**
      * Update the first, last, previous and next key
      */
     updateCurrentKeys() {
@@ -171,24 +208,3 @@ export const useItemsStore = defineStore('items', {
     }
   }
 });
-
-
-function statusText(item) {
-  const status = itemsStore.currentItem?.correction_status;
-  switch (status) {
-    case Item.STATUS_OPEN:
-      return summariesStore.isOwnAuthorized ? t('itemsSuffixAuthorized')
-          : summariesStore.isOwnPregraded ?  t('itemsSuffixPregraded')
-              : t('itemsSuffixOpen');
-    case Item.STATUS_APPROXIMATION:
-      return t('itemsSuffixApproximation');
-    case Item.STATUS_CONSULTING:
-      return t('itemsSuffixConsulting');
-    case Item.STATUS_STITCH:
-      return t('itemsSuffixStitch');
-    case Item.STATUS_FINALIZED:
-      return t('itemsSuffixFinalized');
-  }
-
-
-}

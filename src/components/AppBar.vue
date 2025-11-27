@@ -4,6 +4,7 @@
  */
 import Help from "@/components/Help.vue";
 import Items from "@/components/Items.vue";
+import Tasks from "@/components/Tasks.vue";
 import Authorization from '@/components/Authorization.vue';
 import {stores} from "@/store";
 import { nextTick, watch } from 'vue';
@@ -40,6 +41,7 @@ async function returnToBackend() {
 
 <template>
   <v-app-bar elevation="1" color="white" density="compact">
+    <tasks v-if="stores.tasks().countTasks > 1"/>
     <items/>
     <v-spacer></v-spacer>
     <help></help>
