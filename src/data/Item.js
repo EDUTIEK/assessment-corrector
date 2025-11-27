@@ -2,6 +2,7 @@ import i18n from "@/plugins/i18n";
 import Summary from "@/data/Summary";
 import Correction from "@/data/Correction";
 import Task from "@/data/Task";
+import {stores} from "@/store/index";
 const { t } = i18n.global;
 
 /**
@@ -73,16 +74,19 @@ export default class Item {
    * @return {string}
    */
   static buildPositionText(position) {
-    switch (position) {
-      case Correction.POSITION_FIRST:
-        return t('correctionsFirstCorrection')
-      case Correction.POSITION_SECOND:
-        return t('correctionsSecondCorrection')
-      case Correction.POSITION_STITCH:
-        return t('correctionsSecondCorrection')
-      default:
-        return '';
+    if (stores.settings().Assessment.multiple_correctors) {
+      switch (position) {
+        case Correction.POSITION_FIRST:
+          return t('correctionsFirstCorrection')
+        case Correction.POSITION_SECOND:
+          return t('correctionsSecondCorrection')
+        case Correction.POSITION_STITCH:
+          return t('correctionsSecondCorrection')
+        default:
+          return '';
+      }
     }
+    return ''
   }
 
   /**
