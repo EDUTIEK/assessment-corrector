@@ -268,6 +268,7 @@ export const useCommentsStore = defineStore('comments', {
       this.selectComment(comment.key, true);
 
       // then save the comment
+      // JSON is needed because comments have nestes mark data
       await storage.setItem(comment.key, JSON.stringify(comment.getData()));
       await storage.setItem('keys', JSON.stringify(this.keys));
       await changesStore.setChange(new Change({
@@ -282,7 +283,7 @@ export const useCommentsStore = defineStore('comments', {
 
     /**
      * Update a comment in the store
-     * @param {bool} trigger a dorting and labelling of the comments
+     * @param {bool} trigger a sorting and labelling of the comments
      * @param {Comment} comment
      * @public
      */
@@ -295,6 +296,7 @@ export const useCommentsStore = defineStore('comments', {
         && comment.correction_key == stores.corrections().ownKey
         && !summariesStore.isOwnDisabled
       ) {
+        // JSON is needed because comments have nestes mark data
         await storage.setItem(comment.key, JSON.stringify(comment.getData()));
         await changesStore.setChange(new Change({
           type: Change.TYPE_COMMENT,
@@ -499,6 +501,7 @@ export const useCommentsStore = defineStore('comments', {
         this.showOtherCorrections = !!JSON.parse(await storage.getItem('showOtherCorrections'));
 
         for (const key of this.keys) {
+          // JSON is needed because comments have nestes mark data
           const comment = new Comment(JSON.parse(await storage.getItem(key)));
           if (comment.item_key == apiStore.itemKey) {
             this.comments.push(comment);
@@ -532,6 +535,7 @@ export const useCommentsStore = defineStore('comments', {
         for (const comment_data of data) {
           const comment = new Comment(comment_data);
           this.keys.push(comment.key);
+          // JSON is needed because comments have nestes mark data
           await storage.setItem(comment.key, JSON.stringify(comment.getData()));
           if (comment.item_key == apiStore.itemKey) {
             this.comments.push(comment);
@@ -570,75 +574,6 @@ export const useCommentsStore = defineStore('comments', {
       }
       ;
       return changes;
-    },
-
-
-    /**
-     * Update the keys of comments after sending to the backend
-     * A key is changed from a temporary string to a numeric value for a saved comment
-     * A new key is null for a deleted comment
-     *
-     * @param {object} matches - assoc array with old and new string keys
-     * @return string new selected key or null if key is the same
-     */
-    async updateKeys(matches = {}) {
-
-      let removedKeys = [];       // old keys of removed comments
-      let changedKeys = [];       // old keys that are changed
-      let changedComments = [];   // comment objects with changed keys
-
-      // collect the changes in the storage (all correction items)
-      for (const key of this.keys) {
-        if (key in matches) {
-          if (matches[key] == null) {
-            removedKeys.push(key);
-          } else if (key != matches[key]) {
-            let comment = new Comment(JSON.parse(await storage.getItem(key)));
-            comment.key = matches[key];
-            changedKeys.push(key);
-            changedComments.push(comment);
-          }
-        }
-      }
-
-      // treat the changes in the state (curent correction item)
-      let newSelectedKey = null;
-      if (changedKeys.includes(this.selectedKey)) {
-        newSelectedKey = matches[this.selectedKey];
-        this.selectComment(newSelectedKey, false);
-      }
-      this.comments = this.comments.filter(comment => !removedKeys.includes(comment.key));
-      for (const comment of this.comments) {
-        if (changedKeys.includes(comment.key)) {
-          comment.key = matches[comment.key];
-        }
-      }
-      let newFilterKeys = [];
-      for (const key of this.filterKeys) {
-        if (changedKeys.includes(key)) {
-          newFilterKeys.push(matches[key]);
-        } else {
-          newFilterKeys.push(key);
-        }
-      }
-      this.filterKeys = newFilterKeys; // no setFilterChange here
-
-      // save the changes to the storage
-      this.keys = this.keys.filter(key => !removedKeys.includes(key) && !changedKeys.includes(key));
-      for (const key of removedKeys) {
-        await storage.removeItem(key);
-      }
-      for (const key of changedKeys) {
-        this.keys.push(matches[key]);
-        await storage.removeItem(key);
-      }
-      for (const comment of changedComments) {
-        await storage.setItem(comment.key, JSON.stringify(comment.getData()));
-      }
-      await storage.setItem('keys', JSON.stringify(this.keys));
-
-      // defer setting the change
-      return newSelectedKey;
     }
   }
 });

@@ -7,10 +7,13 @@ import Criterion from "@/data/Criterion";
  */
 export default class Points {
 
+  static newKey(corrector_id) {
+    return 'P' + corrector_id + '_' + Math.random().toString();
+  }
+
   /**
    * Unique identifier of the points
-   * Will be auto-generated for new points with random alpanumeric key
-   * Will be replaces with a numeric key when the points are stored in the backend
+   * Will be auto-generated for new points
    * @type {string}
    */
   key = '';
@@ -77,14 +80,10 @@ export default class Points {
 
     if (data.key !== undefined && data.key !== null) {
       this.key = data.key.toString()
-    } else {
-      // get a temporary random key
-      this.key = 'temp' + Math.random().toString();
     }
     if (data.comment_key !== undefined && data.comment_key !== null) {
       this.comment_key = data.comment_key.toString();
     }
-
     if (data.task_id !== undefined && data.task_id !== null) {
       this.task_id = parseInt(data.task_id);
     }
@@ -100,7 +99,9 @@ export default class Points {
     if (data.points !== undefined && data.points !== null) {
       this.points = parseFloat(data.points);
     }
-
+    if (!this.key && this.corrector_id) {
+      this.key = Points.newKey(this.corrector_id);
+    }
     if (!this.item_key && this.task_id && this.writer_id) {
       this.item_key = Item.buildKey(this.task_id, this.writer_id)
     }
@@ -124,7 +125,8 @@ export default class Points {
     this.writer_id = Correction.extractWriterId(this.correction_key);
     this.corrector_id = Correction.extractCorrectorId(this.correction_key);
     this.criterion_id = Criterion.extractCriterionId(this.criterion_key);
-    this.item_key = Item.buildKey(this.task_id, this.writer_id)
+    this.item_key = Item.buildKey(this.task_id, this.writer_id);
+    this.key = Points.newKey(this.corrector_id);
   }
 
   /**

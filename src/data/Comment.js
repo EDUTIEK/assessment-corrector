@@ -31,16 +31,13 @@ export default class Comment {
     }
   }
 
-  static buildKey(id) {
-    if (id) {
-      return 'C' + id;
-    }
+  static newKey(corrector_id) {
+    return 'C' + corrector_id + '_' + Math.random().toString();
   }
 
   /**
    * Unique identifier of the comment
-   * Will be auto-generated for a new comment with random alpanumeric key (starting with 'temp')
-   * Will be replaced with a numeric key when the comment is stored in the backend
+   * Will be auto-generated for a new comment
    * @type {string}
    */
   key = '';
@@ -147,9 +144,6 @@ export default class Comment {
 
     if (data.key !== undefined && data.key !== null) {
       this.key = data.key.toString()
-    } else {
-      // get a temporary random key
-      this.key = 'temp' + Math.random().toString();
     }
     if (data.task_id !== undefined && data.task_id !== null) {
       this.task_id = parseInt(data.task_id);
@@ -186,6 +180,9 @@ export default class Comment {
       }
     }
 
+    if (!this.key && this.corrector_id) {
+      this.key = Comment.newKey(this.corrector_id);
+    }
     if (!this.item_key && this.task_id && this.writer_id) {
       this.item_key = Item.buildKey(this.task_id, this.writer_id)
     }
@@ -203,7 +200,8 @@ export default class Comment {
     this.task_id = Correction.extractTaskId(this.correction_key);
     this.writer_id = Correction.extractWriterId(this.correction_key);
     this.corrector_id = Correction.extractCorrectorId(this.correction_key);
-    this.item_key = Item.buildKey(this.task_id, this.writer_id)
+    this.item_key = Item.buildKey(this.task_id, this.writer_id);
+    this.key = Comment.newKey(this.corrector_id);
   }
 
   /**

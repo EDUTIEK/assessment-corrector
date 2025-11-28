@@ -511,49 +511,36 @@ export const useApiStore = defineStore('api', {
       // don't interfer with a running request
       if (!(await this.isSending(true))) {
         this.setSending(true);
-        try {
-          const data = {
-            comments: await stores.comments().getChangedData(this.lastSendingTry),
-            points: await stores.points().getChangedData(this.lastSendingTry),
-            summaries: await stores.summaries().getChangedData(this.lastSendingTry),
-            snippets: await stores.snippets().getChangedData(this.lastSendingTry),
-            preferences: await stores.preferences().getChangedData(this.lastSendingTry),
-          };
 
-          const response = await axios.put('/correction/changes/', data, this.getRequestConfig(this.dataToken));
-          this.setTimeOffset(response);
-          this.refreshToken(response);
+        const changesStore = stores.changes();
+        if (changesStore.countChanges > 0) {
 
-          const newSelectedKey = await stores.comments().updateKeys(response.data.comments);
-          await stores.points().changeCommentKeys(response.data.comments);
-          await stores.points().updateKeys(response.data.points);
+          try {
+            const data = {'Task': {}};
+            data['Task'][Change.TYPE_COMMENT] = await stores.comments().getChangedData(this.lastSendingTry);
+            data['Task'][Change.TYPE_POINTS] = await stores.points().getChangedData(this.lastSendingTry);
+            data['Task'][Change.TYPE_SUMMARY] = await stores.summaries().getChangedData(this.lastSendingTry);
+            data['Task'][Change.TYPE_SNIPPETS] = await stores.snippets().getChangedData(this.lastSendingTry);
+            data['Task'][Change.TYPE_PREFERENCES] = await stores.preferences().getChangedData(this.lastSendingTry);
 
-          // trigger selection change for the comment
-          if (newSelectedKey !== null) {
-            await stores.comments().selectComment(newSelectedKey, true);
+            const response = await axios.put('/correction/changes/', data, this.getRequestConfig(this.dataToken));
+            this.setTimeOffset(response);
+            this.refreshToken(response);
+
+            for (const component in response.data ?? []) {
+              const changes = response.data[component];
+              for (const type in changes ?? []) {
+                await changesStore.setChangesSent(type, changes[type],  this.lastSendingTry)
+              }
+            }
           }
+          catch (error) {
+            console.error(error);
+            this.setSending(false);
+            return false;
+          }
+        }
 
-          await stores.changes().setChangesSent(Change.TYPE_COMMENT,
-            response.data.comments,
-            this.lastSendingTry);
-          await stores.changes().setChangesSent(Change.TYPE_POINTS,
-            response.data.points,
-            this.lastSendingTry);
-          await stores.changes().setChangesSent(Change.TYPE_SUMMARY,
-            response.data.summaries,
-            this.lastSendingTry);
-          await stores.changes().setChangesSent(Change.TYPE_SNIPPETS,
-              response.data.snippets,
-              this.lastSendingTry);
-          await stores.changes().setChangesSent(Change.TYPE_PREFERENCES,
-            response.data.preferences,
-            this.lastSendingTry);
-        }
-        catch (error) {
-          console.error(error);
-          this.setSending(false);
-          return false;
-        }
         this.setSending(false);
       }
 
