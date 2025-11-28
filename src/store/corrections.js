@@ -44,7 +44,7 @@ export const useCorrectionsStore = defineStore('corrections', {
      * @returns {Correction|null}
      */
     ownCorrection(state) {
-      return state.allCorrections.find(element => element.key != state.ownKey) ?? null
+      return state.allCorrections.find(element => element.key == state.ownKey) ?? null
     },
 
     /**

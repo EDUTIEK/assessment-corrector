@@ -81,7 +81,7 @@ export const useCriteriaStore = defineStore('criteria', {
       return fn;
     },
 
-    getCorrectionCommentCriteria: state => {
+    getCorrectionCommentCriteria(state) {
 
       /**
        * Get the comments related criteria of a correction
