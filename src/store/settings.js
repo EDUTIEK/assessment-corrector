@@ -54,7 +54,7 @@ export const useSettingsStore = defineStore('settings', {
       if (state.Task.enable_comments) {
         text = (text ? text + ', ' : '') + t('summariesIncludeComments');
       }
-      if (state.Task.include_comment_ratings) {
+      if (state.Task.enable_comment_ratings) {
         text = (text ? text + ', ' : '') + t('summariesIncludeCommentRatings');
       }
       if (state.Task.enable_partial_points) {

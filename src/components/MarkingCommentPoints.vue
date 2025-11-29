@@ -22,8 +22,11 @@ async function loadPoints() {
   criteriaPoints.value = {};
   for (const criterion of criteriaStore.getCorrectionCommentCriteria(correction_key.value)) {
     const pointsObject = pointsStore.getObjectByData(correction_key.value, comment_key.value, criterion.key);
-    criteriaPoints.value[criterion.key] = (pointsObject ? pointsObject.points : 0);
+    criteriaPoints.value[criterion.key] = pointsObject?.points ?? 0;
   }
+  // criterion_key '' means points given without criterion
+  const pointsObject = pointsStore.getObjectByData(correction_key.value, comment_key.value, '');
+  criteriaPoints.value[''] = pointsObject?.points ?? 0;
 }
 
 loadPoints();
@@ -34,9 +37,9 @@ function savePoints(criterionKey) {
 }
 
 async function handleFocusChange() {
-  if (layoutStore.focusTarget == 'markingCommentCriteria') {
+  if (layoutStore.focusTarget == 'MarkingCommentPoints') {
     await nextTick();
-    document.getElementById('appMarkingCommentCriteriaStart').focus();
+    document.getElementById('appMarkingCommentPointsStart').focus();
   }
 }
 watch(() => layoutStore.focusChange, handleFocusChange);
@@ -46,11 +49,10 @@ async function handleKeyDown(event) {
   switch (event.key) {
     case 'Escape':
       event.preventDefault();
-      layoutStore.focusMarkingCommentCriteriaSum();
+      layoutStore.focusMarkingCommentPointsSum();
       break;
   }
 }
-
 
 </script>
 
@@ -58,23 +60,42 @@ async function handleKeyDown(event) {
 <template>
   <div>
     <p class="info" v-if="comment_key == ''">
-      {{ $t('markingCommentCriteriaPleaseSelect') }}
+      {{ $t('markingCommentPointsPleaseSelect') }}
     </p>
     <v-table v-if="comment_key != ''" density="compact">
       <thead>
       <tr>
         <th class="col-left">
-          <span id="appMarkingCommentCriteriaStart" tabindex="0" @keydown="handleKeyDown">{{ $t('markingCommentsCriteriaCriterion') }}</span>
+          <span id="appMarkingCommentPointsStart" tabindex="0" @keydown="handleKeyDown">{{ $t('markingCommentPointsCriterion') }}</span>
         </th>
         <th class="col-mid text-right">
           {{ $t('allPoints', 0) }}
         </th>
         <th class="col-right text-right">
-          {{ $t('markingCommentCriteriaSumOfMax') }}
+          {{ $t('markingCommentPointsSumOfMax') }}
         </th>
       </tr>
       </thead>
       <tbody>
+      <!-- points without criterion -->
+      <tr>
+        <td class="col-left">
+          <label tabindex="0" @keydown="handleKeyDown" for="app-points-input-without">{{ $t('markingCommentPointsWithoutCriterion') }}</label>
+        </td>
+        <td class="col-mid text-right">
+          <input class="appPoints" type="number" v-model="criteriaPoints['']"
+                 id="pp-points-input-without"
+                 :disabled="summariesStore.isOwnDisabled || comment_key == '' || correction_key != stores.corrections().ownKey"
+                 :max="settingStore.Assessment.max_points"
+                 @change="savePoints('')"
+                 @keydown="handleKeyDown"
+          />
+        </td>
+        <td :class="'col-right text-right ' + (pointsStore.getPointsOfCriterionExceeded(null, correction_key) ? 'red' : '')">
+          {{ pointsStore.getSumOfPointsForCorrection(correction_key, true, false) }} / {{ settingStore.Assessment.max_points }}
+        </td>
+      </tr>
+      <!-- criteria points -->
       <tr v-for="criterion in criteriaStore.getCorrectionCommentCriteria(correction_key)" :key="criterion.key">
         <td class="col-left">
           <label tabindex="0" @keydown="handleKeyDown" :for="'app-points-input-' + criterion.key">{{ criterion.title }}</label>

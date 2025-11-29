@@ -65,8 +65,8 @@ export const usePointsStore = defineStore('points', {
        * Get the sum of points given by a correction
        *
        * @param {string} correction_key
-       * @param {bool} with_comment
-       * @param {bool} with_criterion
+       * @param {bool|null} with_comment
+       * @param {bool|null} with_criterion
        * @returns {number}
        */
       const fn = function (correction_key, with_comment = null, with_criterion = null) {
@@ -125,16 +125,17 @@ export const usePointsStore = defineStore('points', {
       /**
        * Get if the sum of points given to a criterion by a correction exceeds the maximum points of this criterion
        *
-       * @param {Criterion} criterion
+       * @param {Criterion|null} criterion
        * @param {string} comment_key
        * @returns {number}
        */
       const fn = function (criterion, correction_key) {
         let sum = 0;
+        const criterion_key = criterion?.key ?? '';
         state.points
-          .filter(points => points.criterion_key == criterion.key && points.correction_key == correction_key)
+          .filter(points => points.criterion_key == criterion_key && points.correction_key == correction_key)
           .forEach(points => sum += points.points);
-        return sum > criterion.points;
+        return sum > (criterion ? criterion.points : stores.settings().Assessment.max_points);
       }
       return fn;
     },

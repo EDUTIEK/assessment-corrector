@@ -20,6 +20,7 @@ const resourcesStore = stores.resources();
 const commentsStore = stores.comments();
 const criteriaStore = stores.criteria();
 const pagesStore = stores.pages();
+const settingsStore = stores.settings();
 
 async function handleFocusChange() {
   if (layoutStore.focusTarget == 'appHeadLeft') {
@@ -153,22 +154,22 @@ document.addEventListener('keydown', layoutStore.handleKeyDown);
               <span class="sr-only">{{$t('allShow') + (layoutStore.showMarkingComments ? $t('allIsSelected') : '')}}</span>
             </v-btn>
 
-            <!-- toggle marking comment criteria -->
-            <v-btn size="small" v-show="criteriaStore.hasCommentCriteria && layoutStore.isMarkingVisible"
-                   @click="layoutStore.toggleMarkingCommentCriteria()">
-              <v-icon v-show="layoutStore.showMarkingCommentCriteria" icon="mdi-checkbox-outline"></v-icon>
-              <v-icon v-show="!layoutStore.showMarkingCommentCriteria" icon="mdi-checkbox-blank-outline"></v-icon>
+            <!-- toggle marking comment points -->
+            <v-btn size="small" v-if="settingsStore.Task.enable_partial_points" v-show="layoutStore.isMarkingVisible"
+                   @click="layoutStore.toggleMarkingCommentPoints()">
+              <v-icon v-show="layoutStore.showMarkingCommentPoints" icon="mdi-checkbox-outline"></v-icon>
+              <v-icon v-show="!layoutStore.showMarkingCommentPoints" icon="mdi-checkbox-blank-outline"></v-icon>
               <span>{{ $t('allPartialPoints') }}</span>
-              <span class="sr-only">{{$t('allShow') + (layoutStore.showMarkingCommentCriteria ? $t('allIsSelected') : '')}}</span>
+              <span class="sr-only">{{$t('allShow') + (layoutStore.showMarkingCommentPoints ? $t('allIsSelected') : '')}}</span>
             </v-btn>
 
-            <!-- toggle marking general criteria -->
-            <v-btn size="small" v-show="criteriaStore.hasOwnGeneralCriteria && layoutStore.isMarkingVisible"
-                   @click="layoutStore.toggleMarkingGeneralCriteria()">
-              <v-icon v-show="layoutStore.showMarkingGeneralCriteria" icon="mdi-checkbox-outline"></v-icon>
-              <v-icon v-show="!layoutStore.showMarkingGeneralCriteria" icon="mdi-checkbox-blank-outline"></v-icon>
+            <!-- toggle marking general points -->
+            <v-btn size="small" v-if="settingsStore.Task.enable_partial_points && criteriaStore.hasOwnGeneralCriteria" v-show="layoutStore.isMarkingVisible"
+                   @click="layoutStore.toggleMarkingGeneralPoints()">
+              <v-icon v-show="layoutStore.showMarkingGeneralPoints" icon="mdi-checkbox-outline"></v-icon>
+              <v-icon v-show="!layoutStore.showMarkingGeneralPoints" icon="mdi-checkbox-blank-outline"></v-icon>
               <span>{{ $t('allGeneralPoints') }}</span>
-              <span class="sr-only">{{$t('allShow') + (layoutStore.showMarkingGeneralCriteria ? $t('allIsSelected') : '')}}</span>
+              <span class="sr-only">{{$t('allShow') + (layoutStore.showMarkingGeneralPoints ? $t('allIsSelected') : '')}}</span>
             </v-btn>
 
             <!-- toggle marking text -->

@@ -1,7 +1,7 @@
 <script setup>
 import MarkingComments from "@/components/MarkingComments.vue";
-import MarkingCommentCriteria from "@/components/MarkingCommentCriteria.vue";
-import MarkingGeneralCriteria from "@/components/MarkingGeneralCriteria.vue";
+import MarkingCommentPoints from "@/components/MarkingCommentPoints.vue";
+import MarkingGeneralPoints from "@/components/MarkingGeneralPoints.vue";
 import OwnSummaryText from "@/components/OwnSummaryText.vue";
 import SumOfPoints from "@/components/SumOfPoints.vue";
 
@@ -13,17 +13,23 @@ const itemsStore = stores.items();
 const commentsStore = stores.comments();
 const criteriaStore = stores.criteria();
 const summariesStore = stores.summaries();
+const settingsStore = stores.settings();
 
 function markingCommentsShown() {
   return layoutStore.showMarkingComments && (itemsStore.canAct || summariesStore.isOneAuthorized)
 }
 
-function markingGeneralCriteriaShown() {
-  return layoutStore.showMarkingGeneralCriteria && criteriaStore.hasOwnGeneralCriteria && (itemsStore.canAct || summariesStore.isOneAuthorized)
+function MarkingGeneralPointsShown() {
+  return settingsStore.Task.enable_partial_points
+      && layoutStore.showMarkingGeneralPoints
+      && criteriaStore.hasOwnGeneralCriteria
+      && (itemsStore.canAct || summariesStore.isOneAuthorized)
 }
 
-function markingCommentCriteriaShown() {
-  return layoutStore.showMarkingCommentCriteria && criteriaStore.hasCommentCriteria && (itemsStore.canAct || summariesStore.isOneAuthorized)
+function MarkingCommentPointsShown() {
+  return settingsStore.Task.enable_partial_points
+      && layoutStore.showMarkingCommentPoints
+      && (itemsStore.canAct || summariesStore.isOneAuthorized)
 }
 
 function markingTextShown() {
@@ -32,8 +38,8 @@ function markingTextShown() {
 
 function expansionClass() {
   const sum = (markingCommentsShown() ? 1 : 0)
-      + (markingGeneralCriteriaShown() ? 1 : 0)
-      + (markingCommentCriteriaShown() ? 1 : 0)
+      + (MarkingGeneralPointsShown() ? 1 : 0)
+      + (MarkingCommentPointsShown() ? 1 : 0)
       + (markingTextShown() ? 1 : 0);
   switch (sum) {
     case 0:
@@ -58,16 +64,16 @@ function expansionClass() {
       <marking-comments class="content"></marking-comments>
     </div>
 
-    <div v-if="markingCommentCriteriaShown()" :class="expansionClass()">
+    <div v-if="MarkingCommentPointsShown()" :class="expansionClass()">
       <h2 class="headline">{{ $t('allPartialPointsLong') }}<span v-show="commentsStore.selectedKey != ''"
                                                           class="commentLabel">{{ commentsStore.selectedLabel }}</span> </h2>
-      <marking-comment-criteria class="content"></marking-comment-criteria>
+      <marking-comment-points class="content"></marking-comment-points>
     </div>
 
 
-    <div v-if="markingGeneralCriteriaShown()" :class="expansionClass()">
+    <div v-if="MarkingGeneralPointsShown()" :class="expansionClass()">
       <h2 class="headline">{{ $t('allGeneralPointsLong') }}</h2>
-      <marking-general-criteria class="content"></marking-general-criteria>
+      <marking-general-points class="content"></marking-general-points>
     </div>
 
     <!-- v-if neeed to avoid simultaneous data binding with summary text  -->

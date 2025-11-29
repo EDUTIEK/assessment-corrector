@@ -174,7 +174,7 @@ export const useItemsStore = defineStore('items', {
      */
     async changeItem(newKey) {
       if (newKey && !stores.api().isLoading) {
-        if (!(await stores.changes().hasChangesInStorage()) || await stores.api().saveChangesToBackend(true)) {
+        if (stores.changes().countChanges == 0 || await stores.api().saveChangesToBackend(true)) {
           await stores.api().loadItemFromBackend(newKey);
         } else {
           stores.layout().showSendFailure = true;

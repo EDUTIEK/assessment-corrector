@@ -153,13 +153,13 @@ async function handleSumOfPointsKeydown() {
   switch (event.key) {
     case "Enter":
       event.preventDefault();
-      layoutStore.focusMarkingCommentCriteria();
+      layoutStore.focusMarkingCommentPoints();
       break;
   }
 }
 
 async function handleFocusChange() {
-  if (layoutStore.focusTarget == 'markingCommentCriteriaSum') {
+  if (layoutStore.focusTarget == 'MarkingCommentPointsSum') {
     await nextTick();
     if (comment.key == commentsStore.selectedKey) {
       document.getElementById('pointsInput' + comment.key).focus();
@@ -251,25 +251,10 @@ watch(() => snippetsStore.selection_open, handleSnippet);
 
             <!-- enter points -->
             <v-col cols="3">
-              <span v-if="criteriaStore.getCorrectionHasCommentCriteria(comment.correction_key)">
-                  <span tabindex="0" class="pointsSum"
-                        :id="'pointsInput' + comment.key"
-                        @keydown="handleSumOfPointsKeydown()"
-                  >{{ $t('markingCommentSum')}} {{ getPointsDisplay(comment) }} {{ getPointsLabel(comment) }}</span>
-              </span>
-              <span v-if="!criteriaStore.getCorrectionHasCommentCriteria(comment.correction_key)">
-                <input class="pointsInput"
-                       type="number"
-                       :style=getPointsInputStyle(comment)
-                       :id="'pointsInput' + comment.key"
-                       :max="settingsStore.Assessment.max_points"
-                       :disabled="summariesStore.isOwnDisabled || comment.correction_key != stores.corrections().ownKey"
-                       @change="pointsStore.setValueByCommentOrCriterion(comment.key, '', comment_points)"
-                       @keydown="handleTextKeydown()"
-                       v-model="comment_points"/>
-                <label :for="'pointsInput' + comment.key">&nbsp;{{ getPointsLabel(comment) }}</label>
-              </span>
-
+                <span tabindex="0" class="pointsSum"
+                      :id="'pointsInput' + comment.key"
+                      @keydown="handleSumOfPointsKeydown()"
+                >{{ $t('markingCommentSum')}} {{ getPointsDisplay(comment) }} {{ getPointsLabel(comment) }}</span>
             </v-col>
 
             <!-- enter rating excellent -->
@@ -326,11 +311,8 @@ watch(() => snippetsStore.selection_open, handleSnippet);
             <v-col cols=3>
             </v-col>
             <v-col cols=3>
-              <span v-if="criteriaStore.getCorrectionHasCommentCriteria(comment.correction_key)" v-show="getPointsDisplay(comment) > 0">
+              <span v-show="getPointsDisplay(comment) > 0">
                 <span class="pointsSum">{{ $t('markingCommentSum')}} {{ getPointsDisplay(comment) }} {{ getPointsLabel(comment) }}</span>
-              </span>
-              <span v-if="!criteriaStore.getCorrectionHasCommentCriteria(comment.correction_key)" v-show="getPointsDisplay(comment) > 0">
-                <span class="pointsInput">{{ getPointsDisplay(comment) }}</span>&nbsp;{{ getPointsLabel(comment) }}
               </span>
             </v-col>
 

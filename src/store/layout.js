@@ -19,8 +19,8 @@ export const useLayoutStore = defineStore('layout', {
       rightContent: 'marking',            // summary|marking|correction
 
       showMarkingComments: true,          // display of the comments on marking column
-      showMarkingGeneralCriteria: true,   // display of the general criteria on marking column
-      showMarkingCommentCriteria: true,   // display of the comment criteria on marking column
+      showMarkingGeneralPoints: true,   // display of the general criteria on marking column
+      showMarkingCommentPoints: true,   // display of the comment criteria on marking column
       showMarkingText: false,             // display of the summary text on marking column
 
       showLeftSummaryCriteria: true,      // display of the criteria table on the left summary column
@@ -135,8 +135,8 @@ export const useLayoutStore = defineStore('layout', {
           this.expandedColumn = data.expandedColumn;
           this.rightContent = data.rightContent;
           this.showMarkingComments = !!data.showMarkingComments,
-          this.showMarkingGeneralCriteria = !!data.showMarkingGeneralCriteria,
-          this.showMarkingCommentCriteria = !!data.showMarkingCommentCriteria,
+          this.showMarkingGeneralPoints = !!data.showMarkingGeneralPoints,
+          this.showMarkingCommentPoints = !!data.showMarkingCommentPoints,
           this.showMarkingText = !!data.showMarkingText,
           this.showLeftSummaryCriteria = !!data.showLeftSummaryCriteria;
           this.showRightSummaryCriteria = !!data.showRightSummaryCriteria;
@@ -144,7 +144,7 @@ export const useLayoutStore = defineStore('layout', {
           this.showRightSummaryText = !!data.showRightSummaryText;
         }
 
-        if (!this.showMarkingComments && !this.showMarkingGeneralCriteria && !this.showMarkingCommentCriteria) {
+        if (!this.showMarkingComments && !this.showMarkingGeneralPoints && !this.showMarkingCommentPoints) {
           this.showMarkingComments = true;
         }
         if (!this.showLeftSummaryCriteria && !this.showLeftSummaryText) {
@@ -166,8 +166,8 @@ export const useLayoutStore = defineStore('layout', {
           leftContent: this.leftContent,
           rightContent: this.rightContent,
           showMarkingComments: this.showMarkingComments,
-          showMarkingGeneralCriteria: this.showMarkingGeneralCriteria,
-          showMarkingCommentCriteria: this.showMarkingCommentCriteria,
+          showMarkingGeneralPoints: this.showMarkingGeneralPoints,
+          showMarkingCommentPoints: this.showMarkingCommentPoints,
           showMarkingText: this.showMarkingText,
           showLeftSummaryCriteria: this.showLeftSummaryCriteria,
           showRightSummaryCriteria: this.showRightSummaryCriteria,
@@ -282,28 +282,28 @@ export const useLayoutStore = defineStore('layout', {
       this.saveToStorage();
     },
 
-    focusMarkingCommentCriteriaSum() {
+    focusMarkingCommentPointsSum() {
       if (!this.showMarkingComments) {
         this.showMarkingComments = true;
         this.saveToStorage();
       }
-      this.setFocusChange('markingCommentCriteriaSum');
+      this.setFocusChange('MarkingCommentPointsSum');
     },
 
-    focusMarkingGeneralCriteria() {
-      if (!this.showMarkingGeneralCriteria) {
-        this.showMarkingGeneralCriteria = true;
+    focusMarkingGeneralPoints() {
+      if (!this.showMarkingGeneralPoints) {
+        this.showMarkingGeneralPoints = true;
         this.saveToStorage();
       }
-      this.setFocusChange('markingGeneralCriteria');
+      this.setFocusChange('MarkingGeneralPoints');
     },
 
-    focusMarkingCommentCriteria() {
-      if (!this.showMarkingCommentCriteria) {
-        this.showMarkingCommentCriteria = true;
+    focusMarkingCommentPoints() {
+      if (!this.showMarkingCommentPoints) {
+        this.showMarkingCommentPoints = true;
         this.saveToStorage();
       }
-      this.setFocusChange('markingCommentCriteria');
+      this.setFocusChange('MarkingCommentPoints');
     },
 
     toggleMarkingComments() {
@@ -311,13 +311,13 @@ export const useLayoutStore = defineStore('layout', {
       this.saveToStorage();
     },
 
-    toggleMarkingGeneralCriteria() {
-      this.showMarkingGeneralCriteria = !this.showMarkingGeneralCriteria
+    toggleMarkingGeneralPoints() {
+      this.showMarkingGeneralPoints = !this.showMarkingGeneralPoints
       this.saveToStorage();
     },
 
-    toggleMarkingCommentCriteria() {
-      this.showMarkingCommentCriteria = !this.showMarkingCommentCriteria
+    toggleMarkingCommentPoints() {
+      this.showMarkingCommentPoints = !this.showMarkingCommentPoints
       this.saveToStorage();
     },
 

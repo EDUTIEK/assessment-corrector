@@ -124,7 +124,9 @@ export default class Points {
     this.task_id = Correction.extractTaskId(this.correction_key);
     this.writer_id = Correction.extractWriterId(this.correction_key);
     this.corrector_id = Correction.extractCorrectorId(this.correction_key);
-    this.criterion_id = Criterion.extractCriterionId(this.criterion_key);
+    if (criterion_key) {
+      this.criterion_id = Criterion.extractCriterionId(this.criterion_key);
+    }
     this.item_key = Item.buildKey(this.task_id, this.writer_id);
     this.key = Points.newKey(this.corrector_id);
   }

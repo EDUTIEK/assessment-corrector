@@ -219,7 +219,9 @@ export const useApiStore = defineStore('api', {
       }
 
       const changesStore = stores.changes();
-      if (await changesStore.hasChangesInStorage()) {
+      await changesStore.loadFromStorage();
+
+      if (changesStore.countChanges > 0) {
         if (newContext) {
           console.log('init: open saving, new context');
           await this.loadDataFromStorage();

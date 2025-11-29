@@ -30,7 +30,7 @@ watch(() => layoutStore.focusChange, handleFocusChange);
 
 
 async function returnToBackend() {
-  if (!(await changesStore.hasChangesInStorage()) || await apiStore.saveChangesToBackend(true)) {
+  if (stores.changes().countChanges == 0 || await apiStore.saveChangesToBackend(true)) {
     window.location = apiStore.returnUrl;
   } else {
     stores.layout().showSendFailure = true;
