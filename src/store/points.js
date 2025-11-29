@@ -268,14 +268,11 @@ export const usePointsStore = defineStore('points', {
         type: Change.TYPE_POINTS,
         action: Change.ACTION_DELETE,
         key: points.key,
-        item_key: points.item_key
+        item_key: points.item_key,
+        payload: points.getData()
       });
 
-      if (remove_key.substr(0, 4) == 'temp') {
-        await changesStore.unsetChange(change);
-      } else {
-        await changesStore.setChange(change);
-      }
+      await changesStore.setChange(change);
     },
 
     /**

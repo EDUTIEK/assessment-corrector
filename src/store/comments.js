@@ -351,15 +351,11 @@ export const useCommentsStore = defineStore('comments', {
         type: Change.TYPE_COMMENT,
         action: Change.ACTION_DELETE,
         key: comment.key,
-        item_key: comment.item_key
+        item_key: comment.item_key,
+        payload: comment.getData()
       });
 
-      if (removeKey.substr(0, 4) == 'temp') {
-        await changesStore.unsetChange(change);
-
-      } else {
-        await changesStore.setChange(change);
-      }
+      await changesStore.setChange(change);
     },
 
     /**

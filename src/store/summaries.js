@@ -291,9 +291,7 @@ export const useSummariesStore = defineStore('summaries', {
     async updateContent(fromEditor = false, force = false) {
 
       const storedSummary = this.summaries[this.editSummary.getKey()] ?? new Summary();
-
-      // don't update if not changeable
-      if (!storedSummary.isChangeable()) {
+      if (!storedSummary.isChangeable() || storedSummary.isEqual(this.editSummary)) {
         return;
       }
 
