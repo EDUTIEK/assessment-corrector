@@ -141,28 +141,6 @@ export const useApiStore = defineStore('api', {
       }
       return fn;
     },
-
-    /**
-     * todo: refactor (see writer)
-     */
-    getChangeDataToSend(state) {
-
-      /**
-       * Get the data of a change to be sent to the backend
-       * @param {Change} change
-       * @param {object|null} payload
-       */
-      const fn = function (change, payload = null) {
-        const data = change.getData();
-        if (payload) {
-          data.payload = payload;
-        }
-        data.server_time = state.getServerTime(change.last_change);
-        return data;
-      }
-      return fn;
-    }
-
   },
 
   actions: {
@@ -191,7 +169,7 @@ export const useApiStore = defineStore('api', {
       this.userId = localStorage.getItem('xlasCorrectorUserId');
       this.assId = localStorage.getItem('xlasCorrectorAssId');
       this.contextId = localStorage.getItem('xlasCorrectorContextId');
-      this.itemKey = localStorage.getItem('correctionItemKey') ?? '';
+      this.itemKey = localStorage.getItem('xlasCorrectorItemKey') ?? '';
       this.dataToken = localStorage.getItem('xlasCorrectorDataToken');
       this.fileToken = localStorage.getItem('xlasCorrectorFileToken');
       this.timeOffset = Math.floor(localStorage.getItem('xlasCorrectorTimeOffset') ?? 0);
@@ -213,16 +191,15 @@ export const useApiStore = defineStore('api', {
       // these values just need a reload of the item
       let task_id = Item.extractTaskId(this.itemKey);
       let writer_id = Item.extractWriterId(this.itemKey);
-      if (Cookies.get('xlasTaskId') != undefined && Cookies.get('xlasTaskId') !== task_id) {
+      if (Cookies.get('xlasTaskId') != undefined && Cookies.get('xlasTaskId') !== task_id
+        && Cookies.get('xlasWriterId') != undefined && Cookies.get('xlasWriterId') !== writer_id) {
+        newItem = true;
         task_id = Cookies.get('xlasTaskId');
-        newItem = true;
-      }
-      if (Cookies.get('xlasWriterId') != undefined && Cookies.get('xlasWriterId') !== writer_id) {
         writer_id = Cookies.get('xlasWriterId');
-        newItem = true;
-      }
-      if (newItem) {
         this.itemKey = Item.buildKey(task_id, writer_id);
+      }
+      if (!this.itemKey) {
+        newItem = true;
       }
 
       // these values can be changed without forcing a whole reload
@@ -267,6 +244,7 @@ export const useApiStore = defineStore('api', {
      */
     async initAfterReplaceDataConfirmed() {
       console.log('initAfterReplaceDataConfirmed');
+      await clearAllStores();
       stores.layout().showDataReplaceConfirmation = false;
       stores.layout().showItemReplaceConfirmation = false;
 
@@ -406,7 +384,6 @@ export const useApiStore = defineStore('api', {
       console.log("loadDataFromBackend...");
 
       this.setLoading(true);
-      await clearAllStores();
       this.clearAllIntervals();
 
       let response = {};
@@ -472,7 +449,7 @@ export const useApiStore = defineStore('api', {
       // set the itemKey here before loading and check it in the loadFromBackend() functions
       // otherwise a fast navigation between writers may cause wrong assignments (race condition)
       this.itemKey = itemKey;
-      localStorage.setItem('itemKey', this.itemKey);
+      localStorage.setItem('xlasCorrectorItemKey', this.itemKey);
       await itemsStore.saveItem(new Item(response.data['Task']['Item']));
       
 
@@ -507,23 +484,22 @@ export const useApiStore = defineStore('api', {
      * @return bool
      */
     async saveChangesToBackend(wait = false) {
+      const changesStore = stores.changes();
 
-      // don't interfer with a running request
-      if (!(await this.isSending(true))) {
-        this.setSending(true);
+      if (changesStore.countChanges > 0) {
+        // don't interfer with a running request
+        if (!(await this.isSending(true))) {
 
-        const changesStore = stores.changes();
-        if (changesStore.countChanges > 0) {
-
+          this.setSending(true);
           try {
             const data = {'Task': {}};
+            data['Task'][Change.TYPE_SNIPPETS] = await stores.snippets().getChangedData(this.lastSendingTry);
+            data['Task'][Change.TYPE_PREFERENCES] = await stores.preferences().getChangedData(this.lastSendingTry);
             data['Task'][Change.TYPE_COMMENT] = await stores.comments().getChangedData(this.lastSendingTry);
             data['Task'][Change.TYPE_POINTS] = await stores.points().getChangedData(this.lastSendingTry);
             data['Task'][Change.TYPE_SUMMARY] = await stores.summaries().getChangedData(this.lastSendingTry);
-            data['Task'][Change.TYPE_SNIPPETS] = await stores.snippets().getChangedData(this.lastSendingTry);
-            data['Task'][Change.TYPE_PREFERENCES] = await stores.preferences().getChangedData(this.lastSendingTry);
 
-            const response = await axios.put('/correction/changes/', data, this.getRequestConfig(this.dataToken));
+            const response = await axios.put('/corrector/changes', data, this.getRequestConfig(this.dataToken));
             this.setTimeOffset(response);
             this.refreshToken(response);
 
@@ -539,12 +515,10 @@ export const useApiStore = defineStore('api', {
             this.setSending(false);
             return false;
           }
+          this.setSending(false);
         }
-
-        this.setSending(false);
       }
-
-      return true;
+      return changesStore.countChanges == 0;
     },
 
     /**

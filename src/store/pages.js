@@ -154,7 +154,7 @@ export const usePagesStore = defineStore('pages', {
         this.$reset();
 
         const keys = await storage.getItem('keys');
-        for (const key of this.keys) {
+        for (const key of keys) {
           const page = new Page(await storage.getItem(key));
           if (page.item_key == apiStore.itemKey) {
             this.pages[key] = page;

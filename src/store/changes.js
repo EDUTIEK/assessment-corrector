@@ -1,21 +1,25 @@
 /**
  * Changes Store
  *
- * This stores unsent change markers for all created, updated or deleted objects of certain types, e.g. Comment
- * The stored changes just give the type, keys and timestamp of the change
- * The actual changed will be  added as a payload when the change is sent to the backend
+ * stores unsent change markers for all created, updated or deleted objects of certain types, e.g. WritingStep
+ * stored changes just give the type, keys and timestamp of the change
+ * the actual changed data will be added as a payload when the change is sent to the backend
  */
+import Change from '@/data/Change';
+import ChangeResponse from "@/data/ChangeReponse";
 import {getStorage} from "@/lib/Storage";
 import {defineStore} from 'pinia';
-import Change from '@/data/Change';
+import {stores} from "@/store/index";
 
 const storage = getStorage('changes');
 
 function startState() {
   const state = {
-    changes: {}
+    changes: {},
+    lastSave: 0,            // timestamp (ms) of the last saving in the storage
+    lastSendingSuccess: 0   // timestamp (ms) of the last successful sending to the backend
   };
-  for (const type of Change.ALLOWED_TYPES) {
+  for (const type of Change.STORED_TYPES) {
     state.changes[type] = {};   // changes of objects of the type that have to be sent to the backend: key => Change
   }
   return state;
@@ -36,31 +40,27 @@ export const useChangesStore = defineStore('changes', {
      * @param {object} state
      * @returns {number}
      */
-    countChanges: state => {
+    countChanges(state) {
       let count = 0;
-      for (const type in state.changes) {
+      for (const type of Change.STORED_TYPES) {
         count += Object.keys(state.changes[type]).length;
       }
       return count;
     },
 
-    getCountOfChangesFor: state => {
+    getChangesCount(state) {
 
       /**
-       * Get the count of changes for an object type
-       * @param {string} type see Change.ALLOWED_TYPES
-       * @returns {number}
+       * Get the number of changes of a type
+       * @param {string} types - change types to count
        */
       const fn = function (type) {
-        if (!Change.ALLOWED_TYPES.includes(type)) {
-          return 0;
-        }
-        return Object.keys(state.changes[type]).length;
+        return Object.keys(state.changes[type] ?? []).length;
       }
       return fn;
-    },
+    } ,
 
-    getChangesFor: state => {
+    getChangesFor(state) {
 
       /**
        * Get the changes of a type
@@ -70,7 +70,7 @@ export const useChangesStore = defineStore('changes', {
        * @see setChangesSent
        */
       const fn = function (type, maxTime = 0) {
-        if (!Change.ALLOWED_TYPES.includes(type)) {
+        if (!Change.STORED_TYPES.includes(type)) {
           return [];
         }
         const changes = [];
@@ -84,6 +84,25 @@ export const useChangesStore = defineStore('changes', {
       }
       return fn;
     },
+
+    getChangeDataToSend(state) {
+
+      /**
+       * Get the data of a change to be sent to the backend
+       * @param {Change} change
+       * @param {object|null} payload
+       */
+      const fn = function (change, payload = null) {
+        const data = change.getData();
+        if (payload) {
+          data.payload = payload;
+        }
+        // convert javascript time to unix time for the backend
+        data.last_change = stores.api().getServerTime(change.last_change);
+        return data;
+      }
+      return fn;
+    }
   },
 
   actions: {
@@ -94,13 +113,12 @@ export const useChangesStore = defineStore('changes', {
      */
     async clearStorage() {
       try {
+        this.$reset();
         await storage.clear();
       }
       catch (err) {
         console.log(err);
       }
-      // initialize the state
-      this.$reset();
     },
 
     /**
@@ -109,41 +127,25 @@ export const useChangesStore = defineStore('changes', {
      * @public
      */
     async loadFromStorage() {
-      const state = startState();
+      this.$reset();
 
       try {
-        for (const type in state.changes) {
-          const stored = await storage.getItem(type);
-          if (stored) {
+        for (const type in this.changes) {
+          const keys = await storage.getItem(type) ?? [];
+          for (const key of keys) {
+            const stored = await storage.getItem(Change.buildChangeKey(type, key));
             const parsed = JSON.parse(stored);
             if (typeof parsed === 'object' && parsed !== null) {
-              for (const key in parsed) {
-                state.changes[type][key] = new Change(parsed[key]);
-              }
+              this.changes[type][key] = new Change(parsed);
             }
           }
         }
+        this.lastSave = parseInt(await storage.getItem('lastSave'));
+        this.lastSendingSuccess = parseInt(await storage.getItem('lastSendingSuccess'));
       }
       catch (err) {
         console.log(err);
       }
-
-      // replace the state with a new one
-      this.$patch(state);
-    },
-
-    /**
-     * Save changes of a type to the storage
-     * Saves the change objects as plain data
-     * @param {string} type see Change.ALLOWED_TYPES
-     */
-    async saveChangesOfTypeToStorage(type) {
-      const data = {};
-      for (const key in this.changes[type]) {
-        const change = this.changes[type][key];
-        data[key] = change.getData();
-      }
-      await storage.setItem(type, JSON.stringify(data));
     },
 
     /**
@@ -152,17 +154,10 @@ export const useChangesStore = defineStore('changes', {
      */
     async hasChangesInStorage() {
       for (const type in this.changes) {
-        const stored = await storage.getItem(type);
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          if (Object.keys(parsed).length > 0) {
-            return true;
-          }
-        }
+        const keys = await storage.getItem(type) ?? [];
+        return keys.length > 0;
       }
-      return false;
     },
-
 
     /**
      * Set a change and save the changes
@@ -171,12 +166,12 @@ export const useChangesStore = defineStore('changes', {
      * @param {Change} change
      */
     async setChange(change) {
-      // todo: activate changes
-      return;
-
       if (change.isValid()) {
         this.changes[change.type][change.key] = change;
-        await this.saveChangesOfTypeToStorage(change.type);
+        await storage.setItem(change.getChangeKey(), JSON.stringify(change.getData()));
+        await storage.setItem(change.type, Object.keys(this.changes[change.type]));
+        this.lastSave = Date.now();
+        await storage.setItem('lastSave', this.lastSave);
       }
     },
 
@@ -187,44 +182,52 @@ export const useChangesStore = defineStore('changes', {
     async unsetChange(change) {
       if (change.isValid()) {
         delete this.changes[change.type][change.key];
-        await this.saveChangesOfTypeToStorage(change.type);
+        await storage.removeItem(change.getChangeKey());
+        await storage.setItem(change.type, Object.keys(this.changes[change.type]));
+        this.lastSave = Date.now();
+        await storage.setItem('lastSave', this.lastSave);
       }
     },
-
 
     /**
      * Cleanup changes that have been sent to the backend
      * This will delete all changes that are responded as processed and that are not newer than the sending time
      *
      * @param {string} type see Change.ALLOWED_TYPES
-     * @param {object} processed - old key: new key or null if the data has been deleted
-     * @param {integer} maxTime maximum timestamp until processed changes should be deleted
+     * @param {object} response
+     * @param {integer} maxDeleteTime maximum timestamp until processed changes should be deleted
      * @see getChangesFor
      */
-    async setChangesSent(type, processed, maxTime) {
+    async setChangesSent(type, responses = [], maxDeleteTime) {
 
-      const changes = this.changes[type];
-      let toStore = false;
+      let some_removed = false;
 
-      for (const old_key in processed) {
-        const new_key = processed[old_key];
-        const change = changes[old_key];
+      if (this.changes[type]) {
+        for (const response_data of responses) {
+          const response = new ChangeResponse(response_data);
+          const change = this.changes[type][response.key];
 
-        if (change) {
-          if (change.last_change <= maxTime) {
-            delete changes[old_key];
-            toStore = true;
-          } else if (new_key == null || new_key != old_key) {
-            change.key = new_key;
-            changes[new_key] = change;
-            delete changes[old_key];
-            toStore = true;
+          if (change && response.done) {
+            if (change.last_change <= maxDeleteTime) {
+
+              // change that has not been updated since the sending => delete it
+              delete this.changes[type][response.key];
+              await storage.removeItem(change.getChangeKey());
+              some_removed = true;
+            }
           }
         }
       }
-      if (toStore) {
-        await this.saveChangesOfTypeToStorage(type);
+
+      // save the keys if needed (avoid multiple writes)
+      if (some_removed) {
+        this.lastSave = Date.now();
+        await storage.setItem(type, Object.keys(this.changes[type]));
+        await storage.setItem('lastSave', this.lastSave);
       }
+
+      this.lastSendingSuccess = Date.now();
+      await storage.setItem('lastSendingSuccess', this.lastSendingSuccess);
     }
   }
 });

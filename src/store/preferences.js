@@ -100,12 +100,11 @@ export const usePreferencesStore = defineStore('preferences', {
      * @return {array} Change objects
      */
     async getChangedData(sendingTime = 0) {
-      const apiStore = stores.api();
       const changesStore = stores.changes();
       const changes = [];
       for (const change of changesStore.getChangesFor(Change.TYPE_PREFERENCES, sendingTime)) {
         // preferences exist only once, will be the same for all changes
-        changes.push(apiStore.getChangeDataToSend(change, Object.assign({}, this.$state)));
+        changes.push(changesStore.getChangeDataToSend(change, Object.assign({}, this.$state)));
         break;
       }
       return changes;

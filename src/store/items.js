@@ -191,14 +191,14 @@ export const useItemsStore = defineStore('items', {
         const first = 0;
         const last = sorted.length -1;
 
-        this.firstKey = sorted[first].getKey();
-        this.lastKey = sorted[last].getKey();
+        this.firstKey = sorted[first]?.getKey();
+        this.lastKey = sorted[last]?.getKey();
         this.previousKey = null;
         this.nextKey = null;
 
         for (let i = first; i <= last; i++) {
           let item = sorted[i];
-          if (item.getKey() == this.currentKey) {
+          if (item?.getKey() == this.currentKey) {
             this.previousKey = i > first ? sorted[i - 1].getKey() : null;
             this.nextKey = i < last ? sorted[i + 1].getKey() : null;
             break;
