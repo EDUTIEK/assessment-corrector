@@ -29,7 +29,7 @@ function savePoints(criterionKey) {
 }
 
 async function handleFocusChange() {
-  if (layoutStore.focusTarget == 'MarkingGeneralPoints') {
+  if (layoutStore.focusTarget == 'markingGeneralPoints') {
     await nextTick();
     document.getElementById('appMarkingGeneralPointsStart').focus();
   }
@@ -56,13 +56,13 @@ async function handleKeyDown(event) {
       <thead>
       <tr>
         <th class="col-left">
-          <span id="appMarkingCommentPointsStart" tabindex="0" @keydown="handleKeyDown">{{ $t('MarkingGeneralPointsCriterion') }}</span>
+          <span id="appMarkingCommentPointsStart" tabindex="0" @keydown="handleKeyDown">{{ $t('markingGeneralPointsCriterion') }}</span>
         </th>
         <th class="col-mid text-right">
           {{ $t('allPoints', 0) }}
         </th>
         <th class="col-right text-right">
-          {{ $t('MarkingGeneralPointsMax') }}
+          {{ $t('markingGeneralPointsMax') }}
         </th>
       </tr>
       </thead>

@@ -13,8 +13,7 @@ export const useSnippetsStore = defineStore('snippets', {
   state: () => {
     return {
       // saved in storage
-      keys: [],                 // list of string keys
-      snippets: [],             // list of snippet objects
+      snippets: {},             // list of snippet objects
 
       // not saved in storage
       selection_open: false,          // selection dialog is open
@@ -33,12 +32,16 @@ export const useSnippetsStore = defineStore('snippets', {
    */
   getters: {
 
+    sortedSnippets(state) {
+      return Object.values(state.snippets).sort(Snippet.order);
+    },
+
     forComment(state) {
-      return state.snippets.filter(element => element.purpose == Snippet.FOR_COMMENT);
+      return Object.values(state.snippets).filter(element => element.purpose == Snippet.FOR_COMMENT);
     },
 
     forSummary(state) {
-      return state.snippets.filter(element => element.purpose == Snippet.FOR_SUMMARY);
+      return Object.values(state.snippets).filter(element => element.purpose == Snippet.FOR_SUMMARY);
     },
 
     has(state) {
@@ -50,7 +53,7 @@ export const useSnippetsStore = defineStore('snippets', {
        * @returns {object|null}
        */
       const fn = function (key) {
-        return state.keys.includes(key);
+        return Object.keys(state.snippets).includes(key);
       }
       return fn;
     },
@@ -64,7 +67,7 @@ export const useSnippetsStore = defineStore('snippets', {
        * @returns {object|null}
        */
       const fn = function (key) {
-        return state.snippets.find(element => element.key == key);
+        return state.snippets[key];
       }
       return fn;
     },
@@ -95,12 +98,8 @@ export const useSnippetsStore = defineStore('snippets', {
         this.$reset();
 
         const keys = await storage.getItem('keys');
-        if (keys) {
-          this.keys = keys;
-        }
-        for (const key of this.keys) {
-          this.snippets.push(new Snippet(await storage.getItem(key)));
-          this.snippets = this.snippets.sort(Snippet.order);
+        for (const key of keys ?? []) {
+          this.snippets[key] = new Snippet(await storage.getItem(key));
         }
 
       }
@@ -118,8 +117,7 @@ export const useSnippetsStore = defineStore('snippets', {
           const snippet = new Snippet(snippet_data);
           this.keys.push(snippet.key);
           await storage.setItem(snippet.key, snippet.getData());
-          this.snippets.push(snippet);
-          this.snippets = this.snippets.sort(Snippet.order);
+          this.snippets[snippet.key] = snippet;
         }
         await storage.setItem('keys', Object.keys(this.snippets));
       }
@@ -135,13 +133,11 @@ export const useSnippetsStore = defineStore('snippets', {
      */
     async createSnippet(snippet) {
       // first do state changes (trigger watchers)
-      this.keys.push(snippet.key);
-      this.snippets.push(snippet);
-      this.snippets = this.snippets.sort(Snippet.order);
+      this.snippets[snippet.key] = snippet;
 
       // then save the snippet
       await storage.setItem(snippet.key, snippet.getData());
-      await storage.setItem('keys', this.keys);
+      await storage.setItem('keys', Object.keys(this.snippets));
 
       const changesStore = stores.changes();
       await changesStore.setChange(new Change({
@@ -159,9 +155,7 @@ export const useSnippetsStore = defineStore('snippets', {
     async updateSnippet(snippet) {
 
       if (this.has(snippet.key)) {
-        this.snippets = this.snippets.sort(Snippet.order);
         await storage.setItem(snippet.key, snippet.getData());
-
         const changesStore = stores.changes();
         await changesStore.setChange(new Change({
           type: Change.TYPE_SNIPPETS,
@@ -178,10 +172,9 @@ export const useSnippetsStore = defineStore('snippets', {
      */
     async deleteSnippet(removeKey) {
       if (this.has(removeKey)) {
-        this.snippets = this.snippets.filter(element => element.key != removeKey).sort(Snippet.order);
-        this.keys = this.keys.filter(key => key != removeKey)
-        await storage.setItem('keys', this.keys);
+        delete this.snippets[removeKey];
         await storage.removeItem(removeKey);
+        await storage.setItem('keys', Object.keys(this.snippets));
 
         const changesStore = stores.changes();
         await changesStore.setChange(new Change({
@@ -209,7 +202,6 @@ export const useSnippetsStore = defineStore('snippets', {
           changes.push(changesStore.getChangeDataToSend(change));
         }
       }
-      ;
       return changes;
     },
   }
