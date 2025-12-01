@@ -26,6 +26,7 @@ declare module 'vue' {
     OwnSummary: typeof import('./src/components/OwnSummary.vue')['default']
     OwnSummaryIncludes: typeof import('./src/components/OwnSummaryIncludes.vue')['default']
     OwnSummaryPoints: typeof import('./src/components/OwnSummaryPoints.vue')['default']
+    OwnSummaryRevision: typeof import('./src/components/OwnSummaryRevision.vue')['default']
     OwnSummaryText: typeof import('./src/components/OwnSummaryText.vue')['default']
     Resources: typeof import('./src/components/Resources.vue')['default']
     SendingStatus: typeof import('./src/components/SendingStatus.vue')['default']

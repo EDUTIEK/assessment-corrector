@@ -31,6 +31,10 @@ export const useCorrectionsStore = defineStore('corrections', {
       return Object.values(state.corrections)
     },
 
+    sortedCorrections(state) {
+      return state.allCorrections.sort(Correction.order);
+    },
+
     countCorrections(state) {
       return state.allCorrections.length
     },

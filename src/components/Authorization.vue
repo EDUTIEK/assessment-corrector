@@ -126,9 +126,9 @@ function editSummary() {
               {{getPartialPointsMessage()}}
             </v-alert>
 
-            <v-alert v-show="summariesStore.areOthersAuthorized && summariesStore.stitchReasonText != '' "
+            <v-alert v-show="summariesStore.areOthersAuthorized && summariesStore.procedureReasonText != '' "
                      color="#0000A0" type="info" variant="text" density="compact">
-              {{ $t(summariesStore.procedureNeededText, [summariesStore.stitchReasonText]) }}
+              {{ $t(summariesStore.procedureNeededText, [summariesStore.procedureReasonText]) }}
             </v-alert>
 
           </div>

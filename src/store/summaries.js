@@ -163,10 +163,10 @@ export const useSummariesStore = defineStore('summaries', {
     },
 
     /**
-     * Text why a stitch decision will be needed the current item
+     * Text why a spacial procedure is needed for the current item
      * @returns {string}
      */
-    stitchReasonText(state) {
+    procedureReasonText(state) {
       let min_points = null;
       let max_points = null;
       let sum_points = 0;
@@ -195,7 +195,7 @@ export const useSummariesStore = defineStore('summaries', {
       const settingsStore = stores.settings();
       if (settingsStore.Assessment.procedure_when_distance) {
         if (max_points - min_points > settingsStore.Assessment.max_auto_distance) {
-          return t('summariesPointsDifferenceExceedsN', [settingsStore.Assessment.max_auto_distance]);
+          return t('summariesProcedureReason', [settingsStore.Assessment.max_auto_distance]);
         }
       }
 

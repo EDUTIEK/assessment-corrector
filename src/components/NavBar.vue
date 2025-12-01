@@ -172,7 +172,7 @@ function getCorrectionTitle(correction) {
       <v-divider class="border-opacity-75"></v-divider>
 
       <v-list-item aria-role="button" class="app-navigation-item" tabindex="0"
-                   v-for="correction in correctionsStore.otherCorrections"
+                   v-for="correction in correctionsStore.sortedCorrections"
                    @click="closeNavigation; layoutStore.selectCorrection(correction.key);"
                    :aria-label="getCorrectionTitle(correction) + (layoutStore.getCorrectionIsVisible(correction.key) ? $t('navBarSelectedAria') : '')"
                    :title="getCorrectionTitle(correction) + (layoutStore.getCorrectionIsVisible(correction.key) ? $t('navBarSelected') : '')"
@@ -181,7 +181,7 @@ function getCorrectionTitle(correction) {
       >
         <template v-slot:prepend>
           <v-icon aria-role="hidden"
-                  :icon="layoutStore.getCorrectionIsVisible(correction.correction_key) ? 'mdi-account-school' : 'mdi-account-school-outline'"></v-icon>
+                  :icon="layoutStore.getCorrectionIsVisible(correction.key) ? 'mdi-account-school' : 'mdi-account-school-outline'"></v-icon>
         </template>
       </v-list-item>
 

@@ -2,14 +2,15 @@
 import SummaryCriteria from '@/components/SummaryCriteria.vue';
 import OwnSummaryPoints from "@/components/OwnSummaryPoints.vue";
 import OwnSummaryText from "@/components/OwnSummaryText.vue";
+import OwnSummaryRevision from "@/components/OwnSummaryRevision.vue";
 import {stores} from "@/store";
 
 const apiStore = stores.api();
 
-const props = defineProps(['showCriteria', 'showText']);
+const props = defineProps(['showCriteria', 'showText', 'showRevision']);
 
 function expansionClass() {
-  const sum = (props.showCriteria ? 1 : 0) + (props.showText ? 1 : 0);
+  const sum = (props.showCriteria ? 1 : 0) + (props.showText ? 1 : 0) + (props.showRevision ? 1 : 0);
   switch (sum) {
     case 0:
       return 'hidden';
@@ -17,6 +18,8 @@ function expansionClass() {
       return 'full';
     case 2:
       return 'half';
+    case 3:
+      return 'third';
   }
 }
 
@@ -31,6 +34,10 @@ function expansionClass() {
     <div v-if="props.showText" :class="expansionClass()">
       <h2 class="headline">{{ $t('allSummary') }}</h2>
       <own-summary-text class="content" :editorId="'summary'"></own-summary-text>
+    </div>
+    <div v-if="props.showRevision" :class="expansionClass()">
+      <h2 class="headline">{{ $t('allRevision') }}</h2>
+      <own-summary-revision class="content" :editorId="'revision'"></own-summary-revision>
     </div>
     <div id="app-own-summary-points">
       <h2 class="headline">{{ $t('allTotalRating') }}</h2>
@@ -76,5 +83,8 @@ function expansionClass() {
   height: calc((100% - 160px) / 2);
 }
 
+.third {
+  height: calc((100% - 160px) / 3);
+}
 
 </style>

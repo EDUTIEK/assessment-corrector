@@ -94,6 +94,12 @@ export default class Summary {
   revision_points = null;
 
   /**
+   * Key of the reached grade in revision
+   * @type {string}
+   */
+  revision_grade_key = '';
+
+  /**
    * Corrector requries a revision by the other corrector
    * @type {boolean}
    */

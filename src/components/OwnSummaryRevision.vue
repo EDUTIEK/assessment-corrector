@@ -54,7 +54,7 @@ function handleInit() {
 }
 
 async function handleFocusChange() {
-  if (layoutStore.focusTarget == 'ownSummary') {
+  if (layoutStore.focusTarget == 'ownRevision') {
     helper.applyFocus();
     await nextTick();
     helper.restoreScrolling();
@@ -99,11 +99,11 @@ watch(() => snippetsStore.selection_open, handleSnippet);
 
 <template>
   <div class="app-own-summary-text-wrapper">
-    <label :for="props.editorId" class="hidden">{{ $t('ownSummaryTextHiddenField') }}</label>
+    <label :for="props.editorId" class="hidden">{{ $t('ownSummaryRevisionTextHiddenField') }}</label>
     <editor
         :id="props.editorId"
         v-if="!summariesStore.isOwnDisabled"
-        v-model="summariesStore.editSummary.text"
+        v-model="summariesStore.editSummary.revision_text"
         @init="handleInit"
         @change="handleChange"
         @keyup="handleKeyUp"
@@ -115,7 +115,7 @@ watch(() => snippetsStore.selection_open, handleSnippet);
 
     <div class="app-summary-text-display long-essay-content correction-summary"
          v-if="summariesStore.isOwnDisabled"
-         v-html="summariesStore.editSummary.text">
+         v-html="summariesStore.editSummary.revision_text">
     </div>
   </div>
 </template>

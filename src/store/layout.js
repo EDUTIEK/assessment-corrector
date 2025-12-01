@@ -76,29 +76,29 @@ export const useLayoutStore = defineStore('layout', {
     isLeftCorrectionVisible: state => (state.isLeftCorrectionSelected && state.isLeftVisible),
     isRightCorrectionVisible: state => (state.isRightCorrectionSelected && state.isRightVisible),
 
-    isLeftVisible: state => {
+    isLeftVisible(state)  {
       const apiStore = stores.api();
       return !apiStore.isLoading && state.expandedColumn != 'right'
     },
 
-    isRightVisible: state => {
+    isRightVisible(state)  {
       const apiStore = stores.api();
       return !apiStore.isLoading && state.expandedColumn != 'left'
     },
 
-    leftCorrectionTitle: state => {
+    leftCorrectionTitle(state)  {
       const correctionsStore = stores.corrections();
       const correction = correctionsStore.getCorrection(state.leftCorrectionKey);
       return correction ? 'Korrektur von ' + correction.title + ' ' + Item.buildPositionText(correction.position) : ''
     },
 
-    rightCorrectionTitle: state => {
+    rightCorrectionTitle(state)  {
       const correctionsStore = stores.corrections();
       const correction = correctionsStore.getCorrection(state.rightCorrectionKey);
       return correction ? 'Korrektur von ' + correction.title + ' '  + Item.buildPositionText(correction.position)  : ''
     },
 
-    getCorrectionIsVisible: state => {
+    getCorrectionIsVisible(state) {
 
       /**
        * Get if a correction's summary is visible

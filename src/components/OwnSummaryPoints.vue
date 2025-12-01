@@ -20,12 +20,12 @@ const layoutStore = stores.layout();
       </v-row>
       <v-row dense>
         <v-col cols="10">
-          <label for="appOwnSummaryPoints"><strong>{{ $t('OwnSummaryPointsRating') }}</strong></label>
+          <label for="appOwnSummaryPoints"><strong>{{ $t('ownSummaryPointsRating') }}</strong></label>
           &nbsp;
           <input :disabled="summariesStore.isOwnDisabled" id="appOwnSummaryPoints" class="appPoints" type="number" min="0"
                  :max="settingsStore.Assessment.max_points" v-model="summariesStore.editSummary.points"/> {{ $t('allPoints', summariesStore.editSummary.points) }}
           &nbsp;
-          <strong>{{ $t('OwnSummaryPointsGrade') }}</strong> {{ summariesStore.currentGradeTitle }}
+          <strong>{{ $t('ownSummaryPointsGrade') }}</strong> {{ summariesStore.currentGradeTitle }}
 
           <p>{{ summariesStore.currentGradeStatement }}</p>
         </v-col>

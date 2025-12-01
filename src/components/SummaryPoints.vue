@@ -10,6 +10,7 @@ const props = defineProps(['correction_key']);
 
 const points = ref(0);
 const grade = ref('');
+const statement = ref('');
 
 const summary = summariesStore.getForCorrection(props.correction_key);
 if (summary) {
@@ -17,6 +18,7 @@ if (summary) {
   const level = levelsStore.getLevel(summary.grade_key);
   if (level) {
     grade.value = level.title;
+    statement.value = level.statement;
   }
 }
 
@@ -30,7 +32,7 @@ if (summary) {
     &nbsp;
     <strong>{{ $t('summaryPointsGrade') }}</strong> {{ grade }}
 
-    <!-- <p>{{ summariesStore.currentGradeStatement }}</p> -->
+    <p>{{ statement }}</p>
   </div>
 </template>
 
