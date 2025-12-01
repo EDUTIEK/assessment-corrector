@@ -172,7 +172,7 @@ function getCorrectionTitle(correction) {
       <v-divider class="border-opacity-75"></v-divider>
 
       <v-list-item aria-role="button" class="app-navigation-item" tabindex="0"
-                   v-for="correction in correctionsStore.sortedCorrections"
+                   v-for="correction in correctionsStore.otherCorrections"
                    @click="closeNavigation; layoutStore.selectCorrection(correction.key);"
                    :aria-label="getCorrectionTitle(correction) + (layoutStore.getCorrectionIsVisible(correction.key) ? $t('navBarSelectedAria') : '')"
                    :title="getCorrectionTitle(correction) + (layoutStore.getCorrectionIsVisible(correction.key) ? $t('navBarSelected') : '')"

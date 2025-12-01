@@ -42,6 +42,7 @@ const summariesStore = stores.summaries();
 const preferencesStore = stores.preferences();
 const layoutStore = stores.layout();
 const snippetsStore = stores.snippets();
+const itemsStore = stores.items();
 
 // editorId used for retrieving the editor instance using the tinymce.get('ID') method.
 const props = defineProps(['editorId']);
@@ -62,6 +63,7 @@ async function handleFocusChange() {
 }
 
 function handleChange() {
+  console.log('x');
   summariesStore.updateContent(true);
   helper.applyZoom();
 }
@@ -102,7 +104,7 @@ watch(() => snippetsStore.selection_open, handleSnippet);
     <label :for="props.editorId" class="hidden">{{ $t('ownSummaryRevisionTextHiddenField') }}</label>
     <editor
         :id="props.editorId"
-        v-if="!summariesStore.isOwnDisabled"
+        v-if="itemsStore.canRevise"
         v-model="summariesStore.editSummary.revision_text"
         @init="handleInit"
         @change="handleChange"
@@ -114,7 +116,7 @@ watch(() => snippetsStore.selection_open, handleSnippet);
     />
 
     <div class="app-summary-text-display long-essay-content correction-summary"
-         v-if="summariesStore.isOwnDisabled"
+         v-if="!itemsStore.canRevise"
          v-html="summariesStore.editSummary.revision_text">
     </div>
   </div>

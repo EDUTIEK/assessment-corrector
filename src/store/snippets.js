@@ -115,7 +115,6 @@ export const useSnippetsStore = defineStore('snippets', {
 
         for (const snippet_data of data) {
           const snippet = new Snippet(snippet_data);
-          this.keys.push(snippet.key);
           await storage.setItem(snippet.key, snippet.getData());
           this.snippets[snippet.key] = snippet;
         }

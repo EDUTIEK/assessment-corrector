@@ -35,7 +35,7 @@ function expansionClass() {
       <h2 class="headline">{{ $t('allSummary') }}</h2>
       <own-summary-text class="content" :editorId="'summary'"></own-summary-text>
     </div>
-    <div v-if="props.showRevision" :class="expansionClass()">
+    <div v-if="stores.items().canRevise && props.showRevision" :class="expansionClass()">
       <h2 class="headline">{{ $t('allRevision') }}</h2>
       <own-summary-revision class="content" :editorId="'revision'"></own-summary-revision>
     </div>

@@ -147,7 +147,7 @@ document.addEventListener('keydown', layoutStore.handleKeyDown);
             </v-btn>
 
             <!-- toggle marking Comments -->
-            <v-btn size="small" v-show="layoutStore.isMarkingVisible" @click="layoutStore.toggleMarkingComments()">
+            <v-btn size="small" v-if="itemsStore.canAct" v-show="layoutStore.isMarkingVisible" @click="layoutStore.toggleMarkingComments()">
               <v-icon v-show="layoutStore.showMarkingComments" icon="mdi-checkbox-outline"></v-icon>
               <v-icon v-show="!layoutStore.showMarkingComments" icon="mdi-checkbox-blank-outline"></v-icon>
               <span>{{ $t('allComments') }}</span>
@@ -155,7 +155,8 @@ document.addEventListener('keydown', layoutStore.handleKeyDown);
             </v-btn>
 
             <!-- toggle marking comment points -->
-            <v-btn size="small" v-if="settingsStore.Task.enable_partial_points" v-show="layoutStore.isMarkingVisible"
+            <v-btn size="small" v-if="itemsStore.canAct && settingsStore.Task.enable_partial_points"
+                   v-show="layoutStore.isMarkingVisible"
                    @click="layoutStore.toggleMarkingCommentPoints()">
               <v-icon v-show="layoutStore.showMarkingCommentPoints" icon="mdi-checkbox-outline"></v-icon>
               <v-icon v-show="!layoutStore.showMarkingCommentPoints" icon="mdi-checkbox-blank-outline"></v-icon>
@@ -164,7 +165,8 @@ document.addEventListener('keydown', layoutStore.handleKeyDown);
             </v-btn>
 
             <!-- toggle marking general points -->
-            <v-btn size="small" v-if="settingsStore.Task.enable_partial_points && criteriaStore.hasOwnGeneralCriteria" v-show="layoutStore.isMarkingVisible"
+            <v-btn size="small" v-if="settingsStore.Task.enable_partial_points && criteriaStore.hasOwnGeneralCriteria"
+                   v-show="layoutStore.isMarkingVisible"
                    @click="layoutStore.toggleMarkingGeneralPoints()">
               <v-icon v-show="layoutStore.showMarkingGeneralPoints" icon="mdi-checkbox-outline"></v-icon>
               <v-icon v-show="!layoutStore.showMarkingGeneralPoints" icon="mdi-checkbox-blank-outline"></v-icon>
@@ -173,7 +175,7 @@ document.addEventListener('keydown', layoutStore.handleKeyDown);
             </v-btn>
 
             <!-- toggle marking text -->
-            <v-btn size="small" v-show="itemsStore.canAct || layoutStore.isMarkingVisible"
+            <v-btn size="small" v-if="itemsStore.canAct" v-show="layoutStore.isMarkingVisible"
                    @click="layoutStore.toggleMarkingText()">
               <v-icon v-show="layoutStore.showMarkingText" icon="mdi-checkbox-outline"></v-icon>
               <v-icon v-show="!layoutStore.showMarkingText" icon="mdi-checkbox-blank-outline"></v-icon>
@@ -197,6 +199,15 @@ document.addEventListener('keydown', layoutStore.handleKeyDown);
               <v-icon v-show="!layoutStore.showRightSummaryText" icon="mdi-checkbox-blank-outline"></v-icon>
               <span>{{ $t('allSummary') }}</span>
               <span class="sr-only">{{$t('allShow') + (layoutStore.showRightSummaryText ? $t('allIsSelected') : '')}}</span>
+            </v-btn>
+
+            <!-- toggle right summary revision  -->
+            <v-btn size="small" v-if="stores.items().canRevise" v-show="layoutStore.isSummaryVisible || layoutStore.isRightCorrectionVisible"
+                   @click="layoutStore.toggleRightSummaryRevision()">
+              <v-icon v-show="layoutStore.showRightSummaryRevision" icon="mdi-checkbox-outline"></v-icon>
+              <v-icon v-show="!layoutStore.showRightSummaryRevision" icon="mdi-checkbox-blank-outline"></v-icon>
+              <span>{{ $t('allRevision') }}</span>
+              <span class="sr-only">{{$t('allShow') + (layoutStore.showRightSummaryRevision ? $t('allIsSelected') : '')}}</span>
             </v-btn>
 
             <!-- expand left column -->
@@ -225,6 +236,7 @@ document.addEventListener('keydown', layoutStore.handleKeyDown);
           <own-summary v-if="layoutStore.isSummaryVisible"
                        :showCriteria="layoutStore.showRightSummaryCriteria"
                        :showText="layoutStore.showRightSummaryText"
+                       :showRevision="layoutStore.showRightSummaryRevision"
           />
           <other-summary v-if="layoutStore.isRightCorrectionVisible"
                          :correction_key="layoutStore.rightCorrectionKey"

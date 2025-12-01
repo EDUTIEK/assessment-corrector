@@ -370,7 +370,12 @@ export const useSummariesStore = defineStore('summaries', {
         // ensure it is not changed because it is bound to tiny
         const clonedSummary = this.editSummary.getClone();
 
+        console.log('a');
+
         if (!clonedSummary.isEqual(storedSummary) && Object.keys(this.summaries).includes(clonedSummary.getKey())) {
+
+          console.log('b');
+
           const apiStore = stores.api();
           const changesStore = stores.changes();
 

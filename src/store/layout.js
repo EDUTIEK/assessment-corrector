@@ -19,15 +19,18 @@ export const useLayoutStore = defineStore('layout', {
       rightContent: 'marking',            // summary|marking|correction
 
       showMarkingComments: true,          // display of the comments on marking column
-      showMarkingGeneralPoints: true,   // display of the general criteria on marking column
-      showMarkingCommentPoints: true,   // display of the comment criteria on marking column
+      showMarkingGeneralPoints: true,     // display of the general criteria on marking column
+      showMarkingCommentPoints: true,     // display of the comment criteria on marking column
       showMarkingText: false,             // display of the summary text on marking column
 
-      showLeftSummaryCriteria: true,      // display of the criteria table on the left summary column
-      showRightSummaryCriteria: true,     // display of the criteria table on the right summary column
+      showLeftSummaryCriteria: false,      // display of the criteria table on the left summary column
+      showRightSummaryCriteria: false,     // display of the criteria table on the right summary column
 
       showLeftSummaryText: true,          // display of the summary text on the left summary column
       showRightSummaryText: true,         // display of the summary text on the right summary column
+
+      showLeftSummaryRevision: false,      // display of the revision text on the left summary column
+      showRightSummaryRevision: false,     // display of the revision text on the right summary column
 
       // not stored
       leftCorrectionKey: '',               // key of the correction shown on the left side
@@ -343,6 +346,16 @@ export const useLayoutStore = defineStore('layout', {
 
     toggleRightSummaryText() {
       this.showRightSummaryText = !this.showRightSummaryText
+      this.saveToStorage()
+    },
+
+    toggleLeftSummaryRevision() {
+      this.showLeftSummaryRevision = !this.showLeftSummaryRevision
+      this.saveToStorage()
+    },
+
+    toggleRightSummaryRevision() {
+      this.showRightSummaryRevision = !this.showRightSummaryRevision
       this.saveToStorage()
     },
 
