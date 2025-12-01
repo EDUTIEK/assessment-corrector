@@ -22,6 +22,11 @@ export default class GradeLevel {
     id = null;
 
     /**
+     * Key of the level
+     */
+    key = null;
+
+    /**
      * minimum points to reach this level
      * @type {number}
      */
@@ -58,6 +63,9 @@ export default class GradeLevel {
         if (data.statement !== undefined && data.statement !== null) {
             this.statement = data.statement.toString();
         }
+        if (this.key === null) {
+            this.key = GradeLevel.buildKey(this.id);
+        }
     }
 
     /**
@@ -65,7 +73,7 @@ export default class GradeLevel {
      * @return {string}
      */
     getKey() {
-        return GradeLevel.buildKey(this.id);
+        return this.key;
     }
 
     /**

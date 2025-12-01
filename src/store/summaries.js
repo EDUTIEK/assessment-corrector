@@ -96,6 +96,21 @@ export const useSummariesStore = defineStore('summaries', {
       return t('summariesNoGrade');
     },
 
+    /**
+     * Resulting grade title from the summary of the current correction and item
+     * @returns {string}
+     */
+    currentGradeStatement(state) {
+      if (state.editSummary.grade_key) {
+        const levelsStore = stores.levels();
+        let level = levelsStore.getLevel(state.editSummary.grade_key);
+        if (level) {
+          return level.statement;
+        }
+      }
+      return '';
+    },
+
     getAuthorizationForCorrection(state) {
       /**
        * Get a summary of a specific correction for the current item
@@ -320,11 +335,14 @@ export const useSummariesStore = defineStore('summaries', {
         this.editSummary.points = Math.floor(this.editSummary.points);
       }
 
+      console.log('update content');
+
       // set the grade key for the points
       const levelsStore = stores.levels();
       let level = levelsStore.getLevelForPoints(this.editSummary.points);
+      console.log('level', level);
       if (level) {
-        this.editSummary.grade_key = level.key
+        this.editSummary.grade_key = level.getKey()
       } else {
         this.editSummary.grade_key = '';
       }

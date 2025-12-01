@@ -27,7 +27,7 @@ const layoutStore = stores.layout();
           &nbsp;
           <strong>{{ $t('OwnSummaryPointsGrade') }}</strong> {{ summariesStore.currentGradeTitle }}
 
-          <p><strong>{{ $t('summaryPointsInclude') }}</strong> {{ settingsStore.inclusionText }}</p>
+          <p>{{ summariesStore.currentGradeStatement }}</p>
         </v-col>
         <v-col cols="2">
           <v-btn density="compact" variant="text" v-show="!summariesStore.isOwnDisabled" :disabled="!itemsStore.canAuthorize"
