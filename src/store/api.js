@@ -373,8 +373,7 @@ export const useApiStore = defineStore('api', {
       stores.tasks().updateCurrentKeys();
       this.setLoading(false);
 
-      // todo activate changes interval
-      //this.setInterval('apiStore.saveChangesToBackend', this.saveChangesToBackend, sendInterval);
+      this.setInterval('apiStore.saveChangesToBackend', this.saveChangesToBackend, sendInterval);
       return true;
     },
 
@@ -472,8 +471,7 @@ export const useApiStore = defineStore('api', {
       stores.items().updateCurrentKeys();
       stores.tasks().updateCurrentKeys();
       this.setLoading(false);
-      // todo: activete
-      // this.setInterval('apiStore.saveChangesToBackend', this.saveChangesToBackend, sendInterval);
+      this.setInterval('apiStore.saveChangesToBackend', this.saveChangesToBackend, sendInterval);
       return true;
     },
 

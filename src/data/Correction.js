@@ -27,7 +27,7 @@ export default class Correction {
    * @returns {number|null}
    */
   static extractTaskId(key) {
-    const matches = key.match(/C(\d+)_(\d+)_(\d+)/);
+    const matches = key ? key.match(/C(\d+)_(\d+)_(\d+)/) : null;
     return matches && matches[1] ? parseInt(matches[1]) : null;
   }
 
@@ -36,7 +36,7 @@ export default class Correction {
    * @returns {number|null}
    */
   static extractWriterId(key) {
-    const matches = key.match(/C(\d+)_(\d+)_(\d+)/);
+    const matches =  key ? key.match(/C(\d+)_(\d+)_(\d+)/) : null;
     return matches && matches[2] ? parseInt(matches[2]) : null;
   }
 
@@ -45,7 +45,7 @@ export default class Correction {
    * @returns {number|null}
    */
   static extractCorrectorId(key) {
-    const matches = key.match(/C(\d+)_(\d+)_(\d+)/);
+    const matches = key ? key.match(/C(\d+)_(\d+)_(\d+)/) : null;
     return matches && matches[3] ? parseInt(matches[3]) : null;
   }
 

@@ -30,7 +30,7 @@ if (summary) {
     &nbsp;
     <strong>{{ $t('summaryPointsGrade') }}</strong> {{ grade }}
 
-    <p><strong>{{ $t('summaryPointsInclude') }}</strong> {{ settingsStore.inclusionText }}</p>
+    <!-- <p>{{ summariesStore.currentGradeStatement }}</p> -->
   </div>
 </template>
 

@@ -4,6 +4,7 @@ import {stores} from "@/store/index";
 import Summary from "@/data/Summary";
 import Change from "@/data/Change";
 import i18n from "@/plugins/i18n";
+import Procedure from '@/data/Procedure';
 
 const { t } = i18n.global;
 
@@ -147,6 +148,20 @@ export const useSummariesStore = defineStore('summaries', {
     },
 
 
+    procedureNeededText(state) {
+      const settingsStore = stores.settings();
+      switch (settingsStore.Assessment.procedure) {
+        case Procedure.APPROXIMATION:
+          return 'summariesProcedureApproximationNeeded';
+        case Procedure.CONSULTING:
+          return 'summariesProcedureConsultingNeeded';
+      }
+      if (settingsStore.Assessment.stitch_after_procedure) {
+        return 'summariesProcedureStitchNeeded';
+      }
+      return '';
+    },
+
     /**
      * Text why a stitch decision will be needed the current item
      * @returns {string}
@@ -238,6 +253,7 @@ export const useSummariesStore = defineStore('summaries', {
      */
     async loadFromStorage() {
       const apiStore = stores.api();
+      const levelsStore = stores.levels();
       const correctionsStore = stores.corrections();
       try {
         this.$reset();
@@ -245,6 +261,7 @@ export const useSummariesStore = defineStore('summaries', {
         const keys = await storage.getItem('keys');
         for (const key of keys) {
           const summary = new Summary(await storage.getItem(key));
+          summary.grade_key = levelsStore.getLevelForPoints(summary.points)?.key;
           if (summary.item_key == apiStore.itemKey) {
             this.summaries[key] = summary;
           }
@@ -273,6 +290,7 @@ export const useSummariesStore = defineStore('summaries', {
      */
     async loadFromBackend(data) {
       const apiStore = stores.api();
+      const levelsStore = stores.levels();
       const correctionsStore = stores.corrections();
       try {
         await storage.clear();
@@ -280,6 +298,7 @@ export const useSummariesStore = defineStore('summaries', {
 
         for (const item of data) {
           const summary = new Summary(item);
+          summary.grade_key = levelsStore.getLevelForPoints(summary.points)?.key;
           await storage.setItem(summary.getKey(), summary.getData());
           if (summary.item_key == apiStore.itemKey) {
             this.summaries[summary.getKey()] = summary;

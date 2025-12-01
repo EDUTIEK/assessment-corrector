@@ -47,10 +47,6 @@ function selectResource(resource) {
   }
 }
 
-function selectCorrection(correction) {
-  layoutStore.selectCorrection(correction.correction_key);
-}
-
 function getResourceIcon(resource) {
   switch (resource.type) {
     case "url":
@@ -177,7 +173,7 @@ function getCorrectionTitle(correction) {
 
       <v-list-item aria-role="button" class="app-navigation-item" tabindex="0"
                    v-for="correction in correctionsStore.otherCorrections"
-                   @click="closeNavigation; selectCorrection(correction);"
+                   @click="closeNavigation; layoutStore.selectCorrection(correction.key);"
                    :aria-label="getCorrectionTitle(correction) + (layoutStore.getCorrectionIsVisible(correction.key) ? $t('navBarSelectedAria') : '')"
                    :title="getCorrectionTitle(correction) + (layoutStore.getCorrectionIsVisible(correction.key) ? $t('navBarSelected') : '')"
                    :key="correction.correction_key"
@@ -190,7 +186,6 @@ function getCorrectionTitle(correction) {
       </v-list-item>
 
       <v-list-item aria-role="button" class="app-navigation-item" tabindex="0"
-                   v-if="itemsStore.canAct"
                    @click="closeNavigation; layoutStore.showSummary();"
                    :aria-label="$t('allOwnSummaryAndRating') + (layoutStore.isSummaryVisible ? $t('navBarSelectedAria') : '')"
                    :title="$t('allOwnSummaryAndRating') + (layoutStore.isSummaryVisible ? $t('navBarSelected') : '')"

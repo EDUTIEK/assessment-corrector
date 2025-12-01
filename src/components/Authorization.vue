@@ -107,6 +107,8 @@ function editSummary() {
             &nbsp;
             <strong>{{ $t('authorizationGradeTitle') }}</strong> {{ summariesStore.currentGradeTitle }}
 
+            <p>{{ summariesStore.currentGradeStatement }}</p>
+
           </div>
 
           <div class="appRow">
@@ -126,7 +128,7 @@ function editSummary() {
 
             <v-alert v-show="summariesStore.areOthersAuthorized && summariesStore.stitchReasonText != '' "
                      color="#0000A0" type="info" variant="text" density="compact">
-              {{ $t('authorizationWarnStitchDecision', [summariesStore.stitchReasonText]) }}
+              {{ $t(summariesStore.procedureNeededText, [summariesStore.stitchReasonText]) }}
             </v-alert>
 
           </div>
