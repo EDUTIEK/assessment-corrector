@@ -37,12 +37,15 @@ import headlinesThreeCss from '@/styles/headlines-three.css?inline';
 import {stores} from "@/store";
 import { nextTick, watch } from 'vue';
 import Snippet from "@/data/Snippet";
+import SumOfPoints from "@/components/SumOfPoints.vue";
 
 const summariesStore = stores.summaries();
 const preferencesStore = stores.preferences();
 const layoutStore = stores.layout();
 const snippetsStore = stores.snippets();
 const itemsStore = stores.items();
+const settingsStore = stores.settings();
+const levelsStore = stores.levels();
 
 // editorId used for retrieving the editor instance using the tinymce.get('ID') method.
 const props = defineProps(['editorId']);
@@ -63,7 +66,6 @@ async function handleFocusChange() {
 }
 
 function handleChange() {
-  console.log('x');
   summariesStore.updateContent(true);
   helper.applyZoom();
 }
@@ -101,35 +103,76 @@ watch(() => snippetsStore.selection_open, handleSnippet);
 
 <template>
   <div class="app-own-summary-text-wrapper">
-    <label :for="props.editorId" class="hidden">{{ $t('ownSummaryRevisionTextHiddenField') }}</label>
-    <editor
-        :id="props.editorId"
-        v-if="itemsStore.canRevise"
-        v-model="summariesStore.editSummary.revision_text"
-        @init="handleInit"
-        @change="handleChange"
-        @keyup="handleKeyUp"
-        @keydown="handleKeyDown"
-        @scroll="helper.saveScrolling"
-        licenseKey = 'gpl'
-        :init="helper.getInit()"
-    />
+    <div class="app-own-summary-editor">
+      <label :for="props.editorId" class="hidden">{{ $t('ownSummaryRevisionTextHiddenField') }}</label>
+      <editor
+          :id="props.editorId"
+          v-if="itemsStore.canRevise"
+          v-model="summariesStore.editSummary.revision_text"
+          @init="handleInit"
+          @change="handleChange"
+          @keyup="handleKeyUp"
+          @keydown="handleKeyDown"
+          @scroll="helper.saveScrolling"
+          licenseKey = 'gpl'
+          :init="helper.getInit()"
+      />
+    </div>
+
 
     <div class="app-summary-text-display long-essay-content correction-summary"
          v-if="!itemsStore.canRevise"
          v-html="summariesStore.editSummary.revision_text">
     </div>
+
+    <v-container class="app-own-summary-points">
+      <v-row dense>
+        <v-col cols="10">
+          <label for="appOwnSummaryPoints"><strong>{{ $t('ownSummaryPointsRating') }}</strong></label>
+          &nbsp;
+          <input :disabled="!itemsStore.canRevise" id="appOwnSummaryPoints" class="appPoints" type="number" min="0"
+                 :max="settingsStore.Assessment.max_points" v-model="summariesStore.editSummary.revision_points"/>
+          {{ $t('allPoints', summariesStore.editSummary.revision_points) }}
+          &nbsp;
+          <strong>{{ $t('ownSummaryPointsGrade') }}</strong> {{ levelsStore.getLevelForPoints(summariesStore.editSummary.revision_points)?.title}}
+          <p>{{ levelsStore.getLevelForPoints(summariesStore.editSummary.revision_points)?.statement }}</p>
+        </v-col>
+        <v-col cols="2">
+          <v-btn density="compact" variant="text" v-if="!itemsStore.canRevise"
+                 @click="stores.layout().showRevision = true;">
+            <v-icon left icon="mdi-file-certificate-outline"></v-icon>
+            <span>{{ $t('allAuthorize') }}</span>
+          </v-btn>
+        </v-col>
+      </v-row>
+    </v-container>
   </div>
 </template>
 
-<style>
+<style scoped>
+
+.appPoints {
+  width: 4em;
+  border: 1px solid #aaaaaa;
+  border-radius: 5px;
+  padding: 3px;
+}
+
+.app-own-summary-points {
+  height: 100px;
+  overflow: hidden;
+}
+
+.app-own-summary-editor {
+  height: calc(100% - 100px);
+}
 
 .app-own-summary-text-wrapper {
   height: 100%;
 }
 
 .app-summary-text-display {
-  height: 100%;
+  height: calc(100% - 100px);
   border: 1px solid #cccccc;
   padding: 10px;
   overflow-y: scroll;

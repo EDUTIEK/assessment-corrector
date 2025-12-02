@@ -183,6 +183,21 @@ export const useLayoutStore = defineStore('layout', {
       }
     },
 
+    initForItem() {
+      if (stores.items().canRevise) {
+        this.showRightSummaryCriteria = false;
+        this.showRightSummaryRevision = true;
+        this.leftContent = 'correction';
+        this.rightContent = 'summary';
+        this.leftCorrectionKey = stores.corrections().firstOtherCorrection?.key ?? '';
+      } else {
+        this.leftContent = 'essay';
+        this.rightContent = 'marking';
+      }
+      this.expandedColumn = 'none';
+      this.saveToStorage();
+    },
+
     showInstructions() {
       this.leftContent = 'instructions';
       this.setLeftVisible();

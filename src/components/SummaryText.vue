@@ -15,9 +15,7 @@ function text() {
 
 
 <template>
-  <div class="app-summary-text-wrapper">
-    <div class="app-summary-text-display long-essay-content headlines-three" v-html="text()">
-    </div>
+  <div class="app-summary-text-wrapper" v-html="text()">
   </div>
 </template>
 

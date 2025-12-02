@@ -51,7 +51,7 @@ function expansionClass() {
 }
 
 #app-summary-points {
-  min-height: 100px;
+  min-height: 160px;
 }
 
 .headline {
@@ -71,11 +71,11 @@ function expansionClass() {
 }
 
 .full {
-  height: calc(100% - 100px);
+  height: calc(100% - 160px);
 }
 
 .half {
-  height: calc((100% - 100px) / 2);
+  height: calc((100% - 160px) / 2);
 }
 
 </style>

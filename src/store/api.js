@@ -371,6 +371,7 @@ export const useApiStore = defineStore('api', {
       stores.comments().setMarkerChange();
       stores.items().updateCurrentKeys();
       stores.tasks().updateCurrentKeys();
+      stores.layout().initForItem();
       this.setLoading(false);
 
       this.setInterval('apiStore.saveChangesToBackend', this.saveChangesToBackend, sendInterval);
@@ -470,6 +471,7 @@ export const useApiStore = defineStore('api', {
       stores.comments().setMarkerChange();
       stores.items().updateCurrentKeys();
       stores.tasks().updateCurrentKeys();
+      stores.layout().initForItem();
       this.setLoading(false);
       this.setInterval('apiStore.saveChangesToBackend', this.saveChangesToBackend, sendInterval);
       return true;

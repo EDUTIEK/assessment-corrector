@@ -52,6 +52,15 @@ export const useCorrectionsStore = defineStore('corrections', {
     },
 
     /**
+     * Get the first correction of another corrector
+     * @param state
+     * @returns {Correction|null}
+     */
+    firstOtherCorrection(state) {
+      return state.allCorrections.sort(Correction.order).find(element => element.key != state.ownKey) ?? null;
+    },
+
+    /**
      * Get a list of correction objects for other Corrections
      * @param state
      * @returns {Correction[]}

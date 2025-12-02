@@ -11,7 +11,7 @@ const { t } = i18n.global;
 const storage = getStorage('summaries');
 
 // set check interval very short to update the grade level according the points
-const checkInterval = 200;      // time (ms) to wait for a new update check (e.g. 0.2s to 1s)
+const checkInterval = 1000;      // time (ms) to wait for a new update check (e.g. 0.2s to 1s)
 
 let lockUpdate = 0;             // prevent updates during a processing
 
@@ -323,13 +323,11 @@ export const useSummariesStore = defineStore('summaries', {
      * Triggered every checkInterval
      */
     async updateContent(fromEditor = false, force = false) {
+      const levelsStore = stores.levels();
+      const apiStore = stores.api();
+      const changesStore = stores.changes();
 
-      const storedSummary = this.summaries[this.editSummary.getKey()] ?? new Summary();
-      if (!storedSummary.isChangeable() || storedSummary.isEqual(this.editSummary)) {
-        return;
-      }
-
-      // avoid too many checks
+       // avoid too many checks
       const currentTime = Date.now();
       if ((currentTime - this.lastCheck < checkInterval) && !force) {
         return;
@@ -342,62 +340,34 @@ export const useSummariesStore = defineStore('summaries', {
         return;
       }
 
-      // limit the points
-      const settingsStore = stores.settings();
-      if (isNaN(this.editSummary.points)) {
-        this.editSummary.points = null;
-      } else if (this.editSummary.points < 0) {
-        this.editSummary.points = 0;
-      } else if (this.editSummary.points > settingsStore.Assessment.max_points) {
-        this.editSummary.points = settingsStore.Assessment.max_points;
-      } else if (!Number.isInteger(this.editSummary.points) && settingsStore.Assessment.no_manual_decimals) {
-        this.editSummary.points = Math.floor(this.editSummary.points);
+      const storedSummary = this.summaries[this.editSummary.getKey()] ?? new Summary();
+      const clonedSummary = this.getCloneToStore(storedSummary, this.editSummary);
+      console.log('cloned', Date.now());
+      if (clonedSummary.isEqual(storedSummary)) {
+        console.log('equal', Date.now());
+        lockUpdate = 0;
+        return;
       }
-
-      console.log('update content');
-
-      // set the grade key for the points
-      const levelsStore = stores.levels();
-      let level = levelsStore.getLevelForPoints(this.editSummary.points);
-      console.log('level', level);
-      if (level) {
-        this.editSummary.grade_key = level.getKey()
-      } else {
-        this.editSummary.grade_key = '';
-      }
+      clonedSummary.last_change = apiStore.getServerTime(Date.now());
 
       try {
-        // ensure it is not changed because it is bound to tiny
-        const clonedSummary = this.editSummary.getClone();
+        console.log('try', Date.now());
+        this.editSummary.setData(clonedSummary.getData());
+        this.summaries[clonedSummary.getKey()] = clonedSummary;
 
-        console.log('a');
+        await storage.setItem(clonedSummary.getKey(), clonedSummary.getData());
+        await changesStore.setChange(new Change({
+          type: Change.TYPE_SUMMARY,
+          action: Change.ACTION_SAVE,
+          key: clonedSummary.getKey(),
+          item_key: clonedSummary.item_key
+        }))
 
-        if (!clonedSummary.isEqual(storedSummary) && Object.keys(this.summaries).includes(clonedSummary.getKey())) {
-
-          console.log('b');
-
-          const apiStore = stores.api();
-          const changesStore = stores.changes();
-
-          clonedSummary.last_change = apiStore.getServerTime(Date.now());
-
-          this.editSummary.setData(clonedSummary.getData());
-          this.summaries[clonedSummary.getKey()] = clonedSummary;
-
-          await storage.setItem(storedSummary.getKey(), clonedSummary.getData());
-          await changesStore.setChange(new Change({
-            type: Change.TYPE_SUMMARY,
-            action: Change.ACTION_SAVE,
-            key: clonedSummary.getKey(),
-            item_key: clonedSummary.item_key
-          }))
-
-          console.log(
+        console.log(
             "Save Change ",
             "| Editor: ", fromEditor,
             "| Duration:", Date.now() - currentTime, 'ms');
 
-        }
         // set this here
         this.lastCheck = currentTime;
       }
@@ -406,6 +376,66 @@ export const useSummariesStore = defineStore('summaries', {
       }
 
       lockUpdate = 0;
+    },
+
+    /**
+     * Get a cloned summary to store
+     * This respects which fields are changeable in the current correction status
+     * @param {Summary} stored
+     * @param {Summary} edited
+     * @return {Summary}
+     */
+    getCloneToStore(stored, edited) {
+      const itemsStore = stores.items();
+      const levelsStore = stores.levels();
+
+      const clone = stored.getClone();
+      if (itemsStore.canCorrect) {
+        clone.text = edited.text;
+        clone.pdf = edited.pdf;
+        clone.points = this.adjustPoints(edited.points);
+        clone.grade_key = levelsStore.getLevelForPoints(edited.points)?.key ?? '';
+      }
+      if (itemsStore.canRevise) {
+        clone.revision_text = edited.revision_text;
+        clone.revision_points = this.adjustPoints(edited.revision_points);
+        clone.revision_grade_key = levelsStore.getLevelForPoints(edited.revision_grade_key)?.key ?? '';
+      }
+
+      switch (edited.status) {
+        case Summary.STATUS_PRE_GRADED:
+        case Summary.STATUS_OPEN:
+          clone.status = itemsStore.canCorrect ? edited.status : clone.status;
+          break;
+        case Summary.STATUS_AUTHORIZED:
+          clone.status = itemsStore.canAuthorize ? edited.status : clone.status;
+          break;
+        case Summary.STATUS_REVISED:
+          clone.status = itemsStore.canRevise ? edited.status : clone.status;
+      }
+
+      return clone;
+    },
+
+    /**
+     * Adjust the points to the alloed range
+     * @param {float|null} points
+     * @return {float|null}
+     */
+    adjustPoints(points) {
+      const settingsStore = stores.settings();
+
+      if (isNaN(points)) {
+        points = null;
+      } else if (points < 0) {
+        points = 0;
+      } else if (points > settingsStore.Assessment.max_points) {
+        points = settingsStore.Assessment.max_points;
+      } else if (!Number.isInteger(points) && settingsStore.Assessment.no_manual_decimals) {
+        points = Math.floor(points);
+      }
+
+      // todo: limit to corridor for revision or stitch authorization
     },
 
     /**
@@ -434,4 +464,5 @@ export const useSummariesStore = defineStore('summaries', {
     },
 
   }
+
 });
