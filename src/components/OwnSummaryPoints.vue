@@ -15,17 +15,14 @@ const layoutStore = stores.layout();
     <v-container>
       <v-row dense>
         <v-col cols="10">
-          <sum-of-points class='sumOfPoints' :correction_key="stores.corrections().ownKey"></sum-of-points>
-        </v-col>
-      </v-row>
-      <v-row dense>
-        <v-col cols="10">
+          <p><sum-of-points class='sumOfPoints' :correction_key="stores.corrections().ownKey"></sum-of-points></p>
+
           <label for="appOwnSummaryPoints"><strong>{{ $t('ownSummaryPointsRating') }}</strong></label>
           &nbsp;
           <input :disabled="summariesStore.isOwnDisabled" id="appOwnSummaryPoints" class="appPoints" type="number" min="0"
                  :max="settingsStore.Assessment.max_points" v-model="summariesStore.editSummary.points"/> {{ $t('allPoints', summariesStore.editSummary.points) }}
           &nbsp;
-          <strong>{{ $t('ownSummaryPointsGrade') }}</strong> {{ summariesStore.currentGradeTitle }}
+          <strong>{{ $t('allGrade') }}</strong> {{ summariesStore.currentGradeTitle }}
 
           <p>{{ summariesStore.currentGradeStatement }}</p>
         </v-col>
@@ -38,9 +35,6 @@ const layoutStore = stores.layout();
         </v-col>
       </v-row>
     </v-container>
-
-
-
   </div>
 </template>
 

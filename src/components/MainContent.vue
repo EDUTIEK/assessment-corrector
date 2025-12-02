@@ -206,7 +206,7 @@ document.addEventListener('keydown', layoutStore.handleKeyDown);
                    @click="layoutStore.toggleRightSummaryRevision()">
               <v-icon v-show="layoutStore.showRightSummaryRevision" icon="mdi-checkbox-outline"></v-icon>
               <v-icon v-show="!layoutStore.showRightSummaryRevision" icon="mdi-checkbox-blank-outline"></v-icon>
-              <span>{{ $t('allRevision') }}</span>
+              <span>{{ settingsStore.procedureText }}</span>
               <span class="sr-only">{{$t('allShow') + (layoutStore.showRightSummaryRevision ? $t('allIsSelected') : '')}}</span>
             </v-btn>
 

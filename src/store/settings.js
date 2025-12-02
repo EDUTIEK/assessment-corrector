@@ -67,6 +67,16 @@ export const useSettingsStore = defineStore('settings', {
       return text;
     },
 
+    procedureText(state) {
+      switch (state.Assessment.procedure) {
+        case Procedure.APPROXIMATION:
+          return t('settingsProcedureApproximation');
+        case Procedure.CONSULTING:
+          return t('settingsProcedureConsulting');
+        default:
+          return t('settingsProcedureNone');
+      }
+    },
   },
 
   actions: {

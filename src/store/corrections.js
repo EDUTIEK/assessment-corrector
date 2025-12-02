@@ -43,6 +43,18 @@ export const useCorrectionsStore = defineStore('corrections', {
       return Object.keys(state.corrections)
     },
 
+    firstCorrection(state) {
+      return state.allCorrections.find(element => element.position == Correction.POSITION_FIRST) ?? null;
+    },
+
+    secondCorrection(state) {
+      return state.allCorrections.find(element => element.position == Correction.POSITION_SECOND) ?? null;
+    },
+
+    stitchCorrection(state) {
+      return state.allCorrections.find(element => element.position == Correction.POSITION_STITCH) ?? null;
+    },
+
     /**
      * Get the correction of the current user for the current item
      * @returns {Correction|null}

@@ -5,6 +5,7 @@ import Summary from "@/data/Summary";
 import Change from "@/data/Change";
 import i18n from "@/plugins/i18n";
 import Procedure from '@/data/Procedure';
+import Correction from '@/data/Correction';
 
 const { t } = i18n.global;
 
@@ -147,90 +148,113 @@ export const useSummariesStore = defineStore('summaries', {
       return fn;
     },
 
-
+    /**
+     * Text to be shown for an authorization if a procedure is needed afterward
+     * @returns {string}
+     */
     procedureNeededText(state) {
       const settingsStore = stores.settings();
-      switch (settingsStore.Assessment.procedure) {
-        case Procedure.APPROXIMATION:
-          return 'summariesProcedureApproximationNeeded';
-        case Procedure.CONSULTING:
-          return 'summariesProcedureConsultingNeeded';
-      }
-      if (settingsStore.Assessment.stitch_after_procedure) {
-        return 'summariesProcedureStitchNeeded';
+      const reason = state.pointsDifferText;
+      if (reason) {
+        switch (settingsStore.Assessment.procedure) {
+          case Procedure.APPROXIMATION:
+            return t('summariesProcedureApproximationNeeded', [reason]);
+          case Procedure.CONSULTING:
+            return t('summariesProcedureConsultingNeeded', [reason]);
+        }
+        if (settingsStore.Assessment.stitch_after_procedure) {
+          return t('summariesProcedureStitchNeeded', [reason]);
+        }
       }
       return '';
     },
 
     /**
-     * Text why a spacial procedure is needed for the current item
+     * Text to be shown for an authorization if a procedure is needed afterward
      * @returns {string}
      */
-    procedureReasonText(state) {
-      let min_points = null;
-      let max_points = null;
-      let sum_points = 0;
-      let count_points = 0;
+    stitchNeededAfterRevisionText(state) {
+      const reason = state.pointsDifferText;
+      if (reason) {
+        return t('summariesProcedureStitchNeeded', [reason]);
+      }
+      return '';
+    },
 
-      // loop over all summaries for the current correction item
-      for (const summary of state.allSummaries) {
-        const points = summary.points;
-        if (points !== null) {
-          sum_points += points;
-          count_points++;
+    /**
+     * Text why a procedure or stitch decision is needed for the current item
+     * @returns {string}
+     */
+    pointsDifferText(state) {
+      const ownSummary = state.editSummary;
+      const otherSummary = state.getForCorrection(stores.corrections().firstOtherCorrection?.key ?? '') ?? null;
 
-          if (min_points === null || points < min_points) {
-            min_points = points;
-          }
-          if (max_points === null || points > max_points) {
-            max_points = points;
-          }
-        }
+      let own_points = null;
+      let other_points = null;
+
+      // revision or stitch decision checks already revised points first
+      if (stores.items().canRevise || stores.corrections().ownCorrection?.position == Correction.POSITION_STITCH) {
+        own_points = ownSummary?.revision_points ?? ownSummary?.points;
+        other_points = otherSummary?.revision_points ?? otherSummary?.points;
+      }
+      // normal authorization checks only original points
+      else {
+        own_points = ownSummary?.points;
+        other_points = otherSummary?.points;
       }
 
-      if (count_points == 0) {
+      if (own_points === null || other_points === null) {
         return '';
       }
 
-      const settingsStore = stores.settings();
-      if (settingsStore.Assessment.procedure_when_distance) {
-        if (max_points - min_points > settingsStore.Assessment.max_auto_distance) {
-          return t('summariesProcedureReason', [settingsStore.Assessment.max_auto_distance]);
-        }
+      if (Math.abs(own_points - other_points) > stores.settings().Assessment.max_auto_distance) {
+        return t('summariesProcedureReason', [stores.settings().Assessment.max_auto_distance]);
       }
 
       return '';
     },
 
-    /**
-     * Minimum points all summaries for the current item
-     * @returns {number|null}
-     */
-    minPoints(state) {
-      let minPoints = null;
-      for (const summary of state.allSummaries) {
-        const points = summary.points;
-        if (minPoints === null || points < minPoints) {
-          minPoints = points;
-        }
+    pointsOutsideCorridorText(state) {
+      const corridor = state.pointsCorridor;
+      const points = stores.items().canRevise ? state.editSummary.revision_points : state.editSummary.points;
+      if (points < corridor.min || points > corridor.max) {
+        return t('summariesPointsOutsideMinMax', [corridor.min, corridor.max]);
       }
-      return minPoints;
+      return '';
     },
 
     /**
-     * Maximum points all summaries for the current item
-     * @returns {number|null}
+     * Get the minimum and maximum allowed points for a revision or stitch decision
+     * @return {object}
      */
-    maxPoints(state) {
-      let maxPoints = null;
-      for (const summary of state.allSummaries) {
-        const points = summary.points;
-        if (maxPoints === null || points > maxPoints) {
-          maxPoints = points;
-        }
+    pointsCorridor(state) {
+      const firstSummary = state.getForCorrection(stores.corrections().firstCorrection?.key ?? '') ?? null;
+      const secondSummary = state.getForCorrection(stores.corrections().secondCorrection?.key ?? '') ?? null;
+
+      let first_points = null;
+      let second_points = null;
+
+      // stitch decision checks points of revision first, then original points
+      if (stores.corrections().ownCorrection?.position == Correction.POSITION_STITCH) {
+        first_points = firstSummary?.revision_points ?? firstSummary?.points;
+        second_points = secondSummary?.revision_points ?? secondSummary?.points;
       }
-      return maxPoints;
-    }
+      // revision with corridor limit checks only original points
+      else if (stores.items().canRevise && stores.settings().Assessment.revision_between) {
+        first_points = firstSummary?.points;
+        second_points = secondSummary?.points;
+      }
+      // all other cases check the allowed points
+      else {
+        first_points = 0;
+        second_points = stores.settings().Assessment.max_points;
+      }
+
+      return {
+        min: Math.min(first_points, second_points),
+        max: Math.max(first_points, second_points)
+      }
+    },
   },
 
   actions: {
@@ -340,18 +364,17 @@ export const useSummariesStore = defineStore('summaries', {
         return;
       }
 
+      // use a clone to avoid conflict with ongoing inputs
       const storedSummary = this.summaries[this.editSummary.getKey()] ?? new Summary();
       const clonedSummary = this.getCloneToStore(storedSummary, this.editSummary);
-      console.log('cloned', Date.now());
       if (clonedSummary.isEqual(storedSummary)) {
-        console.log('equal', Date.now());
         lockUpdate = 0;
         return;
       }
       clonedSummary.last_change = apiStore.getServerTime(Date.now());
 
       try {
-        console.log('try', Date.now());
+        // this updates the adjusted points
         this.editSummary.setData(clonedSummary.getData());
         this.summaries[clonedSummary.getKey()] = clonedSummary;
 
@@ -389,7 +412,7 @@ export const useSummariesStore = defineStore('summaries', {
       const itemsStore = stores.items();
       const levelsStore = stores.levels();
 
-      const clone = stored.getClone();
+      let clone = stored.getClone();
       if (itemsStore.canCorrect) {
         clone.text = edited.text;
         clone.pdf = edited.pdf;
@@ -418,24 +441,23 @@ export const useSummariesStore = defineStore('summaries', {
     },
 
     /**
-     * Adjust the points to the alloed range
+     * Adjust the points to the allowed range
      * @param {float|null} points
      * @return {float|null}
      */
     adjustPoints(points) {
       const settingsStore = stores.settings();
-
-      if (isNaN(points)) {
-        points = null;
-      } else if (points < 0) {
-        points = 0;
-      } else if (points > settingsStore.Assessment.max_points) {
-        points = settingsStore.Assessment.max_points;
+      if (Number.isNaN(points)) {
+        return null;
       } else if (!Number.isInteger(points) && settingsStore.Assessment.no_manual_decimals) {
-        points = Math.floor(points);
+        return Math.floor(parseFloat(points));
+      } else if (points < 0) {
+        return 0;
+      } else if (points > settingsStore.Assessment.max_points) {
+        return settingsStore.Assessment.max_points;
+      } else {
+       return parseFloat(points);
       }
-
-      // todo: limit to corridor for revision or stitch authorization
     },
 
     /**
@@ -463,6 +485,13 @@ export const useSummariesStore = defineStore('summaries', {
       await this.updateContent(false, true);
     },
 
+    /**
+     * Set the own current summary as revised
+     */
+    async setOwnRevised() {
+      this.editSummary.status = Summary.STATUS_REVISED;
+      await this.updateContent(false, true);
+    },
   }
 
 });

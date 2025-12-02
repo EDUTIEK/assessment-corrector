@@ -48,7 +48,7 @@ function expansionClass() {
       <summary-points class="content" :correction_key="stores.corrections().ownKey"></summary-points>
     </div>
     <div v-if="stores.items().canRevise && props.showRevision" :class="expansionClass()">
-      <h2 class="headline">{{ $t('allRevision') }}</h2>
+      <h2 class="headline">{{ stores.settings().procedureText }}</h2>
       <own-summary-revision class="content" :editorId="'revision'"></own-summary-revision>
     </div>
   </div>

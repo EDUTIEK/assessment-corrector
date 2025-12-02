@@ -9,6 +9,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     AppBar: typeof import('./src/components/AppBar.vue')['default']
     Authorization: typeof import('./src/components/Authorization.vue')['default']
+    ConfirmRevision: typeof import('./src/components/ConfirmRevision.vue')['default']
     Essay: typeof import('./src/components/Essay.vue')['default']
     EssayImage: typeof import('./src/components/EssayImage.vue')['default']
     Help: typeof import('./src/components/Help.vue')['default']
@@ -29,6 +30,7 @@ declare module 'vue' {
     OwnSummaryRevision: typeof import('./src/components/OwnSummaryRevision.vue')['default']
     OwnSummaryText: typeof import('./src/components/OwnSummaryText.vue')['default']
     Resources: typeof import('./src/components/Resources.vue')['default']
+    Revision: typeof import('./src/components/Revision.vue')['default']
     SendingStatus: typeof import('./src/components/SendingStatus.vue')['default']
     Snippets: typeof import('./src/components/Snippets.vue')['default']
     Solution: typeof import('./src/components/Solution.vue')['default']

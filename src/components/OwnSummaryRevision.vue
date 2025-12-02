@@ -37,7 +37,7 @@ import headlinesThreeCss from '@/styles/headlines-three.css?inline';
 import {stores} from "@/store";
 import { nextTick, watch } from 'vue';
 import Snippet from "@/data/Snippet";
-import SumOfPoints from "@/components/SumOfPoints.vue";
+import ConfirmRevision from '@/components/ConfirmRevision.vue';
 
 const summariesStore = stores.summaries();
 const preferencesStore = stores.preferences();
@@ -51,18 +51,8 @@ const levelsStore = stores.levels();
 const props = defineProps(['editorId']);
 const helper = new TinyHelper(props.editorId);
 
-watch(() => layoutStore.focusChange, handleFocusChange);
-
 function handleInit() {
   helper.init();
-}
-
-async function handleFocusChange() {
-  if (layoutStore.focusTarget == 'ownRevision') {
-    helper.applyFocus();
-    await nextTick();
-    helper.restoreScrolling();
-  }
 }
 
 function handleChange() {
@@ -128,21 +118,19 @@ watch(() => snippetsStore.selection_open, handleSnippet);
     <v-container class="app-own-summary-points">
       <v-row dense>
         <v-col cols="10">
-          <label for="appOwnSummaryPoints"><strong>{{ $t('ownSummaryPointsRating') }}</strong></label>
+          <label for="appOwnSummaryPoints"><strong>{{ $t('ownSummaryRevisionRating') }}</strong></label>
           &nbsp;
-          <input :disabled="!itemsStore.canRevise" id="appOwnSummaryPoints" class="appPoints" type="number" min="0"
-                 :max="settingsStore.Assessment.max_points" v-model="summariesStore.editSummary.revision_points"/>
+          <input :disabled="!itemsStore.canRevise" id="appOwnSummaryPoints" class="appPoints" type="number"
+                 :min="summariesStore.pointsCorridor.min"
+                 :max="summariesStore.pointsCorridor.max"
+                 v-model="summariesStore.editSummary.revision_points"/>
           {{ $t('allPoints', summariesStore.editSummary.revision_points) }}
           &nbsp;
-          <strong>{{ $t('ownSummaryPointsGrade') }}</strong> {{ levelsStore.getLevelForPoints(summariesStore.editSummary.revision_points)?.title}}
+          <strong>{{ $t('allGrade') }}</strong> {{ levelsStore.getLevelForPoints(summariesStore.editSummary.revision_points)?.title}}
           <p>{{ levelsStore.getLevelForPoints(summariesStore.editSummary.revision_points)?.statement }}</p>
         </v-col>
         <v-col cols="2">
-          <v-btn density="compact" variant="text" v-if="!itemsStore.canRevise"
-                 @click="stores.layout().showRevision = true;">
-            <v-icon left icon="mdi-file-certificate-outline"></v-icon>
-            <span>{{ $t('allAuthorize') }}</span>
-          </v-btn>
+          <confirm-revision></confirm-revision>
         </v-col>
       </v-row>
     </v-container>
