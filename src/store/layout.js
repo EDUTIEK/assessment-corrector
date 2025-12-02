@@ -191,6 +191,10 @@ export const useLayoutStore = defineStore('layout', {
         this.leftContent = 'correction';
         this.rightContent = 'summary';
         this.leftCorrectionKey = stores.corrections().firstOtherCorrection?.key ?? '';
+        if (stores.summaries().getForCorrection(this.leftCorrectionKey)?.isRevised) {
+          this.showLeftSummaryCriteria = false;
+          this.showLeftSummaryRevision = true;
+        }
       } else {
         this.leftContent = 'essay';
         this.rightContent = 'marking';
