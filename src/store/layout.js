@@ -185,7 +185,7 @@ export const useLayoutStore = defineStore('layout', {
     },
 
     initForItem() {
-      if (stores.items().canRevise) {
+      if (stores.items().isInRevision) {
         this.showRightSummaryCriteria = false;
         this.showRightSummaryRevision = true;
         this.leftContent = 'correction';

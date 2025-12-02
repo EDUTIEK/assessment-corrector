@@ -28,6 +28,12 @@ function dialogTitle() {
   }
 }
 
+function canConfirm() {
+  return summariesStore.editSummary.revision_text != ''
+    && summariesStore.pointsOutsideCorridorText == ''
+    && !Number.isNaN(summariesStore.editSummary.revision_points);
+}
+
 function requireOtherRevisionPossible() {
   return settingsStore.Assessment.procedure === Procedure.APPROXIMATION
     && correctionsStore.ownCorrection?.position === Correction.POSITION_FIRST;
@@ -63,29 +69,30 @@ async function setRevisedAndContinue() {
       <v-card>
         <v-card-title>{{ dialogTitle() }}</v-card-title>
         <v-card-text>
-          <div class="appRow"><strong>{{ $t('revisionTextLabel') }}</strong>
+          <div class="appRow" v-if="summariesStore.editSummary.revision_text != ''">
+            <strong>{{ $t('revisionTextLabel') }}</strong>
             <div class="appText long-essay-content headlines-three" v-html="summariesStore.editSummary.revision_text">
             </div>
           </div>
 
           <div class="appRow">
-            <strong>{{ $t('revisionPointsLabel') }}</strong>
-            {{ summariesStore.editSummary.revision_points }}
-            {{ $t('allPoints', summariesStore.editSummary.revision_points) }}
-            <strong>{{ $t('allGrade') }}</strong>
-            {{ levelsStore.getLevelForPoints(summariesStore.editSummary.revision_points)?.title }}
+            <span v-if="!Number.isNaN(summariesStore.editSummary.revision_points)">
+              <strong>{{ $t('revisionPointsLabel') }}</strong>
+              {{ summariesStore.editSummary.revision_points }}
+              {{ $t('allPoints', summariesStore.editSummary.revision_points) }}
+              <strong>{{ $t('allGrade') }}</strong> {{ levelsStore.getLevelForPoints(summariesStore.editSummary.revision_points)?.title}}
+            </span>
             <p>{{ levelsStore.getLevelForPoints(summariesStore.editSummary.revision_points)?.statement }}</p>
           </div>
 
           <div class="appRow">
+            <v-alert v-show="Number.isNaN(summariesStore.editSummary.revision_points)"
+                     color="#0000A0" type="info" variant="text" density="compact">
+              {{ $t('revisionPleaseEnterPoints') }}
+            </v-alert>
             <v-alert v-show="summariesStore.editSummary.revision_text == ''"
                      color="#0000A0" type="info" variant="text" density="compact">
               {{ $t('revisionPleaseEnterText') }}
-            </v-alert>
-
-            <v-alert v-show="(summariesStore.editSummary.revision_points === null)"
-                     color="#0000A0" type="info" variant="text" density="compact">
-              {{ $t('revisionPleaseEnterPoints') }}
             </v-alert>
 
             <v-alert v-show="summariesStore.pointsOutsideCorridorText !== ''"
@@ -100,13 +107,13 @@ async function setRevisedAndContinue() {
 
             <div class="appRow">
               <v-checkbox
-                  v-if = "requireOtherRevisionPossible()"
+                  v-if="requireOtherRevisionPossible()"
                   v-model="summariesStore.editSummary.require_other_revision"
                   :label="t('revisionRequireOtherRevision')"
               ></v-checkbox>
             </div>
 
-            <div class="appRow">
+            <div class="appRow" v-if="canConfirm()">
               {{ $t('revisionWarnFinalize') }}
             </div>
 
@@ -114,7 +121,7 @@ async function setRevisedAndContinue() {
         </v-card-text>
         <v-card-actions>
           <v-btn
-              :disabled = "!!summariesStore.pointsOutsideCorridorText"
+              :disabled = "!canConfirm()"
               @click="setRevisedAndContinue()">
             <v-icon left icon="mdi-check"></v-icon>
             <span>{{ $t('revisionFix') }}</span>
@@ -145,6 +152,7 @@ async function setRevisedAndContinue() {
 }
 
 .appText {
+  min-height: 3em;
   max-height: 10em;
   padding: 5px;
   overflow-y: scroll;

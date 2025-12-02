@@ -93,7 +93,7 @@ watch(() => snippetsStore.selection_open, handleSnippet);
 
 <template>
   <div class="app-own-summary-text-wrapper">
-    <div class="app-own-summary-editor">
+    <div class="app-summary-editor">
       <label :for="props.editorId" class="hidden">{{ $t('ownSummaryRevisionTextHiddenField') }}</label>
       <editor
           :id="props.editorId"
@@ -115,18 +115,20 @@ watch(() => snippetsStore.selection_open, handleSnippet);
          v-html="summariesStore.editSummary.revision_text">
     </div>
 
-    <v-container class="app-own-summary-points">
+    <v-container class="app-summary-points">
       <v-row dense>
         <v-col cols="10">
-          <label for="appOwnSummaryPoints"><strong>{{ $t('ownSummaryRevisionRating') }}</strong></label>
+          <label for="appOwnSummaryPoints"><strong>{{ $t('summaryRevisionRating') }}</strong></label>
           &nbsp;
           <input :disabled="!itemsStore.canRevise" id="appOwnSummaryPoints" class="appPoints" type="number"
                  :min="summariesStore.pointsCorridor.min"
                  :max="summariesStore.pointsCorridor.max"
                  v-model="summariesStore.editSummary.revision_points"/>
-          {{ $t('allPoints', summariesStore.editSummary.revision_points) }}
+          {{ $t('allPoints', Number.isNaN(summariesStore.editSummary.revision_points) ? 0 : summariesStore.editSummary.revision_points) }}
           &nbsp;
-          <strong>{{ $t('allGrade') }}</strong> {{ levelsStore.getLevelForPoints(summariesStore.editSummary.revision_points)?.title}}
+          <span v-if="!Number.isNaN(summariesStore.editSummary.revision_points)">
+            <strong>{{ $t('allGrade') }}</strong> {{ levelsStore.getLevelForPoints(summariesStore.editSummary.revision_points)?.title}}
+          </span>
           <p>{{ levelsStore.getLevelForPoints(summariesStore.editSummary.revision_points)?.statement }}</p>
         </v-col>
         <v-col cols="2">
@@ -146,17 +148,12 @@ watch(() => snippetsStore.selection_open, handleSnippet);
   padding: 3px;
 }
 
-.app-own-summary-points {
+.app-summary-points {
   height: 100px;
-  overflow: hidden;
 }
 
-.app-own-summary-editor {
+.app-summary-editor {
   height: calc(100% - 100px);
-}
-
-.app-own-summary-text-wrapper {
-  height: 100%;
 }
 
 .app-summary-text-display {

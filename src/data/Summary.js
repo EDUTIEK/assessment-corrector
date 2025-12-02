@@ -205,7 +205,7 @@ export default class Summary {
   }
 
   isRevised() {
-    return this.status == this.status == Summary.STATUS_REVISED;
+    return this.status == Summary.STATUS_REVISED;
   }
 
   /**

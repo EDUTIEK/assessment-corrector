@@ -79,6 +79,17 @@ document.addEventListener('keydown', layoutStore.handleKeyDown);
               <span>{{ $t('allSummary') }}</span>
             </v-btn>
 
+            <!-- toggle left summary revision  -->
+            <v-btn size="small"
+                   v-if="stores.summaries().getForCorrection(layoutStore.leftCorrectionKey)?.isRevised()"
+                   v-show="layoutStore.isLeftCorrectionVisible"
+                   @click="layoutStore.toggleLeftSummaryRevision()">
+              <v-icon v-show="layoutStore.showLeftSummaryRevision" icon="mdi-checkbox-outline"></v-icon>
+              <v-icon v-show="!layoutStore.showLeftSummaryRevision" icon="mdi-checkbox-blank-outline"></v-icon>
+              <span>{{ settingsStore.procedureText }}</span>
+              <span class="sr-only">{{$t('allShow') + (layoutStore.showLeftSummaryRevision ? $t('allIsSelected') : '')}}</span>
+            </v-btn>
+
             <!-- expand right column -->
             <v-btn size="small" @click="layoutStore.setLeftExpanded(false)" v-show="layoutStore.isLeftExpanded">
               <v-icon icon="mdi-chevron-left"></v-icon>
@@ -110,6 +121,7 @@ document.addEventListener('keydown', layoutStore.handleKeyDown);
                          :correction_key="layoutStore.leftCorrectionKey"
                          :showCriteria="layoutStore.showLeftSummaryCriteria"
                          :showText="layoutStore.showLeftSummaryText"
+                         :showRevision="layoutStore.showLeftSummaryRevision"
           />
         </div>
       </section>
@@ -202,7 +214,9 @@ document.addEventListener('keydown', layoutStore.handleKeyDown);
             </v-btn>
 
             <!-- toggle right summary revision  -->
-            <v-btn size="small" v-if="stores.items().canRevise" v-show="layoutStore.isSummaryVisible || layoutStore.isRightCorrectionVisible"
+            <v-btn size="small"
+                   v-if="stores.summaries().isOwnRevised || stores.items().canRevise"
+                   v-show="layoutStore.isSummaryVisible || layoutStore.isRightCorrectionVisible"
                    @click="layoutStore.toggleRightSummaryRevision()">
               <v-icon v-show="layoutStore.showRightSummaryRevision" icon="mdi-checkbox-outline"></v-icon>
               <v-icon v-show="!layoutStore.showRightSummaryRevision" icon="mdi-checkbox-blank-outline"></v-icon>
@@ -242,6 +256,7 @@ document.addEventListener('keydown', layoutStore.handleKeyDown);
                          :correction_key="layoutStore.rightCorrectionKey"
                          :showCriteria="layoutStore.showRightSummaryCriteria"
                          :showText="layoutStore.showRightSummaryText"
+                         :showRevision="layoutStore.showRightSummaryRevision"
           />
           <marking v-if="layoutStore.isMarkingVisible"/>
         </div>

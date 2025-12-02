@@ -3,6 +3,7 @@ import SummaryCriteria from '@/components/SummaryCriteria.vue';
 import OwnSummaryPoints from "@/components/OwnSummaryPoints.vue";
 import OwnSummaryText from "@/components/OwnSummaryText.vue";
 import OwnSummaryRevision from "@/components/OwnSummaryRevision.vue";
+import SummaryRevision from "@/components/SummaryRevision.vue";
 import SummaryPoints from "@/components/SummaryPoints.vue";
 import {stores} from "@/store";
 
@@ -14,7 +15,7 @@ const props = defineProps(['showCriteria', 'showText', 'showRevision']);
 function expansionClass() {
   const sum = (props.showCriteria ? 1 : 0)
       + (props.showText ? 1 : 0)
-      + (stores.items().canRevise && props.showRevision ? 1 : 0);
+      + (stores.items().isInRevision && props.showRevision ? 1 : 0);
   switch (sum) {
     case 0:
       return 'hidden';
@@ -47,9 +48,13 @@ function expansionClass() {
       <h2 class="headline">{{ $t('allTotalRating') }}</h2>
       <summary-points class="content" :correction_key="stores.corrections().ownKey"></summary-points>
     </div>
-    <div v-if="stores.items().canRevise && props.showRevision" :class="expansionClass()">
+    <div v-if="props.showRevision && stores.items().canRevise" :class="expansionClass()">
       <h2 class="headline">{{ stores.settings().procedureText }}</h2>
       <own-summary-revision class="content" :editorId="'revision'"></own-summary-revision>
+    </div>
+    <div v-if="props.showRevision && stores.summaries().isOwnRevised && !stores.items().canRevise" :class="expansionClass()">
+      <h2 class="headline">{{ stores.settings().procedureText }}</h2>
+      <summary-revision class="content" :correction_key="stores.corrections().ownKey"></summary-revision>
     </div>
   </div>
 </template>

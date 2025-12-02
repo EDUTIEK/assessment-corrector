@@ -3,12 +3,18 @@ import {stores} from "@/store";
 import SummaryCriteria from '@/components/SummaryCriteria.vue';
 import SummaryPoints from "@/components/SummaryPoints.vue";
 import SummaryText from "@/components/SummaryText.vue";
+import SummaryRevision from "@/components/SummaryRevision.vue";
 
-const props = defineProps(['correction_key', 'showCriteria', 'showText']);
+const props = defineProps(['correction_key', 'showCriteria', 'showText', 'showRevision']);
 const summariesStore = stores.summaries();
+const summary = summariesStore.getForCorrection(props.correction_key);
 
 function expansionClass() {
-  const sum = (props.showCriteria ? 1 : 0) + (props.showText ? 1 : 0);
+  const sum = (props.showCriteria ? 1 : 0)
+      + ((props.showText  && summary.isAuthorized()) ? 1 : 0)
+      + ((props.showRevision && summary.isRevised()) ? 1 : 0);
+
+
   switch (sum) {
     case 0:
       return 'hidden';
@@ -16,6 +22,8 @@ function expansionClass() {
       return 'full';
     case 2:
       return 'half';
+    case 3:
+      return 'third';
   }
 }
 </script>
@@ -23,22 +31,24 @@ function expansionClass() {
 <template>
   <div id="app-other-summary-wrapper">
 
-    <div v-if="props.showCriteria && summariesStore.getAuthorizationForCorrection(props.correction_key)"
-         :class="expansionClass()">
+    <div v-if="props.showCriteria && summary.isAuthorized()" :class="expansionClass()">
       <div class="headline">{{ $t('allOverview') }}</div>
       <summary-criteria class="content" :correction_key="props.correction_key"></summary-criteria>
     </div>
-    <div v-if="props.showText && summariesStore.getAuthorizationForCorrection(props.correction_key)"
-         :class="expansionClass()">
+    <div v-if="props.showText && summary.isAuthorized()" :class="expansionClass()">
       <div class="headline">{{ $t('allSummary') }}</div>
       <summary-text class="content" :correction_key="props.correction_key"></summary-text>
     </div>
-    <div v-if="summariesStore.getAuthorizationForCorrection(props.correction_key)">
+    <div v-if="summary.isAuthorized()" class="app-summary-points">
       <div class="headline">{{ $t('allTotalRating') }}</div>
       <summary-points class="content" :correction_key="props.correction_key"></summary-points>
     </div>
+    <div v-if="props.showRevision && summary.isRevised()" :class="expansionClass()">
+      <div class="headline">{{ stores.settings().procedureText }}</div>
+      <summary-revision class="content" :correction_key="props.correction_key"></summary-revision>
+    </div>
 
-    <div v-if="!summariesStore.getAuthorizationForCorrection(props.correction_key)">
+    <div v-if="!summary.isAuthorized()">
       {{ $t('otherSummaryNotAuthorized') }}
     </div>
   </div>
@@ -50,8 +60,8 @@ function expansionClass() {
   height: 100%;
 }
 
-#app-summary-points {
-  min-height: 160px;
+.app-summary-points {
+ height: 120px;
 }
 
 .headline {
@@ -76,6 +86,10 @@ function expansionClass() {
 
 .half {
   height: calc((100% - 160px) / 2);
+}
+
+.third {
+  height: calc((100% - 160px) / 3);
 }
 
 </style>

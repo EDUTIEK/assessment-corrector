@@ -69,6 +69,24 @@ export const useItemsStore = defineStore('items', {
       return state.currentItem?.can_revise;
     },
 
+    isOpen(state) {
+      return state.currentItem?.correction_status === Item.STATUS_OPEN;
+    },
+
+    isInRevision(state) {
+      return state.currentItem?.correction_status === Item.STATUS_APPROXIMATION
+          || state.currentItem?.correction_status === Item.STATUS_CONSULTING;
+    },
+
+    isInStitch(state) {
+      return state.currentItem?.correction_status === Item.STATUS_STITCH;
+    },
+
+    isFinal(state) {
+      return state.currentItem?.correction_status === Item.STATUS_FINALIZED;
+    },
+
+
     getItem(state) {
 
       /**

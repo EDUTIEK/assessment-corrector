@@ -39,6 +39,7 @@ declare module 'vue' {
     StitchDecision: typeof import('./src/components/StitchDecision.vue')['default']
     SummaryCriteria: typeof import('./src/components/SummaryCriteria.vue')['default']
     SummaryPoints: typeof import('./src/components/SummaryPoints.vue')['default']
+    SummaryRevision: typeof import('./src/components/SummaryRevision.vue')['default']
     SummaryText: typeof import('./src/components/SummaryText.vue')['default']
     SumOfPoints: typeof import('./src/components/SumOfPoints.vue')['default']
     Tasks: typeof import('./src/components/Tasks.vue')['default']

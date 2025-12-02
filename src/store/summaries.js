@@ -65,6 +65,14 @@ export const useSummariesStore = defineStore('summaries', {
       return state.editSummary.isAuthorized();
     },
 
+    /**
+     * Is the summary of the current correction and item revised
+     * @returns {bool}
+     */
+    isOwnRevised(state) {
+      return state.editSummary.isRevised();
+    },
+
     isOneAuthorized(state) {
       for (const summary of state.allSummaries) {
         if (summary.isAuthorized()) {
@@ -208,7 +216,7 @@ export const useSummariesStore = defineStore('summaries', {
       }
 
       if (Math.abs(own_points - other_points) > stores.settings().Assessment.max_auto_distance) {
-        return t('summariesProcedureReason', [stores.settings().Assessment.max_auto_distance]);
+        return t('summariesPointsDifferText', stores.settings().Assessment.max_auto_distance);
       }
 
       return '';
@@ -368,10 +376,11 @@ export const useSummariesStore = defineStore('summaries', {
       const storedSummary = this.summaries[this.editSummary.getKey()] ?? new Summary();
       const clonedSummary = this.getCloneToStore(storedSummary, this.editSummary);
       if (clonedSummary.isEqual(storedSummary)) {
+        this.lastCheck = currentTime;
         lockUpdate = 0;
         return;
       }
-      clonedSummary.last_change = apiStore.getServerTime(Date.now());
+      clonedSummary.last_change = apiStore.getServerTime(currentTime);
 
       try {
         // this updates the adjusted points
@@ -390,14 +399,12 @@ export const useSummariesStore = defineStore('summaries', {
             "Save Change ",
             "| Editor: ", fromEditor,
             "| Duration:", Date.now() - currentTime, 'ms');
-
-        // set this here
-        this.lastCheck = currentTime;
       }
       catch (error) {
         console.error(error);
       }
 
+      this.lastCheck = currentTime;
       lockUpdate = 0;
     },
 
@@ -423,6 +430,7 @@ export const useSummariesStore = defineStore('summaries', {
         clone.revision_text = edited.revision_text;
         clone.revision_points = this.adjustPoints(edited.revision_points);
         clone.revision_grade_key = levelsStore.getLevelForPoints(edited.revision_grade_key)?.key ?? '';
+        clone.require_other_revision = edited.require_other_revision;
       }
 
       switch (edited.status) {
