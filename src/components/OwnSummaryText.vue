@@ -112,11 +112,6 @@ watch(() => snippetsStore.selection_open, handleSnippet);
         licenseKey = 'gpl'
         :init="helper.getInit()"
     />
-
-    <div class="app-summary-text-display long-essay-content correction-summary"
-         v-if="summariesStore.isOwnDisabled"
-         v-html="summariesStore.editSummary.text">
-    </div>
   </div>
 </template>
 
@@ -125,13 +120,5 @@ watch(() => snippetsStore.selection_open, handleSnippet);
 .app-own-summary-text-wrapper {
   height: 100%;
 }
-
-.app-summary-text-display {
-  height: 100%;
-  border: 1px solid #cccccc;
-  padding: 10px;
-  overflow-y: scroll;
-}
-
 
 </style>

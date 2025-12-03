@@ -185,7 +185,7 @@ export const useLayoutStore = defineStore('layout', {
     },
 
     initForItem() {
-      if (stores.items().isInRevision) {
+      if (stores.items().isInRevision || stores.items().isInStitch) {
         this.showRightSummaryCriteria = false;
         this.showRightSummaryRevision = true;
         this.leftContent = 'correction';
@@ -195,7 +195,8 @@ export const useLayoutStore = defineStore('layout', {
           this.showLeftSummaryCriteria = false;
           this.showLeftSummaryRevision = true;
         }
-      } else {
+      }
+      else {
         this.leftContent = 'essay';
         this.rightContent = 'marking';
       }

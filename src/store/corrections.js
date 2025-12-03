@@ -69,7 +69,9 @@ export const useCorrectionsStore = defineStore('corrections', {
      * @returns {Correction|null}
      */
     firstOtherCorrection(state) {
-      return state.allCorrections.sort(Correction.order).find(element => element.key != state.ownKey) ?? null;
+      return state.allCorrections
+          .sort(Correction.order)
+          .find(element => element.key != state.ownKey) ?? null;
     },
 
     /**

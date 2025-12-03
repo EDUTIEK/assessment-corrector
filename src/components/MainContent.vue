@@ -7,8 +7,7 @@ import SolutionPdf from '@/components/SolutionPdf.vue';
 import Resources from "@/components/Resources.vue";
 import Essay from "@/components/Essay.vue";
 import EssayImage from '@/components/EssayImage.vue';
-import OwnSummary from "@/components/OwnSummary.vue";
-import OtherSummary from '@/components/OtherSummary.vue';
+import SummaryColumn from "@/components/SummaryColumn.vue";
 import Marking from "@/components/Marking.vue";
 import Snippets from "@/components/Snippets.vue";
 import { nextTick, watch } from 'vue';
@@ -117,7 +116,7 @@ document.addEventListener('keydown', layoutStore.handleKeyDown);
           <essay v-if="layoutStore.isEssayVisible && !pagesStore.hasPages"/>
           <essay-image v-if="layoutStore.isEssayVisible && pagesStore.hasPages"/>
           <resources v-if="layoutStore.isResourcesVisible"/>
-          <other-summary v-if="layoutStore.isLeftCorrectionVisible"
+          <summary-column v-if="layoutStore.isLeftCorrectionVisible"
                          :correction_key="layoutStore.leftCorrectionKey"
                          :showCriteria="layoutStore.showLeftSummaryCriteria"
                          :showText="layoutStore.showLeftSummaryText"
@@ -247,12 +246,13 @@ document.addEventListener('keydown', layoutStore.handleKeyDown);
         </div>
         <!-- Content -->
         <div class="col-content">
-          <own-summary v-if="layoutStore.isSummaryVisible"
+          <summary-column v-if="layoutStore.isSummaryVisible"
+                       :correction_key="stores.corrections().ownKey"
                        :showCriteria="layoutStore.showRightSummaryCriteria"
                        :showText="layoutStore.showRightSummaryText"
                        :showRevision="layoutStore.showRightSummaryRevision"
           />
-          <other-summary v-if="layoutStore.isRightCorrectionVisible"
+          <summary-column v-if="layoutStore.isRightCorrectionVisible"
                          :correction_key="layoutStore.rightCorrectionKey"
                          :showCriteria="layoutStore.showRightSummaryCriteria"
                          :showText="layoutStore.showRightSummaryText"
