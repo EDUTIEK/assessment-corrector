@@ -81,7 +81,7 @@ export default class Item {
         case Correction.POSITION_SECOND:
           return t('correctionsSecondCorrection')
         case Correction.POSITION_STITCH:
-          return t('correctionsSecondCorrection')
+          return t('correctionsStitchCorrection')
         default:
           return '';
       }

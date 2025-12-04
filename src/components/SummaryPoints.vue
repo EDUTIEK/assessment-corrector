@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import {ref, watch} from 'vue';
 import {stores} from "@/store";
 
 const settingsStore = stores.settings();
@@ -12,15 +12,19 @@ const points = ref(0);
 const grade = ref('');
 const statement = ref('');
 
-const summary = summariesStore.getForCorrection(props.correction_key);
-if (summary) {
-  points.value = summary.points;
-  const level = levelsStore.getLevel(summary.grade_key);
-  if (level) {
-    grade.value = level.title;
-    statement.value = level.statement;
+function init() {
+  const summary = summariesStore.getForCorrection(props.correction_key);
+  if (summary) {
+    points.value = summary.points;
+    const level = levelsStore.getLevel(summary.grade_key);
+    if (level) {
+      grade.value = level.title;
+      statement.value = level.statement;
+    }
   }
 }
+watch(() => props.correction_key, init);
+init();
 
 </script>
 

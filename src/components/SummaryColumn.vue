@@ -7,17 +7,27 @@ import OwnSummaryPoints from "@/components/OwnSummaryPoints.vue";
 import OwnSummaryText from "@/components/OwnSummaryText.vue";
 import OwnSummaryRevision from "@/components/OwnSummaryRevision.vue";
 import {stores} from "@/store";
+import {watch} from "vue";
 
 const props = defineProps(['correction_key', 'showCriteria', 'showText', 'showRevision']);
 
-const is_own = props.correction_key == stores.corrections().ownKey;
-const can_correct = is_own && stores.items().canCorrect;
-const can_revise = is_own && stores.items().canRevise;
+let is_own;
+let can_correct;
+let can_revise;
+let summary;
+let is_authorized;
+let is_revised;
 
-const summary = is_own ? stores.summaries(). editSummary : stores.summaries().getForCorrection(props.correction_key);
-const is_authorized = summary.isAuthorized();
-const is_revised = summary.isRevised();
-
+function init() {
+  is_own = props.correction_key == stores.corrections().ownKey;
+  can_correct = is_own && stores.items().canCorrect;
+  can_revise = is_own && stores.items().canRevise;
+  summary = is_own ? stores.summaries().editSummary : stores.summaries().getForCorrection(props.correction_key);
+  is_authorized = summary.isAuthorized();
+  is_revised = summary.isRevised();
+}
+watch(() => props.correction_key, init);
+init();
 
 function expansionClass() {
   const sum = (props.showCriteria ? 1 : 0)

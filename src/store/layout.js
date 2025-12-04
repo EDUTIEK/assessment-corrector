@@ -384,23 +384,23 @@ export const useLayoutStore = defineStore('layout', {
       const apiStore = stores.api();
       const correctionsStore = stores.corrections();
 
-      if (this.leftCorrectionKey == correction_key) {
+      if (this.leftCorrectionKey == correction_key) {         // already selected
         this.showLeftCorrection();
-      } else if (this.rightCorrectionKey == correction_key) {
+      } else if (this.rightCorrectionKey == correction_key) { // already selected
         this.showRightCorrection();
-      } else if (stores.corrections().ownKey) {
+      } else if (stores.corrections().ownKey) {               // user is corrector => other correctors should be left
         this.leftCorrectionKey = correction_key;
         this.showLeftCorrection();
-      } else if (correctionsStore.countCorrections == 1) {
+      } else if (correctionsStore.countCorrections == 1) {    // admin view => show a single corrector on the right
         this.rightCorrectionKey = correction_key;
         this.showRightCorrection();
-      } else if (this.leftCorrectionKey == '') {
+      } else if (this.leftCorrectionKey == '') {              // left is free
         this.leftCorrectionKey = correction_key;
         this.showLeftCorrection();
-      } else if (this.rightCorrectionKey == '') {
+      } else if (this.rightCorrectionKey == '') {             // right is free
         this.rightCorrectionKey = correction_key;
         this.showRightCorrection();
-      } else {
+      } else {                                                // replace on left
         this.leftCorrectionKey = correction_key;
         this.showLeftCorrection();
       }

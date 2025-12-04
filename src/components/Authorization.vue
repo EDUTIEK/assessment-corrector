@@ -33,7 +33,7 @@ function getPartialPointsMessage() {
   }
 
   if (points != summariesStore.editSummary.points) {
-    return t('authorizationPointsMismatch', [note])
+    return t('authorizationPointsMismatch', [points])
   }
 
   return '';
@@ -129,6 +129,11 @@ function editSummary() {
             <v-alert v-show="summariesStore.areOthersAuthorized && summariesStore.procedureNeededText != '' "
                      color="#0000A0" type="info" variant="text" density="compact">
               {{ summariesStore.procedureNeededText }}
+            </v-alert>
+
+            <v-alert v-show="itemsStore.isInStitch && summariesStore.pointsOutsideCorridorText !== ''"
+                     color="#0000A0" type="info" variant="text" density="compact">
+              {{ summariesStore.pointsOutsideCorridorText }}
             </v-alert>
 
           </div>

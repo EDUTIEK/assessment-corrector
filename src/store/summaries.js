@@ -162,15 +162,16 @@ export const useSummariesStore = defineStore('summaries', {
      */
     procedureNeededText(state) {
       const settingsStore = stores.settings();
+      const itemsStore = stores.items();
       const reason = state.pointsDifferText;
-      if (reason) {
+      if (reason && !itemsStore.isInStitch) {
         switch (settingsStore.Assessment.procedure) {
           case Procedure.APPROXIMATION:
             return t('summariesProcedureApproximationNeeded', [reason]);
           case Procedure.CONSULTING:
             return t('summariesProcedureConsultingNeeded', [reason]);
         }
-        if (settingsStore.Assessment.stitch_after_procedure) {
+        if (settingsStore.Assessment.stitch_after_procedure && !itemsStore.isInStitch) {
           return t('summariesProcedureStitchNeeded', [reason]);
         }
       }
