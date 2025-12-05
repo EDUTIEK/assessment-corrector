@@ -45,6 +45,7 @@ export const useLayoutStore = defineStore('layout', {
       showSendFailure: false,             // show a message about a sending failure
       showDataReplaceConfirmation: false, // show a confirmation that the stored data should be replaced by another task or user
       showItemReplaceConfirmation: false, // show a confirmation that the stored item should be replaced by another item
+      showSummaryFileUpload: false,       // show a dialog to upload a summary file
 
       focusTarget: '',                    // target for setting the focus (header|navigation|left|right|ownSummary)
       focusChange: 0                      // indicator to set the focus to the target

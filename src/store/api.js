@@ -128,6 +128,20 @@ export const useApiStore = defineStore('api', {
       return fn;
     },
 
+    getUploadUrl(state) {
+
+      /**
+       * Get the Url for uploading a
+       * @param {string} key
+       * @returns {string}
+       */
+      const fn = function (task_id, writer_id) {
+        const config = this.getRequestConfig(this.dataToken);
+        return config.baseURL + '/corrector/file/' + task_id + '/' + writer_id + '?' + config.params.toString();
+      }
+      return fn;
+    },
+
 
     getServerTime(state) {
 

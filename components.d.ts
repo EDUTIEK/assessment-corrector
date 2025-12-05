@@ -23,6 +23,7 @@ declare module 'vue' {
     MarkingComments: typeof import('./src/components/MarkingComments.vue')['default']
     MarkingGeneralPoints: typeof import('./src/components/MarkingGeneralPoints.vue')['default']
     NavBar: typeof import('./src/components/NavBar.vue')['default']
+    OwnSummaryFile: typeof import('./src/components/OwnSummaryFile.vue')['default']
     OwnSummaryPoints: typeof import('./src/components/OwnSummaryPoints.vue')['default']
     OwnSummaryRevision: typeof import('./src/components/OwnSummaryRevision.vue')['default']
     OwnSummaryText: typeof import('./src/components/OwnSummaryText.vue')['default']

@@ -4,7 +4,8 @@ import SummaryText from "@/components/SummaryText.vue";
 import SummaryPoints from "@/components/SummaryPoints.vue";
 import SummaryRevision from "@/components/SummaryRevision.vue";
 import OwnSummaryPoints from "@/components/OwnSummaryPoints.vue";
-import OwnSummaryText from "@/components/OwnSummaryText.vue";
+import OwnSummaryText from "@/components/OwnSummaryText.vue"
+import OwnSummaryFile from "@/components/OwnSummaryFile.vue";
 import OwnSummaryRevision from "@/components/OwnSummaryRevision.vue";
 import {stores} from "@/store";
 import {watch} from "vue";
@@ -58,6 +59,7 @@ function expansionClass() {
     <div v-if="props.showText && can_correct" :class="expansionClass()">
       <h2 class="headline">{{ $t('allSummary') }}</h2>
       <own-summary-text class="content" :editorId="'summary'"></own-summary-text>
+      <own-summary-file></own-summary-file>
     </div>
     <div v-if="props.showText && !can_correct && is_authorized" :class="expansionClass()">
       <h2 class="headline">{{ $t('allSummary') }}</h2>

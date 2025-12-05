@@ -65,13 +65,14 @@ export default class TinyHelper {
                 editor.ui.registry.addButton('zoomOut', {tooltip: 'Verkleinern', icon: 'zoom-out', onAction: this.zoomOut.bind(this)});
                 editor.ui.registry.addButton('zoomIn', {tooltip: 'Vergrößern', icon: 'zoom-in', onAction: this.zoomIn.bind(this)});
                 editor.ui.registry.addButton('openSnippets', {tooltip: 'Textbausteine', icon: 'plus', onAction: this.openSnippets.bind(this)});
+                editor.ui.registry.addButton('uploadFile', {tooltip: 'Bewertungsbogen', icon: 'browse', onAction: this.uploadFile.bind(this)});
             }.bind(this)
         }
     }
 
     toolbar() {
         // correction always has full formatting options
-        return 'zoomOut zoomIn undo redo styles bold italic underline bullist numlist removeformat charmap openSnippets';
+        return 'zoomOut zoomIn undo redo styles bold italic underline bullist numlist removeformat charmap openSnippets uploadFile';
     }
 
     /**
@@ -129,6 +130,9 @@ export default class TinyHelper {
         snippetsStore.openSelection(Snippet.FOR_SUMMARY, null, this.editor.selection.getContent());
     }
 
+    uploadFile() {
+        stores.layout().showSummaryFileUpload = true;
+    }
 
     /**
      * Set the focus to the editor
