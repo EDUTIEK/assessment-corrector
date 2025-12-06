@@ -58,8 +58,8 @@ function expansionClass() {
 
     <div v-if="props.showText && can_correct" :class="expansionClass()">
       <h2 class="headline">{{ $t('allSummary') }}</h2>
-      <own-summary-text class="content" :editorId="'summary'"></own-summary-text>
-      <own-summary-file></own-summary-file>
+      <own-summary-text v-if="!summary.pdf" class="content" :editorId="'summary'"></own-summary-text>
+      <own-summary-file v-if="summary.pdf" ></own-summary-file>
     </div>
     <div v-if="props.showText && !can_correct && is_authorized" :class="expansionClass()">
       <h2 class="headline">{{ $t('allSummary') }}</h2>

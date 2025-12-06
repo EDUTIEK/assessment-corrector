@@ -15,39 +15,28 @@ const uploadPercentage = ref(0);
 const message = ref('');
 const isSuccess = ref(false);
 
+function updateProgress(progressEvent) {
+  // Calculate and update the progress percentage
+  uploadPercentage.value = Math.round((100 * progressEvent.loaded) / progressEvent.total);
+}
 
-const uploadFile = async () => {
+async function uploadFile() {
   if (!selectedFile.value) {
-    message.value = 'Please select a file first!';
+    message.value = 'Bitte wählen Sie eine Datei';
     isSuccess.value = false;
     return;
   }
 
-  const formData = new FormData();
-  // The 'file' key depends on what your backend API expects
-  formData.append('file', selectedFile.value);
-
-  try {
-    message.value = '';
-    uploadPercentage.value = 0;
-
-    await axios.post(apiStore.getUploadUrl(summariesStore.editSummary.task_id, summariesStore.editSummary.writer_id), formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-      onUploadProgress: (progressEvent) => {
-        // Calculate and update the progress percentage
-        uploadPercentage.value = Math.round((100 * progressEvent.loaded) / progressEvent.total);
-      },
-    });
+  const id = await(apiStore.sendFile(selectedFile.value, this.onProgress));
+  if (id) {
+    summariesStore.editSummary.pdf = id;
     closeUpload();
-
-  } catch (error) {
-    message.value = 'Fehler beim Hochladen: ' + (error.response?.data?.message || error.message);
-    isSuccess.value = false;
-    uploadPercentage.value = 0;
   }
-};
+
+  message.value = 'Fehler beim Hochladen!'
+  isSuccess.value = false;
+  uploadPercentage.value = 0;
+}
 
 function closeUpload() {
   message.value = '';
@@ -60,7 +49,18 @@ function closeUpload() {
 
 
 <template>
-  <v-container>
+  <div class="app-own-summary-file-wrapper">
+    File ID: {{ summariesStore.editSummary.pdf }}
+    <!--
+    <object
+        v-if="resource.mimetype =='application/pdf'"
+        type="application/pdf"
+        :data="resource.url"
+        width="100%"
+        height="100%">
+    </object>
+    -->
+
     <v-dialog max-width="60em" persistent v-model="layoutStore.showSummaryFileUpload">
       <v-card class="pa-4">
         <v-card-title>Datei hochladen</v-card-title>
@@ -116,7 +116,7 @@ function closeUpload() {
 
     </v-dialog>
 
-  </v-container>
+  </div>
 </template>
 
 

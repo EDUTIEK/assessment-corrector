@@ -34,6 +34,12 @@ export default class Summary {
   correction_key = '';
 
   /**
+   * Id of the summary
+   * @type {integer}
+   */
+  id = null;
+
+  /**
    * Task to which this summary belongs
    * @type {integer}
    */
@@ -125,6 +131,9 @@ export default class Summary {
    * @param {object} data
    */
   setData(data) {
+    if (data.id !== undefined && data.id !== null) {
+      this.id = parseInt(data.id);
+    }
     if (data.task_id !== undefined && data.task_id !== null) {
       this.task_id = parseInt(data.task_id);
     }

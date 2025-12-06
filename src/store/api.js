@@ -128,6 +128,20 @@ export const useApiStore = defineStore('api', {
       return fn;
     },
 
+    getSummaryPdfUrl(state) {
+
+      /**
+       * Get the Url for loading a page thumbnail
+       * @param {Page} page
+       * @returns {string}
+       */
+      const fn = function (page) {
+        const config = this.getRequestConfig(this.fileToken);
+        return config.baseURL + '/corrector/file/essaytask/thumb/' + page.id + '?' + config.params.toString();
+      }
+      return fn;
+    },
+
     getUploadUrl(state) {
 
       /**
@@ -135,9 +149,9 @@ export const useApiStore = defineStore('api', {
        * @param {string} key
        * @returns {string}
        */
-      const fn = function (task_id, writer_id) {
+      const fn = function (id) {
         const config = this.getRequestConfig(this.dataToken);
-        return config.baseURL + '/corrector/file/' + task_id + '/' + writer_id + '?' + config.params.toString();
+        return config.baseURL + '/corrector/file/task/summary/' + id + '?' + config.params.toString();
       }
       return fn;
     },
@@ -535,6 +549,32 @@ export const useApiStore = defineStore('api', {
         }
       }
       return changesStore.countChanges == 0;
+    },
+
+    /**
+     * Send a file to the backend
+     */
+    async sendFile(file, onProgress) {
+
+      try {
+        const formData = new FormData();
+        // 'file' is the POST element
+        formData.append('file', file);
+
+        const id = await axios.post(
+            apiStore.getUploadUrl(summariesStore.editSummary.task_id, summariesStore.editSummary.writer_id),
+            formData,
+            {
+              headers: {
+                'Content-Type': 'multipart/form-data',
+              },
+              onUploadProgress: onProgress
+            });
+        return true;
+
+      } catch (error) {
+        return false;
+      }
     },
 
     /**
