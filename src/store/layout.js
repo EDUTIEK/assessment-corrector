@@ -44,9 +44,6 @@ export const useLayoutStore = defineStore('layout', {
       showDataReplaceConfirmation: false, // show a confirmation that the stored data should be replaced by another task or user
       showItemReplaceConfirmation: false, // show a confirmation that the stored item should be replaced by another item
 
-      showSummaryFileUpload: false,       // show a dialog to upload a summary file
-      showSummaryFileDelete: false,       // show a dialog to delete a summary file
-
       focusTarget: '',                    // target for setting the focus (header|navigation|left|right|ownSummary)
       focusChange: 0                      // indicator to set the focus to the target
     }

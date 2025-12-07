@@ -64,20 +64,13 @@ function expansionClass() {
             <h2 class="headline">{{ $t('allSummary') }}</h2>
           </v-col>
           <v-col cols="4" class="ma-0 pa-0 text-right">
-            <v-btn class="headline-button" v-if="!summary.pdf" flat @click="stores.layout().showSummaryFileUpload = true">
-              <v-icon left icon="mdi-upload"></v-icon>
-              <span>{{ $t('allUpload') + '...' }}</span>
-            </v-btn>
-            <v-btn class="headline-button" v-if="summary.pdf" flat @click="stores.layout().showSummaryFileDelete = true">
-              <v-icon left icon="mdi-delete-outline"></v-icon>
-              <span>{{ $t('allDelete') + '...' }}</span>
-            </v-btn>
+            <own-summary-upload v-id="can_correct" ></own-summary-upload>
           </v-col>
         </v-row>
       </v-container>
 
       <own-summary-text v-show="!summary.pdf" class="content" :editorId="'summary'"></own-summary-text>
-      <own-summary-upload v-show="summary.pdf" ></own-summary-upload>
+      <summary-file v-if="summary.pdf" class="content" :correction_key="props.correction_key"></summary-file>
     </div>
     <div v-if="props.showText && !can_correct && is_authorized" :class="expansionClass()">
       <h2 class="headline">{{ $t('allSummary') }}</h2>
@@ -135,10 +128,6 @@ function expansionClass() {
   height: 40px;
   padding-top: 10px;
   padding-left: 10px;
-  background-color: #f0f0f0;
-}
-
-.headline-button {
   background-color: #f0f0f0;
 }
 

@@ -16,7 +16,8 @@ const selectedFile = ref(null);
 const uploadPercentage = ref(0);
 const message = ref('');
 const isSuccess = ref(false);
-const pdfUrl = ref(apiStore.getSummaryPdfUrl(summariesStore.editSummary));
+const showUpload = ref(false);
+const showDelete = ref(false);
 
 function updateProgress(progressEvent) {
   // Calculate and update the progress percentage
@@ -34,7 +35,6 @@ async function uploadFile() {
   if (id) {
     summariesStore.editSummary.pdf = id;
     summariesStore.editSummary.text = '';
-    pdfUrl.value = apiStore.getSummaryPdfUrl(summariesStore.editSummary);
     closeUpload();
     return;
   }
@@ -46,7 +46,7 @@ async function uploadFile() {
 
 async function deleteFile() {
   summariesStore.editSummary.pdf = null;
-  layoutStore.showSummaryFileDelete = false;
+  showDelete.value = false;
 }
 
 function closeUpload() {
@@ -54,20 +54,22 @@ function closeUpload() {
   isSuccess.value = false;
   selectedFile.value = null;
   uploadPercentage.value = 0;
-  layoutStore.showSummaryFileUpload = false;
+  showUpload.value = false;
 }
 </script>
 
-
 <template>
-  <div id="app-own-summary-file-wrapper">
-    <object v-if="pdfUrl" class="summary-pdf"
-        type="application/pdf"
-        :data="pdfUrl"
-    >
-    </object>
+  <div id="app-own-summary-upload-wrapper">
+    <v-btn class="headline-button" v-if="!summariesStore.editSummary.pdf" flat @click="showUpload = true">
+      <v-icon left icon="mdi-upload"></v-icon>
+      <span>{{ $t('allUpload') + '...' }}</span>
+    </v-btn>
+    <v-btn class="headline-button" v-if="summariesStore.editSummary.pdf" flat @click="showDelete = true">
+      <v-icon left icon="mdi-delete-outline"></v-icon>
+      <span>{{ $t('allDelete') + '...' }}</span>
+    </v-btn>
 
-    <v-dialog max-width="60em" persistent v-model="layoutStore.showSummaryFileUpload">
+    <v-dialog max-width="60em" persistent v-model="showUpload">
       <v-card class="pa-4">
         <v-card-title>{{ $t('allUpload') }}</v-card-title>
         <v-card-text>
@@ -123,7 +125,7 @@ function closeUpload() {
 
     </v-dialog>
 
-    <v-dialog max-width="60em" persistent v-model="layoutStore.showSummaryFileDelete">
+    <v-dialog max-width="60em" persistent v-model="showDelete">
       <v-card class="pa-4">
         <v-card-title>{{ $t('allDelete') }}</v-card-title>
         <v-card-text>
@@ -134,7 +136,7 @@ function closeUpload() {
             <v-icon left icon="mdi-delete-outline"></v-icon>
             {{ $t('allDelete') }}
           </v-btn>
-          <v-btn @click="layoutStore.showSummaryFileDelete = false">
+          <v-btn @click="showDelete = false">
             <v-icon left icon="mdi-close"></v-icon>
             <span>{{ $t('allCancel') }}</span>
           </v-btn>
@@ -149,12 +151,8 @@ function closeUpload() {
 
 
 <style scoped>
-#app-own-summary-file-wrapper {
-  height: 100%;
-}
 
-.summary-pdf {
-  height: calc(100% - 40px);
-  width: 100%;
+.headline-button {
+  background-color: #f0f0f0;
 }
 </style>

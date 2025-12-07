@@ -129,10 +129,6 @@ export default class TinyHelper {
         snippetsStore.openSelection(Snippet.FOR_SUMMARY, null, this.editor.selection.getContent());
     }
 
-    uploadFile() {
-        stores.layout().showSummaryFileUpload = true;
-    }
-
     /**
      * Set the focus to the editor
      */
