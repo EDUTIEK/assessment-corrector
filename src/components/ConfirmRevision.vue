@@ -17,6 +17,8 @@ const layoutStore = stores.layout();
 
 const { t } = i18n.global
 
+const showConfirmation = ref(false);
+
 function dialogTitle() {
   switch (settingsStore.Assessment.procedure) {
     case Procedure.APPROXIMATION:
@@ -43,13 +45,13 @@ async function setRevisedAndContinue() {
 
   await summariesStore.setOwnRevised();
   if (await apiStore.saveChangesToBackend(true)) {
-    layoutStore.showRevision = false;
+    showConfirmation.value = false;
     let newKey = itemsStore.nextKey;
     if (newKey != '') {
       apiStore.loadItemFromBackend(newKey);
     }
   } else {
-    layoutStore.showRevision = false;
+    showConfirmation.value = false;
     layoutStore.showSendFailure = true;
   }
 }
@@ -60,12 +62,12 @@ async function setRevisedAndContinue() {
   <div id="app-authorization-wrapper">
 
     <v-btn class="app-header-item" v-if="itemsStore.canRevise" :disabled="apiStore.isLoading"
-           @click="layoutStore.showRevision = true;">
+           @click="showConfirmation = true">
       <v-icon left icon="mdi-file-certificate-outline"></v-icon>
       <span>{{ $t('revisionButton') }}</span>
     </v-btn>
 
-    <v-dialog max-width="60em" persistent v-model="layoutStore.showRevision">
+    <v-dialog max-width="60em" persistent v-model="showConfirmation">
       <v-card>
         <v-card-title>{{ dialogTitle() }}</v-card-title>
         <v-card-text>
@@ -126,7 +128,7 @@ async function setRevisedAndContinue() {
             <v-icon left icon="mdi-check"></v-icon>
             <span>{{ $t('revisionFix') }}</span>
           </v-btn>
-          <v-btn @click="layoutStore.showRevision = false;">
+          <v-btn @click="showConfirmation = false">
             <v-icon left icon="mdi-close"></v-icon>
             <span>{{ $t('allCancel') }}</span>
           </v-btn>

@@ -40,8 +40,6 @@ export const useLayoutStore = defineStore('layout', {
       initialized: false,                 // used to switch from startup screen to the editing view
       showInitFailure: false,             // show a message that the initialisation failed
       showItemLoadFailure: false,         // show a message that the loading if an item failed
-      showAuthorization: false,           // show the dialog for authorization
-      showRevision: false,                // show the dialog for revision
       showSendFailure: false,             // show a message about a sending failure
       showDataReplaceConfirmation: false, // show a confirmation that the stored data should be replaced by another task or user
       showItemReplaceConfirmation: false, // show a confirmation that the stored item should be replaced by another item

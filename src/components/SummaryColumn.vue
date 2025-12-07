@@ -6,7 +6,7 @@ import SummaryPoints from "@/components/SummaryPoints.vue";
 import SummaryRevision from "@/components/SummaryRevision.vue";
 import OwnSummaryPoints from "@/components/OwnSummaryPoints.vue";
 import OwnSummaryText from "@/components/OwnSummaryText.vue"
-import OwnSummaryFile from "@/components/OwnSummaryFile.vue";
+import OwnSummaryUpload from "@/components/OwnSummaryUpload.vue";
 import OwnSummaryRevision from "@/components/OwnSummaryRevision.vue";
 import {stores} from "@/store";
 import {watch} from "vue";
@@ -77,7 +77,7 @@ function expansionClass() {
       </v-container>
 
       <own-summary-text v-show="!summary.pdf" class="content" :editorId="'summary'"></own-summary-text>
-      <own-summary-file v-show="summary.pdf" ></own-summary-file>
+      <own-summary-upload v-show="summary.pdf" ></own-summary-upload>
     </div>
     <div v-if="props.showText && !can_correct && is_authorized" :class="expansionClass()">
       <h2 class="headline">{{ $t('allSummary') }}</h2>

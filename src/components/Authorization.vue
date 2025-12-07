@@ -17,8 +17,7 @@ const commentsStore = stores.comments();
 const criteriaStore = stores.criteria();
 const { t } = i18n.global
 
-const showIncludes = ref(false);
-
+const showConfirmation = ref(false);
 
 function getPartialPointsMessage() {
   let points = 0;
@@ -43,13 +42,13 @@ async function setAuthorizedAndContinue() {
 
   await summariesStore.setOwnAuthorized();
   if (await apiStore.saveChangesToBackend(true)) {
-    stores.layout().showAuthorization = false;
+    showConfirmation.value = false;
     let newKey = itemsStore.nextKey;
     if (newKey != '') {
       apiStore.loadItemFromBackend(newKey);
     }
   } else {
-    stores.layout().showAuthorization = false;
+    showConfirmation.value = false;
     stores.layout().showSendFailure = true;
   }
 }
@@ -59,13 +58,13 @@ async function setAuthorizedAndContinue() {
 <template>
   <div id="app-authorization-wrapper">
 
-    <v-btn class="app-header-item" flat v-show="!summariesStore.isOwnDisabled" :disabled="apiStore.isLoading || !itemsStore.canAuthorize"
-           @click="stores.layout().showAuthorization = true;">
+    <v-btn class="app-header-item" v-show="!summariesStore.isOwnDisabled" :disabled="apiStore.isLoading || !itemsStore.canAuthorize"
+           @click="showConfirmation = true">
       <v-icon left icon="mdi-file-certificate-outline"></v-icon>
       <span>{{ $t('authorizationAuthorize') }}...</span>
     </v-btn>
 
-    <v-dialog max-width="60em" persistent v-model="stores.layout().showAuthorization">
+    <v-dialog max-width="60em" persistent v-model="showConfirmation">
       <v-card>
         <v-card-title>{{ $t('authorizationTitle', [itemsStore.currentItem.title]) }}</v-card-title>
         <v-card-text>
@@ -130,7 +129,7 @@ async function setAuthorizedAndContinue() {
             <v-icon left icon="mdi-check"></v-icon>
             <span>{{ $t('authorizationAuthorize') }}</span>
           </v-btn>
-          <v-btn @click="stores.layout().showAuthorization = false;">
+          <v-btn @click="showConfirmation = false">
             <v-icon left icon="mdi-close"></v-icon>
             <span>{{ $t('allCancel') }}</span>
           </v-btn>
