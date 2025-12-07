@@ -33,6 +33,7 @@ async function uploadFile() {
   const id = await apiStore.sendSummaryPdf(summariesStore.editSummary, selectedFile.value, updateProgress);
   if (id) {
     summariesStore.editSummary.pdf = id;
+    summariesStore.editSummary.text = '';
     pdfUrl.value = apiStore.getSummaryPdfUrl(summariesStore.editSummary);
     closeUpload();
     return;
@@ -68,7 +69,7 @@ function closeUpload() {
 
     <v-dialog max-width="60em" persistent v-model="layoutStore.showSummaryFileUpload">
       <v-card class="pa-4">
-        <v-card-title>Datei hochladen</v-card-title>
+        <v-card-title>{{ $t('allUpload') }}</v-card-title>
         <v-card-text>
 
           <v-alert v-show="settingsStore.Task.summary_pdf_advice != ''"
@@ -110,7 +111,8 @@ function closeUpload() {
               :disabled="!selectedFile"
               @click="uploadFile"
           >
-            Hochladen
+            <v-icon left icon="mdi-upload"></v-icon>
+            {{ $t('allUpload') }}
           </v-btn>
           <v-btn @click="closeUpload()">
             <v-icon left icon="mdi-close"></v-icon>
@@ -123,13 +125,13 @@ function closeUpload() {
 
     <v-dialog max-width="60em" persistent v-model="layoutStore.showSummaryFileDelete">
       <v-card class="pa-4">
-        <v-card-title>Datei Löschen</v-card-title>
+        <v-card-title>{{ $t('allDelete') }}</v-card-title>
         <v-card-text>
             {{ $t('ownSummaryFileDeleteMessage') }}
         </v-card-text>
         <v-card-actions>
           <v-btn @click="deleteFile()">
-            <v-icon left icon="mdi-delete"></v-icon>
+            <v-icon left icon="mdi-delete-outline"></v-icon>
             {{ $t('allDelete') }}
           </v-btn>
           <v-btn @click="layoutStore.showSummaryFileDelete = false">

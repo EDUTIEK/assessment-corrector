@@ -267,13 +267,6 @@ export const useLayoutStore = defineStore('layout', {
       this.saveToStorage();
     },
 
-    showOwnSummaryText() {
-      this.rightContent = 'summary';
-      this.showRightSummaryText = true
-      this.setRightVisible('ownSummary');
-      this.saveToStorage();
-    },
-
     setLeftVisible(target = null) {
       if (!this.isLeftVisible) {
         this.expandedColumn = 'left';

@@ -1,6 +1,7 @@
 <script setup>
 import SummaryCriteria from '@/components/SummaryCriteria.vue';
 import SummaryText from "@/components/SummaryText.vue";
+import SummaryFile from "@/components/SummaryFile.vue";
 import SummaryPoints from "@/components/SummaryPoints.vue";
 import SummaryRevision from "@/components/SummaryRevision.vue";
 import OwnSummaryPoints from "@/components/OwnSummaryPoints.vue";
@@ -68,7 +69,7 @@ function expansionClass() {
               <span>{{ $t('allUpload') + '...' }}</span>
             </v-btn>
             <v-btn class="headline-button" v-if="summary.pdf" flat @click="stores.layout().showSummaryFileDelete = true">
-              <v-icon left icon="mdi-delete"></v-icon>
+              <v-icon left icon="mdi-delete-outline"></v-icon>
               <span>{{ $t('allDelete') + '...' }}</span>
             </v-btn>
           </v-col>
@@ -80,7 +81,8 @@ function expansionClass() {
     </div>
     <div v-if="props.showText && !can_correct && is_authorized" :class="expansionClass()">
       <h2 class="headline">{{ $t('allSummary') }}</h2>
-      <summary-text class="content" :correction_key="props.correction_key"></summary-text>
+      <summary-text v-if="!summary.pdf" class="content" :correction_key="props.correction_key"></summary-text>
+      <summary-file v-if="summary.pdf" class="content" :correction_key="props.correction_key"></summary-file>
     </div>
 
     <div id="app-own-summary-points" v-if="can_correct">

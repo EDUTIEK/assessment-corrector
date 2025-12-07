@@ -54,33 +54,15 @@ async function setAuthorizedAndContinue() {
   }
 }
 
-async function setAuthorizedAndClose() {
-
-  await summariesStore.setOwnAuthorized();
-  if (await apiStore.saveChangesToBackend(true)) {
-    stores.layout().showAuthorization = false;
-    window.location = apiStore.returnUrl;
-  } else {
-    stores.layout().showAuthorization = false;
-    stores.layout().showSendFailure = true;
-    return;
-  }
-}
-
-function editSummary() {
-  stores.layout().showAuthorization = false;
-  layoutStore.showOwnSummaryText();
-}
-
 </script>
 
 <template>
   <div id="app-authorization-wrapper">
 
-    <v-btn class="app-header-item" v-show="!summariesStore.isOwnDisabled" :disabled="apiStore.isLoading || !itemsStore.canAuthorize"
+    <v-btn class="app-header-item" flat v-show="!summariesStore.isOwnDisabled" :disabled="apiStore.isLoading || !itemsStore.canAuthorize"
            @click="stores.layout().showAuthorization = true;">
       <v-icon left icon="mdi-file-certificate-outline"></v-icon>
-      <span>{{ $t('authorizationButton') }}</span>
+      <span>{{ $t('authorizationAuthorize') }}...</span>
     </v-btn>
 
     <v-dialog max-width="60em" persistent v-model="stores.layout().showAuthorization">
@@ -88,12 +70,13 @@ function editSummary() {
         <v-card-title>{{ $t('authorizationTitle', [itemsStore.currentItem.title]) }}</v-card-title>
         <v-card-text>
           <div class="appRow"><strong>{{ $t('authorizationSummaryLabel') }}</strong>
-            <v-btn  density="compact" variant="text" @click="editSummary()">
-              <v-icon left icon="mdi-pencil"></v-icon>
-              <span class="sr-only">{{ $t('authorizationSummaryEdit') }}</span>
-            </v-btn>
-            <div class="appText long-essay-content headlines-three" v-html="summariesStore.editSummary.text">
+            <div class="appText long-essay-content headlines-three" v-if="summariesStore.editSummary.text" v-html="summariesStore.editSummary.text">
             </div>
+            <object class="appPdf" v-if="summariesStore.editSummary.pdf"
+                    type="application/pdf"
+                    :data="apiStore.getSummaryPdfUrl(summariesStore.editSummary)"
+            >
+            </object>
           </div>
 
           <div class="appRow">
@@ -112,7 +95,7 @@ function editSummary() {
           </div>
 
           <div class="appRow">
-            <v-alert v-show="summariesStore.editSummary.text == ''"
+            <v-alert v-show="!summariesStore.editSummary.text && !summariesStore.editSummary.pdf"
                      color="#0000A0" type="info" variant="text" density="compact">
               {{ $t('authorizationPleaseEnterSummary') }}
             </v-alert>
@@ -145,11 +128,7 @@ function editSummary() {
         <v-card-actions>
           <v-btn @click="setAuthorizedAndContinue()">
             <v-icon left icon="mdi-check"></v-icon>
-            <span>{{ $t('authorizationAuthorizeAndContinue') }}</span>
-          </v-btn>
-          <v-btn @click="setAuthorizedAndClose()">
-            <v-icon left icon="mdi-check"></v-icon>
-            <span>{{ $t('authorizationAuthorizeAndClose') }}</span>
+            <span>{{ $t('authorizationAuthorize') }}</span>
           </v-btn>
           <v-btn @click="stores.layout().showAuthorization = false;">
             <v-icon left icon="mdi-close"></v-icon>
@@ -182,5 +161,9 @@ function editSummary() {
   border: 1px solid lightgray;
 }
 
+.appPdf {
+  height: 12em;
+  width: 100%;
+}
 
 </style>

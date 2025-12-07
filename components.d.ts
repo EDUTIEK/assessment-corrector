@@ -35,6 +35,7 @@ declare module 'vue' {
     StartupContent: typeof import('./src/components/StartupContent.vue')['default']
     SummaryColumn: typeof import('./src/components/SummaryColumn.vue')['default']
     SummaryCriteria: typeof import('./src/components/SummaryCriteria.vue')['default']
+    SummaryFile: typeof import('./src/components/SummaryFile.vue')['default']
     SummaryPoints: typeof import('./src/components/SummaryPoints.vue')['default']
     SummaryRevision: typeof import('./src/components/SummaryRevision.vue')['default']
     SummaryText: typeof import('./src/components/SummaryText.vue')['default']

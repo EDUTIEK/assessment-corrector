@@ -1,6 +1,7 @@
 <script setup>
 import {stores} from "@/store";
 import SumOfPoints from "@/components/SumOfPoints.vue";
+import Authorization from "@/components/Authorization.vue";
 
 const apiStore = stores.api();
 const itemsStore = stores.items();
@@ -29,11 +30,7 @@ const layoutStore = stores.layout();
           <p>{{ summariesStore.currentGradeStatement }}</p>
         </v-col>
         <v-col cols="2">
-          <v-btn density="compact" variant="text" v-show="!summariesStore.isOwnDisabled" :disabled="!itemsStore.canAuthorize"
-                 @click="stores.layout().showAuthorization = true;">
-            <v-icon left icon="mdi-file-certificate-outline"></v-icon>
-            <span>{{ $t('allAuthorize') }}</span>
-          </v-btn>
+          <authorization v-show="!summariesStore.isOwnDisabled"></authorization>
         </v-col>
       </v-row>
     </v-container>

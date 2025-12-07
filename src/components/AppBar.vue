@@ -5,7 +5,6 @@
 import Help from "@/components/Help.vue";
 import Items from "@/components/Items.vue";
 import Tasks from "@/components/Tasks.vue";
-import Authorization from '@/components/Authorization.vue';
 import {stores} from "@/store";
 import { nextTick, watch } from 'vue';
 
@@ -45,7 +44,6 @@ async function returnToBackend() {
     <items/>
     <v-spacer></v-spacer>
     <help></help>
-    <authorization v-if="stores.items().canAuthorize"/>
     <v-btn class="app-header-item" @click="returnToBackend()">
       <v-icon left icon="mdi-logout-variant"></v-icon>
       <span>{{ $t('appBarReturn') }}</span>
