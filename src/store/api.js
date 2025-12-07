@@ -92,7 +92,7 @@ export const useApiStore = defineStore('api', {
        */
       const fn = function (resource) {
         const config = this.getRequestConfig(this.fileToken);
-        return config.baseURL + '/corrector/file/task/resource/' + resource.id + '?' + config.params.toString();
+        return config.baseURL + '/corrector/file/task/resource/' + resource.id + '/resource?' + config.params.toString();
       }
       return fn;
     },
@@ -109,7 +109,7 @@ export const useApiStore = defineStore('api', {
        */
       const fn = function (page) {
         const config = this.getRequestConfig(this.fileToken);
-        return config.baseURL + '/corrector/file/essaytask/image/' + page.id + '?' + config.params.toString();
+        return config.baseURL + '/corrector/file/essaytask/image/' + page.id + '/image?' + config.params.toString();
       }
       return fn;
     },
@@ -123,7 +123,7 @@ export const useApiStore = defineStore('api', {
        */
       const fn = function (page) {
         const config = this.getRequestConfig(this.fileToken);
-        return config.baseURL + '/corrector/file/essaytask/thumb/' + page.id + '?' + config.params.toString();
+        return config.baseURL + '/corrector/file/essaytask/thumb/' + page.id + '/thumb?' + config.params.toString();
       }
       return fn;
     },
@@ -135,27 +135,12 @@ export const useApiStore = defineStore('api', {
        * @param {Page} page
        * @returns {string}
        */
-      const fn = function (page) {
+      const fn = function (summary) {
         const config = this.getRequestConfig(this.fileToken);
-        return config.baseURL + '/corrector/file/essaytask/thumb/' + page.id + '?' + config.params.toString();
+        return config.baseURL + '/corrector/file/task/summary/' + summary.id + '/' + summary.pdf + '?' + config.params.toString();
       }
       return fn;
     },
-
-    getUploadUrl(state) {
-
-      /**
-       * Get the Url for uploading a
-       * @param {string} key
-       * @returns {string}
-       */
-      const fn = function (id) {
-        const config = this.getRequestConfig(this.dataToken);
-        return config.baseURL + '/corrector/file/task/summary/' + id + '?' + config.params.toString();
-      }
-      return fn;
-    },
-
 
     getServerTime(state) {
 
@@ -552,27 +537,29 @@ export const useApiStore = defineStore('api', {
     },
 
     /**
-     * Send a file to the backend
+     * Send a summary pdf file
+     * @return {string|false}
      */
-    async sendFile(file, onProgress) {
+    async sendSummaryPdf(summary, file, onProgress) {
 
       try {
         const formData = new FormData();
         // 'file' is the POST element
         formData.append('file', file);
 
-        const id = await axios.post(
-            apiStore.getUploadUrl(summariesStore.editSummary.task_id, summariesStore.editSummary.writer_id),
+        const response = await axios.post(
+            '/corrector/upload/' + summary.task_id + '/' + summary.writer_id,
             formData,
-            {
+            Object.assign(this.getRequestConfig(this.dataToken), {
               headers: {
                 'Content-Type': 'multipart/form-data',
               },
               onUploadProgress: onProgress
-            });
-        return true;
+            }));
+        return response.data.id;
 
       } catch (error) {
+        console.log(error);
         return false;
       }
     },

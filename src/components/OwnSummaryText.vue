@@ -120,5 +120,4 @@ watch(() => snippetsStore.selection_open, handleSnippet);
 .app-own-summary-text-wrapper {
   height: 100%;
 }
-
 </style>
