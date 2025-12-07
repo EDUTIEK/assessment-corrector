@@ -57,14 +57,14 @@ function expansionClass() {
       <summary-criteria class="content" :correction_key="props.correction_key"></summary-criteria>
     </div>
 
-    <div v-if="props.showText && can_correct" :class="expansionClass()">
+    <div v-if="props.showText && can_correct && !stores.summaries().isOwnDisabled" :class="expansionClass()">
       <v-container class="ma-0 pa-0">
         <v-row class="section-header ma-0">
           <v-col cols="8" class="ma-0 pa-0">
             <h2 class="headline">{{ $t('allSummary') }}</h2>
           </v-col>
           <v-col cols="4" class="ma-0 pa-0 text-right">
-            <own-summary-upload v-id="can_correct" ></own-summary-upload>
+            <own-summary-upload></own-summary-upload>
           </v-col>
         </v-row>
       </v-container>
@@ -72,7 +72,7 @@ function expansionClass() {
       <own-summary-text v-show="!summary.pdf" class="content" :editorId="'summary'"></own-summary-text>
       <summary-file v-if="summary.pdf" class="content" :correction_key="props.correction_key"></summary-file>
     </div>
-    <div v-if="props.showText && !can_correct && is_authorized" :class="expansionClass()">
+    <div v-if="props.showText && !can_correct || is_authorized || stores.summaries().isOwnDisabled" :class="expansionClass()">
       <h2 class="headline">{{ $t('allSummary') }}</h2>
       <summary-text v-if="!summary.pdf" class="content" :correction_key="props.correction_key"></summary-text>
       <summary-file v-if="summary.pdf" class="content" :correction_key="props.correction_key"></summary-file>

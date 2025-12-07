@@ -12,7 +12,7 @@ export default class Summary {
   static STATUS_AUTHORIZED = "authorized";
   static STATUS_REVISED = "revised";
 
-  static ALLOWED_TYPES = [Summary.STATUS_NOT_STARTED, Summary.STATUS_OPEN, Summary.STATUS_PRE_GRADED, Summary.STATUS_AUTHORIZED, Summary.STATUS_REVISED];
+  static ALLOWED_STATUS = [Summary.STATUS_NOT_STARTED, Summary.STATUS_OPEN, Summary.STATUS_PRE_GRADED, Summary.STATUS_AUTHORIZED, Summary.STATUS_REVISED];
 
   /**
    * @return {string}
@@ -155,7 +155,7 @@ export default class Summary {
     if (data.pdf !== undefined && data.pdf !== null) {
       this.pdf = data.pdf.toString()
     }
-    if (data.status !== undefined && Summary.ALLOWED_TYPES.includes(data.status)) {
+    if (data.status !== undefined && Summary.ALLOWED_STATUS.includes(data.status)) {
       this.status = data.status.toString()
     }
     if (data.grade_key !== undefined && data.grade_key !== null) {
@@ -199,10 +199,6 @@ export default class Summary {
    */
   getClone() {
     return new Summary(this.getData());
-  }
-
-  isChangeable() {
-    return this.status == Summary.STATUS_NOT_STARTED || this.status == Summary.STATUS_OPEN;
   }
 
   isPregraded() {

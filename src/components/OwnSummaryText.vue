@@ -115,7 +115,7 @@ watch(() => snippetsStore.selection_open, handleSnippet);
   </div>
 </template>
 
-<style>
+<style scoped>
 
 .app-own-summary-text-wrapper {
   height: 100%;

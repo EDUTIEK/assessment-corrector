@@ -201,6 +201,16 @@ export const useItemsStore = defineStore('items', {
     },
 
     /**
+     * Set the correction status of the current item
+     * @param status
+     */
+    async setCurrentGradingStatus(status) {
+      this.currentItem.grading_status = status;
+      this.currentItem.title = Item.buildTitle(this.currentItem);
+      await storage.setItem(this.currentItem.getKey(), JSON.stringify(this.currentItem.getData()));
+    },
+
+    /**
      * Update the first, last, previous and next key
      */
     updateCurrentKeys() {

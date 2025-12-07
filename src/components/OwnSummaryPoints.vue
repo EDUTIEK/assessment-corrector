@@ -2,12 +2,31 @@
 import {stores} from "@/store";
 import SumOfPoints from "@/components/SumOfPoints.vue";
 import Authorization from "@/components/Authorization.vue";
+import Summary from "@/data/Summary";
+import {ref} from "vue";
 
 const apiStore = stores.api();
 const itemsStore = stores.items();
 const summariesStore = stores.summaries();
 const settingsStore = stores.settings();
 const layoutStore = stores.layout();
+
+const pregraded = ref(false);
+pregraded.value = summariesStore.isOwnPregraded;
+
+async function togglePregraded(event) {
+  event.preventDefault();
+
+  if (summariesStore.isOwnPregraded) {
+    await summariesStore.setOwnOpen();
+  }
+  else if (!summariesStore.isOwnAuthorized) {
+    await summariesStore.setOwnPregraded();
+  }
+
+  await itemsStore.setCurrentGradingStatus(summariesStore.editSummary.status);
+  pregraded.value = summariesStore.isOwnPregraded;
+}
 
 </script>
 
@@ -20,7 +39,7 @@ const layoutStore = stores.layout();
 
           <label for="appOwnSummaryPoints"><strong>{{ $t('ownSummaryPointsRating') }}</strong></label>
           &nbsp;
-          <input :disabled="summariesStore.isOwnDisabled" id="appOwnSummaryPoints" class="appPoints" type="number"
+          <input id="appOwnSummaryPoints"  type="number" :disabled="summariesStore.isOwnDisabled"class="appPoints"
                  :min="summariesStore.pointsCorridor.min"
                  :max="summariesStore.pointsCorridor.max"
                  v-model="summariesStore.editSummary.points"/> {{ $t('allPoints', summariesStore.editSummary.points) }}
@@ -30,7 +49,15 @@ const layoutStore = stores.layout();
           <p>{{ summariesStore.currentGradeStatement }}</p>
         </v-col>
         <v-col cols="2">
-          <authorization v-show="!summariesStore.isOwnDisabled"></authorization>
+
+          <input id="appOwnSummaryPregraded" type="checkbox" class="appCheckbox"
+              v-if="!summariesStore.isOwnAuthorized"
+              v-model="pregraded"
+              :disabled="summariesStore.isOwnAuthorized"
+              @change="togglePregraded"
+          ></input>
+          <label for="appOwnSummaryPregraded">{{ $t('allPregraded') }}</label>
+          <authorization v-show="!summariesStore.isOwnAuthorized"></authorization>
         </v-col>
       </v-row>
     </v-container>
@@ -44,6 +71,11 @@ const layoutStore = stores.layout();
   border: 1px solid #aaaaaa;
   border-radius: 5px;
   padding: 3px;
+}
+
+.appCheckbox {
+  margin: 0 5px 15px 0;
+  padding: 0;
 }
 
 </style>

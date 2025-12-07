@@ -6,6 +6,7 @@ import OwnSummaryText from "@/components/OwnSummaryText.vue";
 import SumOfPoints from "@/components/SumOfPoints.vue";
 
 import {stores} from "@/store";
+import SummaryText from "@/components/SummaryText.vue";
 
 const apiStore = stores.api();
 const layoutStore = stores.layout();
@@ -16,7 +17,8 @@ const summariesStore = stores.summaries();
 const settingsStore = stores.settings();
 
 function markingCommentsShown() {
-  return layoutStore.showMarkingComments && (itemsStore.canAct || summariesStore.isOneAuthorized)
+  return layoutStore.showMarkingComments
+      && (itemsStore.canAct || summariesStore.isOneAuthorized)
 }
 
 function MarkingGeneralPointsShown() {
@@ -33,7 +35,8 @@ function MarkingCommentPointsShown() {
 }
 
 function markingTextShown() {
-  return layoutStore.showMarkingText && (itemsStore.canAct || summariesStore.isOneAuthorized)
+  return layoutStore.showMarkingText
+      && (itemsStore.canAct || summariesStore.isOneAuthorized)
 }
 
 function expansionClass() {
@@ -79,7 +82,9 @@ function expansionClass() {
     <!-- v-if neeed to avoid simultaneous data binding with summary text  -->
     <div v-if="markingTextShown()" :class="expansionClass()">
       <h2 class="headline">{{ $t('allOwnSummary') }}</h2>
-      <own-summary-text class="content" :editorId="'marking'"></own-summary-text>
+      <own-summary-text v-if="!summariesStore.isOwnDisabled" class="content" :editorId="'marking'"></own-summary-text>
+      <summary-text v-if="summariesStore.isOwnDisabled" class="content"
+                    :correction_key="stores.summaries().editSummary?.correction_key" ></summary-text>
     </div>
 
     <div v-if="!itemsStore.canAct && !summariesStore.isOneAuthorized">

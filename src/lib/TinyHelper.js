@@ -47,7 +47,7 @@ export default class TinyHelper {
             style_formats: this.styleFormats(),
             custom_undo_redo_levels: 10,
             text_patterns: false,
-            skin_url: 'default',
+            //skin_url: 'default',  // Influences AppBar style if set to default. Deactivation causes console error that can be ignored
             content_css: 'default',
             content_style: contentLocalCss.toString() + '\n' + headlinesThreeCss.toString(),
             browser_spellcheck: true,

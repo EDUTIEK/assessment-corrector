@@ -58,7 +58,8 @@ async function setAuthorizedAndContinue() {
 <template>
   <div id="app-authorization-wrapper">
 
-    <v-btn class="app-header-item" v-show="!summariesStore.isOwnDisabled" :disabled="apiStore.isLoading || !itemsStore.canAuthorize"
+    <v-btn class="app-header-item"
+           :disabled="apiStore.isLoading || !itemsStore.canAuthorize"
            @click="showConfirmation = true">
       <v-icon left icon="mdi-file-certificate-outline"></v-icon>
       <span>{{ $t('authorizationAuthorize') }}...</span>

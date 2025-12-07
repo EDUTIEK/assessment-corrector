@@ -46,7 +46,10 @@ export const useSummariesStore = defineStore('summaries', {
      * @return {bool}
      */
     isOwnDisabled(state) {
-      return state.editSummary.correction_key == '' || !state.editSummary.isChangeable()
+      return state.editSummary.correction_key == ''
+          || state.editSummary.isPregraded()
+          || state.editSummary.isAuthorized()
+          || !stores.items().canCorrect
     },
 
     /**
@@ -484,6 +487,22 @@ export const useSummariesStore = defineStore('summaries', {
         changes.push(changesStore.getChangeDataToSend(change, data));
       }
       return changes;
+    },
+
+    /**
+     * Set the own current summary as open
+     */
+    async setOwnOpen() {
+      this.editSummary.status = Summary.STATUS_OPEN;
+      await this.updateContent(false, true);
+    },
+
+    /**
+     * Set the own current summary as pregraded
+     */
+    async setOwnPregraded() {
+      this.editSummary.status = Summary.STATUS_PRE_GRADED;
+      await this.updateContent(false, true);
     },
 
     /**
