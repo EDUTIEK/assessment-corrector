@@ -71,7 +71,7 @@ function closeUpload() {
 
     <v-dialog max-width="60em" persistent v-model="showUpload">
       <v-card class="pa-4">
-        <v-card-title>{{ $t('allUpload') }}</v-card-title>
+        <v-card-title>{{ $t('ownSummaryUploadTitle') }}</v-card-title>
         <v-card-text>
 
           <v-alert v-show="settingsStore.Task.summary_pdf_advice != ''"
@@ -100,6 +100,8 @@ function closeUpload() {
             </v-progress-linear>
           </div>
 
+          <p>{{ $t('ownSummaryUploadInfo') }}</p>
+
           <v-alert
               v-if="message"
               :type="isSuccess ? 'success' : 'error'"
@@ -127,9 +129,9 @@ function closeUpload() {
 
     <v-dialog max-width="60em" persistent v-model="showDelete">
       <v-card class="pa-4">
-        <v-card-title>{{ $t('allDelete') }}</v-card-title>
+        <v-card-title>{{ $t('ownSummaryUploadDeleteTitle') }}</v-card-title>
         <v-card-text>
-            {{ $t('ownSummaryFileDeleteMessage') }}
+            {{ $t('ownSummaryUploadDeleteInfo') }}
         </v-card-text>
         <v-card-actions>
           <v-btn @click="deleteFile()">
