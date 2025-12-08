@@ -29,6 +29,10 @@ export const useResourcesStore = defineStore('resources', {
           .sort(Resource.order);
     },
 
+    hasResources(state) {
+      return state.currentResources.length > 0;
+    },
+
     hasInstruction(state) {
       return !! state.currentResources.find(element => element.type === Resource.TYPE_INSTRUCTION);
     },

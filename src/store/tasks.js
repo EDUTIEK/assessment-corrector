@@ -43,6 +43,9 @@ export const useTasksStore = defineStore('tasks', {
     hasSolution(state) {
       return !!state.currentTask?.solution;
     },
+    hasTexts(state) {
+      return state.hasInstructions || state.hasSolution;
+    },
     sortedTasks(state) {
       return Object.values(state.tasks).toSorted(Task.order);
     },

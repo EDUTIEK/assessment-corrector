@@ -126,7 +126,6 @@ function getCorrectionTitle(correction) {
         </template>
       </v-list-item>
 
-      <v-divider class="border-opacity-75"></v-divider>
 
       <v-list-item aria-role="button" class="app-navigation-item" tabindex="0"
                    v-for="resource in resourcesStore.fileOrUrlResources"
@@ -142,17 +141,17 @@ function getCorrectionTitle(correction) {
         </template>
       </v-list-item>
 
-      <!-- <v-divider class="border-opacity-75"></v-divider> -->
+      <v-divider v-show="taskStore.hasTexts || resourcesStore.hasResources" class="border-opacity-75"></v-divider>
 
       <v-list-item aria-role="button" class="app-navigation-item" tabindex="0"
                    @click="closeNavigation; layoutStore.showEssay();"
-                   :aria-label="$t('allEssay') + (layoutStore.isEssayVisible ? $t('navBarSelectedAria') : '')"
-                   :title="$t('allEssay') + (layoutStore.isEssayVisible ? $t('navBarSelected') : '')"
+                   :aria-label="$t('allEssayAndCorrection') + (layoutStore.isEssayVisible ? $t('navBarSelectedAria') : '')"
+                   :title="$t('allEssayAndCorrection') + (layoutStore.isEssayVisible ? $t('navBarSelected') : '')"
                    :ripple="false"
       >
         <template v-slot:prepend>
           <v-icon aria-role="hidden"
-                  :icon="layoutStore.isEssayVisible ? 'mdi-comment-edit': 'mdi-comment-edit-outline'"></v-icon>
+                  :icon="layoutStore.isEssayVisible && layoutStore.isMarkingVisible ? 'mdi-comment-edit': 'mdi-comment-edit-outline'"></v-icon>
         </template>
       </v-list-item>
 
