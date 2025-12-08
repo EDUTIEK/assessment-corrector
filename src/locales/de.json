@@ -204,7 +204,7 @@
     "ownSummaryUploadDeleteTitle": "PDF-Datei des Gutachtens löschen",
     "ownSummaryUploadDeleteInfo": "Wenn Sie die PDF-Datei löschen, wird die Texteingabe des Gutachtens wieder verfügbar.",
     "ownSummaryUploadTitle": "Gutachten als PDF-Datei hochladen",
-    "ownSummaryUploadInfo": "Die hochgeladene PDF-Datei ersetzt die Texteingabe des Gutachtens.",
+    "ownSummaryUploadTextWarning": "Bitte löschen Sie den Gutachten-Text, bevor Sie ein Gutachten als PDF-Datei hochladen.",
     "SendingStatusSending": "Änderungen werden gesendet",
     "SendingStatusSend": "Letzte Änderung senden",
     "SendingStatusSent": "Alles gesendet",

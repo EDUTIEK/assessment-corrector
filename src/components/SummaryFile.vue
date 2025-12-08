@@ -14,23 +14,28 @@ function url() {
 
 <template>
   <div class="app-summary-file-wrapper">
-    <object v-if="url()" class="summary-pdf"
+    <iframe scrolling="no" v-if="url()" class="summary-pdf"
             type="application/pdf"
-            :data="url()"
+            :src="url()"
     >
-    </object>
+    </iframe>
   </div>
 </template>
 
 <style scoped>
 
+div.toolbar {
+  display: none !important;
+}
+
 .app-summary-text-wrapper {
   height: 100%;
 }
 
-object {
-  height: 100%;
+iframe {
+  height: calc(100% - 10px);
   width: 100%;
+  overflow: hidden;
 }
 
 </style>

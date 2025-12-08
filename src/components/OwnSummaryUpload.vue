@@ -16,6 +16,8 @@ const selectedFile = ref(null);
 const uploadPercentage = ref(0);
 const message = ref('');
 const isSuccess = ref(false);
+
+const showTextWarning = ref(false);
 const showUpload = ref(false);
 const showDelete = ref(false);
 
@@ -44,10 +46,15 @@ async function uploadFile() {
   uploadPercentage.value = 0;
 }
 
-async function deleteFile() {
-  summariesStore.editSummary.pdf = null;
-  showDelete.value = false;
+
+function openUpload() {
+  if (summariesStore.editSummary.text) {
+    showTextWarning.value = true;
+  } else {
+    showUpload.value = true;
+  }
 }
+
 
 function closeUpload() {
   message.value = '';
@@ -56,11 +63,17 @@ function closeUpload() {
   uploadPercentage.value = 0;
   showUpload.value = false;
 }
+
+function deleteFile() {
+  summariesStore.editSummary.pdf = null;
+  showDelete.value = false;
+}
+
 </script>
 
 <template>
   <div id="app-own-summary-upload-wrapper">
-    <v-btn class="headline-button" v-if="!summariesStore.editSummary.pdf" flat @click="showUpload = true">
+    <v-btn class="headline-button" v-if="!summariesStore.editSummary.pdf" flat @click="openUpload">
       <v-icon left icon="mdi-upload"></v-icon>
       <span>{{ $t('allUpload') + '...' }}</span>
     </v-btn>
@@ -68,6 +81,21 @@ function closeUpload() {
       <v-icon left icon="mdi-delete-outline"></v-icon>
       <span>{{ $t('allDelete') + '...' }}</span>
     </v-btn>
+
+    <v-dialog max-width="60em" persistent v-model="showTextWarning">
+      <v-card class="pa-4">
+        <v-card-title>{{ $t('ownSummaryUploadTitle') }}</v-card-title>
+        <v-card-text>
+          {{ $t('ownSummaryUploadTextWarning') }}
+        </v-card-text>
+        <v-card-actions>
+          <v-btn @click="showTextWarning = false">
+            <v-icon left icon="mdi-close"></v-icon>
+            <span>{{ $t('allClose') }}</span>
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
     <v-dialog max-width="60em" persistent v-model="showUpload">
       <v-card class="pa-4">
@@ -99,8 +127,6 @@ function closeUpload() {
               <strong>{{ Math.ceil(uploadPercentage) }}%</strong>
             </v-progress-linear>
           </div>
-
-          <p>{{ $t('ownSummaryUploadInfo') }}</p>
 
           <v-alert
               v-if="message"
@@ -144,9 +170,7 @@ function closeUpload() {
           </v-btn>
         </v-card-actions>
       </v-card>
-
     </v-dialog>
-
 
   </div>
 </template>
