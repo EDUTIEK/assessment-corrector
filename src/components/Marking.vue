@@ -3,10 +3,13 @@ import MarkingComments from "@/components/MarkingComments.vue";
 import MarkingCommentPoints from "@/components/MarkingCommentPoints.vue";
 import MarkingGeneralPoints from "@/components/MarkingGeneralPoints.vue";
 import OwnSummaryText from "@/components/OwnSummaryText.vue";
+import OwnSummaryUpload from '@/components/OwnSummaryUpload.vue';
+import SummaryText from "@/components/SummaryText.vue";
 import SumOfPoints from "@/components/SumOfPoints.vue";
 
 import {stores} from "@/store";
-import SummaryText from "@/components/SummaryText.vue";
+import SummaryFile from '@/components/SummaryFile.vue';
+
 
 const apiStore = stores.api();
 const layoutStore = stores.layout();
@@ -17,7 +20,8 @@ const summariesStore = stores.summaries();
 const settingsStore = stores.settings();
 
 function markingCommentsShown() {
-  return layoutStore.showMarkingComments
+  return settingsStore.Task.enable_comments
+      && layoutStore.showMarkingComments
       && (itemsStore.canAct || summariesStore.isOneAuthorized)
 }
 
@@ -80,11 +84,24 @@ function expansionClass() {
     </div>
 
     <!-- v-if neeed to avoid simultaneous data binding with summary text  -->
-    <div v-if="markingTextShown()" :class="expansionClass()">
-      <h2 class="headline">{{ $t('allOwnSummary') }}</h2>
-      <own-summary-text v-if="!summariesStore.isOwnDisabled" class="content" :editorId="'marking'"></own-summary-text>
-      <summary-text v-if="summariesStore.isOwnDisabled" class="content"
-                    :correction_key="stores.summaries().editSummary?.correction_key" ></summary-text>
+    <div v-if="markingTextShown() && !stores.summaries().isOwnDisabled" :class="expansionClass()">
+      <v-container class="ma-0 pa-0">
+        <v-row class="section-header ma-0">
+          <v-col cols="8" class="ma-0 pa-0">
+            <h2 class="headline">{{ $t('allOwnSummary') }}</h2>
+          </v-col>
+          <v-col cols="4" class="ma-0 pa-0 text-right">
+            <own-summary-upload v-if="!summariesStore.isOwnDisabled"></own-summary-upload>
+          </v-col>
+        </v-row>
+      </v-container>
+      <own-summary-text v-if="!summariesStore.editSummary.pdf" class="content" :editorId="'marking'"></own-summary-text>
+      <summary-file v-if="summariesStore.editSummary.pdf" class="content" :correction_key="summariesStore.editSummary.correction_key"></summary-file>
+    </div>
+    <div v-if="markingTextShown() && stores.summaries().isOwnDisabled" :class="expansionClass()">
+      <h2 class="headline">{{ $t('allSummary') }}</h2>
+      <summary-text v-if="!summariesStore.editSummary.pdf" class="content" :correction_key="summariesStore.editSummary.correction_key"></summary-text>
+      <summary-file v-if="summariesStore.editSummary.pdf" class="content" :correction_key="summariesStore.editSummary.correction_key"></summary-file>
     </div>
 
     <div v-if="!itemsStore.canAct && !summariesStore.isOneAuthorized">
@@ -98,6 +115,10 @@ function expansionClass() {
 
 #app-marking-wrapper {
   height: 100%;
+}
+
+.section-header {
+  background-color: #f0f0f0;
 }
 
 .headline {
@@ -132,7 +153,7 @@ function expansionClass() {
 }
 
 .full {
-  height: 100% - 30px;
+  height: calc(100% - 40px);
 }
 
 .half {

@@ -63,7 +63,9 @@ document.addEventListener('keydown', layoutStore.handleKeyDown);
           <v-btn-group density="comfortable">
 
             <!-- toggle left summary criteria  -->
-            <v-btn size="small" v-show="layoutStore.isLeftCorrectionVisible"
+            <v-btn size="small"
+                   v-if="settingsStore.hasSummaryOverview"
+                   v-show="layoutStore.isLeftCorrectionVisible"
                    @click="layoutStore.toggleLeftSummaryCriteria()">
               <v-icon v-show="layoutStore.showLeftSummaryCriteria" icon="mdi-checkbox-outline"></v-icon>
               <v-icon v-show="!layoutStore.showLeftSummaryCriteria" icon="mdi-checkbox-blank-outline"></v-icon>
@@ -142,7 +144,7 @@ document.addEventListener('keydown', layoutStore.handleKeyDown);
           <v-btn-group density="comfortable">
 
             <!-- show other corrections -->
-            <v-btn size="small" variant="plain" v-if="layoutStore.isMarkingVisible"
+            <v-btn size="small" variant="plain" v-if="settingsStore.Task.enable_comments && layoutStore.isMarkingVisible"
                    @click="commentsStore.setShowOtherCorrections(!commentsStore.isOtherCorrectionsShown)">
               <v-icon
                   :icon="commentsStore.isOtherCorrectionsShown ? 'mdi-account-school' : 'mdi-account-school-outline'"></v-icon>
@@ -150,7 +152,7 @@ document.addEventListener('keydown', layoutStore.handleKeyDown);
             </v-btn>
 
             <!-- reset comments filter -->
-            <v-btn size="small" variant="plain" v-if="layoutStore.isMarkingVisible"
+            <v-btn size="small" variant="plain" v-if="settingsStore.hasSummaryOverview && layoutStore.isMarkingVisible"
                    :disabled="!commentsStore.isFilterActive"
                    @click="commentsStore.resetFilter()">
               <v-icon :icon="commentsStore.isFilterActive ? 'mdi-filter' : 'mdi-filter-outline'"></v-icon>
@@ -158,7 +160,7 @@ document.addEventListener('keydown', layoutStore.handleKeyDown);
             </v-btn>
 
             <!-- toggle marking Comments -->
-            <v-btn size="small" v-if="itemsStore.canAct" v-show="layoutStore.isMarkingVisible" @click="layoutStore.toggleMarkingComments()">
+            <v-btn size="small" v-if="settingsStore.Task.enable_comments && itemsStore.canAct" v-show="layoutStore.isMarkingVisible" @click="layoutStore.toggleMarkingComments()">
               <v-icon v-show="layoutStore.showMarkingComments" icon="mdi-checkbox-outline"></v-icon>
               <v-icon v-show="!layoutStore.showMarkingComments" icon="mdi-checkbox-blank-outline"></v-icon>
               <span>{{ $t('allComments') }}</span>
@@ -166,7 +168,7 @@ document.addEventListener('keydown', layoutStore.handleKeyDown);
             </v-btn>
 
             <!-- toggle marking comment points -->
-            <v-btn size="small" v-if="itemsStore.canAct && settingsStore.Task.enable_partial_points"
+            <v-btn size="small" v-if="settingsStore.Task.enable_partial_points && itemsStore.canAct && settingsStore.Task.enable_partial_points"
                    v-show="layoutStore.isMarkingVisible"
                    @click="layoutStore.toggleMarkingCommentPoints()">
               <v-icon v-show="layoutStore.showMarkingCommentPoints" icon="mdi-checkbox-outline"></v-icon>
@@ -195,7 +197,9 @@ document.addEventListener('keydown', layoutStore.handleKeyDown);
             </v-btn>
 
             <!-- toggle right summary criteria  -->
-            <v-btn size="small" v-show="layoutStore.isSummaryVisible || layoutStore.isRightCorrectionVisible"
+            <v-btn size="small"
+                   v-if="settingsStore.hasSummaryOverview"
+                   v-show="layoutStore.isSummaryVisible || layoutStore.isRightCorrectionVisible"
                    @click="layoutStore.toggleRightSummaryCriteria()">
               <v-icon v-show="layoutStore.showRightSummaryCriteria" icon="mdi-checkbox-outline"></v-icon>
               <v-icon v-show="!layoutStore.showRightSummaryCriteria" icon="mdi-checkbox-blank-outline"></v-icon>

@@ -47,7 +47,10 @@ onMounted(() => {
  * @param {Mark} created
  */
 async function onCreation(created) {
-  //console.log(Date.now(), 'onCreation', created);
+  if (!stores.settings().Task.enable_comments) {
+    return;
+  }
+
   if (!!created && !summariesStore.isOwnDisabled) {
 
     const mark = new Mark(created);
@@ -93,6 +96,10 @@ async function onCreation(created) {
  * @param {MouseEvent} event the beginning mouseDown when a new mark is created
  */
 function onSelection(selected, event) {
+  if (!stores.settings().Task.enable_comments) {
+    return;
+  }
+
   if (!!selected) {
     let comment = commentsStore.getCommentByMarkKey(selected.key);
     if (comment) {
@@ -341,21 +348,21 @@ function toggleLabels() {
 
       &nbsp;
 
-      <v-btn-toggle density="comfortable" variant="outlined" divided v-model="selectedTool" @click="selectTool()">
+      <v-btn-toggle v-if="stores.settings().Task.enable_comments" density="comfortable" variant="outlined" divided v-model="selectedTool" @click="selectTool()">
         <v-btn size="small" icon="mdi-cursor-move" value="scroll"></v-btn>
         <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-minus" value="line"></v-btn>
         <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-wave" value="wave"></v-btn>
         <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-check" value="check"></v-btn>
-        <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-close" value="cross"></v-btn>
+        <!-- <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-close" value="cross"></v-btn> -->
         <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-help" value="question"></v-btn>
-        <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-rectangle-outline"
-               value="rectangle"></v-btn>
-        <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-vector-triangle" value="polygon"></v-btn>
+        <!-- <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-rectangle-outline"
+               value="rectangle"></v-btn> -->
+        <!-- <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-vector-triangle" value="polygon"></v-btn> -->
       </v-btn-toggle>
 
       &nbsp;
 
-      <v-btn-group density="comfortable" variant="outlined" divided>
+      <v-btn-group v-if="stores.settings().Task.enable_comments" density="comfortable" variant="outlined" divided>
         <v-btn size="small" :active="showLabels" icon="mdi-label-outline" @click="toggleLabels()"></v-btn>
       </v-btn-group>
 

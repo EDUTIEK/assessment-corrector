@@ -77,6 +77,10 @@ export const useSettingsStore = defineStore('settings', {
           return t('settingsProcedureNone');
       }
     },
+
+    hasSummaryOverview(state) {
+      return state.Task.enable_comment_ratings || state.Task.enable_partial_points;
+    }
   },
 
   actions: {

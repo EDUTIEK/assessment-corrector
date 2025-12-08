@@ -87,7 +87,7 @@ async function filterByCriterion(criterion_key) {
 
 <template>
   <div>
-    <v-table class="table" density="compact">
+    <v-table v-if="settingsStore.Task.enable_comment_ratings" class="table" density="compact">
       <thead>
       <tr>
         <th>{{ $t('summaryCriteriaMarkings') }}</th>
@@ -126,7 +126,7 @@ async function filterByCriterion(criterion_key) {
     </v-table>
 
     <!-- Points for comments directly -->
-    <v-table v-if="!criteriaStore.getCorrectionHasCommentCriteria(props.correction_key)" class="table" density="compact">
+    <v-table v-if="settingsStore.Task.enable_partial_points && !criteriaStore.getCorrectionHasCommentCriteria(props.correction_key)" class="table" density="compact">
       <thead>
       <tr>
         <th><strong>{{ $t('summaryCriteriaRating') }}</strong></th>
@@ -151,7 +151,7 @@ async function filterByCriterion(criterion_key) {
     </v-table>
 
     <!-- Points for criteria in comments -->
-    <v-table v-if="criteriaStore.getCorrectionHasCommentCriteria(props.correction_key)" class="table" density="compact">
+    <v-table v-if="settingsStore.Task.enable_partial_points && criteriaStore.getCorrectionHasCommentCriteria(props.correction_key)" class="table" density="compact">
       <thead>
       <tr>
         <th>{{ $t('summaryCriteriaInComments') }}</th>
@@ -174,7 +174,7 @@ async function filterByCriterion(criterion_key) {
     </v-table>
 
     <!-- Points for general criteria -->
-    <v-table v-if="criteriaStore.getCorrectionHasGeneralCriteria(props.correction_key)" class="table" density="compact">
+    <v-table v-if="settingsStore.Task.enable_partial_points && criteriaStore.getCorrectionHasGeneralCriteria(props.correction_key)" class="table" density="compact">
       <thead>
       <tr>
         <th>{{ $t('summaryCriteriaGeneralCriteria') }}</th>

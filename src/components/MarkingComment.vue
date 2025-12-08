@@ -252,6 +252,7 @@ watch(() => snippetsStore.selection_open, handleSnippet);
             <!-- enter points -->
             <v-col cols="3">
                 <span tabindex="0" class="pointsSum"
+                      v-if="stores.settings().Task.enable_partial_points"
                       :id="'pointsInput' + comment.key"
                       @keydown="handleSumOfPointsKeydown()"
                 >{{ $t('markingCommentSum')}} {{ getPointsDisplay(comment) }} {{ getPointsLabel(comment) }}</span>
@@ -259,7 +260,9 @@ watch(() => snippetsStore.selection_open, handleSnippet);
 
             <!-- enter rating excellent -->
             <v-col cols="3">
-              <span v-show="comment.rating_excellent || comment.key == commentsStore.selectedKey">
+              <span
+                  v-if="stores.settings().Task.enable_comment_ratings"
+                  v-show="comment.rating_excellent || comment.key == commentsStore.selectedKey">
                <input type="checkbox"
                       class="ratingInput"
                       v-model="comment.rating_excellent"
@@ -275,7 +278,9 @@ watch(() => snippetsStore.selection_open, handleSnippet);
 
             <!-- enter rating cardinal -->
             <v-col cols="3">
-              <span v-show="comment.rating_cardinal || comment.key == commentsStore.selectedKey">
+              <span
+                  v-if="stores.settings().Task.enable_comment_ratings"
+                  v-show="comment.rating_cardinal || comment.key == commentsStore.selectedKey">
                 <input type="checkbox"
                        class="ratingInput"
                        v-model="comment.rating_cardinal"

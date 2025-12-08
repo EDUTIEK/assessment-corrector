@@ -19,6 +19,9 @@ let can_revise;
 let summary;
 let is_authorized;
 let is_revised;
+let show_criteria;
+let show_text;
+let show_revision;
 
 function init() {
   is_own = props.correction_key == stores.corrections().ownKey;
@@ -27,14 +30,21 @@ function init() {
   summary = is_own ? stores.summaries().editSummary : stores.summaries().getForCorrection(props.correction_key);
   is_authorized = summary.isAuthorized();
   is_revised = summary.isRevised();
+
+  show_criteria = props.showCriteria && (stores.settings().Task.enable_comment_ratings || stores.settings().Task.enable_partial_points);
+  show_text = props.showText && (is_own || is_authorized);
+  show_revision = props.showRevision && (is_own  && can_revise || is_revised);
 }
 watch(() => props.correction_key, init);
+watch(() => props.showCriteria, init);
+watch(() => props.showText, init);
+watch(() => props.showRevision, init);
 init();
 
 function expansionClass() {
-  const sum = (props.showCriteria ? 1 : 0)
-      + (props.showText && (is_own || is_authorized) ? 1 : 0)
-      + (props.showRevision && (is_own  && can_revise || is_revised) ? 1 : 0);
+  const sum = (show_criteria ? 1 : 0)
+      + (show_text ? 1 : 0)
+      + (show_revision ? 1 : 0);
   switch (sum) {
     case 0:
       return 'hidden';
@@ -52,12 +62,12 @@ function expansionClass() {
 <template>
   <div id="app-summary-wrapper">
 
-    <div v-if="props.showCriteria && (can_correct || is_authorized)" :class="expansionClass()">
+    <div v-if="show_criteria" :class="expansionClass()">
       <h2 class="headline">{{ $t('allOverview') }}</h2>
       <summary-criteria class="content" :correction_key="props.correction_key"></summary-criteria>
     </div>
 
-    <div v-if="props.showText && can_correct && !stores.summaries().isOwnDisabled" :class="expansionClass()">
+    <div v-if="show_text && !stores.summaries().isOwnDisabled" :class="expansionClass()">
       <v-container class="ma-0 pa-0">
         <v-row class="section-header ma-0">
           <v-col cols="8" class="ma-0 pa-0">
@@ -68,11 +78,10 @@ function expansionClass() {
           </v-col>
         </v-row>
       </v-container>
-
       <own-summary-text v-show="!summary.pdf" class="content" :editorId="'summary'"></own-summary-text>
       <summary-file v-if="summary.pdf" class="content" :correction_key="props.correction_key"></summary-file>
     </div>
-    <div v-if="props.showText && !can_correct || is_authorized || stores.summaries().isOwnDisabled" :class="expansionClass()">
+    <div v-if="show_text && stores.summaries().isOwnDisabled" :class="expansionClass()">
       <h2 class="headline">{{ $t('allSummary') }}</h2>
       <summary-text v-if="!summary.pdf" class="content" :correction_key="props.correction_key"></summary-text>
       <summary-file v-if="summary.pdf" class="content" :correction_key="props.correction_key"></summary-file>
@@ -87,11 +96,11 @@ function expansionClass() {
       <summary-points class="content" :correction_key="props.correction_key"></summary-points>
     </div>
 
-    <div v-if="props.showRevision && can_revise" :class="expansionClass()">
+    <div v-if="show_revision && can_revise" :class="expansionClass()">
       <h2 class="headline">{{ stores.settings().procedureText }}</h2>
       <own-summary-revision class="content" :editorId="'revision'"></own-summary-revision>
     </div>
-    <div v-if="props.showRevision && !can_revise && is_revised" :class="expansionClass()">
+    <div v-if="show_revision && !can_revise && is_revised" :class="expansionClass()">
       <h2 class="headline">{{ stores.settings().procedureText }}</h2>
       <summary-revision class="content" :correction_key="props.correction_key"></summary-revision>
     </div>

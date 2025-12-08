@@ -193,10 +193,17 @@ export const useLayoutStore = defineStore('layout', {
           this.showLeftSummaryCriteria = false;
           this.showLeftSummaryRevision = true;
         }
+        if (!stores.settings().hasSummaryOverview) {
+          this.showLeftSummaryCriteria = false;
+          this.showRightSummaryCriteria = false;
+        }
       }
       else {
         this.leftContent = 'essay';
         this.rightContent = 'marking';
+        if (!stores.settings().Task.enable_comments) {
+          this.showMarkingText = true;
+        }
       }
       this.expandedColumn = 'none';
       this.saveToStorage();

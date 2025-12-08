@@ -87,6 +87,10 @@ function updateMark(comment) {
  * Decide whether to add a new comment or select an existing comment
  */
 async function onSelection(selected) {
+  if (!stores.settings().Task.enable_comments) {
+    return;
+  }
+
   // check if new selection overlaps with own comments
   let comments = commentsStore.getActiveCommentsInRange(selected.firstWord, selected.lastWord);
   if (comments.length) {
