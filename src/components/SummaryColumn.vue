@@ -71,7 +71,7 @@ function expansionClass() {
       <summary-criteria class="content" :correction_key="props.correction_key"></summary-criteria>
     </div>
 
-    <div v-if="show_text && !stores.summaries().isOwnDisabled" :class="expansionClass()">
+    <div v-if="show_text && is_own && !stores.summaries().isOwnDisabled" :class="expansionClass()">
       <v-container class="ma-0 pa-0">
         <v-row class="section-header ma-0">
           <v-col cols="8" class="ma-0 pa-0">
@@ -85,7 +85,7 @@ function expansionClass() {
       <own-summary-text v-show="!summary.pdf" class="content" :editorId="'summary'"></own-summary-text>
       <summary-file v-if="summary.pdf" class="content" :correction_key="props.correction_key"></summary-file>
     </div>
-    <div v-if="show_text && stores.summaries().isOwnDisabled" :class="expansionClass()">
+    <div v-if="show_text && (!is_own || stores.summaries().isOwnDisabled)" :class="expansionClass()">
       <h2 class="headline">{{ $t('allSummary') }} {{ position_text }}</h2>
       <summary-text v-if="!summary.pdf" class="content" :correction_key="props.correction_key"></summary-text>
       <summary-file v-if="summary.pdf" class="content" :correction_key="props.correction_key"></summary-file>
@@ -124,11 +124,10 @@ function expansionClass() {
 
 #app-own-summary-points {
   height: 160px;
-  padding-top: 10px;
 }
 
 #app-summary-points {
-  height: 120px;
+  height: 160px;
 }
 
 .section-header {
