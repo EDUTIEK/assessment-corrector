@@ -65,8 +65,11 @@ async function setAuthorizedAndContinue() {
       <v-card>
         <v-card-title>{{ $t('authorizationTitle', [itemsStore.currentItem.title]) }}</v-card-title>
         <v-card-text>
-          <div class="appRow"><strong>{{ $t('authorizationSummaryLabel') }}</strong>
-            <div class="appText long-essay-content headlines-three" v-if="summariesStore.editSummary.text" v-html="summariesStore.editSummary.text">
+
+          <div v-if="summariesStore.editSummary.hasTextOrPdf()"
+               class="appRow"><strong>{{ $t('authorizationSummaryLabel') }}</strong>
+            <div class="appText long-essay-content headlines-three"
+                 v-if="summariesStore.editSummary.text" v-html="summariesStore.editSummary.text">
             </div>
             <object class="appPdf" v-if="summariesStore.editSummary.pdf"
                     type="application/pdf"
@@ -75,14 +78,13 @@ async function setAuthorizedAndContinue() {
             </object>
           </div>
 
-          <div class="appRow">
+          <div v-if="settingsStore.Task.enable_partial_points" class="appRow">
             <sum-of-points class='sumOfPoints' :correction_key="stores.corrections().ownKey"></sum-of-points>
           </div>
 
-          <div class="appRow">
-            <label for="appAuthorizationPoints"><strong>{{ $t('authorizationPointsLabel') }}</strong></label>
-            <input id="appAuthorizationPoints" class="appPoints" type="number" min="0" :max="settingsStore.Assessment.max_points"
-                   v-model="summariesStore.editSummary.points"/>{{ $t('authorizationPointsSuffix' ) }}
+          <div v-if="summariesStore.editSummary.hasPoints()" class="appRow">
+            <strong>{{ $t('ownSummaryPointsRating') }}</strong>
+            {{ summariesStore.editSummary.points }} {{ $t('authorizationPointsSuffix' ) }}
             &nbsp;
             <strong>{{ $t('authorizationGradeTitle') }}</strong> {{ summariesStore.currentGradeTitle }}
 
@@ -96,7 +98,7 @@ async function setAuthorizedAndContinue() {
               {{ $t('authorizationPleaseEnterSummary') }}
             </v-alert>
 
-            <v-alert v-show="(levelsStore.hasLevels && (summariesStore.editSummary.points === null))"
+            <v-alert v-show="(levelsStore.hasLevels && (!summariesStore.editSummary.hasPoints()))"
                      color="#0000A0" type="info" variant="text" density="compact">
               {{ $t('authorizationPleaseEnterPoints') }}
             </v-alert>
@@ -117,12 +119,12 @@ async function setAuthorizedAndContinue() {
 
           </div>
 
-          <div class="appRow">
+          <div v-if="summariesStore.editSummary.hasTextOrPdf() && summariesStore.editSummary.hasPoints()" class="appRow">
             {{ $t('authorizationWarnFinalize') }}
           </div>
         </v-card-text>
         <v-card-actions>
-          <v-btn @click="setAuthorizedAndContinue()">
+          <v-btn v-if="summariesStore.editSummary.hasTextOrPdf() && summariesStore.editSummary.hasPoints()" @click="setAuthorizedAndContinue()">
             <v-icon left icon="mdi-check"></v-icon>
             <span>{{ $t('authorizationAuthorize') }}</span>
           </v-btn>

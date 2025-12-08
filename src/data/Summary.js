@@ -201,6 +201,14 @@ export default class Summary {
     return new Summary(this.getData());
   }
 
+  hasTextOrPdf() {
+    return this.text || this.pdf;
+  }
+
+  hasPoints() {
+    return this.points !== null && !Number.isNaN(this.points);
+  }
+
   isPregraded() {
     return this.status == Summary.STATUS_PRE_GRADED;
   }

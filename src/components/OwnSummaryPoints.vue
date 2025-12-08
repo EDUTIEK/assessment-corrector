@@ -35,11 +35,13 @@ async function togglePregraded(event) {
     <v-container>
       <v-row dense>
         <v-col cols="10">
-          <p><sum-of-points class='sumOfPoints' :correction_key="stores.corrections().ownKey"></sum-of-points></p>
+          <p v-if="settingsStore.Task.enable_partial_points">
+            <sum-of-points class='sumOfPoints' :correction_key="stores.corrections().ownKey"></sum-of-points>
+          </p>
 
           <label for="appOwnSummaryPoints"><strong>{{ $t('ownSummaryPointsRating') }}</strong></label>
           &nbsp;
-          <input id="appOwnSummaryPoints"  type="number" :disabled="summariesStore.isOwnDisabled"class="appPoints"
+          <input id="appOwnSummaryPoints"  type="number" :disabled="summariesStore.isOwnDisabled" class="appPoints"
                  :min="summariesStore.pointsCorridor.min"
                  :max="summariesStore.pointsCorridor.max"
                  v-model="summariesStore.editSummary.points"/> {{ $t('allPoints', summariesStore.editSummary.points) }}
@@ -53,7 +55,7 @@ async function togglePregraded(event) {
           <input id="appOwnSummaryPregraded" type="checkbox" class="appCheckbox"
               v-if="!summariesStore.isOwnAuthorized"
               v-model="pregraded"
-              :disabled="summariesStore.isOwnAuthorized"
+              :disabled="summariesStore.isOwnAuthorized || !summariesStore.editSummary.hasPoints()"
               @change="togglePregraded"
           ></input>
           <label for="appOwnSummaryPregraded">{{ $t('allPregraded') }}</label>
