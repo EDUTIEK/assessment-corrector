@@ -254,6 +254,11 @@ export const useLayoutStore = defineStore('layout', {
     showEssay() {
       this.leftContent = 'essay';
       this.setLeftVisible();
+
+      if (stores.settings().Task.enable_comments) {
+        this.rightContent = 'marking';
+        this.setRightVisible();
+      }
       this.saveToStorage();
     },
 

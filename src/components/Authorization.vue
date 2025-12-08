@@ -21,21 +21,17 @@ const showConfirmation = ref(false);
 
 function getPartialPointsMessage() {
   let points = 0;
-  let note = '';
 
-  if (settingsStore.Task.enable_partial_points) {
-    points = pointsStore.getSumOfPointsForCorrection(stores.corrections().ownKey);
-    note = t('authorizationPartialPoints', points);
-  }
-  else {
+  if (!settingsStore.Task.enable_partial_points) {
     return '';
   }
 
-  if (points != summariesStore.editSummary.points) {
-    return t('authorizationPointsMismatch', [points])
+  points = pointsStore.getSumOfPointsForCorrection(stores.corrections().ownKey);
+  if (points == 0 || points == summariesStore.editSummary.points) {
+    return '';
   }
 
-  return '';
+  return t('authorizationPointsMismatch', [points]);
 }
 
 async function setAuthorizedAndContinue() {

@@ -10,8 +10,12 @@ import OwnSummaryUpload from "@/components/OwnSummaryUpload.vue";
 import OwnSummaryRevision from "@/components/OwnSummaryRevision.vue";
 import {stores} from "@/store";
 import {watch} from "vue";
+import Item from '@/data/Item';
 
 const props = defineProps(['correction_key', 'showCriteria', 'showText', 'showRevision']);
+
+const correction = stores.corrections().getCorrection(props.correction_key);
+const position_text = Item.buildPositionText(correction.position);
 
 let is_own;
 let can_correct;
@@ -63,7 +67,7 @@ function expansionClass() {
   <div id="app-summary-wrapper">
 
     <div v-if="show_criteria" :class="expansionClass()">
-      <h2 class="headline">{{ $t('allOverview') }}</h2>
+      <h2 class="headline">{{ $t('allOverview') }} {{ position_text }}</h2>
       <summary-criteria class="content" :correction_key="props.correction_key"></summary-criteria>
     </div>
 
@@ -71,7 +75,7 @@ function expansionClass() {
       <v-container class="ma-0 pa-0">
         <v-row class="section-header ma-0">
           <v-col cols="8" class="ma-0 pa-0">
-            <h2 class="headline">{{ $t('allSummary') }}</h2>
+            <h2 class="headline">{{ $t('allSummary') }} {{ position_text }}</h2>
           </v-col>
           <v-col cols="4" class="ma-0 pa-0 text-right">
             <own-summary-upload></own-summary-upload>
@@ -82,17 +86,17 @@ function expansionClass() {
       <summary-file v-if="summary.pdf" class="content" :correction_key="props.correction_key"></summary-file>
     </div>
     <div v-if="show_text && stores.summaries().isOwnDisabled" :class="expansionClass()">
-      <h2 class="headline">{{ $t('allSummary') }}</h2>
+      <h2 class="headline">{{ $t('allSummary') }} {{ position_text }}</h2>
       <summary-text v-if="!summary.pdf" class="content" :correction_key="props.correction_key"></summary-text>
       <summary-file v-if="summary.pdf" class="content" :correction_key="props.correction_key"></summary-file>
     </div>
 
     <div id="app-own-summary-points" v-if="can_correct">
-      <h2 class="headline">{{ $t('allTotalRating') }}</h2>
+      <h2 class="headline">{{ $t('allTotalRating') }} {{ position_text }}</h2>
       <own-summary-points class="content" ></own-summary-points>
     </div>
     <div id="app-summary-points" v-if="!can_correct && is_authorized" >
-      <h2 class="headline">{{ $t('allTotalRating') }}</h2>
+      <h2 class="headline">{{ $t('allTotalRating') }} {{ position_text }}</h2>
       <summary-points class="content" :correction_key="props.correction_key"></summary-points>
     </div>
 
