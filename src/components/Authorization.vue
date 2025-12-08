@@ -39,10 +39,7 @@ async function setAuthorizedAndContinue() {
   await summariesStore.setOwnAuthorized();
   if (await apiStore.saveChangesToBackend(true)) {
     showConfirmation.value = false;
-    let newKey = itemsStore.nextKey;
-    if (newKey != '') {
-      apiStore.loadItemFromBackend(newKey);
-    }
+    apiStore.loadItemFromBackend(itemsStore.currentKey);
   } else {
     showConfirmation.value = false;
     stores.layout().showSendFailure = true;
@@ -124,7 +121,8 @@ async function setAuthorizedAndContinue() {
           </div>
         </v-card-text>
         <v-card-actions>
-          <v-btn v-if="summariesStore.editSummary.hasTextOrPdf() && summariesStore.editSummary.hasPoints()" @click="setAuthorizedAndContinue()">
+          <v-btn v-if="summariesStore.editSummary.hasTextOrPdf() && summariesStore.editSummary.hasPoints()"
+                 @click="setAuthorizedAndContinue()">
             <v-icon left icon="mdi-check"></v-icon>
             <span>{{ $t('authorizationAuthorize') }}</span>
           </v-btn>

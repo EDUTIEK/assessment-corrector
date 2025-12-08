@@ -46,10 +46,7 @@ async function setRevisedAndContinue() {
   await summariesStore.setOwnRevised();
   if (await apiStore.saveChangesToBackend(true)) {
     showConfirmation.value = false;
-    let newKey = itemsStore.nextKey;
-    if (newKey != '') {
-      apiStore.loadItemFromBackend(newKey);
-    }
+    apiStore.loadItemFromBackend(itemsStore.currentKey);
   } else {
     showConfirmation.value = false;
     layoutStore.showSendFailure = true;
