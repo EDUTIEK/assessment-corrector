@@ -68,14 +68,14 @@ async function setRevisedAndContinue() {
       <v-card>
         <v-card-title>{{ dialogTitle() }}</v-card-title>
         <v-card-text>
-          <div class="appRow" v-if="summariesStore.editSummary.revision_text != ''">
+          <div class="appRow" v-if="summariesStore.editSummary.hasRevisionText()">
             <strong>{{ $t('revisionTextLabel') }}</strong>
             <div class="appText long-essay-content headlines-three" v-html="summariesStore.editSummary.revision_text">
             </div>
           </div>
 
           <div class="appRow">
-            <span v-if="!Number.isNaN(summariesStore.editSummary.revision_points)">
+            <span v-if="summariesStore.editSummary.hasRevisionPoints()">
               <strong>{{ $t('revisionPointsLabel') }}</strong>
               {{ summariesStore.editSummary.revision_points }}
               {{ $t('allPoints', summariesStore.editSummary.revision_points) }}
@@ -85,11 +85,11 @@ async function setRevisedAndContinue() {
           </div>
 
           <div class="appRow">
-            <v-alert v-show="Number.isNaN(summariesStore.editSummary.revision_points)"
+            <v-alert v-show="!summariesStore.editSummary.hasRevisionPoints()"
                      color="#0000A0" type="info" variant="text" density="compact">
               {{ $t('revisionPleaseEnterPoints') }}
             </v-alert>
-            <v-alert v-show="summariesStore.editSummary.revision_text == ''"
+            <v-alert v-show="!summariesStore.editSummary.hasRevisionText()"
                      color="#0000A0" type="info" variant="text" density="compact">
               {{ $t('revisionPleaseEnterText') }}
             </v-alert>
@@ -104,7 +104,7 @@ async function setRevisedAndContinue() {
               {{ summariesStore.stitchNeededAfterRevisionText }}
             </v-alert>
 
-            <div class="appRow">
+            <div class="appRow" v-if="summariesStore.editSummary.hasRevisionText() && summariesStore.editSummary.hasRevisionPoints()">
               <v-checkbox
                   v-if="requireOtherRevisionPossible()"
                   v-model="summariesStore.editSummary.require_other_revision"

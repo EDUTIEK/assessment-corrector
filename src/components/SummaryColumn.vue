@@ -101,11 +101,11 @@ function expansionClass() {
     </div>
 
     <div v-if="show_revision && can_revise" :class="expansionClass()">
-      <h2 class="headline">{{ stores.settings().procedureText }}</h2>
+      <h2 class="headline">{{ stores.settings().procedureText }} {{ position_text }}</h2>
       <own-summary-revision class="content" :editorId="'revision'"></own-summary-revision>
     </div>
     <div v-if="show_revision && !can_revise && is_revised" :class="expansionClass()">
-      <h2 class="headline">{{ stores.settings().procedureText }}</h2>
+      <h2 class="headline">{{ stores.settings().procedureText }} {{ position_text }}</h2>
       <summary-revision class="content" :correction_key="props.correction_key"></summary-revision>
     </div>
 

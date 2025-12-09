@@ -209,6 +209,14 @@ export default class Summary {
     return this.points !== null && !Number.isNaN(this.points);
   }
 
+  hasRevisionText() {
+    return !!this.revision_text;
+  }
+
+  hasRevisionPoints() {
+    return this.revision_points !== null && !Number.isNaN(this.revision_points);
+  }
+
   isPregraded() {
     return this.status == Summary.STATUS_PRE_GRADED;
   }
