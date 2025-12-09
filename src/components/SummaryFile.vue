@@ -6,7 +6,7 @@ const props = defineProps(['correction_key']);
 
 function url() {
   let summary = stores.summaries().getForCorrection(props.correction_key);
-  if (summary) {
+  if (summary && summary.pdf) {
     return stores.api().getSummaryPdfUrl(summary);
   }
 }
