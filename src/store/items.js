@@ -43,7 +43,7 @@ export const useItemsStore = defineStore('items', {
     },
 
     sortedItems(state) {
-      if (stores.api().itemKey) {
+      if (stores.api().itemKey && !!state.items[stores.api().itemKey]) {
         const task_id = Item.extractTaskId(stores.api().itemKey)
         return Object.values(state.items)
             .filter(item => item.task_id == task_id)

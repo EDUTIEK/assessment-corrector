@@ -436,7 +436,7 @@ export const useApiStore = defineStore('api', {
 
       const itemsStore = stores.items();
       if (itemKey == '' || !stores.items().getItem(itemKey)) {
-        itemKey = itemsStore.firstKey
+        itemKey = itemsStore.firstKey ?? '';
       }
 
       let response = {};
