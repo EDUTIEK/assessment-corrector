@@ -6,11 +6,12 @@ import {clearAllStores, stores} from "@/store";
 import {defineStore} from 'pinia';
 import axios from 'axios'
 import Cookies from 'js-cookie';
-
+import i18n from "@/plugins/i18n";
 import md5 from 'md5';
 import Change from '@/data/Change';
 import Item from '@/data/Item';
 
+const { t } = i18n.global;
 const sendInterval = 5000;      // time (ms) to wait for sending open savings to the backend
 
 export const useApiStore = defineStore('api', {
@@ -160,10 +161,9 @@ export const useApiStore = defineStore('api', {
 
     /**
      * Clear the store
-     * Don't clear local variables of the api store
      */
     async clearStorage() {
-      localStorage.clear();
+      // Don't clear the api store because these values need to be kept for a page reload
     },
 
     /**
@@ -177,26 +177,26 @@ export const useApiStore = defineStore('api', {
       let newItem = false;
 
       // take values formerly stored
-      this.backendUrl = localStorage.getItem('xlasCorrectorBackendUrl');
-      this.returnUrl = localStorage.getItem('xlasCorrectorReturnUrl');
-      this.userId = localStorage.getItem('xlasCorrectorUserId');
-      this.assId = localStorage.getItem('xlasCorrectorAssId');
-      this.contextId = localStorage.getItem('xlasCorrectorContextId');
+      this.backendUrl = localStorage.getItem('xlasCorrectorBackendUrl') ?? '';
+      this.returnUrl = localStorage.getItem('xlasCorrectorReturnUrl') ?? '';
+      this.userId = localStorage.getItem('xlasCorrectorUserId') ?? '';
+      this.assId = localStorage.getItem('xlasCorrectorAssId') ?? '';
+      this.contextId = localStorage.getItem('xlasCorrectorContextId') ?? '';
       this.itemKey = localStorage.getItem('xlasCorrectorItemKey') ?? '';
-      this.dataToken = localStorage.getItem('xlasCorrectorDataToken');
-      this.fileToken = localStorage.getItem('xlasCorrectorFileToken');
+      this.dataToken = localStorage.getItem('xlasCorrectorDataToken') ?? '';
+      this.fileToken = localStorage.getItem('xlasCorrectorFileToken') ?? '';
       this.timeOffset = Math.floor(localStorage.getItem('xlasCorrectorTimeOffset') ?? 0);
 
       // check if context given by cookies differs and force a reload if neccessary
-      if (Cookies.get('xlasUserId') != undefined && Cookies.get('xlasUserId') !== this.userId) {
+      if (Cookies.get('xlasUserId') != undefined && Cookies.get('xlasUserId') != this.userId) {
         this.userId = Cookies.get('xlasUserId');
         newContext = true;
       }
-      if (!!Cookies.get('xlasAssId') && Cookies.get('xlasAssId') !== this.assId) {
+      if (!!Cookies.get('xlasAssId') && Cookies.get('xlasAssId') != this.assId) {
         this.assId = Cookies.get('xlasAssId');
         newContext = true;
       }
-      if (Cookies.get('xlasContextId') != undefined && Cookies.get('xlasContextId') !== this.contextId) {
+      if (Cookies.get('xlasContextId') != undefined && Cookies.get('xlasContextId') != this.contextId) {
         this.contextId = Cookies.get('xlasContextId');
         newContext = true;
       }
@@ -204,8 +204,8 @@ export const useApiStore = defineStore('api', {
       // these values just need a reload of the item
       let task_id = Item.extractTaskId(this.itemKey);
       let writer_id = Item.extractWriterId(this.itemKey);
-      if (Cookies.get('xlasTaskId') != undefined && Cookies.get('xlasTaskId') !== task_id
-        && Cookies.get('xlasWriterId') != undefined && Cookies.get('xlasWriterId') !== writer_id) {
+      if (Cookies.get('xlasTaskId') != undefined && Cookies.get('xlasWriterId') != undefined
+          && (Cookies.get('xlasTaskId') != task_id || Cookies.get('xlasWriterId') != writer_id)) {
         newItem = true;
         task_id = Cookies.get('xlasTaskId');
         writer_id = Cookies.get('xlasWriterId');
@@ -216,20 +216,47 @@ export const useApiStore = defineStore('api', {
       }
 
       // these values can be changed without forcing a whole reload
-      if (Cookies.get('xlasBackendUrl') != undefined && Cookies.get('xlasBackendUrl') !== this.backendUrl) {
+      if (Cookies.get('xlasBackendUrl') != undefined && Cookies.get('xlasBackendUrl') != this.backendUrl) {
         this.backendUrl = Cookies.get('xlasBackendUrl');
       }
-      if (Cookies.get('xlasReturnUrl') != undefined && Cookies.get('xlasReturnUrl') !== this.returnUrl) {
+      if (Cookies.get('xlasReturnUrl') != undefined && Cookies.get('xlasReturnUrl') != this.returnUrl) {
         this.returnUrl = Cookies.get('xlasReturnUrl');
       }
-      if (Cookies.get('xlasToken') != undefined && Cookies.get('xlasToken') !== this.dataToken) {
-        this.dataToken = Cookies.get('xlasToken');
+      if (Cookies.get('xlasDataToken') != undefined && Cookies.get('xlasDataToken') != this.dataToken) {
+        this.dataToken = Cookies.get('xlasDataToken');
+      }
+      if (Cookies.get('xlasFileToken') != undefined && Cookies.get('xlasFileToken') != this.dataToken) {
+        this.fileToken = Cookies.get('xlasFileToken');
       }
 
-      if (!this.backendUrl || !this.returnUrl || !this.userId || !this.assId || !this.contextId || !this.dataToken) {
-        stores.layout().showInitFailure = true;
+      if (!this.backendUrl || !this.returnUrl
+          || !this.userId || !this.assId || !this.contextId
+          || !this.dataToken || !this.fileToken) {
+        stores.layout().initFailure = t('apiMissingParams');
         return;
       }
+
+      // remove the cookies
+      // needed to distinct the call from the backend from a later reload
+      Cookies.remove('xlasBackendUrl');
+      Cookies.remove('xlasReturnUrl');
+      Cookies.remove('xlasUserId');
+      Cookies.remove('xlasAssId');
+      Cookies.remove('xlasContextId');
+      Cookies.remove('xlasTaskId');
+      Cookies.remove('xlasWriterId');
+      Cookies.remove('xlasDataToken');
+      Cookies.remove('xlasFileToken');
+
+      // save the state
+      localStorage.setItem('xlasCorrectorBackendUrl', this.backendUrl);
+      localStorage.setItem('xlasCorrectorReturnUrl', this.returnUrl);
+      localStorage.setItem('xlasCorrectorUserId', this.userId);
+      localStorage.setItem('xlasCorrectorAssId', this.assId);
+      localStorage.setItem('xlasCorrectorContextId', this.contextId);
+      localStorage.setItem('xlasCorrectorItemKey', this.itemKey);
+      localStorage.setItem('xlasCorrectorDataToken', this.dataToken);
+      localStorage.setItem('xlasCorrectorFileToken', this.fileToken);
 
       const changesStore = stores.changes();
       await changesStore.loadFromStorage();
@@ -267,7 +294,6 @@ export const useApiStore = defineStore('api', {
         await this.loadItemFromBackend(this.itemKey);
         this.finishInitialisation();
       }
-      this.updateConfig();
     },
 
     /**
@@ -287,51 +313,19 @@ export const useApiStore = defineStore('api', {
         await this.loadItemFromStorage(this.itemKey);
         this.finishInitialisation();
       }
-      this.updateConfig();
     },
-
 
     /**
      * Finish the initialisation
      * set config dependent layout states
-     * start the sending timer
      */
     finishInitialisation() {
 
       if (stores.summaries().isOneAuthorized) {
         stores.comments().setShowOtherCorrections(true);
       }
-
       stores.layout().initialized = true;
     },
-
-    /**
-     * Update the app configuration
-     * This is called when the initialisation can be done silently
-     * Or when a confirmation dialog is confirmed
-     */
-    updateConfig() {
-      // remove the cookies
-      // needed to distinct the call from the backend from a later reload
-      Cookies.remove('xlasBackendUrl');
-      Cookies.remove('xlasReturnUrl');
-      Cookies.remove('xlasUserId');
-      Cookies.remove('xlasAssId');
-      Cookies.remove('xlasContextId');
-      Cookies.remove('xlasTaskId');
-      Cookies.remove('xlasWriterId');
-      Cookies.remove('xlasToken');
-
-      localStorage.setItem('xlasCorrectorBackendUrl', this.backendUrl);
-      localStorage.setItem('xlasCorrectorReturnUrl', this.returnUrl);
-      localStorage.setItem('xlasCorrectorUserId', this.userId);
-      localStorage.setItem('xlasCorrectorAssId', this.assId);
-      localStorage.setItem('xlasCorrectorContextId', this.contextId);
-      localStorage.setItem('xlasCorrectorItemKey', this.itemKey);
-      localStorage.setItem('xlasCorrectorDataToken', this.dataToken);
-      localStorage.setItem('xlasCorrectorFileToken', this.fileToken);
-    },
-
 
     /**
      * Load all data from the storage
@@ -350,7 +344,6 @@ export const useApiStore = defineStore('api', {
       await stores.settings().loadFromStorage();
       await stores.snippets().loadFromStorage();
       await stores.tasks().loadFromStorage();
-
 
       this.setLoading(false);
       return true;
@@ -409,7 +402,7 @@ export const useApiStore = defineStore('api', {
       }
       catch (error) {
         console.error(error);
-        stores.layout().showInitFailure = true;
+        stores.layout().initFailure = t('apiLoadingDataFailed');
         this.setLoading(false);
         return false;
       }
@@ -571,12 +564,12 @@ export const useApiStore = defineStore('api', {
      * when the response data transfer is short (no files)
      */
     setTimeOffset(response) {
-      if (response.headers['longessaytime']) {
-        const serverTimeMs = response.headers['longessaytime'] * 1000;
+      if (response.headers['xlastime']) {
+        const serverTimeMs = response.headers['xlastime'] * 1000;
         const clientTimeMs = Date.now();
 
         this.timeOffset = clientTimeMs - serverTimeMs;
-        localStorage.setItem('writerTimeOffset', this.timeOffset);
+        localStorage.setItem('xlasCorrectorTimeOffset', this.timeOffset);
       }
     },
 

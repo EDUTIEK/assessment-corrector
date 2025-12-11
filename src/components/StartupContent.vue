@@ -15,10 +15,15 @@ import {stores} from "@/store";
       </v-btn>
     </v-app-bar>
 
-    <v-dialog persistent v-model="stores.layout().showInitFailure">
+    <v-dialog persistent  max-width="60em" v-model="stores.layout().hasInitFailure">
       <v-card>
+        <v-card-title>
+          {{ $t('startupContentLoadError') }}
+        </v-card-title>
         <v-card-text>
-          <p>{{ $t('startupContentLoadError') }}</p>
+          <v-alert type="warning" variant="text" color="#0000A0" >
+            {{ stores.layout().initFailure }}
+          </v-alert>
         </v-card-text>
         <v-card-actions>
           <v-btn :href="stores.api().returnUrl">
@@ -29,7 +34,7 @@ import {stores} from "@/store";
       </v-card>
     </v-dialog>
 
-    <v-dialog persistent v-model="stores.layout().showItemLoadFailure">
+    <v-dialog persistent  max-width="60em" v-model="stores.layout().showItemLoadFailure">
       <v-card>
         <v-card-text>
           <p>{{ $t('startupContentLoadItemError') }}</p>
@@ -44,7 +49,7 @@ import {stores} from "@/store";
     </v-dialog>
 
 
-    <v-dialog persistent v-model="stores.layout().showDataReplaceConfirmation">
+    <v-dialog persistent  max-width="60em" v-model="stores.layout().showDataReplaceConfirmation">
       <v-card>
         <v-card-text>
           <p>{{ $t('startupContentDataReplaceInfo1') }}</p>
@@ -67,7 +72,7 @@ import {stores} from "@/store";
       </v-card>
     </v-dialog>
 
-    <v-dialog persistent v-model="stores.layout().showItemReplaceConfirmation">
+    <v-dialog persistent  max-width="60em" v-model="stores.layout().showItemReplaceConfirmation">
       <v-card>
         <v-card-text>
           <p>{{ $t('startupContentItemReplaceInfo1') }}</p>

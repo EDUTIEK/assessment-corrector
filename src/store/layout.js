@@ -35,10 +35,11 @@ export const useLayoutStore = defineStore('layout', {
       // not stored
       leftCorrectionKey: '',               // key of the correction shown on the left side
       rightCorrectionKey: '',              // key of the correction shown on the right side
-      showIncludesPopup: false,           // show the popup to set the included elements
+      showIncludesPopup: false,            // show the popup to set the included elements
+
+      initFailure: '',                    // failure from app initialisation
 
       initialized: false,                 // used to switch from startup screen to the editing view
-      showInitFailure: false,             // show a message that the initialisation failed
       showItemLoadFailure: false,         // show a message that the loading if an item failed
       showSendFailure: false,             // show a message about a sending failure
       showDataReplaceConfirmation: false, // show a confirmation that the stored data should be replaced by another task or user
@@ -53,6 +54,8 @@ export const useLayoutStore = defineStore('layout', {
    * Getter functions (with params) start with 'get', simple state queries not
    */
   getters: {
+    hasInitFailure: state => state.initFailure !== '',
+
     isLeftExpanded: state => state.expandedColumn == 'left',
     isRightExpanded: state => state.expandedColumn == 'right',
 
