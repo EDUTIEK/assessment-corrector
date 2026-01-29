@@ -107,7 +107,7 @@ export default class Item {
           case Summary.STATUS_AUTHORIZED:
             return t('itemsSuffixAuthorized');
           default:
-            return '';
+            return t('itemsSuffixOpen');
         }
       case Item.STATUS_APPROXIMATION:
         return t('itemsSuffixApproximation');
@@ -167,7 +167,7 @@ export default class Item {
   correction_status = '';
 
   /**
-   * Whole correction status of the writer (over all tasks)
+   * Own grading status of this item
    * @type {string}
    * @see Summary
    */

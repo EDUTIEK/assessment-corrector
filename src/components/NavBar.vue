@@ -155,7 +155,7 @@ function getCorrectionTitle(correction) {
         </template>
       </v-list-item>
 
-      <!--
+      <!-- correction only
       <v-list-item aria-role="button" class="app-navigation-item" tabindex="0"
                    @click="closeNavigation; layoutStore.showMarking();"
                    :aria-label="$t('allCorrection') + (layoutStore.isMarkingVisible ? $t('navBarSelectedAria') : '')"
@@ -186,6 +186,7 @@ function getCorrectionTitle(correction) {
       </v-list-item>
 
       <v-list-item aria-role="button" class="app-navigation-item" tabindex="0"
+                   v-if="correctionsStore.ownCorrection !== null"
                    @click="closeNavigation; layoutStore.showSummary();"
                    :aria-label="$t('allOwnSummaryAndRating') + (layoutStore.isSummaryVisible ? $t('navBarSelectedAria') : '')"
                    :title="$t('allOwnSummaryAndRating') + (layoutStore.isSummaryVisible ? $t('navBarSelected') : '')"

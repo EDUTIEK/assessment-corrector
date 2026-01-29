@@ -22,12 +22,13 @@ export const useApiStore = defineStore('api', {
       backendUrl: '',                     // url to be used for REST calls
       returnUrl: '',                      // url to be called when the correction is closed
       userId: '',                         // identifying id of the current user
-      assId: '',                          // identifying id of the assesment
+      assId: '',                          // identifying id of the assessment
       contextId: '',                      // identifying id of the context for permission checks
+      asAdmin: '',                        // app is opened for administrator (permission will be checked in the backend)
       itemKey: '',                        // identifying key of the correction item
       dataToken: '',                      // authentication token for transmission if data
       fileToken: '',                      // authentication token for loading files
-      timeOffset: 0,                      // differnce between server time and client time (ms)
+      timeOffset: 0,                      // difference between server time and client time (ms)
 
       // not saved
       intervals: {},                       // list of all registered timer intervals, indexed by their name
@@ -70,6 +71,7 @@ export const useApiStore = defineStore('api', {
         params.append('user_id', state.userId);
         params.append('ass_id', state.assId);
         params.append('context_id', state.contextId);
+        params.append('as_admin', state.asAdmin);
         params.append('signature', md5(state.userId + state.assId + state.contextId + token));
 
         return {
@@ -182,6 +184,7 @@ export const useApiStore = defineStore('api', {
       this.userId = localStorage.getItem('xlasCorrectorUserId') ?? '';
       this.assId = localStorage.getItem('xlasCorrectorAssId') ?? '';
       this.contextId = localStorage.getItem('xlasCorrectorContextId') ?? '';
+      this.asAdmin = localStorage.getItem('xlasCorrectorAsAdmin') ?? '';
       this.itemKey = localStorage.getItem('xlasCorrectorItemKey') ?? '';
       this.dataToken = localStorage.getItem('xlasCorrectorDataToken') ?? '';
       this.fileToken = localStorage.getItem('xlasCorrectorFileToken') ?? '';
@@ -198,6 +201,10 @@ export const useApiStore = defineStore('api', {
       }
       if (Cookies.get('xlasContextId') != undefined && Cookies.get('xlasContextId') != this.contextId) {
         this.contextId = Cookies.get('xlasContextId');
+        newContext = true;
+      }
+      if (Cookies.get('xlasAsAdmin') != undefined  && Cookies.get('xlasAsAdmin') != this.asAdmin) {
+        this.asAdmin = Cookies.get('xlasAsAdmin')
         newContext = true;
       }
 
@@ -243,6 +250,7 @@ export const useApiStore = defineStore('api', {
       Cookies.remove('xlasUserId');
       Cookies.remove('xlasAssId');
       Cookies.remove('xlasContextId');
+      Cookies.remove('xlasAsAdmin');
       Cookies.remove('xlasTaskId');
       Cookies.remove('xlasWriterId');
       Cookies.remove('xlasDataToken');
@@ -254,6 +262,7 @@ export const useApiStore = defineStore('api', {
       localStorage.setItem('xlasCorrectorUserId', this.userId);
       localStorage.setItem('xlasCorrectorAssId', this.assId);
       localStorage.setItem('xlasCorrectorContextId', this.contextId);
+      localStorage.setItem('xlasCorrectorAsAdmin', this.asAdmin);
       localStorage.setItem('xlasCorrectorItemKey', this.itemKey);
       localStorage.setItem('xlasCorrectorDataToken', this.dataToken);
       localStorage.setItem('xlasCorrectorFileToken', this.fileToken);
@@ -316,8 +325,8 @@ export const useApiStore = defineStore('api', {
     },
 
     /**
-     * Finish the initialisation
-     * set config dependent layout states
+     * Finish the initialization
+     * set config-dependent layout states
      */
     finishInitialisation() {
 
