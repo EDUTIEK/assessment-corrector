@@ -40,11 +40,11 @@ export default class TinyHelper {
             menubar: false,
             statusbar: false,
             elementpath: false,
-            plugins: 'lists charmap wordcount',
+            plugins: 'lists charmap wordcount table pagebreak',
             toolbar: this.toolbar(),
-            valid_elements: this.validElements(),
-            formats: this.formats(),
-            style_formats: this.styleFormats(),
+            // valid_elements: this.validElements(),
+            // formats: this.formats(),
+            // style_formats: this.styleFormats(),
             custom_undo_redo_levels: 10,
             text_patterns: false,
             //skin_url: 'default',  // Influences AppBar style if set to default. Deactivation causes console error that can be ignored
@@ -71,7 +71,7 @@ export default class TinyHelper {
 
     toolbar() {
         // correction always has full formatting options
-        return 'zoomOut zoomIn undo redo styles bold italic underline bullist numlist removeformat charmap openSnippets';
+        return 'zoomOut zoomIn undo redo styles bold italic underline bullist numlist removeformat charmap table pagebreak openSnippets';
     }
 
     /**
