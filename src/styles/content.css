@@ -94,6 +94,7 @@
     display:block;
     min-width: 40px!important;
     flex-shrink: 0;
+    text-align:left;
 }
 
 .long-essay-content-column {

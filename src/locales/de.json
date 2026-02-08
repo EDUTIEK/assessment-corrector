@@ -203,6 +203,11 @@
     "ownSummaryPregraded": "vorbenotet",
     "ownSummaryRevisionTextHiddenField": "Verborgenes Feld zur Überarbeitung",
     "ownSummaryTextHiddenField": "Verborgenes Feld zum Gutachten",
+    "ownSummaryTemplate": "Vorlage",
+    "ownSummaryTemplateAdoptLong": "Gutachten-Vorlage übernehmen",
+    "ownSummaryTemplateAdoptShort": "Übernehmen",
+    "ownSummaryTemplateMessage": "Wenn Sie die Gutachten-Vorlage übernehmen, wird Ihr bisheriger Gutachten-Text ersetzt.",
+    "ownSummaryTemplatePreview": "Vorschau",
     "ownSummaryUploadDeleteTitle": "PDF-Datei des Gutachtens löschen",
     "ownSummaryUploadDeleteInfo": "Wenn Sie die PDF-Datei löschen, können Sie wieder einen Text eingeben oder eine andere Datei hochladen.",
     "ownSummaryUploadTitle": "Gutachten als PDF-Datei hochladen",
@@ -284,5 +289,5 @@
     "tasksNextTask": "Nächste Teilaufgabe",
     "tasksPreviousTask": "Vorherige Teilaufgabe",
     "tasksTask": "Teilaufgabe",
-    "tinyHelperIframeAriaText": "Gutachten-Editor"
+    "tinyHelperIframeAriaText": "Gutachten-Editor",
 }

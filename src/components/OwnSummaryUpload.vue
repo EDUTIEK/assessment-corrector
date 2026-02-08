@@ -1,9 +1,7 @@
 <script setup>
-import { ref } from 'vue';
-import axios from 'axios';
+import {ref} from 'vue';
 import i18n from "@/plugins/i18n";
 import {stores} from "@/store";
-import SumOfPoints from "@/components/SumOfPoints.vue";
 
 const { t } = i18n.global;
 
@@ -72,7 +70,7 @@ function deleteFile() {
 </script>
 
 <template>
-  <div id="app-own-summary-upload-wrapper">
+  <span id="app-own-summary-upload-wrapper">
     <v-btn class="headline-button" v-if="!summariesStore.editSummary.pdf" flat @click="openUpload">
       <v-icon left icon="mdi-upload"></v-icon>
       <span>{{ $t('allUpload') + '...' }}</span>
@@ -172,7 +170,7 @@ function deleteFile() {
       </v-card>
     </v-dialog>
 
-  </div>
+  </span>
 </template>
 
 

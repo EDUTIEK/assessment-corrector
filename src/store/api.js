@@ -353,6 +353,7 @@ export const useApiStore = defineStore('api', {
       await stores.settings().loadFromStorage();
       await stores.snippets().loadFromStorage();
       await stores.tasks().loadFromStorage();
+      await stores.templates().loadFromStorage();
 
       this.setLoading(false);
       return true;
@@ -427,6 +428,7 @@ export const useApiStore = defineStore('api', {
       await stores.settings().loadFromBackend('Task', response.data['Task']['Settings']);
       await stores.snippets().loadFromBackend(response.data['Task']['Snippets']);
       await stores.tasks().loadFromBackend(response.data['Task']['Tasks']);
+      await stores.templates().loadFromBackend(response.data['Task']['Templates']);
 
       await stores.settings().loadFromBackend('EssayTask', response.data['EssayTask']['Settings']);
 

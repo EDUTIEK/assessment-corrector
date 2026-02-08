@@ -15,6 +15,7 @@ import { useSettingsStore } from "@/store/settings";
 import { useSnippetsStore } from "@/store/snippets";
 import { useSummariesStore } from "@/store/summaries";
 import { useTasksStore } from "@/store/tasks";
+import { useTemplateStore } from "@/store/templates";
 
 /**
  * Service locator for pinia stores
@@ -36,7 +37,8 @@ export const stores = {
     settings: () => useSettingsStore(),
     snippets: () => useSnippetsStore(),
     summaries: () => useSummariesStore(),
-    tasks: () => useTasksStore()
+    tasks: () => useTasksStore(),
+    templates: () => useTemplateStore()
 }
 
 /**

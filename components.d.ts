@@ -25,6 +25,7 @@ declare module 'vue' {
     NavBar: typeof import('./src/components/NavBar.vue')['default']
     OwnSummaryPoints: typeof import('./src/components/OwnSummaryPoints.vue')['default']
     OwnSummaryRevision: typeof import('./src/components/OwnSummaryRevision.vue')['default']
+    OwnSummaryTemplate: typeof import('./src/components/OwnSummaryTemplate.vue')['default']
     OwnSummaryText: typeof import('./src/components/OwnSummaryText.vue')['default']
     OwnSummaryUpload: typeof import('./src/components/OwnSummaryUpload.vue')['default']
     Resources: typeof import('./src/components/Resources.vue')['default']

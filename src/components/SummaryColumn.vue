@@ -6,6 +6,7 @@ import SummaryPoints from "@/components/SummaryPoints.vue";
 import SummaryRevision from "@/components/SummaryRevision.vue";
 import OwnSummaryPoints from "@/components/OwnSummaryPoints.vue";
 import OwnSummaryText from "@/components/OwnSummaryText.vue"
+import OwnSummaryTemplate from "@/components/OwnSummaryTemplate.vue";
 import OwnSummaryUpload from "@/components/OwnSummaryUpload.vue";
 import OwnSummaryRevision from "@/components/OwnSummaryRevision.vue";
 import {stores} from "@/store";
@@ -78,6 +79,7 @@ function expansionClass() {
             <h2 class="headline">{{ $t('allSummary') }} {{ position_text }}</h2>
           </v-col>
           <v-col cols="4" class="ma-0 pa-0 text-right">
+            <own-summary-template></own-summary-template>
             <own-summary-upload></own-summary-upload>
           </v-col>
         </v-row>

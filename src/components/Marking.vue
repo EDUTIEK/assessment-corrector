@@ -3,6 +3,7 @@ import MarkingComments from "@/components/MarkingComments.vue";
 import MarkingCommentPoints from "@/components/MarkingCommentPoints.vue";
 import MarkingGeneralPoints from "@/components/MarkingGeneralPoints.vue";
 import OwnSummaryText from "@/components/OwnSummaryText.vue";
+import OwnSummaryTemplate from "@/components/OwnSummaryTemplate.vue";
 import OwnSummaryUpload from '@/components/OwnSummaryUpload.vue';
 import SummaryText from "@/components/SummaryText.vue";
 import SumOfPoints from "@/components/SumOfPoints.vue";
@@ -91,6 +92,7 @@ function expansionClass() {
             <h2 class="headline">{{ $t('allOwnSummary') }}</h2>
           </v-col>
           <v-col cols="4" class="ma-0 pa-0 text-right">
+            <own-summary-template v-if="!summariesStore.isOwnDisabled"></own-summary-template>
             <own-summary-upload v-if="!summariesStore.isOwnDisabled"></own-summary-upload>
           </v-col>
         </v-row>
