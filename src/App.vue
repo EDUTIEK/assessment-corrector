@@ -29,7 +29,6 @@ stores.api().init();
  * Global content styles will be applied by class
  */
 @import '@/styles/content.css';
-@import '@/styles/headlines-three.css';
 
 html {
   overflow-y: hidden !important;
@@ -67,10 +66,10 @@ html {
   transition: none !important;
 }
 
-
 /**
- * Tiny styles must be global
+ * Tiny UI styles (must be global)
  */
+
 .tox-tinymce {
   border: 1px solid #cccccc !important;
   border-radius: 0 !important;
@@ -81,29 +80,42 @@ html {
 }
 
 .tox-editor-header {
-  /*
-  width: 134%!important;
-  transform: scale(0.75)!important;
-  transform-origin: 0% 0% 0px!important;
-  */
-
   box-shadow: none !important;
   border-bottom: 1px solid #cccccc !important;
   margin-bottom: 0 !important
 }
 
+.tox-menu {
+  counter-reset: h1 h2 h3 h4 h5 h6;
+}
 
-/* labels of marks on images (must be globally styled) */
+/* Make font sizes in the tiny formats menu independent from changing font sizes in the content area */
+.tox-menu h1, .tox-menu h2, .tox-menu h3, .tox-menu h4, .tox-menu h5, .tox-menu h6,
+.tox-menu p, .tox-menu pre, .tox-menu li, .tox-menu blockquote, .tox-menu div,
+.tox-menu strong, .tox-menu em, .tox-menu u, .tox-menu s, .tox-menu sup, .tox-menu sub, .tox-menu code
+{
+  font-size: 1rem !important;
+}
+
+/* Hide property dialogs of tinymce */
+div[aria-label="Tabelleneigenschaften"],
+div[aria-label="Zeileneigenschaften"],
+div[aria-label="Zelleigenschaften"]
+{
+  display: none !important;
+}
+
+/**
+ * ImageMarker: labels of marks on images (must be globally styled)
+ */
 
 .appImageMarker svg rect.label {
   fill: #aaaaaaaa !important;
 }
 
-
 .appImageMarker svg g.active rect.label {
   fill: grey !important;
 }
-
 
 .appImageMarker svg text {
   fill: white;

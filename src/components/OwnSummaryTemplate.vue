@@ -45,7 +45,7 @@ function closePreview() {
             {{ $t('ownSummaryTemplateMessage') }}
           </v-alert>
 
-          <div class="appText long-essay-content headlines-three"
+          <div class="appText xlas-content headlines-three"
                v-html="stores.templates().currentTemplate?.content">
           </div>
         </v-card-text>
@@ -77,6 +77,7 @@ function closePreview() {
   height: 12em;
   overflow-y: scroll;
   border: 1px solid lightgray;
+  padding: 15px;
 }
 
 </style>

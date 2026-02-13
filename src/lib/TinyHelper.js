@@ -1,12 +1,32 @@
-import tinymce from "tinymce";
+/**
+ * Helpr class for using TinyMCE
+ */
+
 import {stores} from "@/store/index";
 import {nextTick, ref, watch} from 'vue';
 import i18n from "@/plugins/i18n";
-
-import contentLocalCss from '@/styles/content.css?inline';
-import headlinesThreeCss from '@/styles/headlines-three.css?inline';
 import {useSnippetsStore} from "@/store/snippets";
 import Snippet from "@/data/Snippet";
+import contentCss from '@/styles/content.css?inline';
+
+import tinymce from 'tinymce';
+import 'tinymce/icons/default/icons.min.js';
+import 'tinymce/themes/silver/theme.min.js';
+import 'tinymce/models/dom/model.min.js';
+
+import 'tinymce/skins/ui/oxide/skin.js';
+import 'tinymce/skins/ui/oxide/content.js';
+import 'tinymce/skins/content/default/content.js';
+
+import '@/plugins/tiny_de.js';
+import 'tinymce/plugins/lists';
+import 'tinymce/plugins/charmap';
+import 'tinymce/plugins/wordcount';
+import 'tinymce/plugins/table';
+import 'tinymce/plugins/pagebreak';
+
+const formatting_options = 'extended';
+const headline_scheme = 'three';
 
 let settingsStore;
 let preferencesStore;
@@ -40,16 +60,18 @@ export default class TinyHelper {
             menubar: false,
             statusbar: false,
             elementpath: false,
+            body_class: 'xlas-content headlines-three',
             plugins: 'lists charmap wordcount table pagebreak',
-            toolbar: this.toolbar(),
-            // valid_elements: this.validElements(),
-            // formats: this.formats(),
-            // style_formats: this.styleFormats(),
+            toolbar: this.tinyToolbar(formatting_options),
+            valid_elements: this.tinyValidElements(formatting_options),
+            valid_styles: this.tinyValidStyles(formatting_options),
+            formats: this.tinyFormats(),
+            style_formats: this.tinyStyleFormats(formatting_options, headline_scheme),
             custom_undo_redo_levels: 10,
             text_patterns: false,
-            //skin_url: 'default',  // Influences AppBar style if set to default. Deactivation causes console error that can be ignored
+            skin_url: 'default',  // Influences AppBar style if set to default. Deactivation causes console error that can be ignored
             content_css: 'default',
-            content_style: contentLocalCss.toString() + '\n' + headlinesThreeCss.toString(),
+            content_style: contentCss.toString(),
             browser_spellcheck: true,
             highlight_on_focus: true,
             iframe_aria_text: t('tinyHelperIframeAriaText'),
@@ -61,44 +83,22 @@ export default class TinyHelper {
             paste_data_images: false,     // don't paste images
             paste_remove_styles_if_webkit: true,  // default
             paste_webkit_styles: 'none',          // default
+            table_appearance_options: false,
+            table_advtab: false,
+            table_cell_advtab: false,
+            table_row_advtab: false,
+            table_sizing_mode: 'responsive',
+            table_default_styles: {},         // no inline styles on new tables
+            table_default_attributes: {},      // no default attributes like width
+            table_resize_bars: false,
+            table_toolbar: 'tabledelete | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol',
+
             setup: function (editor) {
                 editor.ui.registry.addButton('zoomOut', {tooltip: 'Verkleinern', icon: 'zoom-out', onAction: this.zoomOut.bind(this)});
                 editor.ui.registry.addButton('zoomIn', {tooltip: 'Vergrößern', icon: 'zoom-in', onAction: this.zoomIn.bind(this)});
                 editor.ui.registry.addButton('openSnippets', {tooltip: 'Textbausteine', icon: 'plus', onAction: this.openSnippets.bind(this)});
             }.bind(this)
         }
-    }
-
-    toolbar() {
-        // correction always has full formatting options
-        return 'zoomOut zoomIn undo redo styles bold italic underline bullist numlist removeformat charmap table pagebreak openSnippets';
-    }
-
-    /**
-     * @see https://www.tiny.cloud/docs/configure/content-filtering/#valid_elements
-     */
-    validElements() {
-        // correction always has full formatting options
-        return 'p/div,br,strong/b,em/i,u,ol,ul,li,h1,h2,h3,h4,h5,h6,pre';
-    }
-
-    /**
-     * @see https://www.tiny.cloud/docs/configure/content-formatting/#formats
-     */
-    formats() {
-        return {
-            underline: { inline: 'u', remove: 'all' }
-        }
-    }
-
-    styleFormats() {
-        return [
-            { title: t('settingsParagraph'), format: 'p' },
-            { title: t('settingsHeading1'), format: 'h1' },
-            { title: t('settingsHeading2'), format: 'h2' },
-            { title: t('settingsHeading3'), format: 'h3' },
-            { title: t('settingsTypewriter'), format: 'pre' },
-        ];
     }
 
     /**
@@ -233,4 +233,166 @@ export default class TinyHelper {
             console.log(e);
         }
     }
+
+    tinyToolbar(formatting_options) {
+        switch (formatting_options) {
+            case 'extended':
+                return 'undo redo styles bold italic underline bullist numlist indent outdent forecolor backcolor removeformat charmap table pagebreak wordcount'
+            case 'full':
+                return 'undo redo styles bold italic underline bullist numlist removeformat charmap wordcount';
+            case 'medium':
+                return 'undo redo bold italic underline bullist numlistremoveformat charmap wordcount';
+            case 'minimal':
+                return 'undo redo bold italic underline removeformat charmap wordcount';
+            case 'none':
+            default:
+                return 'undo redo charmap wordcount';
+        }
+    }
+
+    /**
+     * @see https://www.tiny.cloud/docs/configure/content-filtering/#valid_elements
+     */
+    tinyValidElements(formatting_options) {
+        switch (formatting_options) {
+            case 'extended':
+                return '@[style|border|colspan|rowspan],'
+                    + 'p/div,br,strong/b,em/i,u,s,ol,ul,li,h1,h2,h3,h4,h5,h6,pre,code,blockquote,span,sub,sup,table,thead,tbody,th,tr,td,hr,'
+                    + 'img[class<mce-pagebreak|src|data-mce-resize|data-mce-placeholder|data-mce-selected]';
+            case 'full':
+                return 'p/div,br,strong/b,em/i,u,ol,ul,li,h1,h2,h3,h4,h5,h6,pre';
+            case 'medium':
+                return 'p/div,br,strong/b,em/i,u,ol,ul,li';
+            case 'minimal':
+                return 'p/div,p/li,br,strong/b,em/i,u';
+            case 'none':
+            default:
+                return 'p/div,p/li,br';
+        }
+    }
+
+    tinyValidStyles(formatting_options) {
+        switch (formatting_options) {
+            case 'extended':
+                return {
+                    '*': 'background-color,color,text-align,mce-pagebreak,padding-left'
+                };
+            default:
+                return {};
+        }
+    }
+
+    tinyStyleFormats(formatting_options, headline_scheme) {
+
+        const headings = {title: t('settingsHeadings'), items: [] };
+        switch (headline_scheme) {
+            case 'single':
+                headings.items = [
+                    { title: t('settingsHeadings'), format: 'h1' },
+                ];
+                break;
+            case 'three':
+                headings.items = [
+                    { title: t('settingsHeading1'), format: 'h1' },
+                    { title: t('settingsHeading2'), format: 'h2' },
+                    { title: t('settingsHeading3'), format: 'h3' },
+                ];
+                break;
+            default:
+                headings.items = [
+                    { title: t('settingsHeading1'), format: 'h1' },
+                    { title: t('settingsHeading2'), format: 'h2' },
+                    { title: t('settingsHeading3'), format: 'h3' },
+                    { title: t('settingsHeading4'), format: 'h4' },
+                    { title: t('settingsHeading5'), format: 'h5' },
+                    { title: t('settingsHeading6'), format: 'h6' },
+                ];
+        }
+
+        const inline = {title: t('settingsInline'), items: [] };
+        switch (formatting_options) {
+            case 'extended':
+                inline.items = [
+                    { title: t('settingsBold'), format: 'bold' },
+                    { title: t('settingsItalic'), format: 'italic' },
+                    { title: t('settingsUnderline'), format: 'underline' },
+                    { title: t('settingsStrikethrough'), format: 'strikethrough' },
+                    { title: t('settingsSuperscript'), format: 'superscript' },
+                    { title: t('settingsSubscript'), format: 'subscript' },
+                    { title: t('settingsCode'), format: 'code' }
+                ];
+                break;
+            case 'full':
+            case 'medium':
+            case'minimal':
+                inline.items = [
+                    { title: t('settingsBold'), format: 'bold' },
+                    { title: t('settingsItalic'), format: 'italic' },
+                    { title: t('settingsUnderline'), format: 'underline' },
+                ];
+                break;
+        }
+
+        const blocks = { title: t('settingsBlocks'), items: [] };
+        switch (formatting_options) {
+            case 'extended':
+                blocks.items = [
+                    { title: t('settingsParagraph'), format: 'p' },
+                    { title: t('settingsBlockquote'), format: 'blockquote' },
+                    { title: t('settingsPre'), format: 'pre' },
+                ];
+                break;
+            case 'full':
+                blocks.items = [
+                    { title: t('settingsParagraph'), format: 'p' },
+                    { title: t('settingsPre'), format: 'pre' },
+                ];
+                break;
+            case 'medium':
+            case 'minimal':
+                blocks.items = [
+                    { title: t('settingsParagraph'), format: 'p' },
+                ];
+                break;
+        }
+
+        const align = { title: t('settingsAlign'), items: [] };
+        switch (formatting_options) {
+            case 'extended':
+                align.items = [
+                    { title: t('settingsAlignLeft'), format: 'alignleft' },
+                    { title: t('settingsAlignCenter'), format: 'aligncenter' },
+                    { title: t('settingsAlignRight'), format: 'alignright' },
+                    { title: t('settingsAlignJustify'), format: 'alignjustify' }
+                ];
+                break;
+        }
+
+        const formats = [];
+        if (headings.items.length) {
+            formats.push(headings);
+        }
+        if (inline.items.length) {
+            formats.push(inline);
+        }
+        if (blocks.items.length) {
+            formats.push(blocks);
+        }
+        if (align.items.length) {
+            formats.push(align);
+        }
+
+        return formats;
+    }
+
+    /**
+     * @see https://www.tiny.cloud/docs/configure/content-formatting/#formats
+     */
+    tinyFormats() {
+        return {
+            underline: { inline: 'u', remove: 'all' },
+            strikethrough: { inline: 's', remove: 'all' }
+        }
+    }
+
 }

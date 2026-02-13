@@ -32,7 +32,7 @@ init();
 
 <template>
   <div id="app-summary-revision-wrapper">
-    <div class="app-summary-text-display long-essay-content headlines-three" v-html="text"></div>
+    <div class="app-summary-text-display xlas-content headlines-three" v-html="text"></div>
     <div class="app-summary-points">
       <p>
         <strong>{{ $t('summaryRevisionRating') }}</strong> {{ points }} {{ $t('allPoints', points) }}

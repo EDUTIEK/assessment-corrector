@@ -1,21 +1,123 @@
 /**
  * Style of written contents
- * (font size in em needed for zoom on ReviewContentScreen)
+ *
+ * This file should be identical in the ILIAS plugin, the assessment service and all web apps
+ *
+ * All styles are defined for a common top element with the class 'xlas-content'
+ * The top element can be either the <body> in TinyMCE or a surrounding <div> for content display
+ *
+ * Font size is set in rem for the top element and in em for sub elements
+ *
+ * The top element can have an additional class for the used headline scheme:
+ * - 'headlines-single' has the same size and no prefix for all headlines
+ * - 'headlines-three' has three different sizes for h1, h2 and h3 and no prefix for all headlines
+ * - 'headlines-numeric' has the same size a prefix like '1.1.1.1.1.1' for all headlines
+ * - 'headlines-edutiek' has the same size and a prefix line 'A.', 'I.', '1.', 'a.', 'aa.', '(1)' for the headlines
  */
 
-.mce-content-body, .long-essay-content {
+.xlas-content {
     font-family: serif;
-    font-size: 1em;
-    max-width: 60em;
+    font-size: 1rem;
     line-height: 150%;
+    text-align: justify;
 }
 
-.mce-content-body h1, .long-essay-content h1,
-.mce-content-body h2, .long-essay-content h2,
-.mce-content-body h3, .long-essay-content h3,
-.mce-content-body h4, .long-essay-content h4,
-.mce-content-body h5, .long-essay-content h5,
-.mce-content-body h6, .long-essay-content h6 {
+.xlas-content p,
+.xlas-content pre {
+    margin-top: 0;
+    margin-bottom: 10px;
+    min-height: 1.5em;
+    text-align: justify;
+}
+
+.xlas-content pre {
+    max-width: 80em;                /* dompdf needs a fixed value */
+    white-space: pre-wrap;          /* keep line breaks and break if needed */
+    word-wrap: break-word;          /* legacy setting (older browsers) */
+    overflow-wrap: break-word;      /* modern variant of word-wrap */
+}
+
+.xlas-content ol,
+.xlas-content ul {
+    margin: 0;
+    padding: 0;
+    margin-bottom: 10px;
+}
+
+.xlas-content li {
+    margin: 0;
+    margin-left: 40px;
+    min-height: 1.5em;
+}
+
+.xlas-content li + li {
+    margin-top: 10px;
+}
+
+.xlas-content li > ol,
+.xlas-content li > ul {
+    margin-top: 10px;
+    margin-bottom: 0;
+}
+
+.xlas-content table {
+    border-collapse: collapse;
+    border: 1px solid gray;
+    width: 100%;
+    table-layout: fixed;
+    margin-bottom: 10px;
+}
+
+.xlas-content tr {
+    vertical-align: top;
+}
+
+.xlas-content td,
+.xlas-content th {
+    border: 1px solid gray;
+    min-width: 1em;
+    min-height: 1em;
+    padding: 5px;
+}
+
+/**
+ * Page break in printing
+ */
+.xlas-content hr {
+    page-break-before: always;
+    height: 0;
+    width: 0;
+    border: 0;
+    margin: 0;
+}
+
+/**
+ * Page break in tiny
+ */
+.xlas-content .mce-pagebreak {
+    width: calc(100% + 40px);
+    height: 1px;
+    height: 20px;
+    background-color: #eeeeee;
+    border-top: 1px solid #ccc;
+    margin-left: -20px;
+}
+
+/**
+ * Headlines in general
+ */
+
+.xlas-content {
+    counter-reset: xlas-h1 xlas-h2 xlas-h3 xlas-h4 xlas-h5 xlas-h6;
+}
+
+.xlas-content h1,
+.xlas-content h2,
+.xlas-content h3,
+.xlas-content h4,
+.xlas-content h5,
+.xlas-content h6 {
+    font-family: serif;
     font-size: 1em;
     font-weight: bold;
     padding: 0;
@@ -24,79 +126,103 @@
     min-height: 1.5em;
 }
 
-.mce-content-body ol, .long-essay-content ol,
-.mce-content-body ul, .long-essay-content ul {
-    margin-left: 10px;
-    margin-bottom: 20px;
+.xlas-content h1 {
+    counter-increment: xlas-h1;
+    counter-reset: xlas-h2 xlas-h3 xlas-h4 xlas-h5 xlas-h6;
 }
 
-.mce-content-body li, .long-essay-content li {
-    margin-left: 20px;
-    margin-bottom: 5px;
-    min-height: 1.5em;
+.xlas-content h2 {
+    counter-increment: xlas-h2;
+    counter-reset: xlas-h3 xlas-h4 xlas-h5 xlas-h6;
 }
 
-.mce-content-body p, .long-essay-content p,
-.mce-content-body pre, .long-essay-content pre {
-    margin-top: 0;
-    margin-bottom: 10px;
-    min-height: 1.5em;
+.xlas-content h3 {
+    counter-increment: xlas-h3;
+    counter-reset: xlas-h4 xlas-h5 xlas-h6;
 }
 
-.mce-content-body, .long-essay-content, .tox-menu {
-    counter-reset: h1 h2 h3 h4 h5 h6;
+.xlas-content h4 {
+    counter-increment: xlas-h4;
+    counter-reset: xlas-h5 xlas-h6;
 }
 
-.mce-content-body h1, .long-essay-content h1, .tox-menu h1 {
-    counter-increment: h1;
-    counter-reset: h2 h3 h4 h5 h6;
+.xlas-content h5 {
+    counter-increment: xlas-h5;
+    counter-reset: xlas-h6;
 }
 
-.mce-content-body h2, .long-essay-content h2, .tox-menu h2 {
-    counter-increment: h2;
-    counter-reset: h3 h4 h5 h6;
+.xlas-content h6 {
+    counter-increment: xlas-h6;
 }
 
-.mce-content-body h3, .long-essay-content h3, .tox-menu h3 {
-    counter-increment: h3;
-    counter-reset: h4 h5 h6;
+/**
+ * Three level headline style
+ */
+
+.xlas-content.headlines-three h1 {
+    font-size: 1.3em !important;
 }
 
-.mce-content-body h4, .long-essay-content h4, .tox-menu h4 {
-    counter-increment: h4;
-    counter-reset: h5 h6;
+.xlas-content.headlines-three h2 {
+    font-size: 1.15em !important;
 }
 
-.mce-content-body h5, .long-essay-content h5, .tox-menu h5 {
-    counter-increment: h5;
-    counter-reset: h6;
+.xlas-content.headlines-three h3 {
+    font-size: 1.0em !important;
 }
 
-.mce-content-body h6, .long-essay-content h6, .tox-menu h6 {
-    counter-increment: h6;
+/**
+ * Numeric headline style
+ */
+
+.xlas-content.headlines-numeric h1::before {
+    content: counter(xlas-h1, decimal) " ";
 }
 
-/*
-    Make font sizes in the tiny formats menu independent from changing font sizes in the content area
-    May be refined by headlines css files
-*/
-.tox-menu p, .tox-menu h1, .tox-menu h2, .tox-menu h3, .tox-menu h4, .tox-menu h5, .tox-menu h6, .tox-menu pre, .tox-menu li {
-    font-size: 1rem !important;
+.xlas-content.headlines-numeric h2::before {
+    content: counter(xlas-h1, decimal) "." counter(xlas-h2, decimal) " ";
 }
 
-.long-essay-content-row {
-    display: flex;
-    flex-direction: row;
-    width: 100%;
+.xlas-content.headlines-numeric h3::before {
+    content: counter(xlas-h1, decimal) "." counter(xlas-h2, decimal) "." counter(xlas-h3, decimal) " ";
 }
 
-.long-essay-counter-column {
-    display:block;
-    min-width: 40px!important;
-    flex-shrink: 0;
-    text-align:left;
+.xlas-content.headlines-numeric h4::before {
+    content: counter(xlas-h1, decimal) "." counter(xlas-h2, decimal) "." counter(xlas-h3, decimal) "." counter(xlas-h4, decimal) " ";
 }
 
-.long-essay-content-column {
-    display:block;
+.xlas-content.headlines-numeric h5::before {
+    content: counter(xlas-h1, decimal) "." counter(xlas-h2, decimal) "." counter(xlas-h3, decimal) "." counter(xlas-h4, decimal) "." counter(xlas-h5, decimal) " ";
+}
+
+.xlas-content.headlines-numeric h6::before {
+    content: counter(xlas-h1, decimal) "." counter(xlas-h2, decimal) "." counter(xlas-h3, decimal) "." counter(xlas-h4, decimal) "." counter(xlas-h5, decimal) "." counter(xlas-h6, decimal) " ";
+}
+
+/**
+ * Edutiek headline style
+ */
+
+.xlas-content.headlines-edutiek h1::before {
+    content: counter(xlas-h1, upper-latin) ". ";
+}
+
+.xlas-content.headlines-edutiek h2::before {
+    content: counter(xlas-h2, upper-roman) ". ";
+}
+
+.xlas-content.headlines-edutiek h3::before {
+    content: counter(xlas-h3, decimal) ". ";
+}
+
+.xlas-content.headlines-edutiek h4::before {
+    content: counter(xlas-h4, lower-latin) ". ";
+}
+
+.xlas-content.headlines-edutiek h5::before {
+    content: counter(xlas-h5, lower-latin) counter(xlas-h5, lower-latin) ". ";
+}
+
+.xlas-content.headlines-edutiek h6::before {
+    content: "(" counter(xlas-h6, decimal) ") ";
 }

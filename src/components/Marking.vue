@@ -88,10 +88,10 @@ function expansionClass() {
     <div v-if="markingTextShown() && !stores.summaries().isOwnDisabled" :class="expansionClass()">
       <v-container class="ma-0 pa-0">
         <v-row class="section-header ma-0">
-          <v-col cols="8" class="ma-0 pa-0">
+          <v-col cols="6" class="ma-0 pa-0">
             <h2 class="headline">{{ $t('allOwnSummary') }}</h2>
           </v-col>
-          <v-col cols="4" class="ma-0 pa-0 text-right">
+          <v-col cols="6" class="ma-0 pa-0 text-right">
             <own-summary-template v-if="!summariesStore.isOwnDisabled"></own-summary-template>
             <own-summary-upload v-if="!summariesStore.isOwnDisabled"></own-summary-upload>
           </v-col>

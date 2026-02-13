@@ -154,13 +154,21 @@ function applyZoom() {
     </div>
     <div contenteditable="true"  id="app-essay"
          @beforeinput="handleBeforeinput"
-         :class="'long-essay-content ' + settingsStore.headlineClass" v-html="essayStore.text">
+         :class="'xlas-content ' + settingsStore.contentClass" v-html="essayStore.text">
     </div>
   </div>
 </template>
 
 <style>
 /* Must be global because of v-html used for the instructions */
+
+.xlas-counter {
+  font-family:sans-serif;
+  font-size:0.7em;
+  font-weight:normal;
+  margin-left: -10mm;
+  float: left;
+}
 
 #app-essay-wrapper {
   height: 100%;
@@ -177,6 +185,7 @@ function applyZoom() {
   flex-grow: 1;
   width: 100%;
   padding: 20px;
+  padding-left: 15mm;
   overflow-y: scroll;
 }
 
@@ -204,18 +213,6 @@ w-p.labelled:before {
 w-p.labelled.selected:before {
   background-color: #606060;
 }
-
-/*
-w-p.other {
-    background-color: #F5F7FB;
-}
-w-p.other-cardinal {
-    background-color: #FCF6F4;
-}
-w-p.other-excellent {
-    background-color: #F7F9F7;
-}
-*/
 
 w-p.other {
   background-color: #D8E5F4;

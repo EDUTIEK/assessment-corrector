@@ -65,7 +65,7 @@ async function setAuthorizedAndContinue() {
 
           <div v-if="summariesStore.editSummary.hasTextOrPdf()"
                class="appRow"><strong>{{ $t('authorizationSummaryLabel') }}</strong>
-            <div class="appText long-essay-content headlines-three"
+            <div class="appText xlas-content headlines-three"
                  v-if="summariesStore.editSummary.text" v-html="summariesStore.editSummary.text">
             </div>
             <object class="appPdf" v-if="summariesStore.editSummary.pdf"
@@ -155,6 +155,7 @@ async function setAuthorizedAndContinue() {
   height: 12em;
   overflow-y: scroll;
   border: 1px solid lightgray;
+  padding: 10px;
 }
 
 .appPdf {

@@ -75,22 +75,22 @@ function expansionClass() {
     <div v-if="show_text && is_own && !stores.summaries().isOwnDisabled" :class="expansionClass()">
       <v-container class="ma-0 pa-0">
         <v-row class="section-header ma-0">
-          <v-col cols="8" class="ma-0 pa-0">
+          <v-col cols="6" class="ma-0 pa-0">
             <h2 class="headline">{{ $t('allSummary') }} {{ position_text }}</h2>
           </v-col>
-          <v-col cols="4" class="ma-0 pa-0 text-right">
+          <v-col cols="6" class="ma-0 pa-0 text-right">
             <own-summary-template></own-summary-template>
             <own-summary-upload></own-summary-upload>
           </v-col>
         </v-row>
       </v-container>
-      <own-summary-text v-show="!summary.pdf" class="content" :editorId="'summary'"></own-summary-text>
-      <summary-file v-if="summary.pdf" class="content" :correction_key="props.correction_key"></summary-file>
+      <own-summary-text v-show="!summary.pdf" class="content-noscroll" :editorId="'summary'"></own-summary-text>
+      <summary-file v-if="summary.pdf" class="content-noscroll" :correction_key="props.correction_key"></summary-file>
     </div>
     <div v-if="show_text && (!is_own || stores.summaries().isOwnDisabled)" :class="expansionClass()">
       <h2 class="headline">{{ $t('allSummary') }} {{ position_text }}</h2>
       <summary-text v-if="!summary.pdf" class="content" :correction_key="props.correction_key"></summary-text>
-      <summary-file v-if="summary.pdf" class="content" :correction_key="props.correction_key"></summary-file>
+      <summary-file v-if="summary.pdf" class="content-noscroll" :correction_key="props.correction_key"></summary-file>
     </div>
 
     <div id="app-own-summary-points" v-if="can_correct">
@@ -104,14 +104,14 @@ function expansionClass() {
 
     <div v-if="show_revision && can_revise" :class="expansionClass()">
       <h2 class="headline">{{ stores.settings().procedureText }} {{ position_text }}</h2>
-      <own-summary-revision class="content" :editorId="'revision'"></own-summary-revision>
+      <own-summary-revision class="content-noscroll" :editorId="'revision'"></own-summary-revision>
     </div>
     <div v-if="show_revision && !can_revise && is_revised" :class="expansionClass()">
       <h2 class="headline">{{ stores.settings().procedureText }} {{ position_text }}</h2>
-      <summary-revision class="content" :correction_key="props.correction_key"></summary-revision>
+      <summary-revision class="content-noscroll" :correction_key="props.correction_key"></summary-revision>
     </div>
 
-    <div v-if="!can_correct && !is_authorized">
+    <div v-if="!can_correct && !is_authorized" >
       {{ $t('otherSummaryNotAuthorized') }}
     </div>
 
@@ -148,6 +148,11 @@ function expansionClass() {
 .content {
   height: calc(100% - 40px);
   overflow-y: scroll;
+}
+
+.content-noscroll {
+  height: calc(100% - 40px);
+  overflow-y: hidden;
 }
 
 .hidden {

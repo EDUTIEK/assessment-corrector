@@ -70,7 +70,7 @@ async function setRevisedAndContinue() {
         <v-card-text>
           <div class="appRow" v-if="summariesStore.editSummary.hasRevisionText()">
             <strong>{{ $t('revisionTextLabel') }}</strong>
-            <div class="appText long-essay-content headlines-three" v-html="summariesStore.editSummary.revision_text">
+            <div class="appText xlas-content headlines-three" v-html="summariesStore.editSummary.revision_text">
             </div>
           </div>
 
@@ -153,7 +153,7 @@ async function setRevisedAndContinue() {
 .appText {
   min-height: 3em;
   max-height: 10em;
-  padding: 5px;
+  padding: 10px;
   overflow-y: scroll;
   border: 1px solid lightgray;
 }

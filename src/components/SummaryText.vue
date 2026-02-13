@@ -14,7 +14,7 @@ function text() {
 </script>
 
 <template>
-  <div class="app-summary-text-wrapper long-essay-content headlines-three" v-html="text()">
+  <div class="app-summary-text-wrapper xlas-content headlines-three" v-html="text()">
   </div>
 </template>
 

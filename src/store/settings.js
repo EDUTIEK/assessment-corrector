@@ -44,7 +44,7 @@ export const useSettingsStore = defineStore('settings', {
 
   getters: {
 
-    headlineClass(state) {
+    contentClass(state) {
       return state.EssayTask.headline_scheme === 'three' ? 'headlines-three' : ''
     },
 
