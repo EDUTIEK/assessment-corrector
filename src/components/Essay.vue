@@ -1,6 +1,7 @@
 <script setup>
 import {stores} from "@/store";
 import TextMarker from '@/lib/TextMarker';
+import Comment from "@/data/Comment";
 import { onMounted,  nextTick, watch } from 'vue';
 
 const essayStore = stores.essay();
@@ -9,6 +10,7 @@ const summariesStore = stores.summaries();
 const preferencesStore = stores.preferences();
 const settingsStore = stores.settings();
 const layoutStore = stores.layout();
+const configStore = stores.config();
 
 let marker;
 
@@ -41,11 +43,12 @@ watch(() => commentsStore.markerChange, refreshMarks);
 watch(() => commentsStore.filterChange, refreshMarks);
 
 function refreshSelection() {
-  marker.hideAllMarksOfClass('selected');
+  refreshMarks();
 
   let comment = commentsStore.getComment(commentsStore.selectedKey);
   if (comment) {
-    marker.showMark('selected', comment.start_position, comment.end_position);
+    const style = configStore.getCommentStyle(comment.correction_position, true);
+    marker.showMark(Comment.CLASS_SELECTED, style, comment.start_position, comment.end_position);
     marker.addLabel('labelled', comment.label, comment.start_position);
     marker.scrollToMark(comment.start_position, comment.end_position);
   }
@@ -66,19 +69,13 @@ watch(() => commentsStore.caretRequest, setCaretToSelectedComment);
  * Update the marking of a comment
  */
 function updateMark(comment) {
-  if (comment.prefix) {
-    marker.hideMark(comment.prefix + '-excellent', comment.start_position, comment.end_position);
-    marker.hideMark(comment.prefix + '-cardinal', comment.start_position, comment.end_position);
-    marker.hideMark(comment.prefix, comment.start_position, comment.end_position);
-
-    if (comment.rating_excellent) {
-      marker.showMark(comment.prefix + '-excellent', comment.start_position, comment.end_position);
-    } else if (comment.rating_cardinal) {
-      marker.showMark(comment.prefix + '-cardinal', comment.start_position, comment.end_position);
-    } else {
-      marker.showMark(comment.prefix, comment.start_position, comment.end_position);
-    }
+  for (const css_class of Comment.CORRECTOR_CSS_CLASSES) {
+    marker.hideMark(css_class, comment.start_position, comment.end_position);
   }
+  const style = configStore.getCommentStyle(
+      comment.correction_position,
+      comment.key == commentsStore.selectedKey);
+  marker.showMark(comment.getCssClass(), style, comment.start_position, comment.end_position);
   marker.addLabel('labelled', comment.label, comment.start_position);
 }
 
@@ -142,6 +139,7 @@ function zoomOut() {
 function applyZoom() {
   document.getElementById('app-essay').style.fontSize = (preferencesStore.essay_text_zoom) + 'rem';
 }
+
 </script>
 
 <template>
@@ -152,9 +150,13 @@ function applyZoom() {
         <v-btn :title="$t('essayZoomIn')" size="small" icon="mdi-magnify-plus-outline" @click="zoomIn()"></v-btn>
       </v-btn-group>
     </div>
+    <component :is="'style'">
+      {{ configStore.commentStyles }}
+    </component>
     <div contenteditable="true"  id="app-essay"
          @beforeinput="handleBeforeinput"
-         :class="'xlas-content ' + settingsStore.contentClass" v-html="essayStore.text">
+         :class="'xlas-content ' + settingsStore.contentClass"
+         v-html="'<style>' + configStore.commentStyles + '</style>' + essayStore.text">
     </div>
   </div>
 </template>
@@ -212,55 +214,6 @@ w-p.labelled:before {
 
 w-p.labelled.selected:before {
   background-color: #606060;
-}
-
-w-p.other {
-  background-color: #D8E5F4;
-}
-
-w-p.other-cardinal {
-  background-color: #FBDED1;
-}
-
-w-p.other-excellent {
-  background-color: #E3EFDD;
-}
-
-
-w-p.own {
-  background-color: #D8E5F4;
-}
-
-w-p.own-cardinal {
-  background-color: #FBDED1;
-}
-
-w-p.own-excellent {
-  background-color: #E3EFDD;
-}
-
-w-p.other.selected {
-  background-color: #94C3FC;
-}
-
-w-p.own.selected {
-  background-color: #94C3FC !important;
-}
-
-w-p.other-cardinal.selected {
-  background-color: #FCB494;
-}
-
-w-p.own-cardinal.selected {
-  background-color: #FCB494 !important;
-}
-
-w-p.other-excellent.selected {
-  background-color: #BBEBA5;
-}
-
-w-p.own-excellent.selected {
-  background-color: #BBEBA5 !important;
 }
 
 </style>

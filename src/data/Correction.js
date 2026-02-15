@@ -104,6 +104,12 @@ export default class Correction {
   position = 0;
 
   /**
+   * Color that should be used for markings of this correction (dynamically assigned)
+   * @type {string}
+   */
+  color = '#CCCCCC';
+
+  /**
    * Constructor - gets properties from a data object
    * @param {object} data
    */

@@ -7,10 +7,31 @@ import Correction from "@/data/Correction";
  */
 export default class Comment {
 
+  static CLASS_SELECTED = 'xlas-comment-selected'
+  static CLASS_CORRECTOR1 = 'xlas-corrector1';
+  static CLASS_CORRECTOR2 = 'xlas-corrector2';
+  static CLASS_CORRECTOR3 = 'xlas-corrector3';
+  static CLASS_CORRECTORX = 'xlas-correctorX';
+
+  static CORRECTOR_CSS_CLASSES = [Comment.CLASS_CORRECTOR1, Comment.CLASS_CORRECTOR2, Comment.CLASS_CORRECTOR3,  Comment.CLASS_CORRECTORX];
+
   static RATING_CARDINAL = 'cardinal';
   static RAITNG_EXCELLENT = 'excellent';
 
   static ALLOWED_RATING = [Comment.RATING_CARDINAL, Comment.RAITNG_EXCELLENT];
+
+  static cssClassByCorrectionPosition(position) {
+    switch(position) {
+      case 0:
+        return Comment.CLASS_CORRECTOR1;
+      case 1:
+        return Comment.CLASS_CORRECTOR2;
+      case 2:
+        return Comment.CLASS_CORRECTOR3;
+      default:
+        return Comment.CLASS_CORRECTORX;
+    }
+  }
 
   /**
    * Compare two comments for sorting
@@ -112,6 +133,18 @@ export default class Comment {
   rating_cardinal = false;
 
   /**
+   * position of the correction to which this comment belongs (not stored, dynamically assigned)
+   * @type {string}
+   */
+  correction_position = null;
+
+  /**
+   * color of the correction to which this comment belongs (not stored, dynamically assigned)
+   * @type {string}
+   */
+  color = '';
+
+  /**
    * label that should be shown for the comment (not stored, dynamically assigned)
    * @type {string}
    */
@@ -192,6 +225,15 @@ export default class Comment {
   }
 
   /**
+   * Get the CSS class for this comment
+   * @returns {string}
+   */
+  getCssClass()
+  {
+      return Comment.cssClassByCorrectionPosition(this.correction_position);
+  }
+
+  /**
    * Set the correction key and change the ids accordingly
    * @param {string} correction_key
    */
@@ -256,7 +298,10 @@ export default class Comment {
    * @param {Mark} mark
    */
   getMarkColor(mark) {
+
     const filled = (mark.shape == Mark.SHAPE_CIRCLE || mark.shape == Mark.SHAPE_POLYGON || mark.shape == Mark.SHAPE_RECTANGLE);
+
+    return this.color;
 
     let color = '';
     if (this.prefix == 'own') {
@@ -285,8 +330,10 @@ export default class Comment {
   getMarkSelectedColor(mark) {
     const filled = (mark.shape == Mark.SHAPE_CIRCLE || mark.shape == Mark.SHAPE_POLYGON || mark.shape == Mark.SHAPE_RECTANGLE);
 
+    return this.color;
+
     if (this.rating_excellent) {
-      return filled ? '#BBEBA5A0' : '#19e62e';
+      return filled ? '#BBEBA5' : '#19e62e';
     } else if (this.rating_cardinal) {
       return filled ? '#FCB494A0' : '#bc4710';
     } else {

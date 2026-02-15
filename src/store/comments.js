@@ -366,6 +366,7 @@ export const useCommentsStore = defineStore('comments', {
     async sortAndLabelComments() {
       const apiStore = stores.api();
       const correctionsStore = stores.corrections();
+      const configStore = stores.config();
 
       this.comments = this.comments.sort(Comment.order);
 
@@ -386,6 +387,9 @@ export const useCommentsStore = defineStore('comments', {
         } else {
           numbers[comment.correction_key]++;
         }
+
+        comment.correction_position = correction.position;
+        comment.color = correction.color;
         comment.label = initials + ' ' + parent.toString() + '.' + numbers[comment.correction_key].toString();
         comment.prefix = (comment.correction_key == stores.corrections().ownKey) ? 'own' : 'other';
       }

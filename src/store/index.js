@@ -1,6 +1,7 @@
 import { useApiStore } from '@/store/api';
 import { useChangesStore } from "@/store/changes";
 import { useCommentsStore } from "@/store/comments";
+import { useConfigStore } from "@/store/config";
 import { useCorrectionsStore } from "@/store/corrections";
 import { useCriteriaStore } from "@/store/criteria";
 import { useEssayStore } from "@/store/essay";
@@ -24,6 +25,7 @@ export const stores = {
     api: () => useApiStore(),
     changes: () => useChangesStore(),
     comments: () => useCommentsStore(),
+    config: () => useConfigStore(),
     corrections: () => useCorrectionsStore(),
     criteria: () => useCriteriaStore(),
     essay: () => useEssayStore(),

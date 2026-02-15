@@ -12,6 +12,7 @@ const criteriaStore = stores.criteria();
 const pointsStore = stores.points();
 const layoutStore = stores.layout();
 const snippetsStore = stores.snippets();
+const configStore = stores.config();
 
 const { t } = i18n.global;
 const props = defineProps(['comment']);
@@ -71,19 +72,7 @@ onMounted(() => {
  */
 function getBgColor(comment) {
 
-  if (comment.key == commentsStore.selectedKey) {
-    if (comment.rating_excellent) return '#BBEBA5';
-    if (comment.rating_cardinal) return '#FCB494';
-    return '#94C3FC';
-  } else if (comment.prefix == 'own') {
-    if (comment.rating_excellent) return '#E3EFDD';
-    if (comment.rating_cardinal) return '#FBDED1';
-    return '#D8E5F4';
-  } else {
-    if (comment.rating_excellent) return '#F7F9F7';
-    if (comment.rating_cardinal) return '#FCF6F4';
-    return '#F5F7FB';
-  }
+  return configStore.getCommentColor(comment.correction_position, comment.key == commentsStore.selectedKey);
 }
 
 function getPointsInputStyle(comment) {

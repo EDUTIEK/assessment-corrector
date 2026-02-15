@@ -344,6 +344,7 @@ export const useApiStore = defineStore('api', {
       this.setLoading(true);
       this.clearAllIntervals();
 
+      await stores.config().loadFromStorage();
       await stores.criteria().loadFromStorage();
       await stores.items().loadFromStorage();
       await stores.layout().loadFromStorage();
@@ -419,6 +420,7 @@ export const useApiStore = defineStore('api', {
       
       await stores.layout().clearStorage();
 
+      await stores.config().loadFromBackend(response.data['Assessment']['Config']);
       await stores.levels().loadFromBackend(response.data['Assessment']['GradeLevels']);
       await stores.resources().loadFromBackend(response.data['Assessment']['Resources']);
       await stores.settings().loadFromBackend('Assessment', response.data['Assessment']['Settings']);

@@ -186,17 +186,18 @@ class TextMarker {
 
   /**
    * Show a mark
-   * @param {string} cssClass
+   * @param {string} cssClass  - css class to add to the mark
    * @param {integer} firstWord
    * @param {integer} lastWord
    */
-  showMark(cssClass, firstWord, lastWord) {
+  showMark(cssClass, cssText, firstWord, lastWord) {
     this.marks.push({ cssClass: cssClass, firstWord: firstWord, lastWord: lastWord });
 
     this.el.querySelectorAll('w-p').forEach(node => {
       let w = parseInt(node.getAttribute('w'));
       if (w >= firstWord && w <= lastWord) {
         node.classList.add(cssClass);
+        node.style.cssText = cssText;
       }
       if (this.observer && (w == firstWord || w == lastWord)) {
         this.observer.observe(node);
@@ -206,7 +207,7 @@ class TextMarker {
 
   /**
    * Hide a mark
-   * @param {string} cssClass
+   * @param {string} cssClass - css class to remove from the mark
    * @param {integer} firstWord
    * @param {integer} lastWord
    */
@@ -217,6 +218,7 @@ class TextMarker {
       let w = parseInt(node.getAttribute('w'));
       if (w >= firstWord && w <= lastWord) {
         node.classList.remove(cssClass);
+        node.style.cssText = '';
       }
       if (this.observer && (w == firstWord || w == lastWord)) {
         this.observer.unobserve(node);
@@ -225,18 +227,6 @@ class TextMarker {
     });
   }
 
-  /**
-   * Hide all marks with a certain css class
-   * This is used to deseelct a mark
-   * @param {string} cssClass
-   */
-  hideAllMarksOfClass(cssClass) {
-    this.marks = this.marks.filter(mark => mark.cssClass != cssClass);
-
-    this.el.querySelectorAll('w-p.' + cssClass).forEach(node => {
-      node.classList.remove(cssClass);
-    });
-  }
 
   /**
    * Remove the css classes from all marks and labels
@@ -246,17 +236,11 @@ class TextMarker {
 
     this.el.querySelectorAll('w-p[class]').forEach(node => {
       node.classList.value = '';
+      node.style.cssText = '';
     });
     if (this.observer) {
       this.observer.disconnect();
     }
-  }
-
-  /**
-   * Remove the css classes of a current selection
-   */
-  hideSelection() {
-
   }
 
   /**

@@ -112,12 +112,16 @@ export const useCorrectionsStore = defineStore('corrections', {
     },
 
     async loadFromStorage() {
+      const configStore = stores.config();
+
       try {
         this.$reset();
 
         const keys = await storage.getItem('keys') ?? [];
         for (const key of keys) {
-          this.corrections[key] = new Correction(await storage.getItem(key));
+          const correction = new Correction(await storage.getItem(key));
+          correction.color = configStore.getCommentColor(correction.position);
+          this.corrections[key] = correction
         }
         this.updateOwnKey();
       }
@@ -127,12 +131,15 @@ export const useCorrectionsStore = defineStore('corrections', {
     },
 
     async loadFromBackend(data = []) {
+      const configStore = stores.config();
+
       try {
         await storage.clear();
         this.$reset();
 
         for (const item of data) {
           const correction = new Correction(item);
+          correction.color = configStore.getCommentColor(correction.position);
           this.corrections[correction.getKey()] = correction;
           await storage.setItem(correction.getKey(), correction.getData());
         }
@@ -143,7 +150,6 @@ export const useCorrectionsStore = defineStore('corrections', {
         console.log(err);
       }
     },
-
 
     updateOwnKey() {
         const apiStore = stores.api();
