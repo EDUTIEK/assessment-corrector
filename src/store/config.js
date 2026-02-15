@@ -6,6 +6,7 @@ import {getStorage} from "@/lib/Storage";
 import i18n from "@/plugins/i18n";
 import {defineStore} from 'pinia';
 import Comment from "@/data/Comment";
+import {stores} from "@/store/index";
 
 const storage = getStorage('config');
 
@@ -58,10 +59,24 @@ export const useConfigStore = defineStore('config', {
       return '';
     },
 
+    getDefaultCommentColor(state) {
+
+      const correctionStore = stores.corrections();
+      const own_position = correctionStore.ownCorrection?.position;
+
+      /**
+       * Get the default color used for marking an own comment
+       */
+      const fn = function (selected = false) {
+        return state.getCommentColor(own_position, selected);
+      }
+      return fn;
+    },
+
     getCommentColor(state) {
 
       /**
-       * Get a comment by its key
+       * Get the color used for marking a comment
        *
        * @param {number} position
        * @returns {string}
@@ -69,13 +84,13 @@ export const useConfigStore = defineStore('config', {
       const fn = function (position, selected = false) {
         switch (position) {
           case 0:
-            return hexToRgba(state.corrector1_color, selected ? 1: 0.2);
+            return hexToRgba(state.corrector1_color, selected ? 1: 0.4);
           case 1:
-            return hexToRgba(state.corrector2_color, selected ? 1: 0.2);
+            return hexToRgba(state.corrector2_color, selected ? 1: 0.4);
           case 2:
-            return hexToRgba(state.corrector3_color, selected ? 1: 0.2);
+            return hexToRgba(state.corrector3_color, selected ? 1: 0.4);
           default:
-            return hexToRgba('CCCCCC', selected ? 1: 0.2);
+            return hexToRgba('CCCCCC', selected ? 1: 0.4);
         }
       }
       return fn;

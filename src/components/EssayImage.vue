@@ -18,6 +18,7 @@ const summariesStore = stores.summaries();
 const pagesStore = stores.pages();
 const layoutStore = stores.layout();
 const preferencesStore = stores.preferences();
+const configStore =  stores.config();
 
 const markerNode = ref();
 const selectedTool = ref('scroll');
@@ -33,8 +34,8 @@ let currentKeys = [];         // kys of all marks shown on the page
 
 onMounted(() => {
   marker = createImageMarker(markerNode.value, onCreation, onSelection);
-  marker.setDefaultColor('#3365ffaa');
-  marker.setDefaultSelectedColor('#3365ffaa');
+  marker.setDefaultColor(configStore.getDefaultCommentColor(false));
+  marker.setDefaultSelectedColor(configStore.getDefaultCommentColor(true));
   selectTool()
   showPage(pagesStore.minPage);
 });
@@ -120,8 +121,8 @@ function onSelection(selected, event) {
           const mark_data = {
             ...mark.getData(),
             label: showLabels.value ? comment.label : '',
-            color: comment.getMarkColor(mark),
-            selectedColor: comment.getMarkSelectedColor(mark),
+            color: configStore.getCommentColor(comment.correction_position, false),
+            selectedColor: configStore.getCommentColor(comment.correction_position, true),
             locked: comment.correction_key != stores.corrections().ownKey || summariesStore.isOwnDisabled
           }
           marker.updateMark(mark_data);
@@ -206,8 +207,8 @@ function refreshMarks() {
         const mark_data = {
           ...mark.getData(),
           label: showLabels.value ? comment.label : '',
-          color: comment.getMarkColor(mark),
-          selectedColor: comment.getMarkSelectedColor(mark),
+          color: configStore.getCommentColor(comment.correction_position, false),
+          selectedColor: configStore.getCommentColor(comment.correction_position, true),
           locked: comment.correction_key != stores.corrections().ownKey || summariesStore.isOwnDisabled
         }
         if (currentKeys.includes(mark.key)) {

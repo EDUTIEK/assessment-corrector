@@ -120,14 +120,14 @@ div[aria-label="Zelleigenschaften"]
 .appImageMarker svg text {
   fill: white;
   font-family: sans-serif;
-  font-size: 55px;
+  font-size: 30px;
   font-style: normal;
   font-weight: normal;
 }
 
 .appImageMarker svg .shape text.symbol {
   font-weight: bold;
-  font-size: 70px;
+  font-size: 40px;
 }
 
 </style>

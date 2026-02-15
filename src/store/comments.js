@@ -389,9 +389,7 @@ export const useCommentsStore = defineStore('comments', {
         }
 
         comment.correction_position = correction.position;
-        comment.color = correction.color;
         comment.label = initials + ' ' + parent.toString() + '.' + numbers[comment.correction_key].toString();
-        comment.prefix = (comment.correction_key == stores.corrections().ownKey) ? 'own' : 'other';
       }
     },
 

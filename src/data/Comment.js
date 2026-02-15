@@ -139,22 +139,10 @@ export default class Comment {
   correction_position = null;
 
   /**
-   * color of the correction to which this comment belongs (not stored, dynamically assigned)
-   * @type {string}
-   */
-  color = '';
-
-  /**
    * label that should be shown for the comment (not stored, dynamically assigned)
    * @type {string}
    */
   label = '';
-
-  /**
-   * 'own' for own comment, 'other' for comments of other corrections (not stored, dynamically assigned)
-   * @type {string}
-   */
-  prefix = '';
 
   /**
    * Image mark: Graphical marks on PDF image assigned to the comment
@@ -293,53 +281,6 @@ export default class Comment {
     return null;
   }
 
-  /**
-   * Get the color for a mark
-   * @param {Mark} mark
-   */
-  getMarkColor(mark) {
-
-    const filled = (mark.shape == Mark.SHAPE_CIRCLE || mark.shape == Mark.SHAPE_POLYGON || mark.shape == Mark.SHAPE_RECTANGLE);
-
-    return this.color;
-
-    let color = '';
-    if (this.prefix == 'own') {
-      if (this.rating_excellent) {
-        return filled ? '#E3EFDD80' : '#19e62e';
-      } else if (this.rating_cardinal) {
-        return filled ? '#FBDED180' : '#bc4710';
-      } else {
-        return filled ? '#D8E5F480' : '#3365ff';
-      }
-    } else {
-      if (this.rating_excellent) {
-        return filled ? '#F7F9F780' : '#19e62e';
-      } else if (this.rating_cardinal) {
-        return filled ? '#FCF6F480' : '#bc4710';
-      } else {
-        return filled ? '#F5F7FB80' : '#3365ff';
-      }
-    }
-  }
-
-  /**
-   * Get the color for a mark
-   * @param {Mark} mark
-   */
-  getMarkSelectedColor(mark) {
-    const filled = (mark.shape == Mark.SHAPE_CIRCLE || mark.shape == Mark.SHAPE_POLYGON || mark.shape == Mark.SHAPE_RECTANGLE);
-
-    return this.color;
-
-    if (this.rating_excellent) {
-      return filled ? '#BBEBA5' : '#19e62e';
-    } else if (this.rating_cardinal) {
-      return filled ? '#FCB494A0' : '#bc4710';
-    } else {
-      return filled ? '#94C3FCA0' : '#3365ff';
-    }
-  }
 
   /**
    * Calculate the start position as lowest y position of all marks
