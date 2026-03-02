@@ -129,7 +129,7 @@ async function filterByCriterion(criterion_key) {
     <v-table v-if="settingsStore.Task.enable_partial_points && !criteriaStore.getCorrectionHasCommentCriteria(props.correction_key)" class="table" density="compact">
       <thead>
       <tr>
-        <th><strong>{{ $t('summaryCriteriaRating') }}</strong></th>
+        <th>{{ $t('summaryCriteriaRating') }}</th>
         <th class="text-right">{{ $t('allPoints') }}</th>
       </tr>
       </thead>

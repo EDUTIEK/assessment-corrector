@@ -68,7 +68,7 @@ function expansionClass() {
   <div id="app-summary-wrapper">
 
     <div v-if="show_criteria" :class="expansionClass()">
-      <h2 class="headline">{{ $t('allOverview') }} {{ position_text }}</h2>
+      <h2 class="headline">{{ $t('summaryOverview') }} {{ position_text }}</h2>
       <summary-criteria class="content" :correction_key="props.correction_key"></summary-criteria>
     </div>
 
