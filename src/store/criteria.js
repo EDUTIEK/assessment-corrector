@@ -105,7 +105,7 @@ export const useCriteriaStore = defineStore('criteria', {
        * @returns {boolean}
        */
       const fn = function (correction_key) {
-        return !!state.getCorrectionCriteria(correction_key)
+        return state.getCorrectionCriteria(correction_key).length > 0;
       };
       return fn;
     },
@@ -119,7 +119,7 @@ export const useCriteriaStore = defineStore('criteria', {
        * @returns {boolean}
        */
       const fn = function (correction_key) {
-        return !!state.getCorrectionGeneralCriteria(correction_key)
+        return state.getCorrectionGeneralCriteria(correction_key).length > 0;
       };
       return fn;
     },
@@ -133,7 +133,7 @@ export const useCriteriaStore = defineStore('criteria', {
        * @returns {boolean}
        */
       const fn = function (correction_key) {
-        return !!state.getCorrectionCommentCriteria(correction_key)
+        return state.getCorrectionCommentCriteria(correction_key).length > 0;
       };
       return fn;
     },
