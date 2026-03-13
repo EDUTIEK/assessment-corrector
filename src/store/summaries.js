@@ -41,11 +41,18 @@ export const useSummariesStore = defineStore('summaries', {
       return Object.values(state.summaries);
     },
 
-    isOwnSummaryValidForAuthorization(state) {
+    isOwnValidForAuthorization(state) {
       return state.editSummary.hasTextOrPdf()
       && state.editSummary.hasPoints()
       && state.editSummary.points >= state.pointsCorridor.min
       && state.editSummary.points <= state.pointsCorridor.max
+    },
+
+    isOwnValidForRevision(state) {
+      return state.editSummary.hasRevisionText()
+          && state.editSummary.hasRevisionPoints()
+          && state.editSummary.points >= state.pointsCorridor.min
+          && state.editSummary.points <= state.pointsCorridor.max
     },
 
     /**
@@ -57,6 +64,16 @@ export const useSummariesStore = defineStore('summaries', {
           || state.editSummary.isPregraded()
           || state.editSummary.isAuthorized()
           || !stores.items().canCorrect
+    },
+
+    /**
+     * Is a revision of the current correction and item disabled
+     * @return {bool}
+     */
+    isOwnRevisionDisabled(state) {
+      return state.editSummary.correction_key == ''
+          || state.editSummary.isRevised()
+          || !stores.items().canRevise
     },
 
     /**
@@ -106,14 +123,7 @@ export const useSummariesStore = defineStore('summaries', {
      * @returns {string}
      */
     currentGradeTitle(state) {
-      if (state.editSummary.grade_key) {
-        const levelsStore = stores.levels();
-        let level = levelsStore.getLevel(state.editSummary.grade_key);
-        if (level) {
-          return level.title;
-        }
-      }
-      return t('summariesNoGrade');
+      return stores.levels().getLevel(state.editSummary.grade_key ?? '')?.title ?? t('summariesNoGrade');
     },
 
     /**
@@ -121,14 +131,23 @@ export const useSummariesStore = defineStore('summaries', {
      * @returns {string}
      */
     currentGradeStatement(state) {
-      if (state.editSummary.grade_key) {
-        const levelsStore = stores.levels();
-        let level = levelsStore.getLevel(state.editSummary.grade_key);
-        if (level) {
-          return level.statement;
-        }
-      }
-      return '';
+      return stores.levels().getLevel(state.editSummary.grade_key ?? '')?.statement ?? '';
+    },
+
+    /**
+     * Resulting revision grade title from the summary of the current correction and item
+     * @returns {string}
+     */
+    currentRevisionGradeTitle(state) {
+      return stores.levels().getLevel(state.editSummary.revision_grade_key ?? '')?.title ?? t('summariesNoGrade');
+    },
+
+    /**
+     * Resulting revision grade title from the summary of the current correction and item
+     * @returns {string}
+     */
+    currentRevisionGradeStatement(state) {
+      return stores.levels().getLevel(state.editSummary.revision_grade_key ?? '')?.statement ?? '';
     },
 
     getAuthorizationForCorrection(state) {
@@ -459,13 +478,16 @@ export const useSummariesStore = defineStore('summaries', {
       return clone;
     },
 
-    /**
-     * Check entered points
-     */
     updatePoints(points) {
       points =  this.adjustPoints(points);
       this.editSummary.points = points;
       this.editSummary.grade_key = stores.levels().getLevelForPoints(points)?.key ?? ''
+    },
+
+    updateRevisionPoints(points) {
+      points = this.adjustPoints(points);
+      this.editSummary.revision_points = points;
+      this.editSummary.revision_grade_key = stores.levels().getLevelForPoints(points)?.key ?? ''
     },
 
     /**

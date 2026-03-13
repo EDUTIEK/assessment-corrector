@@ -4,10 +4,12 @@ import Editor from '@tinymce/tinymce-vue'
 import TinyHelper from '@/lib/TinyHelper';
 
 import {stores} from "@/store";
-import { nextTick, watch } from 'vue';
+import { nextTick, ref, watch } from 'vue';
 import Snippet from "@/data/Snippet";
 import ConfirmRevision from '@/components/ConfirmRevision.vue';
+import i18n from "@/plugins/i18n";
 
+const { t } = i18n.global;
 const summariesStore = stores.summaries();
 const preferencesStore = stores.preferences();
 const layoutStore = stores.layout();
@@ -19,6 +21,37 @@ const levelsStore = stores.levels();
 // editorId used for retrieving the editor instance using the tinymce.get('ID') method.
 const props = defineProps(['editorId']);
 const helper = new TinyHelper(props.editorId);
+
+const points = ref(null);
+const message = ref('');
+const messageClass = ref('');
+const corridor = summariesStore.pointsCorridor;
+
+watch(points, () => {
+  summariesStore.updateRevisionPoints(points.value);
+  message.value = summariesStore.currentRevisionGradeStatement;
+});
+
+points.value = summariesStore.editSummary.revision_points;
+message.value = summariesStore.currentRevisionGradeStatement;
+
+function check(value) {
+  if (value < corridor.min) {
+    summariesStore.updateRevisionPoints(null);
+    message.value = t('summariesPointsOutsideMinMax', [corridor.min, corridor.max]);
+    messageClass.value = 'alert';
+    return false;
+  }
+  if (value > corridor.max) {
+    summariesStore.updateRevisionPoints(null);
+    message.value = t('summariesPointsOutsideMinMax', [corridor.min, corridor.max]);
+    messageClass.value = 'alert';
+    return false;
+  }
+
+  messageClass.value = '';
+  return true;
+}
 
 function handleInit() {
   helper.init();
@@ -78,30 +111,36 @@ watch(() => snippetsStore.selection_open, handleSnippet);
       />
     </div>
 
-
     <div class="app-summary-text-display long-essay-content correction-summary"
          v-if="!itemsStore.canRevise"
          v-html="summariesStore.editSummary.revision_text">
     </div>
 
     <v-container class="app-summary-points">
-      <v-row dense>
-        <v-col cols="10">
-          <label for="appOwnSummaryPoints"><strong>{{ $t('summaryRevisionRating') }}</strong></label>
-          &nbsp;
-          <input :disabled="!itemsStore.canRevise" id="appOwnSummaryPoints" class="appPoints" type="number"
-                 :min="summariesStore.pointsCorridor.min"
-                 :max="summariesStore.pointsCorridor.max"
-                 v-model="summariesStore.editSummary.revision_points"/>
-          {{ $t('allPoints', Number.isNaN(summariesStore.editSummary.revision_points) ? 0 : summariesStore.editSummary.revision_points) }}
-          &nbsp;
-          <span v-if="!Number.isNaN(summariesStore.editSummary.revision_points)">
-            <strong>{{ $t('allGrade') }}</strong> {{ levelsStore.getLevelForPoints(summariesStore.editSummary.revision_points)?.title}}
-          </span>
-          <p>{{ levelsStore.getLevelForPoints(summariesStore.editSummary.revision_points)?.statement }}</p>
+      <v-row dense class="ma-0 pa-0">
+        <v-col cols="10" class="ma-0 pa-0">
+          <p>
+            <label class="middle" for="appOwnSummaryPoints"><strong>{{ $t('summaryRevisionRating') }}</strong></label>
+            &nbsp;
+            <v-number-input
+                id="appOwnSummaryRevisionPoints"
+                class="appPoints middle"
+                variant="outlined"
+                density="compact"
+                width="10em"
+                hide-details
+                :disabled="summariesStore.isOwnRevisionDisabled"
+                :rules="[check]"
+                v-model="points"
+            ></v-number-input>
+            &nbsp;
+            <span class="middle"><strong>{{ $t('allGrade') }}</strong> {{ summariesStore.currentRevisionGradeTitle }}</span>
+          </p>
+
+          <p :class="messageClass">{{ message }}</p>
         </v-col>
-        <v-col cols="2">
-          <confirm-revision></confirm-revision>
+        <v-col cols="2" class="ma-0 pa-0">
+          <confirm-revision v-show="!summariesStore.isOwnRevised"></confirm-revision>
         </v-col>
       </v-row>
     </v-container>
@@ -110,15 +149,19 @@ watch(() => snippetsStore.selection_open, handleSnippet);
 
 <style scoped>
 
-.appPoints {
-  width: 4em;
-  border: 1px solid #aaaaaa;
-  border-radius: 5px;
-  padding: 3px;
+.middle {
+  display:inline-block;
+  vertical-align: middle;
+  margin-top: 5px;
+  margin-bottom: 5px;
 }
 
-.app-summary-points {
-  height: 100px;
+.appPoints {
+  zoom: 80%;
+}
+
+.alert {
+  color:red;
 }
 
 .app-summary-editor {

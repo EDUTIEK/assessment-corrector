@@ -66,7 +66,7 @@ function check(value) {
                 :disabled="summariesStore.isOwnDisabled"
                 :rules="[check]"
                 v-model="points"
-            ></v-number-input> {{ points }}
+            ></v-number-input>
             &nbsp;
             <span class="middle"><strong>{{ $t('allGrade') }}</strong> {{ summariesStore.currentGradeTitle }}</span>
           </p>

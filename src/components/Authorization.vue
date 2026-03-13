@@ -52,7 +52,7 @@ async function setAuthorizedAndContinue() {
   <div id="app-authorization-wrapper">
 
     <v-btn class="app-header-item"
-           :disabled="apiStore.isLoading || !itemsStore.canAuthorize || !summariesStore.isOwnSummaryValidForAuthorization"
+           :disabled="apiStore.isLoading || !itemsStore.canAuthorize || !summariesStore.isOwnValidForAuthorization"
            @click="showConfirmation = true">
       <v-icon left icon="mdi-file-certificate-outline"></v-icon>
       <span>{{ $t('authorizationAuthorize') }}...</span>
@@ -116,12 +116,13 @@ async function setAuthorizedAndContinue() {
 
           </div>
 
-          <div v-if="summariesStore.editSummary.hasTextOrPdf() && summariesStore.editSummary.hasPoints()" class="appRow">
+          <div v-if="summariesStore.isOwnValidForAuthorization" class="appRow">
             {{ $t('authorizationWarnFinalize') }}
           </div>
         </v-card-text>
         <v-card-actions>
-          <v-btn v-if="summariesStore.editSummary.hasTextOrPdf() && summariesStore.editSummary.hasPoints()"
+          <v-btn
+                :disabled="!summariesStore.isOwnValidForAuthorization"
                  @click="setAuthorizedAndContinue()">
             <v-icon left icon="mdi-check"></v-icon>
             <span>{{ $t('authorizationAuthorize') }}</span>

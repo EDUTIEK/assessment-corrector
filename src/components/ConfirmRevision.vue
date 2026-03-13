@@ -30,12 +30,6 @@ function dialogTitle() {
   }
 }
 
-function canConfirm() {
-  return summariesStore.editSummary.revision_text != ''
-    && summariesStore.pointsOutsideCorridorText == ''
-    && !Number.isNaN(summariesStore.editSummary.revision_points);
-}
-
 function requireOtherRevisionPossible() {
   return settingsStore.Assessment.procedure === Procedure.APPROXIMATION
     && correctionsStore.ownCorrection?.position === Correction.POSITION_FIRST;
@@ -58,7 +52,7 @@ async function setRevisedAndContinue() {
 <template>
   <div id="app-authorization-wrapper">
 
-    <v-btn class="app-header-item" v-if="itemsStore.canRevise" :disabled="apiStore.isLoading"
+    <v-btn class="app-header-item" v-if="itemsStore.canRevise" :disabled="apiStore.isLoading || !summariesStore.isOwnValidForRevision"
            @click="showConfirmation = true">
       <v-icon left icon="mdi-file-certificate-outline"></v-icon>
       <span>{{ $t('revisionButton') }}</span>
@@ -104,7 +98,7 @@ async function setRevisedAndContinue() {
               {{ summariesStore.stitchNeededAfterRevisionText }}
             </v-alert>
 
-            <div class="appRow" v-if="summariesStore.editSummary.hasRevisionText() && summariesStore.editSummary.hasRevisionPoints()">
+            <div class="appRow" v-if="summariesStore.isOwnValidForRevision">
               <v-checkbox
                   v-if="requireOtherRevisionPossible()"
                   v-model="summariesStore.editSummary.require_other_revision"
@@ -112,7 +106,7 @@ async function setRevisedAndContinue() {
               ></v-checkbox>
             </div>
 
-            <div class="appRow" v-if="canConfirm()">
+            <div class="appRow" v-if="summariesStore.isOwnValidForRevision">
               {{ $t('revisionWarnFinalize') }}
             </div>
 
@@ -120,7 +114,7 @@ async function setRevisedAndContinue() {
         </v-card-text>
         <v-card-actions>
           <v-btn
-              :disabled = "!canConfirm()"
+              :disabled="!summariesStore.isOwnValidForRevision"
               @click="setRevisedAndContinue()">
             <v-icon left icon="mdi-check"></v-icon>
             <span>{{ $t('revisionFix') }}</span>

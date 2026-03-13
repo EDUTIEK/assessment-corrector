@@ -47,7 +47,7 @@ async function unset() {
           flat
           class="headline-button"
           size="small"
-          :disabled="summariesStore.isOwnAuthorized || !summariesStore.editSummary.hasPoints() || !summariesStore.editSummary.hasTextOrPdf()"
+          :disabled="summariesStore.isOwnAuthorized || !summariesStore.isOwnValidForAuthorization"
           @click="showSet = true">
         {{ $t('allSet') }}...
       </v-btn>
