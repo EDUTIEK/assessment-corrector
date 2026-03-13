@@ -41,6 +41,13 @@ export const useSummariesStore = defineStore('summaries', {
       return Object.values(state.summaries);
     },
 
+    isOwnSummaryValidForAuthorization(state) {
+      return state.editSummary.hasTextOrPdf()
+      && state.editSummary.hasPoints()
+      && state.editSummary.points >= state.pointsCorridor.min
+      && state.editSummary.points <= state.pointsCorridor.max
+    },
+
     /**
      * Is an editing of the current correction and item disabled
      * @return {bool}
@@ -236,7 +243,7 @@ export const useSummariesStore = defineStore('summaries', {
     },
 
     /**
-     * Get the minimum and maximum allowed points for a revision or stitch decision
+     * Get the minimum and maximum allowed points
      * @return {object}
      */
     pointsCorridor(state) {
@@ -453,23 +460,40 @@ export const useSummariesStore = defineStore('summaries', {
     },
 
     /**
+     * Check entered points
+     */
+    updatePoints(points) {
+      points =  this.adjustPoints(points);
+      this.editSummary.points = points;
+      this.editSummary.grade_key = stores.levels().getLevelForPoints(points)?.key ?? ''
+    },
+
+    /**
      * Adjust the points to the allowed range
      * @param {float|null} points
      * @return {float|null}
      */
     adjustPoints(points) {
       const settingsStore = stores.settings();
-      if (Number.isNaN(points)) {
+
+      if (points === null || Number.isNaN(points)) {
         return null;
-      } else if (!Number.isInteger(points) && settingsStore.Assessment.no_manual_decimals) {
-        return Math.floor(parseFloat(points));
-      } else if (points < 0) {
-        return 0;
-      } else if (points > settingsStore.Assessment.max_points) {
-        return settingsStore.Assessment.max_points;
-      } else {
-       return parseFloat(points);
       }
+
+      points = parseFloat(points);
+
+      if (!Number.isInteger(points) && settingsStore.Assessment.no_manual_decimals) {
+        points = Math.floor(points);
+      }
+
+      if (points < this.pointsCorridor.min) {
+        return null;
+      }
+      if (points > this.pointsCorridor.max) {
+        return null;
+      }
+
+      return points;
     },
 
     /**

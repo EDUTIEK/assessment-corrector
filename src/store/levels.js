@@ -45,7 +45,10 @@ export const useLevelsStore = defineStore('levels', {
        * @returns {null}
        */
       const fn = function (points) {
-        if (Number.isNaN(points)) {
+        if (points === null || Number.isNaN(points)) {
+          return null;
+        }
+        if (points < 0 || points > stores.settings().Assessment.max_points) {
           return null;
         }
 

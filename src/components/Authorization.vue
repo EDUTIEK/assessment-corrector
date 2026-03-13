@@ -15,7 +15,7 @@ const layoutStore = stores.layout();
 const pointsStore = stores.points();
 const commentsStore = stores.comments();
 const criteriaStore = stores.criteria();
-const { t } = i18n.global
+const { t } = i18n.global;
 
 const showConfirmation = ref(false);
 
@@ -52,7 +52,7 @@ async function setAuthorizedAndContinue() {
   <div id="app-authorization-wrapper">
 
     <v-btn class="app-header-item"
-           :disabled="apiStore.isLoading || !itemsStore.canAuthorize || !summariesStore.editSummary.hasPoints() || !summariesStore.editSummary.hasTextOrPdf()"
+           :disabled="apiStore.isLoading || !itemsStore.canAuthorize || !summariesStore.isOwnSummaryValidForAuthorization"
            @click="showConfirmation = true">
       <v-icon left icon="mdi-file-certificate-outline"></v-icon>
       <span>{{ $t('authorizationAuthorize') }}...</span>
