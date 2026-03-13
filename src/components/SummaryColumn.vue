@@ -12,6 +12,7 @@ import OwnSummaryRevision from "@/components/OwnSummaryRevision.vue";
 import {stores} from "@/store";
 import {watch} from "vue";
 import Item from '@/data/Item';
+import OwnSummaryPregrade from "@/components/OwnSummaryPregrade.vue";
 
 const props = defineProps(['correction_key', 'showCriteria', 'showText', 'showRevision']);
 
@@ -79,8 +80,10 @@ function expansionClass() {
             <h2 class="headline">{{ $t('allSummary') }} {{ position_text }}</h2>
           </v-col>
           <v-col cols="6" class="ma-0 pa-0 text-right">
-            <own-summary-template></own-summary-template>
-            <own-summary-upload></own-summary-upload>
+            <div class="header-buttons">
+              <own-summary-template></own-summary-template>
+              <own-summary-upload></own-summary-upload>
+            </div>
           </v-col>
         </v-row>
       </v-container>
@@ -94,9 +97,21 @@ function expansionClass() {
     </div>
 
     <div id="app-own-summary-points" v-if="can_correct">
-      <h2 class="headline">{{ $t('allTotalRating') }} {{ position_text }}</h2>
+      <v-container class="ma-0 pa-0">
+        <v-row class="section-header ma-0">
+          <v-col cols="6" class="ma-0 pa-0">
+            <h2 class="headline">{{ $t('allTotalRating') }} {{ position_text }}</h2>
+          </v-col>
+          <v-col cols="6" class="ma-0 pa-0 text-right">
+            <div class="header-buttons">
+              <own-summary-pregrade></own-summary-pregrade>
+            </div>
+          </v-col>
+        </v-row>
+      </v-container>
       <own-summary-points class="content" ></own-summary-points>
     </div>
+
     <div id="app-summary-points" v-if="!can_correct && is_authorized" >
       <h2 class="headline">{{ $t('allTotalRating') }} {{ position_text }}</h2>
       <summary-points class="content" :correction_key="props.correction_key"></summary-points>
@@ -143,6 +158,10 @@ function expansionClass() {
   padding-top: 10px;
   padding-left: 10px;
   background-color: #f0f0f0;
+}
+
+.header-buttons {
+  padding-top: 5px;
 }
 
 .content {

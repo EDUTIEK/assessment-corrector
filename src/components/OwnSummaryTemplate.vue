@@ -32,7 +32,7 @@ function closePreview() {
 
 <template>
   <span id="app-own-summary-template-wrapper">
-    <v-btn class="headline-button" v-if="stores.templates().currentTemplate?.hasContent" flat @click="openPreview">
+    <v-btn class="headline-button" size="small" v-if="stores.templates().currentTemplate?.hasContent" flat @click="openPreview">
       <v-icon left icon="mdi-file-star-outline"></v-icon>
       <span>{{ $t('ownSummaryTemplate') + '...' }}</span>
     </v-btn>
@@ -70,9 +70,9 @@ function closePreview() {
 <style scoped>
 
 .headline-button {
-  background-color: #f0f0f0;
+  margin-left: 5px;
+  margin-right: 5px;
 }
-
 .appText {
   height: 12em;
   overflow-y: scroll;

@@ -92,11 +92,11 @@ function deleteFile() {
 
 <template>
   <span id="app-own-summary-upload-wrapper">
-    <v-btn class="headline-button" v-if="!summariesStore.editSummary.pdf" flat @click="openUpload">
+    <v-btn class="headline-button" size="small" v-if="!summariesStore.editSummary.pdf" flat @click="openUpload">
       <v-icon left icon="mdi-upload"></v-icon>
       <span>{{ $t('allUpload') + '...' }}</span>
     </v-btn>
-    <v-btn class="headline-button" v-if="summariesStore.editSummary.pdf" flat @click="showDelete = true">
+    <v-btn class="headline-button" size="small" v-if="summariesStore.editSummary.pdf" flat @click="showDelete = true">
       <v-icon left icon="mdi-delete-outline"></v-icon>
       <span>{{ $t('allDelete') + '...' }}</span>
     </v-btn>
@@ -199,6 +199,7 @@ function deleteFile() {
 <style scoped>
 
 .headline-button {
-  background-color: #f0f0f0;
+  margin-left: 5px;
+  margin-right: 5px;
 }
 </style>

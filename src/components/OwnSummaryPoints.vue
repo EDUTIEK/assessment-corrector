@@ -11,30 +11,13 @@ const summariesStore = stores.summaries();
 const settingsStore = stores.settings();
 const layoutStore = stores.layout();
 
-const pregraded = ref(false);
-pregraded.value = summariesStore.isOwnPregraded;
-
-async function togglePregraded(event) {
-  event.preventDefault();
-
-  if (summariesStore.isOwnPregraded) {
-    await summariesStore.setOwnOpen();
-  }
-  else if (!summariesStore.isOwnAuthorized) {
-    await summariesStore.setOwnPregraded();
-  }
-
-  await itemsStore.setCurrentGradingStatus(summariesStore.editSummary.status);
-  pregraded.value = summariesStore.isOwnPregraded;
-}
-
 </script>
 
 <template>
   <div id="app-own-summary-points-wrapper">
-    <v-container>
-      <v-row dense>
-        <v-col cols="10">
+    <v-container class="ma-0 pa-1">
+      <v-row dense class="ma-0 pa-0 align-end">
+        <v-col cols="10" class="ma-0 pa-0">
           <p v-if="settingsStore.Task.enable_partial_points">
             <sum-of-points class='sumOfPoints' :correction_key="stores.corrections().ownKey"></sum-of-points>
           </p>
@@ -50,15 +33,7 @@ async function togglePregraded(event) {
 
           <p>{{ summariesStore.currentGradeStatement }}</p>
         </v-col>
-        <v-col cols="2">
-
-          <input id="appOwnSummaryPregraded" type="checkbox" class="appCheckbox"
-              v-if="!summariesStore.isOwnAuthorized"
-              v-model="pregraded"
-              :disabled="summariesStore.isOwnAuthorized || !summariesStore.editSummary.hasPoints()"
-              @change="togglePregraded"
-          ></input>
-          <label for="appOwnSummaryPregraded">{{ $t('allPregraded') }}</label>
+        <v-col cols="2" class="ma-0 pa-0">
           <authorization v-show="!summariesStore.isOwnAuthorized"></authorization>
         </v-col>
       </v-row>
@@ -73,11 +48,6 @@ async function togglePregraded(event) {
   border: 1px solid #aaaaaa;
   border-radius: 5px;
   padding: 3px;
-}
-
-.appCheckbox {
-  margin: 0 5px 15px 0;
-  padding: 0;
 }
 
 </style>

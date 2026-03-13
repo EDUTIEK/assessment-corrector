@@ -24,6 +24,7 @@ declare module 'vue' {
     MarkingGeneralPoints: typeof import('./src/components/MarkingGeneralPoints.vue')['default']
     NavBar: typeof import('./src/components/NavBar.vue')['default']
     OwnSummaryPoints: typeof import('./src/components/OwnSummaryPoints.vue')['default']
+    OwnSummaryPregrade: typeof import('./src/components/OwnSummaryPregrade.vue')['default']
     OwnSummaryRevision: typeof import('./src/components/OwnSummaryRevision.vue')['default']
     OwnSummaryTemplate: typeof import('./src/components/OwnSummaryTemplate.vue')['default']
     OwnSummaryText: typeof import('./src/components/OwnSummaryText.vue')['default']

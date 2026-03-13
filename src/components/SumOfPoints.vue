@@ -20,12 +20,10 @@ function pointsNote() {
     return '';
   }
   else if (!has_general_criteria) {
-    return has_comment_criteria ? t('sumOfPointsToCriteriaInComments') : t('sumOfPointsToComments');
+    return t('sumOfPointsToComments');
   }
   else  {
-    return has_comment_criteria ?
-        t('sumOfPointsNCommentCriteriaMGeneralCriteria', [with_comment, without_comment]) :
-        t('sumOfPointsNCommentsMGeneralCriteria', [with_comment, without_comment]);
+    return t('sumOfPointsToCommentsAndCriteria', [with_comment, without_comment]);
   }
 }
 
