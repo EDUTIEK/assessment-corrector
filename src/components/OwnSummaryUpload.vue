@@ -14,10 +14,30 @@ const selectedFile = ref(null);
 const uploadPercentage = ref(0);
 const message = ref('');
 const isSuccess = ref(false);
+const isValid = ref(false);
 
 const showTextWarning = ref(false);
 const showUpload = ref(false);
 const showDelete = ref(false);
+
+const rules = [
+    value => validate(value)
+]
+
+function validate(file) {
+  isValid.value = false;
+
+  if (file) {
+    if (file.type !== 'application/pdf') {
+      isValid.value = false;
+      return t('ownSummaryUploadMessageNoPdf');
+    }
+    isValid.value = true;
+    return true;
+  }
+
+  return true;
+}
 
 function updateProgress(progressEvent) {
   // Calculate and update the progress percentage
@@ -25,6 +45,7 @@ function updateProgress(progressEvent) {
 }
 
 async function uploadFile() {
+  console.log(selectedFile.value);
   if (!selectedFile.value) {
     message.value = 'Bitte wählen Sie eine Datei';
     isSuccess.value = false;
@@ -114,6 +135,7 @@ function deleteFile() {
               prepend-icon="mdi-file-check-outline"
               show-size
               accept="application/pdf"
+              :rules = "rules"
           ></v-file-input>
 
           <div v-if="uploadPercentage > 0" class="mt-4">
@@ -136,7 +158,7 @@ function deleteFile() {
         </v-card-text>
         <v-card-actions>
           <v-btn
-              :disabled="!selectedFile"
+              :disabled="!selectedFile || !isValid"
               @click="uploadFile"
           >
             <v-icon left icon="mdi-upload"></v-icon>

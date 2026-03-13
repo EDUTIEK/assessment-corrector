@@ -213,6 +213,7 @@
     "ownSummaryUploadDeleteInfo": "Wenn Sie die PDF-Datei löschen, können Sie wieder einen Text eingeben oder eine andere Datei hochladen.",
     "ownSummaryUploadTitle": "Gutachten als PDF-Datei hochladen",
     "ownSummaryUploadTextWarning": "Bitte löschen Sie den Gutachten-Text, bevor Sie ein Gutachten als PDF-Datei hochladen.",
+    "ownSummaryUploadMessageNoPdf": "Die ausgewählte Datei ist keine PDF-Datei!",
     "SendingStatusSending": "Änderungen werden gesendet",
     "SendingStatusSend": "Letzte Änderung senden",
     "SendingStatusSent": "Alles gesendet",
