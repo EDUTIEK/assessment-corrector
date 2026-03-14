@@ -16,9 +16,8 @@ import OwnSummaryPregrade from "@/components/OwnSummaryPregrade.vue";
 
 const props = defineProps(['correction_key', 'showCriteria', 'showText', 'showRevision']);
 
-const correction = stores.corrections().getCorrection(props.correction_key);
-const position_text = Item.buildPositionText(correction.position);
-
+let correction;
+let position_text;
 let is_own;
 let can_correct;
 let can_revise;
@@ -30,6 +29,9 @@ let show_text;
 let show_revision;
 
 function init() {
+  correction = stores.corrections().getCorrection(props.correction_key);
+  position_text = Item.buildPositionText(correction.position);
+
   is_own = props.correction_key == stores.corrections().ownKey;
   can_correct = is_own && stores.items().canCorrect;
   can_revise = is_own && stores.items().canRevise;
