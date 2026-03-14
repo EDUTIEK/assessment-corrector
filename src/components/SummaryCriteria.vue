@@ -1,7 +1,9 @@
 <script setup>
 import { nextTick, reactive, ref, watch } from 'vue';
 import {stores} from "@/store";
+import i18n from "@/plugins/i18n";
 
+const { t } = i18n.global;
 const apiStore = stores.api();
 const criteriaStore = stores.criteria();
 const commentsStore = stores.comments();
@@ -20,6 +22,15 @@ const commentCriteriaPoints = reactive({});
 async function loadCriteria() {
   await nextTick();
 
+  // general points for comments
+  commentCriteriaPoints[''] = {
+    key: '',
+    title: t('markingCommentPointsWithoutCriterion'),
+    max_points: settingsStore.Assessment.max_points,
+    sum_points: 0
+  }
+
+  // criteria points for comment
   criteriaStore.getCorrectionCommentCriteria(props.correction_key).forEach(criterion => {
     commentCriteriaPoints[criterion.key] = {
       key: criterion.key,
@@ -29,6 +40,7 @@ async function loadCriteria() {
     }
   });
 
+  // general criteria points
   criteriaStore.getCorrectionGeneralCriteria(props.correction_key).forEach(criterion => {
     generalCriteriaPoints[criterion.key] = {
       key: criterion.key,
@@ -39,11 +51,13 @@ async function loadCriteria() {
   });
 
   pointsStore.getObjectsForCorrection(props['correction_key']).forEach(points => {
-    if (commentCriteriaPoints[points.criterion_key] !== undefined) {
-      commentCriteriaPoints[points.criterion_key].sum_points += points.points;
+    const key = points.criterion_key;
+
+    if (commentCriteriaPoints[key] !== undefined) {
+      commentCriteriaPoints[key].sum_points += points.points;
     }
-    if (generalCriteriaPoints[points.criterion_key] !== undefined) {
-      generalCriteriaPoints[points.criterion_key].sum_points += points.points;
+    if (generalCriteriaPoints[key] !== undefined) {
+      generalCriteriaPoints[key].sum_points += points.points;
     }
   });
 }
@@ -62,16 +76,6 @@ async function filterByRating(rating_excellent, rating_cardinal) {
   layoutStore.showMarking();
 }
 
-async function filterByPoints() {
-  commentsStore.setFilterByPoints(props.correction_key);
-  if (!props.correction_key == stores.corrections().ownKey) {
-    commentsStore.setShowOtherCorrections(true);
-  }
-  await nextTick();
-  layoutStore.showEssay();
-  layoutStore.showMarking();
-}
-
 async function filterByCriterion(criterion_key) {
   commentsStore.setFilterByCriterion(props.correction_key, criterion_key);
   if (!props.correction_key == stores.corrections().ownKey) {
@@ -81,7 +85,6 @@ async function filterByCriterion(criterion_key) {
   layoutStore.showEssay();
   layoutStore.showMarking();
 }
-
 
 </script>
 
@@ -125,33 +128,9 @@ async function filterByCriterion(criterion_key) {
       </tbody>
     </v-table>
 
-    <!-- Points for comments directly -->
-    <v-table v-if="settingsStore.Task.enable_partial_points && !criteriaStore.getCorrectionHasCommentCriteria(props.correction_key)" class="table" density="compact">
-      <thead>
-      <tr>
-        <th>{{ $t('summaryCriteriaRating') }}</th>
-        <th class="text-right">{{ $t('allPoints') }}</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr>
-        <td>
-          <v-btn density="compact" size="small" variant="text" prepend-icon="mdi-filter-outline"
-                 :disabled="pointsStore.getSumOfPointsForCorrection(props.correction_key, true, false) == 0"
-                 @click="filterByPoints()">
-            <span class="sr-only">{{ $t('summaryCriteriaPointsInComments') }}</span>
-          </v-btn>
-          <span aria-hidden="true">{{ $t('summaryCriteriaPointsInComments') }}</span>
-        </td>
-        <td class="text-right">
-          {{ pointsStore.getSumOfPointsForCorrection(props.correction_key, true, false) }}
-        </td>
-      </tr>
-      </tbody>
-    </v-table>
 
     <!-- Points for criteria in comments -->
-    <v-table v-if="settingsStore.Task.enable_partial_points && criteriaStore.getCorrectionHasCommentCriteria(props.correction_key)" class="table" density="compact">
+    <v-table v-if="settingsStore.Task.enable_partial_points" class="table" density="compact">
       <thead>
       <tr>
         <th>{{ $t('summaryCriteriaInComments') }}</th>
