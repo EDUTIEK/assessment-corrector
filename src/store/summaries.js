@@ -109,6 +109,10 @@ export const useSummariesStore = defineStore('summaries', {
       return false;
     },
 
+    ownPdf(state) {
+      return state.editSummary.pdf;
+    },
+
     areOthersAuthorized(state) {
       for (const summary of state.allSummaries) {
         if (summary.getKey() != state.editSummary.getKey() && !summary.isAuthorized()) {

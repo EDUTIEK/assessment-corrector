@@ -83,7 +83,7 @@ function expansionClass() {
           </v-col>
           <v-col cols="6" class="ma-0 pa-0 text-right">
             <div class="header-buttons">
-              <own-summary-template></own-summary-template>
+              <own-summary-template v-if="!summary.pdf"></own-summary-template>
               <own-summary-upload></own-summary-upload>
             </div>
           </v-col>

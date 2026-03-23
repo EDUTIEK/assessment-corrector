@@ -3,7 +3,9 @@ import Components from 'unplugin-vue-components/vite'
 import vue from '@vitejs/plugin-vue'
 import Vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 import ViteFonts from 'unplugin-fonts/vite'
+import { viteStaticCopy } from 'vite-plugin-static-copy'
 import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite'
+import path from 'path'
 
 // Utilities
 import { defineConfig } from 'vite'
@@ -25,6 +27,9 @@ export default defineConfig({
     Components(),
     ViteFonts({
     }),
+    viteStaticCopy({targets: [
+        {dest: 'annotate-pdf', src: path.resolve(__dirname, 'node_modules/annotate-pdf') + '/*'},
+      ]}),
     VueI18nPlugin({
       /* options */
       module: 'petite-vue-i18n',

@@ -1,24 +1,35 @@
 <script setup>
 import {stores} from "@/store";
-import {ref} from "vue";
+import createPDFJsApi from 'annotate-pdf/pdfjs-api';
+import {ref, onMounted, watchEffect} from "vue";
 
 const props = defineProps(['correction_key']);
+const summaryStore = stores.summaries();
 
-function url() {
-  let summary = stores.summaries().getForCorrection(props.correction_key);
+const PdfNode = ref();
+let pdfjs;
+
+onMounted(() => {
+  showPdf(stores.summaries().getForCorrection(props.correction_key));
+
+  // display after file upload
+  if (summaryStore.editSummary.correction_key == props.correction_key) {
+    watchEffect(summaryStore.editSummary, showPdf(summaryStore.editSummary));
+  }
+});
+
+
+async function showPdf(summary) {
   if (summary && summary.pdf) {
-    return stores.api().getSummaryPdfUrl(summary);
+    const url = stores.api().getSummaryPdfUrl(summary);
+    pdfjs = createPDFJsApi(PdfNode.value, './annotate-pdf/pdfjs-dist/web/viewer.html', url, {viewOnly: true});
   }
 }
 </script>
 
 <template>
   <div class="app-summary-file-wrapper">
-    <iframe scrolling="no" v-if="url()" class="summary-pdf"
-            type="application/pdf"
-            :src="url()"
-    >
-    </iframe>
+    <div class="appPdfNode" tabindex="0" ref="PdfNode"></div>
   </div>
 </template>
 
@@ -32,10 +43,10 @@ div.toolbar {
   height: 100%;
 }
 
-iframe {
-  height: calc(100% - 10px);
+.appPdfNode {
+  flex-grow: 1;
   width: 100%;
-  overflow: hidden;
+  height: 100%;
 }
 
 </style>
