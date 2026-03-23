@@ -205,7 +205,7 @@
     "ownSummaryPregraded": "vorbenotet",
     "ownSummaryNotPregraded": "nicht vorbenotet",
     "ownSummaryPregradedSet": 'Vorbenotet setzen',
-    "ownSummaryPregradedSetInfo": 'Sie können ihre Korrektur als "vorbenotet" markieren. Damit ist sie für weitere Korrektureingaben gesperrt. Die Markierung können Sie wieder entfernen, um die Korrektur weiter zu bearbeiten.',
+    "ownSummaryPregradedSetInfo": 'Sie können Ihre Korrektur als "vorbenotet" markieren. Damit ist sie für weitere Korrektureingaben gesperrt. Die Markierung können Sie wieder entfernen, um die Korrektur weiter zu bearbeiten.',
     "ownSummaryPregradedUnset": 'Vorbenotet entfernen',
     "ownSummaryPregradedUnsetInfo": 'Wenn Sie die Markierung "vorbenotet" entfernen, können Sie weitere Korrektureingaben vornehmen.',
     "ownSummaryRevisionTextHiddenField": "Verborgenes Feld zur Überarbeitung",
