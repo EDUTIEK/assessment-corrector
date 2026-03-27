@@ -1,9 +1,7 @@
 <script setup>
 import {stores} from "@/store";
 import Instructions from "@/components/Instructions.vue";
-import InstructionsPdf from '@/components/InstructionsPdf.vue';
 import Solution from '@/components/Solution.vue';
-import SolutionPdf from '@/components/SolutionPdf.vue';
 import Resources from "@/components/Resources.vue";
 import Essay from "@/components/Essay.vue";
 import EssayImage from '@/components/EssayImage.vue';
@@ -111,13 +109,13 @@ document.addEventListener('keydown', layoutStore.handleKeyDown);
         </div>
         <!-- Content -->
         <div class="col-content">
-          <instructions v-if="layoutStore.isInstructionsVisible"/>
-          <instructions-pdf v-if="layoutStore.isInstructionsPdfVisible"/>
+          <instructions v-show="layoutStore.isInstructionsVisible"/>
           <solution v-if="layoutStore.isSolutionVisible"/>
-          <solution-pdf v-if="layoutStore.isSolutionPdfVisible"/>
+          <resources v-show="layoutStore.isInstructionsPdfVisible || layoutStore.isSolutionPdfVisible || layoutStore.isResourcesVisible"/>
+
           <essay v-if="layoutStore.isEssayVisible && !pagesStore.hasPages"/>
           <essay-image v-if="layoutStore.isEssayVisible && pagesStore.hasPages"/>
-          <resources v-if="layoutStore.isResourcesVisible"/>
+
           <summary-column v-if="layoutStore.isLeftCorrectionVisible"
                          :correction_key="layoutStore.leftCorrectionKey"
                          :showCriteria="layoutStore.showLeftSummaryCriteria"

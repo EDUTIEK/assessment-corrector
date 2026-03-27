@@ -1,33 +1,53 @@
 <script setup>
+/**
+ * Container for resources shown in the left column of the main content
+ * Resources of different types are shown here
+ * Their visibility is controlled by the layoutStore
+ */
+import ResourcePdf from "@/components/ResourcePdf.vue";
+import ResourceUrl from "@/components/ResourceUrl.vue";
 import {stores} from "@/store";
 
 const resourcesStore = stores.resources();
+const layoutStore = stores.layout();
 
 </script>
 
 <template>
   <div class="resources">
-    <template v-for="resource in resourcesStore.fileOrUrlResources" :key="resource.key">
-      <div v-if="resource.type == 'file'" v-show="resourcesStore.getResourceIsActive(resource)">
-        <object
-            v-if="resource.mimetype =='application/pdf'"
-            type="application/pdf"
-            :data="resource.url"
-            width="100%"
-            height="100%">
-        </object>
-      </div>
-      <div v-if="resource.type=='url' && resource.embedded == true" v-show="resourcesStore.getResourceIsActive(resource)">
-        <iframe
-            :src="resource.source"
-            width="100%"
-            height="100%"
-            frameborder = 0
-            referrerpolicy="strict-origin-when-cross-origin"
-            allowfullscreen
-        >
-        </iframe>
-      </div>
+    <template v-for="resource in resourcesStore.resources" :key="resource.key">
+
+      <resource-pdf v-if="resource.isPdf()"
+                    v-show="layoutStore.isResourceShown(resource)"
+                    :key=resource.key
+                    :resource="resource">
+      </resource-pdf>
+
+      <resource-url v-if="resource.isEmbeddedUrl()"
+                    v-show="layoutStore.isResourceShown(resource)"
+                    :key=resource.key
+                    :resource="resource">
+      </resource-url>
+
+      <audio controls
+             v-if="resource.isAudio()"
+             v-show="layoutStore.isResourceShown(resource)"
+      >
+        <source :src="resource.url" :type="resource.mimetype" :aria-label="resource.title">
+      </audio>
+
+      <video controls
+             v-if="resource.isVideo()"
+             v-show="layoutStore.isResourceShown(resource)"
+      >
+        <source :src="resource.url" :type="resource.mimetype" :aria-label="resource.title">
+      </video>
+
+      <img :src="resource.url"
+           v-if="resource.isImage()"
+           v-show="layoutStore.isResourceShown(resource)"
+      >
+      </img>
     </template>
   </div>
 </template>
@@ -37,6 +57,10 @@ const resourcesStore = stores.resources();
 
 div {
   height: 100%;
+}
+
+audio, video, img {
+  width: 100%;
 }
 
 </style>

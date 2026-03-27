@@ -49,13 +49,22 @@ export const useResourcesStore = defineStore('resources', {
       return state.currentResources.find(element => element.type === Resource.TYPE_SOLUTION);
     },
 
-   fileOrUrlResources(state) {
+    hasEmbeddedFileOrUrlResources(state) {
+      return !! state.currentResources.find(element =>
+          (element.type === Resource.TYPE_FILE || element.type === Resource.TYPE_URL) && element.embedded === true);
+    },
+
+    fileOrUrlResources(state) {
       return state.currentResources.filter(element =>
           element.type == Resource.TYPE_FILE || element.type === Resource.TYPE_URL);
     },
 
     activeResource(state) {
       return state.currentResources.find(element => element.key === state.activeKey);
+    },
+
+    getResourceById(state) {
+      return (resource_id) => state.currentResources.find(element => element.id === resource_id);
     },
 
     getResourceIsActive(state) {
@@ -106,6 +115,9 @@ export const useResourcesStore = defineStore('resources', {
           const resource = new Resource(item);
           if (resource.hasFileToLoad()) {
             resource.url = apiStore.getResourceUrl(resource);
+          }
+          if (resource.type == Resource.TYPE_URL) {
+            resource.url = resource.source
           }
           this.resources[resource.getKey()] = resource;
           await storage.setItem(resource.getKey(), resource.getData());

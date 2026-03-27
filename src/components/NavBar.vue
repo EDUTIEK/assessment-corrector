@@ -40,7 +40,7 @@ function handleKey(event) {
 
 function selectResource(resource) {
   if (resource.type == 'url' && !resource.embedded) {
-    window.open(resource.source, 'long-essay-writer-resource-' + resource.key)
+    window.open(resource.source, 'xlas-corrector-resource-' + resource.key)
   } else {
     resourcesStore.selectResource(resource);
     layoutStore.showResources();
@@ -154,20 +154,6 @@ function getCorrectionTitle(correction) {
                   :icon="layoutStore.isEssayVisible && layoutStore.isMarkingVisible ? 'mdi-comment-edit': 'mdi-comment-edit-outline'"></v-icon>
         </template>
       </v-list-item>
-
-      <!-- correction only
-      <v-list-item aria-role="button" class="app-navigation-item" tabindex="0"
-                   @click="closeNavigation; layoutStore.showMarking();"
-                   :aria-label="$t('allCorrection') + (layoutStore.isMarkingVisible ? $t('navBarSelectedAria') : '')"
-                   :title="$t('allCorrection') + (layoutStore.isMarkingVisible ? $t('navBarSelected') : '')"
-                   :ripple="false"
-      >
-        <template v-slot:prepend>
-          <v-icon aria-role="hidden"
-                  :icon="layoutStore.isMarkingVisible ? 'mdi-comment-edit': 'mdi-comment-edit-outline'"></v-icon>
-        </template>
-      </v-list-item>
-      -->
 
       <v-divider class="border-opacity-75"></v-divider>
 

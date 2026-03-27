@@ -7,6 +7,7 @@ import {defineStore} from 'pinia';
 import {stores} from "@/store/index";
 import {nextTick} from "vue";
 import Item from "@/data/Item";
+import Resource from "@/data/Resource";
 
 const storage = getStorage('layout');
 
@@ -89,6 +90,21 @@ export const useLayoutStore = defineStore('layout', {
     isRightVisible(state)  {
       const apiStore = stores.api();
       return !apiStore.isLoading && state.expandedColumn != 'left'
+    },
+
+    isResourceShown(state) {
+
+      const resourcesStore = stores.resources();
+      /**
+       * Check if a resource is visible
+       * @returns {bool}
+       */
+      const fn = function (resource) {
+        return (state.isInstructionsPdfVisible && resource.type === Resource.TYPE_INSTRUCTION ||
+            state.isSolutionPdfVisible && resource.type === Resource.TYPE_SOLUTION ||
+            state.isResourcesVisible && resourcesStore.getResourceIsActive(resource));
+      }
+      return fn;
     },
 
     leftCorrectionTitle(state)  {
