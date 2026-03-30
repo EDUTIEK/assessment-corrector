@@ -5,6 +5,7 @@ import {stores} from "@/store";
 const settingsStore = stores.settings();
 const levelsStore = stores.levels();
 const summariesStore = stores.summaries();
+const preferencesStore = stores.preferences();
 
 const props = defineProps(['correction_key']);
 
@@ -31,7 +32,7 @@ init();
 <template>
   <div id="app-summary-points-wrapper">
     <strong>{{ $t('summaryPointsRating') }}</strong>
-    {{ points }}
+    {{ preferencesStore.formatNumber(points) }}
     {{ $t('allPoints', points) }}
     <strong>{{ $t('allGrade') }}</strong> {{ grade }}
     <p>{{ statement }}</p>

@@ -15,6 +15,7 @@ const layoutStore = stores.layout();
 const pointsStore = stores.points();
 const commentsStore = stores.comments();
 const criteriaStore = stores.criteria();
+const preferencesStore = stores.preferences();
 const { t } = i18n.global;
 
 const showConfirmation = ref(false);
@@ -31,7 +32,7 @@ function getPartialPointsMessage() {
     return '';
   }
 
-  return t('authorizationPointsMismatch', [points]);
+  return t('authorizationPointsMismatch', [preferencesStore.formatNumber(points)]);
 }
 
 async function setAuthorizedAndContinue() {
@@ -81,7 +82,7 @@ async function setAuthorizedAndContinue() {
 
           <div v-if="summariesStore.editSummary.hasPoints()" class="appRow">
             <strong>{{ $t('ownSummaryPointsRating') }}</strong>
-            {{ summariesStore.editSummary.points }} {{ $t('authorizationPointsSuffix' ) }}
+            {{ preferencesStore.formatNumber(summariesStore.editSummary.points) }} {{ $t('authorizationPointsSuffix' ) }}
             &nbsp;
             <strong>{{ $t('authorizationGradeTitle') }}</strong> {{ summariesStore.currentGradeTitle }}
 

@@ -14,6 +14,7 @@ const summariesStore = stores.summaries();
 const levelsStore = stores.levels();
 const correctionsStore = stores.corrections();
 const layoutStore = stores.layout();
+const preferencesStore = stores.preferences();
 
 const { t } = i18n.global
 
@@ -71,7 +72,7 @@ async function setRevisedAndContinue() {
           <div class="appRow">
             <span v-if="summariesStore.editSummary.hasRevisionPoints()">
               <strong>{{ $t('revisionPointsLabel') }}</strong>
-              {{ summariesStore.editSummary.revision_points }}
+              {{ preferencesStore.formatNumber(summariesStore.editSummary.revision_points) }}
               {{ $t('allPoints', summariesStore.editSummary.revision_points) }}
               <strong>{{ $t('allGrade') }}</strong> {{ levelsStore.getLevelForPoints(summariesStore.editSummary.revision_points)?.title}}
             </span>

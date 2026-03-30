@@ -5,6 +5,7 @@ import i18n from "@/plugins/i18n";
 const settingsStore = stores.settings();
 const pointsStore = stores.points();
 const criteriaStore = stores.criteria();
+const preferencesStore = stores.preferences();
 
 const props = defineProps(['correction_key']);
 const { t } = i18n.global;
@@ -23,7 +24,10 @@ function pointsNote() {
     return t('sumOfPointsToComments');
   }
   else  {
-    return t('sumOfPointsToCommentsAndCriteria', [with_comment, without_comment]);
+    return t('sumOfPointsToCommentsAndCriteria', [
+      preferencesStore.formatNumber(with_comment),
+      preferencesStore.formatNumber(without_comment)
+    ]);
   }
 }
 
@@ -33,7 +37,10 @@ function pointsNote() {
   <span>
     <strong>{{ $t('sumOfPointsLabel')}}</strong>
     <span :class="pointsStore.getSumOfPointsForCorrection(props.correction_key) > settingsStore.Assessment.max_points ? 'red' : ''">
-      {{ pointsStore.getSumOfPointsForCorrection(props.correction_key) }} von max. {{ settingsStore.Assessment.max_points }}</span> {{ pointsNote() }}
+      {{ preferencesStore.formatNumber(pointsStore.getSumOfPointsForCorrection(props.correction_key)) }}
+      {{ $t('sumOfPointsOfMax') }}
+      {{ preferencesStore.formatNumber(settingsStore.Assessment.max_points) }}
+    </span> {{ pointsNote() }}
   </span>
 </template>
 

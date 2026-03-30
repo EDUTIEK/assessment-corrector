@@ -5,6 +5,7 @@ import {stores} from "@/store";
 const settingsStore = stores.settings();
 const levelsStore = stores.levels();
 const summariesStore = stores.summaries();
+const preferencesStore = stores.preferences();
 
 const props = defineProps(['correction_key']);
 
@@ -35,7 +36,7 @@ init();
     <div class="app-summary-text-display xlas-content headlines-three" v-html="text"></div>
     <div class="app-summary-points">
       <p>
-        <strong>{{ $t('summaryRevisionRating') }}</strong> {{ points }} {{ $t('allPoints', points) }}
+        <strong>{{ $t('summaryRevisionRating') }}</strong> {{ preferencesStore.formatNumber(points) }} {{ $t('allPoints', points) }}
         <strong>{{ $t('allGrade') }}</strong> {{ grade }}
       </p>
       <p>

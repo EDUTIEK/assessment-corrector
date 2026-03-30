@@ -9,6 +9,7 @@ const apiStore = stores.api();
 const settingStore = stores.settings();
 const summariesStore = stores.summaries();
 const layoutStore = stores.layout();
+const preferencesStore = stores.preferences();
 
 let correction_key = ref('');
 let criteriaPoints = ref({});
@@ -81,7 +82,7 @@ async function handleKeyDown(event) {
           />
         </td>
         <td class="col-right text-right">
-          {{ criterion.points }}
+          {{ preferencesStore.formatNumber(criterion.points) }}
         </td>
       </tr>
        </tbody>

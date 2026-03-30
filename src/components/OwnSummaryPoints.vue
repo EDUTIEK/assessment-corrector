@@ -9,6 +9,7 @@ import i18n from "@/plugins/i18n";
 const { t } = i18n.global;
 const summariesStore = stores.summaries();
 const settingsStore = stores.settings();
+const preferencesStore = stores.preferences();
 
 const points = ref(null);
 const message = ref('');
@@ -24,15 +25,12 @@ points.value = summariesStore.editSummary.points;
 message.value = summariesStore.currentGradeStatement;
 
 function check(value) {
-  if (value < corridor.min) {
+  if (value < corridor.min || value > corridor.max) {
     summariesStore.updatePoints(null);
-    message.value = t('summariesPointsOutsideMinMax', [corridor.min, corridor.max]);
-    messageClass.value = 'alert';
-    return false;
-  }
-  if (value > corridor.max) {
-    summariesStore.updatePoints(null);
-    message.value = t('summariesPointsOutsideMinMax', [corridor.min, corridor.max]);
+    message.value = t('summariesPointsOutsideMinMax', [
+      preferencesStore.formatNumber(corridor.min),
+      preferencesStore.formatNumber(corridor.max)
+    ]);
     messageClass.value = 'alert';
     return false;
   }
@@ -63,6 +61,8 @@ function check(value) {
                 density="compact"
                 width="10em"
                 hide-details
+                :precision="settingsStore.Assessment.no_manual_decimals ? 0 : 2"
+                :decimal-separator="preferencesStore.decimalSeparator"
                 :disabled="summariesStore.isOwnDisabled"
                 :rules="[check]"
                 v-model="points"

@@ -204,7 +204,7 @@ export const useSummariesStore = defineStore('summaries', {
           case Procedure.CONSULTING:
             return t('summariesProcedureConsultingNeeded', [reason]);
         }
-        if (settingsStore.Assessment.stitch_after_procedure && !itemsStore.isInStitch) {
+        if (settingsStore.Assessment.stitch_after_procedure) {
           return t('summariesProcedureStitchNeeded', [reason]);
         }
       }
@@ -216,9 +216,13 @@ export const useSummariesStore = defineStore('summaries', {
      * @returns {string}
      */
     stitchNeededAfterRevisionText(state) {
+      const settingsStore = stores.settings();
+      const itemsStore = stores.items();
       const reason = state.pointsDifferText;
-      if (reason) {
-        return t('summariesProcedureStitchNeeded', [reason]);
+      if (reason && !itemsStore.isInStitch) {
+        if (settingsStore.Assessment.stitch_after_procedure) {
+          return t('summariesProcedureStitchNeeded', [reason]);
+        }
       }
       return '';
     },
@@ -260,7 +264,10 @@ export const useSummariesStore = defineStore('summaries', {
       const corridor = state.pointsCorridor;
       const points = stores.items().canRevise ? state.editSummary.revision_points : state.editSummary.points;
       if (points < corridor.min || points > corridor.max) {
-        return t('summariesPointsOutsideMinMax', [corridor.min, corridor.max]);
+        return t('summariesPointsOutsideMinMax', [
+          stores.preferences().formatNumber(corridor.min),
+          stores.preferences().formatNumber(corridor.max)
+        ]);
       }
       return '';
     },

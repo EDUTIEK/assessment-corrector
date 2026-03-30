@@ -10,6 +10,7 @@ const commentsStore = stores.comments();
 const pointsStore = stores.points();
 const layoutStore = stores.layout();
 const settingsStore = stores.settings();
+const preferencesStore = stores.preferences();
 
 const props = defineProps(['correction_key']);
 watch(() => props, loadCriteria);
@@ -147,7 +148,7 @@ async function filterByCriterion(criterion_key) {
           </v-btn>
           <span aria-hidden="true">{{ criterion.title }}</span>
         </td>
-        <td class="text-right">{{ criterion.sum_points }} / {{ criterion.max_points }}</td>
+        <td class="text-right">{{ preferencesStore.formatNumber(criterion.sum_points) }} / {{ preferencesStore.formatNumber(criterion.max_points) }}</td>
       </tr>
       </tbody>
     </v-table>
@@ -165,7 +166,7 @@ async function filterByCriterion(criterion_key) {
         <td>
           <span class="generalCriterion">{{ criterion.title }}</span>
         </td>
-        <td class="text-right">{{ criterion.sum_points }} / {{ criterion.max_points }}</td>
+        <td class="text-right">{{ preferencesStore.formatNumber(criterion.sum_points) }} / {{ preferencesStore.formatNumber(criterion.max_points) }}</td>
       </tr>
       </tbody>
     </v-table>

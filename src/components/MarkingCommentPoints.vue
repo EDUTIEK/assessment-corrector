@@ -9,6 +9,7 @@ const apiStore = stores.api();
 const settingStore = stores.settings();
 const summariesStore = stores.summaries();
 const layoutStore = stores.layout();
+const preferencesStore = stores.preferences();
 
 let comment_key = ref('');
 let correction_key = ref('');
@@ -92,7 +93,8 @@ async function handleKeyDown(event) {
           />
         </td>
         <td :class="'col-right text-right ' + (pointsStore.getPointsOfCriterionExceeded(null, correction_key) ? 'red' : '')">
-          {{ pointsStore.getSumOfPointsForCorrection(correction_key, true, false) }} / {{ settingStore.Assessment.max_points }}
+          {{ preferencesStore.formatNumber(pointsStore.getSumOfPointsForCorrection(correction_key, true, false)) }} /
+          {{ preferencesStore.formatNumber(settingStore.Assessment.max_points) }}
         </td>
       </tr>
       <!-- criteria points -->
@@ -110,7 +112,8 @@ async function handleKeyDown(event) {
           />
         </td>
         <td :class="'col-right text-right ' + (pointsStore.getPointsOfCriterionExceeded(criterion, correction_key) ? 'red' : '')">
-          {{ pointsStore.getSumOfPointsForCriterion(criterion, correction_key) }} / {{ criterion.points }}
+          {{ preferencesStore.formatNumber(pointsStore.getSumOfPointsForCriterion(criterion, correction_key)) }} /
+          {{ preferencesStore.formatNumber(criterion.points) }}
         </td>
       </tr>
        </tbody>

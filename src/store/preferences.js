@@ -18,10 +18,33 @@ export const usePreferencesStore = defineStore('preferences', {
       essay_page_zoom: 0.25,                              // zoom of a pdf page display
       essay_text_zoom: 1,                                 // zoom of an essay text display
       summary_text_zoom: 1,                               // zoom in the editor of the correction summary
+
+      // not saved
+      locale: 'de-DE'                                     // currently fixed
     }
   },
 
   getters: {
+
+    decimalSeparator(state) {
+      return ','
+    },
+
+    formatNumber(state) {
+
+      const format = Intl.NumberFormat(state.locale);
+
+      /**
+       * Format a number with the correct decimal sign
+       *
+       * @param {number} number
+       * @returns {string}
+       */
+      const fn = function (number) {
+        return format.format(number);
+      }
+      return fn;
+    }
   },
 
   actions: {

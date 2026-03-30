@@ -36,15 +36,12 @@ points.value = summariesStore.editSummary.revision_points;
 message.value = summariesStore.currentRevisionGradeStatement;
 
 function check(value) {
-  if (value < corridor.min) {
+  if (value < corridor.min || value > corridor.max) {
     summariesStore.updateRevisionPoints(null);
-    message.value = t('summariesPointsOutsideMinMax', [corridor.min, corridor.max]);
-    messageClass.value = 'alert';
-    return false;
-  }
-  if (value > corridor.max) {
-    summariesStore.updateRevisionPoints(null);
-    message.value = t('summariesPointsOutsideMinMax', [corridor.min, corridor.max]);
+    message.value = t('summariesPointsOutsideMinMax', [
+      preferencesStore.formatNumber(corridor.min),
+      preferencesStore.formatNumber(corridor.max)
+    ]);
     messageClass.value = 'alert';
     return false;
   }
@@ -129,6 +126,8 @@ watch(() => snippetsStore.selection_open, handleSnippet);
                 density="compact"
                 width="10em"
                 hide-details
+                :precision="settingsStore.Assessment.no_manual_decimals ? 0 : 2"
+                :decimal-separator="preferencesStore.decimalSeparator"
                 :disabled="summariesStore.isOwnRevisionDisabled"
                 :rules="[check]"
                 v-model="points"
