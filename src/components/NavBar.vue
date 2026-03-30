@@ -74,6 +74,49 @@ function getCorrectionTitle(correction) {
     -->
     <v-list tabindex="-1">
       <v-list-item aria-role="button" class="app-navigation-item" tabindex="0"
+                   @click="closeNavigation; layoutStore.showEssay();"
+                   :aria-label="$t('allEssayAndCorrection') + (layoutStore.isEssayVisible ? $t('navBarSelectedAria') : '')"
+                   :title="$t('allEssayAndCorrection') + (layoutStore.isEssayVisible ? $t('navBarSelected') : '')"
+                   :ripple="false"
+      >
+        <template v-slot:prepend>
+          <v-icon aria-role="hidden"
+                  :icon="layoutStore.isEssayVisible && layoutStore.isMarkingVisible ? 'mdi-comment-edit': 'mdi-comment-edit-outline'"></v-icon>
+        </template>
+      </v-list-item>
+
+      <v-list-item aria-role="button" class="app-navigation-item" tabindex="0"
+                   v-if="correctionsStore.ownCorrection !== null"
+                   @click="closeNavigation; layoutStore.showSummary();"
+                   :aria-label="$t('allOwnSummaryAndRating') + (layoutStore.isSummaryVisible ? $t('navBarSelectedAria') : '')"
+                   :title="$t('allOwnSummaryAndRating') + (layoutStore.isSummaryVisible ? $t('navBarSelected') : '')"
+                   :ripple="false"
+      >
+        <template v-slot:prepend>
+          <v-icon aria-role="hidden"
+                  :icon="layoutStore.isSummaryVisible ? 'mdi-file-edit': 'mdi-file-edit-outline'"></v-icon>
+        </template>
+      </v-list-item>
+
+      <v-divider class="border-opacity-75" v-if="correctionsStore.countCorrections > 1"></v-divider>
+
+      <v-list-item aria-role="button" class="app-navigation-item" tabindex="0"
+                   v-for="correction in correctionsStore.otherCorrections"
+                   @click="closeNavigation; layoutStore.selectCorrection(correction.key);"
+                   :aria-label="getCorrectionTitle(correction) + (layoutStore.getCorrectionIsVisible(correction.key) ? $t('navBarSelectedAria') : '')"
+                   :title="getCorrectionTitle(correction) + (layoutStore.getCorrectionIsVisible(correction.key) ? $t('navBarSelected') : '')"
+                   :key="correction.correction_key"
+                   :ripple="false"
+      >
+        <template v-slot:prepend>
+          <v-icon aria-role="hidden"
+                  :icon="layoutStore.getCorrectionIsVisible(correction.key) ? 'mdi-account-school' : 'mdi-account-school-outline'"></v-icon>
+        </template>
+      </v-list-item>
+
+      <v-divider v-show="taskStore.hasTexts || resourcesStore.hasResources" class="border-opacity-75"></v-divider>
+
+      <v-list-item aria-role="button" class="app-navigation-item" tabindex="0"
                    v-show="taskStore.hasInstructions"
                    @click="closeNavigation; layoutStore.showInstructions();"
                    :aria-label="$t('allInstructions') + layoutStore.isInstructionsVisible ? $t('navBarSelectedAria') : ''"
@@ -138,49 +181,6 @@ function getCorrectionTitle(correction) {
         <template v-slot:prepend>
           <v-icon aria-role="hidden"
                   :icon="getResourceIcon(resource)"></v-icon>
-        </template>
-      </v-list-item>
-
-      <v-divider v-show="taskStore.hasTexts || resourcesStore.hasResources" class="border-opacity-75"></v-divider>
-
-      <v-list-item aria-role="button" class="app-navigation-item" tabindex="0"
-                   @click="closeNavigation; layoutStore.showEssay();"
-                   :aria-label="$t('allEssayAndCorrection') + (layoutStore.isEssayVisible ? $t('navBarSelectedAria') : '')"
-                   :title="$t('allEssayAndCorrection') + (layoutStore.isEssayVisible ? $t('navBarSelected') : '')"
-                   :ripple="false"
-      >
-        <template v-slot:prepend>
-          <v-icon aria-role="hidden"
-                  :icon="layoutStore.isEssayVisible && layoutStore.isMarkingVisible ? 'mdi-comment-edit': 'mdi-comment-edit-outline'"></v-icon>
-        </template>
-      </v-list-item>
-
-      <v-divider class="border-opacity-75"></v-divider>
-
-      <v-list-item aria-role="button" class="app-navigation-item" tabindex="0"
-                   v-for="correction in correctionsStore.otherCorrections"
-                   @click="closeNavigation; layoutStore.selectCorrection(correction.key);"
-                   :aria-label="getCorrectionTitle(correction) + (layoutStore.getCorrectionIsVisible(correction.key) ? $t('navBarSelectedAria') : '')"
-                   :title="getCorrectionTitle(correction) + (layoutStore.getCorrectionIsVisible(correction.key) ? $t('navBarSelected') : '')"
-                   :key="correction.correction_key"
-                   :ripple="false"
-      >
-        <template v-slot:prepend>
-          <v-icon aria-role="hidden"
-                  :icon="layoutStore.getCorrectionIsVisible(correction.key) ? 'mdi-account-school' : 'mdi-account-school-outline'"></v-icon>
-        </template>
-      </v-list-item>
-
-      <v-list-item aria-role="button" class="app-navigation-item" tabindex="0"
-                   v-if="correctionsStore.ownCorrection !== null"
-                   @click="closeNavigation; layoutStore.showSummary();"
-                   :aria-label="$t('allOwnSummaryAndRating') + (layoutStore.isSummaryVisible ? $t('navBarSelectedAria') : '')"
-                   :title="$t('allOwnSummaryAndRating') + (layoutStore.isSummaryVisible ? $t('navBarSelected') : '')"
-                   :ripple="false"
-      >
-        <template v-slot:prepend>
-          <v-icon aria-role="hidden"
-                  :icon="layoutStore.isSummaryVisible ? 'mdi-file-edit': 'mdi-file-edit-outline'"></v-icon>
         </template>
       </v-list-item>
 
