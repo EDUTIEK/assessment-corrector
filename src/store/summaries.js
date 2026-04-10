@@ -49,7 +49,9 @@ export const useSummariesStore = defineStore('summaries', {
     },
 
     isOwnValidForRevision(state) {
-      return state.editSummary.hasRevisionText()
+      const own_correction = stores.corrections().ownCorrection;
+
+      return state.editSummary.hasRevisionText() == own_correction.can_enter_revision_text
           && state.editSummary.hasRevisionPoints()
           && state.editSummary.points >= state.pointsCorridor.min
           && state.editSummary.points <= state.pointsCorridor.max
@@ -218,8 +220,14 @@ export const useSummariesStore = defineStore('summaries', {
     stitchNeededAfterRevisionText(state) {
       const settingsStore = stores.settings();
       const itemsStore = stores.items();
+      const correctionsStore = stores.corrections();
+
+      if (itemsStore.isInStitch || (itemsStore.isInRevision && correctionsStore.ownCorrection.position == Correction.POSITION_FIRST)) {
+        return '';
+      }
+
       const reason = state.pointsDifferText;
-      if (reason && !itemsStore.isInStitch) {
+      if (reason) {
         if (settingsStore.Assessment.stitch_after_procedure) {
           return t('summariesProcedureStitchNeeded', [reason]);
         }

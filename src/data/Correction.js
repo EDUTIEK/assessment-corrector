@@ -103,6 +103,12 @@ export default class Correction {
    */
   position = 0;
 
+  /**
+   * The corrctor position and procedure allows to enter a revision text
+   * @type {boolean}
+   */
+  can_enter_revision_text = false;
+
 
   /**
    * Constructor - gets properties from a data object
@@ -130,6 +136,9 @@ export default class Correction {
     }
     if (data.position !== undefined && data.position !== null) {
       this.position = parseInt(data.position);
+    }
+    if (data.can_enter_revision_text !== undefined && data.can_enter_revision_text !== null) {
+      this.can_enter_revision_text = !!(data.can_enter_revision_text);
     }
 
     this.key = Correction.buildKey(this.task_id, this.writer_id, this.corrector_id);

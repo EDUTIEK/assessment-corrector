@@ -84,7 +84,7 @@ async function setRevisedAndContinue() {
                      color="#0000A0" type="info" variant="text" density="compact">
               {{ $t('revisionPleaseEnterPoints') }}
             </v-alert>
-            <v-alert v-show="!summariesStore.editSummary.hasRevisionText()"
+            <v-alert v-show="!summariesStore.editSummary.hasRevisionText() && correctionsStore.ownCorrection.can_enter_revision_text"
                      color="#0000A0" type="info" variant="text" density="compact">
               {{ $t('revisionPleaseEnterText') }}
             </v-alert>

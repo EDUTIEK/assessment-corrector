@@ -25,6 +25,7 @@ const helper = new TinyHelper(props.editorId);
 const points = ref(null);
 const message = ref('');
 const messageClass = ref('');
+const withText = ref(true);
 const corridor = summariesStore.pointsCorridor;
 
 watch(points, () => {
@@ -33,6 +34,7 @@ watch(points, () => {
 });
 
 points.value = summariesStore.editSummary.revision_points;
+withText.value = stores.corrections().ownCorrection.can_enter_revision_text;
 message.value = summariesStore.currentRevisionGradeStatement;
 
 function check(value) {
@@ -92,7 +94,7 @@ watch(() => snippetsStore.selection_open, handleSnippet);
 
 <template>
   <div class="app-own-summary-text-wrapper">
-    <div class="app-summary-editor">
+    <div class="app-summary-editor" v-if="withText">
       <label :for="props.editorId" class="hidden">{{ $t('ownSummaryRevisionTextHiddenField') }}</label>
       <editor
           :id="props.editorId"

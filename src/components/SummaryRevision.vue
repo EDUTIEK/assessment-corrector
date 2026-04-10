@@ -13,6 +13,7 @@ const text = ref('');
 const points = ref(0);
 const grade = ref('');
 const statement = ref('');
+const withText = ref(true);
 
 function init() {
   const summary = summariesStore.getForCorrection(props.correction_key);
@@ -24,6 +25,7 @@ function init() {
       grade.value = level.title;
       statement.value = level.statement;
     }
+    withText.value = stores.corrections().getCorrection(props.correction_key)?.can_enter_revision_text ?? false
   }
 }
 watch(() => props.correction_key, init);
@@ -33,7 +35,7 @@ init();
 
 <template>
   <div id="app-summary-revision-wrapper">
-    <div class="app-summary-text-display xlas-content headlines-three" v-html="text"></div>
+    <div class="app-summary-text-display xlas-content headlines-three" v-html="text" v-if="withText"></div>
     <div class="app-summary-points">
       <p>
         <strong>{{ $t('summaryRevisionRating') }}</strong> {{ preferencesStore.formatNumber(points) }} {{ $t('allPoints', points) }}
