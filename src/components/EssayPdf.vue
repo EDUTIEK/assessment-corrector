@@ -18,6 +18,7 @@ let pdfjs;
 
 onMounted(() => {
   pdfjs = createPDFJsApi(EssayNode.value, './annotate-pdf/pdfjs-dist/web/viewer.html', essayStore.url);
+  pdfjs.setDefaultColor(stores.config().defaultCommentColorHex);
   loadMarks();
   pdfjs.on('create', createMark);
   pdfjs.on('update', updateMark);
@@ -55,10 +56,12 @@ watch(() => commentsStore.filterKeys, loadMarks);
 watch(() => commentsStore.showOtherCorrections, loadMarks);
 
 function getEventData(event) {
+  console.log(event);
   return {
     key: event.detail.id,
     internal: JSON.stringify(event.detail.intern),
-    parent_number: event.detail.page + 1
+    parent_number: event.detail.page + 1,
+    pos: {x: event.detail.pos.x * 1000, y: event.detail.pos.y * 1000}
   };
 }
 

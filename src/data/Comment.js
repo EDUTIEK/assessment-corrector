@@ -288,15 +288,15 @@ export default class Comment {
   calculateStartPositon() {
     let pos = null;
     for (const mark of this.marks) {
-      if (pos === null || mark.pos.y > pos) {
+      if (pos === null || mark.pos.y < pos) {
         pos = mark.pos.y
       }
     }
     if (pos !== null) {
       this.start_position = pos;
+    } else {
+      this.start_position = 0;
     }
-
-    this.start_position = 0;
   }
 
   /**

@@ -59,6 +59,24 @@ export const useConfigStore = defineStore('config', {
       return '';
     },
 
+    defaultCommentColorHex(state) {
+
+      const correctionStore = stores.corrections();
+      const own_position = correctionStore.ownCorrection?.position;
+
+      switch (own_position) {
+        case 0:
+          return '#' + state.corrector1_color;
+        case 1:
+          return '#' + state.corrector2_color;
+        case 2:
+          return '#' + state.corrector3_color;
+        default:
+          return '#CCCCCC';
+      }
+
+    },
+
     getDefaultCommentColor(state) {
 
       const correctionStore = stores.corrections();

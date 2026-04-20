@@ -35,13 +35,13 @@ class Mark {
    * Start position of a graphical mark
    * @type {MarkPoint}
    */
-  pos = new MarkPoint(0, 0);
+  pos = new MarkPoint({x:0, y:0});
 
   /**
    * End position of a graphical mark (line or wave)
    * @type {MarkPoint}
    */
-  end = new MarkPoint(0, 0);
+  end = new MarkPoint({x:0, y:0});
 
   /**
    * Width of a graphical mark (rectangle)
