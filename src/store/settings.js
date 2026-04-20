@@ -28,6 +28,7 @@ export const useSettingsStore = defineStore('settings', {
         no_manual_decimals: false,      // manually given points must not have decimals
       },
       Task: {
+        pdf_marking: 'images',                            // type of PDF marking function
         positive_rating: t('settingsRatingPositive'),     // label of a positive rating
         negative_rating: t('settingsRatingNegative'),     // label of a negative rating
         enable_comments: false,                           // enable comments on the text
@@ -46,6 +47,14 @@ export const useSettingsStore = defineStore('settings', {
 
     contentClass(state) {
       return state.EssayTask.headline_scheme === 'three' ? 'headlines-three' : ''
+    },
+
+    markingByImages(state) {
+      return state.Task.pdf_marking === 'images'
+    },
+
+    markingInPdf(state) {
+      return state.Task.pdf_marking === 'direct'
     },
 
     inclusionText(state) {

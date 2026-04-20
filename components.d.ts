@@ -12,6 +12,7 @@ declare module 'vue' {
     ConfirmRevision: typeof import('./src/components/ConfirmRevision.vue')['default']
     Essay: typeof import('./src/components/Essay.vue')['default']
     EssayImage: typeof import('./src/components/EssayImage.vue')['default']
+    EssayPdf: typeof import('./src/components/EssayPdf.vue')['default']
     Help: typeof import('./src/components/Help.vue')['default']
     Instructions: typeof import('./src/components/Instructions.vue')['default']
     Items: typeof import('./src/components/Items.vue')['default']

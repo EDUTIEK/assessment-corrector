@@ -5,12 +5,14 @@ import Solution from '@/components/Solution.vue';
 import Resources from "@/components/Resources.vue";
 import Essay from "@/components/Essay.vue";
 import EssayImage from '@/components/EssayImage.vue';
+import EssayPdf from '@/components/EssayPdf.vue';
 import SummaryColumn from "@/components/SummaryColumn.vue";
 import Marking from "@/components/Marking.vue";
 import Snippets from "@/components/Snippets.vue";
 import { nextTick, watch } from 'vue';
 
 const apiStore = stores.api();
+const essayStore = stores.essay();
 const layoutStore = stores.layout();
 const itemsStore = stores.items();
 const resourcesStore = stores.resources();
@@ -113,8 +115,9 @@ document.addEventListener('keydown', layoutStore.handleKeyDown);
           <solution v-if="layoutStore.isSolutionVisible"/>
           <resources v-show="layoutStore.isInstructionsPdfVisible || layoutStore.isSolutionPdfVisible || layoutStore.isResourcesVisible"/>
 
-          <essay v-if="layoutStore.isEssayVisible && !pagesStore.hasPages"/>
-          <essay-image v-if="layoutStore.isEssayVisible && pagesStore.hasPages"/>
+          <essay v-if="layoutStore.isEssayVisible && !essayStore.hasPdf"/>
+          <essay-image v-if="layoutStore.isEssayVisible && essayStore.hasPdf && settingsStore.markingByImages"/>
+          <essay-pdf v-if="layoutStore.isEssayVisible && essayStore.hasPdf && settingsStore.markingInPdf"/>
 
           <summary-column v-if="layoutStore.isLeftCorrectionVisible"
                          :correction_key="layoutStore.leftCorrectionKey"

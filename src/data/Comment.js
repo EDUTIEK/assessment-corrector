@@ -145,7 +145,7 @@ export default class Comment {
   label = '';
 
   /**
-   * Image mark: Graphical marks on PDF image assigned to the comment
+   * Marks in PDF file or graphical marks on PDF image assigned to the comment
    * @type {Mark[]}
    */
   marks = [];
@@ -295,6 +295,8 @@ export default class Comment {
     if (pos !== null) {
       this.start_position = pos;
     }
+
+    this.start_position = 0;
   }
 
   /**

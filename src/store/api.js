@@ -101,6 +101,23 @@ export const useApiStore = defineStore('api', {
     },
 
     /**
+     * Get the Url for loading an essay as pdf file
+     */
+    getEssayUrl(state) {
+
+      /**
+       * Get the Url for loading an essay as pdf file
+       * @param {int} essay_id
+       * @returns {string}
+       */
+      const fn = function (essay_id) {
+        const config = this.getRequestConfig(this.fileToken);
+        return config.baseURL + '/corrector/file/essaytask/essay/' + essay_id + '/pdf?' + config.params.toString();
+      }
+      return fn;
+    },
+
+    /**
      * Get the Url for loading a page image
      */
     getImageUrl(state) {
@@ -472,7 +489,6 @@ export const useApiStore = defineStore('api', {
       this.itemKey = itemKey;
       localStorage.setItem('xlasCorrectorItemKey', this.itemKey);
       await itemsStore.saveItem(new Item(response.data['Task']['Item']));
-      
 
       // dismiss open changes from other items
       // this avoids a race condition on quick navigation between writers

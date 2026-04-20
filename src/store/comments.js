@@ -21,11 +21,14 @@ export const useCommentsStore = defineStore('comments', {
       markerChange: 0,                // for watchers: timestamp of the last change that affects the text markers (not the selection)
       selectionChange: 0,             // for watchers: timestamp of the last change of the selected comment
       filterChange: 0,                // for watchers: timestamp of the last change of the comments filter
-      caretRequest: 0,               // for watchers: timestamp of the last request to set the caret to the mark of selected comment
+      caretRequest: 0,                // for watchers: timestamp of the last request to set the caret to the mark of selected comment
+      deletionChange: 0,              // for watchers: timestamp of the last comment deletion (see lastDeleted)
 
       selectedKey: '',                // key of the currently selected comment
       firstVisibleKey: '',            // key of the first visible comment in the scrolled text
       filterKeys: [],                 // keys of filtered comments
+
+      lastDeleted: null               // last deleted comment
     }
   },
 
@@ -339,6 +342,10 @@ export const useCommentsStore = defineStore('comments', {
         this.selectComment('', true);
       }
       const comment = this.comments.find(element => element.key == removeKey);
+      if (comment) {
+        this.lastDeleted = comment;
+        this.deletionChange = Date.now();
+      }
 
       this.comments = this.comments.filter(comment => comment.key != removeKey);
       if (this.keys.includes(removeKey)) {

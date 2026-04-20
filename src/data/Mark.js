@@ -69,6 +69,12 @@ class Mark {
   symbol = '';
 
   /**
+   * Internal data of a pdf.js mark
+   * @type {null}
+   */
+  internal = null;
+
+  /**
    * Constructor - gets properties from a data object
    * @param {object} data
    */
@@ -107,6 +113,10 @@ class Mark {
     if (data.symbol !== undefined && data.symbol !== null) {
       this.symbol = data.symbol.toString();
     }
+
+    if (data.internal !== undefined && data.internal !== null) {
+      this.internal = data.internal.toString();
+    }
   }
 
   /**
@@ -127,6 +137,7 @@ class Mark {
       height: this.height,
       polygon: polygon,
       symbol: this.symbol,
+      internal: this.internal,
     }
   }
 

@@ -1,0 +1,177 @@
+<script setup>
+/**
+ * Display of a PDF essay
+ * Correction Marks can be set for test and free hand
+ */
+import {stores} from "@/store";
+import createPDFJsApi from 'annotate-pdf/pdfjs-api';
+import {nextTick, onMounted, ref, watch} from 'vue';
+import Comment from "@/data/Comment";
+
+const essayStore = stores.essay();
+const commentsStore = stores.comments();
+const layoutStore = stores.layout();
+
+const EssayNode = ref();
+
+let pdfjs;
+
+onMounted(() => {
+  pdfjs = createPDFJsApi(EssayNode.value, './annotate-pdf/pdfjs-dist/web/viewer.html', essayStore.url);
+  loadMarks();
+  pdfjs.on('create', createMark);
+  pdfjs.on('update', updateMark);
+  pdfjs.on('delete', deleteMark);
+  pdfjs.on('select', selectMark);
+  pdfjs.on('pageChanged', pageChanged);
+  handleFocusChange();
+});
+
+async function handleFocusChange() {
+  if (layoutStore.isEssaySelected) {
+    await nextTick();
+    EssayNode.value.focus();
+  }
+}
+watch(() => layoutStore.focusChange, handleFocusChange);
+
+function loadMarks() {
+  const all = [];
+  for (const comment of commentsStore.activeComments) {
+    for (const mark of comment.marks) {
+      if (mark.internal) {
+        all.push({
+          id: mark.key,
+          page: comment.parent_number,
+          internal: mark.internal
+        });
+      }
+
+    }
+  }
+
+  pdfjs.setAll(all);
+}
+
+function getEventData(event) {
+  return {
+    key: event.detail.id,
+    internal: JSON.stringify(event.detail.intern),
+    page: event.detail.page + 1
+  };
+}
+
+async function createMark(event) {
+  const data = getEventData(event);
+
+  if (!commentsStore.getCommentByMarkKey(data.key)) {
+    // mark is newly drawn
+    const selectedComment = commentsStore.selectedComment;
+    if (!!selectedComment && selectedComment.parent_number == data.page) {
+      // new mark can be added to an existing comment
+      selectedComment.addMarkData(data);
+      await commentsStore.updateComment(selectedComment, true);
+    } else {
+      // new mark will create a new comment
+      const newComment = new Comment({parent_number: data.page});
+      newComment.addMarkData(data);
+      await commentsStore.addComment(newComment);
+    }
+  }
+}
+
+function updateMark(event) {
+  const data = getEventData(event);
+  const comment = commentsStore.getCommentByMarkKey(data.key);
+  if (comment) {
+    const oldData = comment.getData();
+    comment.updateMarkData(data);
+    const newData = comment.getData();
+    if (JSON.stringify(oldData) != JSON.stringify(newData)) {
+      commentsStore.updateComment(comment, true);
+    }
+  }
+}
+
+function deleteMark(event) {
+  const data = getEventData(event);
+  const comment = commentsStore.getCommentByMarkKey(data.key);
+  if (comment) {
+    commentsStore.deleteComment(comment.key);
+  }
+}
+
+function selectMark(event) {
+  const data = getEventData(event);
+  const comment = commentsStore.getCommentByMarkKey(data.key);
+  if (comment) {
+    commentsStore.selectComment(comment.key);
+  }
+}
+
+function pageChanged(event) {
+  let comments = commentsStore.getActiveCommentsByParentNumber(event.detail);
+  if (comments.length) {
+    let comment = comments.shift();
+    commentsStore.setFirstVisibleComment(comment.key);
+  }
+}
+
+function refreshSelection() {
+  const comment = commentsStore.selectComment();
+  if (comment) {
+    for (mark of comment.marks) {
+      pdfjs.select(mark.key);
+    }
+  }
+}
+watch(() => commentsStore.selectionChange, refreshSelection);
+
+function handleDeleted()
+{
+  const comment = commentsStore.lastDeleted;
+  if (comment) {
+    for (mark of comment.marks) {
+      pdfjs.delete(mark.key);
+    }
+  }
+}
+watch(() => commentsStore.deletionChange, handleDeleted);
+
+</script>
+
+<template>
+  <div class ="appEssayWrapper">
+    <div class="appTextButtons">
+      <!--
+      <v-btn-group density="comfortable" variant="outlined" divided>
+        <v-btn title="Load Annotations" size="small" @click="loadAnnotations">Markierungen laden</v-btn>
+        <v-btn title="Save Annotations" size="small" @click="saveAnnotations">Markierungen speichern</v-btn>
+      </v-btn-group>
+      -->
+    </div>
+    <div class="appEssayNode" tabindex="0" ref="EssayNode"></div>
+  </div>
+</template>
+
+<style scoped>
+
+.appEssayWrapper {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.appTextButtons {
+  text-align: center;
+  padding-bottom: 5px;
+  height: 50px;
+}
+
+.appEssayNode {
+  flex-grow: 1;
+  width: 100%;
+  height: calc(100% - 50px);
+}
+
+</style>
