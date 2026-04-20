@@ -42,22 +42,23 @@ function loadMarks() {
       if (mark.internal) {
         all.push({
           id: mark.key,
-          page: comment.parent_number,
-          internal: mark.internal
+          page: comment.parent_number - 1,
+          intern: JSON.parse(mark.internal)
         });
       }
-
     }
   }
 
   pdfjs.setAll(all);
 }
+watch(() => commentsStore.filterKeys, loadMarks);
+watch(() => commentsStore.showOtherCorrections, loadMarks);
 
 function getEventData(event) {
   return {
     key: event.detail.id,
     internal: JSON.stringify(event.detail.intern),
-    page: event.detail.page + 1
+    parent_number: event.detail.page + 1
   };
 }
 
@@ -65,18 +66,10 @@ async function createMark(event) {
   const data = getEventData(event);
 
   if (!commentsStore.getCommentByMarkKey(data.key)) {
-    // mark is newly drawn
-    const selectedComment = commentsStore.selectedComment;
-    if (!!selectedComment && selectedComment.parent_number == data.page) {
-      // new mark can be added to an existing comment
-      selectedComment.addMarkData(data);
-      await commentsStore.updateComment(selectedComment, true);
-    } else {
-      // new mark will create a new comment
-      const newComment = new Comment({parent_number: data.page});
-      newComment.addMarkData(data);
-      await commentsStore.addComment(newComment);
-    }
+    // new mark will create a new comment
+    const newComment = new Comment({parent_number: data.parent_number});
+    newComment.addMarkData(data);
+    await commentsStore.addComment(newComment);
   }
 }
 
@@ -102,10 +95,15 @@ function deleteMark(event) {
 }
 
 function selectMark(event) {
-  const data = getEventData(event);
-  const comment = commentsStore.getCommentByMarkKey(data.key);
-  if (comment) {
-    commentsStore.selectComment(comment.key);
+  if (event.detail) {
+    const data = getEventData(event);
+    const comment = commentsStore.getCommentByMarkKey(data.key);
+    if (comment) {
+      commentsStore.selectComment(comment.key);
+    }
+    else {
+      commentsStore.selectComment('');
+    }
   }
 }
 
@@ -118,9 +116,9 @@ function pageChanged(event) {
 }
 
 function refreshSelection() {
-  const comment = commentsStore.selectComment();
+  const comment = commentsStore.selectedComment;
   if (comment) {
-    for (mark of comment.marks) {
+    for (const mark of comment.marks) {
       pdfjs.select(mark.key);
     }
   }
@@ -131,7 +129,7 @@ function handleDeleted()
 {
   const comment = commentsStore.lastDeleted;
   if (comment) {
-    for (mark of comment.marks) {
+    for (const mark of comment.marks) {
       pdfjs.delete(mark.key);
     }
   }
