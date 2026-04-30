@@ -11,14 +11,20 @@ import Comment from "@/data/Comment";
 const essayStore = stores.essay();
 const commentsStore = stores.comments();
 const layoutStore = stores.layout();
+const summariesStore = stores.summaries();
 
 const EssayNode = ref();
+
+const selectedTool = ref('text');
+const selectedDrawMode= ref('marker');
 
 let pdfjs;
 
 onMounted(() => {
   pdfjs = createPDFJsApi(EssayNode.value, './annotate-pdf/pdfjs-dist/web/viewer.html', essayStore.url);
   pdfjs.setDefaultColor(stores.config().defaultCommentColorHex);
+  pdfjs.enableFreeFormHighlight(false);
+  pdfjs.setDrawMode('marker'); // or 'underline'
   loadMarks();
   pdfjs.on('create', createMark);
   pdfjs.on('update', updateMark);
@@ -27,6 +33,40 @@ onMounted(() => {
   pdfjs.on('pageChanged', pageChanged);
   handleFocusChange();
 });
+
+function selectTool(tool = null) {
+
+  if (tool) {
+    selectedTool.value = tool;
+  }
+
+  switch (selectedTool.value) {
+    case 'text':
+      pdfjs.enableFreeFormHighlight(false);
+      break;
+
+    case 'free':
+      pdfjs.enableFreeFormHighlight(true);
+      break;
+  }
+}
+
+function selectDrawMode(drawMode = null) {
+
+  if (drawMode) {
+    selectedDrawMode.value = drawMode;
+  }
+
+  switch (selectedDrawMode.value) {
+    case 'marker':
+      pdfjs.setDrawMode('marker');
+      break;
+
+    case 'underline':
+      pdfjs.setDrawMode('underline');
+      break;
+  }
+}
 
 async function handleFocusChange() {
   if (layoutStore.isEssaySelected) {
@@ -144,12 +184,20 @@ watch(() => commentsStore.deletionChange, handleDeleted);
 <template>
   <div class ="appEssayWrapper">
     <div class="appTextButtons">
-      <!--
-      <v-btn-group density="comfortable" variant="outlined" divided>
-        <v-btn title="Load Annotations" size="small" @click="loadAnnotations">Markierungen laden</v-btn>
-        <v-btn title="Save Annotations" size="small" @click="saveAnnotations">Markierungen speichern</v-btn>
-      </v-btn-group>
-      -->
+
+
+      <v-btn-toggle v-if="stores.settings().Task.enable_comments" density="comfortable" variant="outlined" divided v-model="selectedTool">
+        <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-cursor-text" value="text" @click="selectTool('text')"></v-btn>
+        <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-draw" value="free" @click="selectTool('free')"></v-btn>
+      </v-btn-toggle>
+
+      &nbsp;
+
+      <v-btn-toggle v-if="stores.settings().Task.enable_comments" density="comfortable" variant="outlined" divided v-model="selectedDrawMode">
+        <v-btn :disabled="summariesStore.isOwnDisabled || selectedTool == 'free'" size="small" icon="mdi-marker" value="marker" @click="selectDrawMode('marker')"></v-btn>
+        <v-btn :disabled="summariesStore.isOwnDisabled || selectedTool == 'free'" size="small" icon="mdi-format-underline" value="underline" @click="selectDrawMode('underline')"></v-btn>
+      </v-btn-toggle>
+
     </div>
     <div class="appEssayNode" tabindex="0" ref="EssayNode"></div>
   </div>
