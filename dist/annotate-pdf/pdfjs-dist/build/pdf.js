@@ -9274,9 +9274,7 @@ class AnnotationEditorUIManager {
     this.#dispatchUpdateStates({
       hasSelectedText: true
     });
-    // edutiek-patch: begin
-    if (this._eventBus.disableTextHighlight || this.#mode !== AnnotationEditorType.HIGHLIGHT && this.#mode !== AnnotationEditorType.NONE) {
-      // edutiek-patch: end
+    if (this.#mode !== AnnotationEditorType.HIGHLIGHT && this.#mode !== AnnotationEditorType.NONE) {
       return;
     }
     if (this.#mode === AnnotationEditorType.HIGHLIGHT) {
@@ -9346,9 +9344,6 @@ class AnnotationEditorUIManager {
       this.#highlightWhenShiftUp = false;
       this.#onSelectEnd("main_toolbar");
     }
-    // edutiek-patch: begin
-    return; // Prevent bogus selection when focusing in again (trying to restore last selected element).
-    // edutiek-patch: end
     if (!this.hasSelection) {
       return;
     }
@@ -27732,14 +27727,8 @@ class HighlightEditor extends AnnotationEditor {
     }
   }
   // edutiek-patch: begin
-  getSvgNode() {
-    return this.parent.drawLayer.getSvgNode(this.#id);
-  }
   getPathNode() {
     return this.parent.drawLayer.getSvgNode(this.#id).querySelector('path');
-  }
-  getHightligtDiv() {
-    return this.#highlightDiv;
   }
   // edutiek-patch: end
   get telemetryInitialData() {
@@ -28425,7 +28414,7 @@ class HighlightEditor extends AnnotationEditor {
       opacity,
       // edutiek-patch: begin
       pageAndMC,
-      edutiekType,
+      underline,
       // edutiek-patch: end
     } = data;
     const editor = await super.deserialize(data, parent, uiManager);
@@ -28433,7 +28422,7 @@ class HighlightEditor extends AnnotationEditor {
     editor.opacity = opacity || 1;
     // edutiek-patch: begin
     editor.pageAndMC = pageAndMC;
-    editor.edutiekType = edutiekType;
+    editor.underline = underline;
     // edutiek-patch: end
     if (inkLists) {
       editor.#thickness = data.thickness;
@@ -28516,7 +28505,7 @@ class HighlightEditor extends AnnotationEditor {
       outlines: this.#serializeOutlines(serialized.rect),
       contents: this.contents,
       pageAndMC: this.pageAndMC,
-      edutiekType: this.edutiekType,
+      underline: this.underline,
       // edutiek-patch: end
     });
     this.addComment(serialized);

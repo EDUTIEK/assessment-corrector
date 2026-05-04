@@ -59792,42 +59792,18 @@ class HighlightAnnotation extends MarkupAnnotation {
     const appearanceBuffer = [`${getPdfColor(color, true)}`, "/R0 gs"];
     const buffer = [];
     // edutiek-patch: begin
-
-    switch(annotation.edutiekType){
-    case 'underline':
+    if (annotation.underline) {
+      appearanceBuffer.push('0 0 0 rg');
       appearanceBuffer.push('/DeviceRGB CS');
       for (const outline of outlines) {
-        appearanceBuffer.push(getPdfColorArray(color).join(' ') + ' SCN');
+        appearanceBuffer.push('1 0 0 SCN');
         appearanceBuffer.push('2 w');
         // appearanceBuffer.push('[5 5] 0 d');
         appearanceBuffer.push(`${numberToString(outline[0])} ${numberToString(outline[1] + 2)} m`);
         appearanceBuffer.push(`${numberToString(outline[6])} ${numberToString(outline[7] + 2)} l`);
         appearanceBuffer.push('S');
       }
-      break;
-    case 'wave':
-      appearanceBuffer.push('/DeviceRGB CS');
-      for (const outline of outlines) {
-        appearanceBuffer.push(getPdfColorArray(color).join(' ') + ' SCN');
-        appearanceBuffer.push('1 w');
-        const x1 = outline[0];
-        const y1 = outline[1] + 2;
-        const x2 = outline[6];
-        const y2 = outline[7] + 2;
-        appearanceBuffer.push(`${numberToString(x1)} ${numberToString(y1)} m`);
-        let n = x1;
-        let dir = 1;
-        const step = 6;
-        const pitch = 3;
-        while (n + step < x2) {
-          appearanceBuffer.push(`${numberToString(n + (step / 2))} ${numberToString(y1 + (dir * pitch))} ${numberToString(n + step)} ${numberToString(y1)} v`);
-          n += step;
-          dir = -dir;
-        }
-        appearanceBuffer.push('S');
-      }
-      break;
-    default:
+    } else {
 	for (const outline of outlines) {
 	  buffer.length = 0;
 	  buffer.push(`${numberToString(outline[0])} ${numberToString(outline[1])} m`);
