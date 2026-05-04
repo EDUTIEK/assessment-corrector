@@ -179,6 +179,23 @@ function handleDeleted()
 }
 watch(() => commentsStore.deletionChange, handleDeleted);
 
+async function download()
+{
+  const blob = await pdfjs.buildBlob();
+  console.log(blob);
+  const url = URL.createObjectURL(blob.data);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'correction.pdf';
+
+  document.body.appendChild(a); // required in Firefox
+  a.click();
+
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url); // free memory
+}
+
 </script>
 
 <template>
@@ -197,6 +214,10 @@ watch(() => commentsStore.deletionChange, handleDeleted);
         <v-btn :disabled="summariesStore.isOwnDisabled || selectedTool == 'free'" size="small" icon="mdi-marker" value="marker" @click="selectDrawMode('marker')"></v-btn>
         <v-btn :disabled="summariesStore.isOwnDisabled || selectedTool == 'free'" size="small" icon="mdi-format-underline" value="underline" @click="selectDrawMode('underline')"></v-btn>
       </v-btn-toggle>
+
+      &nbsp;
+
+      <v-btn variant="text" prepend-icon="mdi-download" @click="download">Download</v-btn>
 
     </div>
     <div class="appEssayNode" tabindex="0" ref="EssayNode"></div>
