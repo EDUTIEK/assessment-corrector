@@ -63,18 +63,7 @@ export const useConfigStore = defineStore('config', {
 
       const correctionStore = stores.corrections();
       const own_position = correctionStore.ownCorrection?.position;
-
-      switch (own_position) {
-        case 0:
-          return '#' + state.corrector1_color;
-        case 1:
-          return '#' + state.corrector2_color;
-        case 2:
-          return '#' + state.corrector3_color;
-        default:
-          return '#CCCCCC';
-      }
-
+      return state.getCommentColor(own_position);
     },
 
     getDefaultCommentColor(state) {
@@ -109,6 +98,29 @@ export const useConfigStore = defineStore('config', {
             return hexToRgba(state.corrector3_color, selected ? 1: 0.4);
           default:
             return hexToRgba('CCCCCC', selected ? 1: 0.4);
+        }
+      }
+      return fn;
+    },
+
+    getCommentColorHex(state) {
+
+      /**
+       * Get the color used for marking a comment
+       *
+       * @param {number} position
+       * @returns {string}
+       */
+      const fn = function (position) {
+        switch (position) {
+          case 0:
+            return '#' + state.corrector1_color;
+          case 1:
+            return '#' + state.corrector2_color;
+          case 2:
+            return '#' + state.corrector3_color;
+          default:
+            return '#CCCCCC';
         }
       }
       return fn;

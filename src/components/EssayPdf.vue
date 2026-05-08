@@ -7,6 +7,7 @@ import {stores} from "@/store";
 import createPDFJsApi from 'annotate-pdf/pdfjs-api';
 import {nextTick, onMounted, ref, watch} from 'vue';
 import Comment from "@/data/Comment";
+import Mark from "@/data/Mark";
 
 const essayStore = stores.essay();
 const commentsStore = stores.comments();
@@ -17,6 +18,7 @@ const EssayNode = ref();
 
 const selectedTool = ref('text');
 const selectedDrawMode= ref('marker');
+const showLabels = ref(true);
 
 let pdfjs;
 
@@ -43,10 +45,12 @@ function selectTool(tool = null) {
   switch (selectedTool.value) {
     case 'text':
       pdfjs.enableFreeFormHighlight(false);
+      pdfjs.enableTextHighlight(true);
       break;
 
     case 'free':
       pdfjs.enableFreeFormHighlight(true);
+      pdfjs.enableTextHighlight(false);
       break;
   }
 }
@@ -65,6 +69,10 @@ function selectDrawMode(drawMode = null) {
     case 'underline':
       pdfjs.setDrawMode('underline');
       break;
+
+    case 'wave':
+      pdfjs.setDrawMode('wave');
+      break;
   }
 }
 
@@ -79,59 +87,82 @@ watch(() => layoutStore.focusChange, handleFocusChange);
 function loadMarks() {
   const all = [];
   for (const comment of commentsStore.activeComments) {
-    for (const mark of comment.marks) {
-      if (mark.internal) {
-        all.push({
-          id: mark.key,
-          page: comment.parent_number - 1,
-          intern: JSON.parse(mark.internal)
-        });
+    for (const annotation of comment.getPdfAnnotations()) {
+      if (!showLabels.value) {
+        annotation.label = '';
       }
+      all.push(annotation);
     }
   }
-
   pdfjs.setAll(all);
 }
-watch(() => commentsStore.filterKeys, loadMarks);
+watch(() => commentsStore.markerChange, loadMarks);
+watch(() => commentsStore.filterChange, loadMarks);
 watch(() => commentsStore.showOtherCorrections, loadMarks);
 
-function getEventData(event) {
-  console.log(event);
-  return {
-    key: event.detail.id,
-    internal: JSON.stringify(event.detail.intern),
-    parent_number: event.detail.page + 1,
-    pos: {x: event.detail.pos.x * 1000, y: event.detail.pos.y * 1000}
-  };
+
+function toggleLabels() {
+  if (showLabels.value == 1) {
+    showLabels.value = 0;
+  } else {
+    showLabels.value = 1;
+  }
+  loadMarks();
 }
 
 async function createMark(event) {
-  const data = getEventData(event);
+
+  const annotation = event.detail;
+  const data = {
+    key: annotation.id,
+    shape: '',
+    internal: JSON.stringify(annotation.intern),
+    parent_number: annotation.page + 1,
+    pos: {x: annotation.pos.x * 1000, y: annotation.pos.y * 1000}
+  }
+
+  if (selectedTool.value == 'free') {
+    data.shape = Mark.SHAPE_FREE_MARKER;
+  } else {
+    switch(annotation.type) {
+      case 'marker':
+        data.shape = Mark.SHAPE_TEXT_MARKER;
+        break;
+      case 'underline':
+        data.shape = Mark.SHAPE_TEXT_UNDERLINE;
+        break;
+      case 'wave':
+        data.shape = Mark.SHAPE_TEXT_WAVE;
+        break;
+    }
+  }
 
   if (!commentsStore.getCommentByMarkKey(data.key)) {
     // new mark will create a new comment
-    const newComment = new Comment({parent_number: data.parent_number});
+    const newComment = new Comment({parent_number: event.detail.page + 1});
     newComment.addMarkData(data);
     await commentsStore.addComment(newComment);
+    commentsStore.selectComment(newComment.key);
   }
 }
 
 function updateMark(event) {
-  const data = getEventData(event);
-  const comment = commentsStore.getCommentByMarkKey(data.key);
-  if (comment) {
-    const oldData = comment.getData();
-    comment.updateMarkData(data);
-    const newData = comment.getData();
-    if (JSON.stringify(oldData) != JSON.stringify(newData)) {
-      commentsStore.updateComment(comment, true);
-    }
-  }
+  // no need to update a mark by pdfjs event
+  // all changes to existing marks are done outside
+
+  // const comment = commentsStore.getCommentByMarkKey(event.detail.id);
+  // if (comment) {
+  //   const oldData = comment.getData();
+  //   comment.updateMarkData(data);
+  //   const newData = comment.getData();
+  //   if (JSON.stringify(oldData) != JSON.stringify(newData)) {
+  //     commentsStore.updateComment(comment, true);
+  //   }
+  // }
 }
 
 function deleteMark(event) {
-  const data = getEventData(event);
-  const comment = commentsStore.getCommentByMarkKey(data.key);
+  const comment = commentsStore.getCommentByMarkKey(event.detail.id);
   if (comment) {
     commentsStore.deleteComment(comment.key);
   }
@@ -139,8 +170,7 @@ function deleteMark(event) {
 
 function selectMark(event) {
   if (event.detail) {
-    const data = getEventData(event);
-    const comment = commentsStore.getCommentByMarkKey(data.key);
+    const comment = commentsStore.getCommentByMarkKey(event.detail.id);
     if (comment) {
       commentsStore.selectComment(comment.key);
     }
@@ -213,7 +243,14 @@ async function download()
       <v-btn-toggle v-if="stores.settings().Task.enable_comments" density="comfortable" variant="outlined" divided v-model="selectedDrawMode">
         <v-btn :disabled="summariesStore.isOwnDisabled || selectedTool == 'free'" size="small" icon="mdi-marker" value="marker" @click="selectDrawMode('marker')"></v-btn>
         <v-btn :disabled="summariesStore.isOwnDisabled || selectedTool == 'free'" size="small" icon="mdi-format-underline" value="underline" @click="selectDrawMode('underline')"></v-btn>
+        <v-btn :disabled="summariesStore.isOwnDisabled || selectedTool == 'free'" size="small" icon="mdi-format-underline-wavy" value="wave" @click="selectDrawMode('wave')"></v-btn>
       </v-btn-toggle>
+
+      &nbsp;
+
+      <v-btn-group v-if="stores.settings().Task.enable_comments" density="comfortable" variant="outlined" divided>
+        <v-btn size="small" :active="!!showLabels" icon="mdi-label-outline" @click="toggleLabels"></v-btn>
+      </v-btn-group>
 
       &nbsp;
 

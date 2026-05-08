@@ -1,6 +1,7 @@
 import Mark from '@/data/Mark';
 import Item from "@/data/Item";
 import Correction from "@/data/Correction";
+import {stores} from "@/store";
 
 /**
  * Correction Comment
@@ -279,6 +280,39 @@ export default class Comment {
       }
     }
     return null;
+  }
+
+  /**
+   * Get the annotations for pdfjs from the marks
+   */
+  getPdfAnnotations() {
+    const all = [];
+    for (const mark of this.marks) {
+      if (mark.internal) {
+        let type = '';
+        switch (mark.shape) {
+          case Mark.SHAPE_TEXT_MARKER:
+            type = 'marker';
+            break;
+          case Mark.SHAPE_TEXT_UNDERLINE:
+            type = 'underline';
+            break;
+          case Mark.SHAPE_TEXT_WAVE:
+            type = 'wave';
+            break;
+        }
+
+        all.push({
+          id: mark.key,
+          page: this.parent_number - 1,
+          type: type,
+          label: this.label,
+          intern: JSON.parse(mark.internal),
+          color: stores.config().getCommentColorHex(this.correction_position)
+        });
+      }
+    }
+    return all;
   }
 
 

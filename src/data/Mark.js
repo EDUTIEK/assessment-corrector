@@ -5,14 +5,24 @@ import MarkPoint from '@/data/MarkPoint';
  */
 class Mark {
 
+  // image shapes
   static SHAPE_CIRCLE = 'circle';
   static SHAPE_RECTANGLE = 'rectangle';
   static SHAPE_POLYGON = 'polygon';
   static SHAPE_LINE = 'line';
   static SHAPE_WAVE = 'wave';
 
-  static ALLOWED_SHAPES = [Mark.SHAPE_CIRCLE, Mark.SHAPE_RECTANGLE, Mark.SHAPE_POLYGON, Mark.SHAPE_LINE, Mark.SHAPE_WAVE];
+  // pdf shapes
+  static SHAPE_FREE_MARKER = 'free_marker';
+  static SHAPE_TEXT_MARKER = 'text_marker';
+  static SHAPE_TEXT_UNDERLINE = 'text_underline';
+  static SHAPE_TEXT_WAVE = 'text_wave';
 
+
+  static ALLOWED_SHAPES = [
+      Mark.SHAPE_CIRCLE, Mark.SHAPE_RECTANGLE, Mark.SHAPE_POLYGON, Mark.SHAPE_LINE, Mark.SHAPE_WAVE,
+      Mark.SHAPE_FREE_MARKER, Mark.SHAPE_TEXT_MARKER, Mark.SHAPE_TEXT_UNDERLINE, Mark.SHAPE_TEXT_WAVE
+  ];
 
   static SYMBOL_CHECK = '✓';
   static SYMBOL_CROSS = '✗';
@@ -165,6 +175,14 @@ class Mark {
           case Mark.SYMBOL_QUESTION:
             return 'mdi-help';
         }
+      case Mark.SHAPE_FREE_MARKER:
+        return 'mdi-draw';
+      case Mark.SHAPE_TEXT_MARKER:
+        return 'mdi-marker';
+      case Mark.SHAPE_TEXT_UNDERLINE:
+        return 'mdi-format-underline';
+      case Mark.SHAPE_TEXT_WAVE:
+        return 'mdi-format-underline-wavy';
     }
     return '';
 
