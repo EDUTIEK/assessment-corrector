@@ -7,11 +7,14 @@
  *     page: {number},
  *     intern: {Object},
  *     text: {string},
+ *     label: {string},
  *     pos: {{x: number, y: number}},
+ *     color: {Color},
+ *     type: {Type},
  * }} Annotation
  *
  * @typedef {string} Color // all hex forms are valid but names are not. E.g. `#FF003377` is valid but `green` is not.
- * @typedef {string} Mode // 'marker' or 'underline'
+ * @typedef {string} Type // 'marker', 'underline' or 'wave'
  *
  * @param {string} parent   id of the parent element to add the iframe
  * @param {string} viewer   url of the viewer html (source of iframe, without parameter)
@@ -36,7 +39,12 @@
  *   setDefaultColor: {function(Color): Promise},
  *   buildBlob: {function(): Promise<Blob>},
  *   enableFreeFormHighlight: {function(bool): Promise},
- *   setDrawMode: {function(Mode): Promise},
+ *   enableTextHighlight: {function(bool): Promise},
+ *   setDrawMode: {function(Type): Promise},
+ *   setLabel: {function(string, string): Promise},
+ *   setText: {function(string, string): Promise},
+ *   setColor: {function(string, Color): Promise},
+ *   setType: {function(string, Type): Promise},
  * }}
  */
 export default (parent, viewer, pdf, options = {}) => {
@@ -89,7 +97,12 @@ export default (parent, viewer, pdf, options = {}) => {
         setDefaultColor: color => request('setDefaultColor', color),
         buildBlob: () => request('buildBlob'),
 	enableFreeFormHighlight: bool => request('enableFreeFormHighlight', bool),
+        enableTextHighlight: bool => request('enableTextHighlight', bool),
         setDrawMode: mode => request('setDrawMode', mode),
+        setLabel: (id, label) => request('setLabel', id, label),
+        setText: (id, text) => request('setText', id, text),
+        setColor: (id, color) => request('setColor', id, color),
+        setType: (id, type) => request('setType', id, type),
     };
 
     function request(name, ...args)
