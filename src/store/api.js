@@ -570,7 +570,7 @@ export const useApiStore = defineStore('api', {
         formData.append('file', file);
 
         const response = await axios.post(
-            '/corrector/upload/' + summary.task_id + '/' + summary.writer_id,
+            '/corrector/upload/task/summary/' + summary.task_id + '/' + summary.writer_id,
             formData,
             Object.assign(this.getRequestConfig(this.dataToken), {
               headers: {
