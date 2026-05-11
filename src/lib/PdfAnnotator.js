@@ -4,24 +4,48 @@ import createPDFJsApi from 'annotate-pdf/pdfjs-api';
 export default class PdfAnnotator {
 
   element = null;
-  pdf = null;
 
-
-  async getOwnPdf() {
-    return await this.#buildFor(stores.comments().ownComments);
-
-  }
-
-  async getSumPdf() {
-    return await this.#buildFor(stores.comments().allComments);
-  }
-
-
-  async #buildFor(comments) {
+  async load(url) {
+    await this.unload();
     this.element = document.createElement('div');
     document.body.appendChild(this.element);
-    this.pdf = createPDFJsApi(this.element, './annotate-pdf/pdfjs-dist/web/viewer.html', stores.essay().url);
+    this.pdf = createPDFJsApi(this.element, './annotate-pdf/pdfjs-dist/web/viewer.html', url);
+  }
 
+  async unload() {
+    if (this.pdf) {
+      await this.pdf.destroy();
+    }
+
+    if (this.element) {
+      document.body.removeChild(this.element);
+      this.element = null;
+    }
+  }
+
+  /**
+   * @param {string } scope 'own'|'all'
+   * @returns {Promise<Blob>}
+   */
+  async build(scope) {
+
+    if (this.pdf === null) {
+      return null;
+    }
+    switch(scope) {
+      case 'own':
+        return await this.#buildFor(stores.comments().ownComments);
+      case 'all':
+        return await this.#buildFor(stores.comments().allComments);
+    }
+    return null;
+  }
+
+
+  /**
+   * @returns {Promise<Blob>}
+   */
+  async #buildFor(comments) {
     const annotations = [];
     for (const comment of stores.comments().allComments) {
       for (const annotation of comment.getPdfAnnotations()) {
@@ -34,11 +58,8 @@ export default class PdfAnnotator {
 
     await new Promise((resolve) => setTimeout(resolve, 500));
 
-    const blob = await this.pdf.buildBlob();
-
-    await this.pdf.destroy();
-    document.body.removeChild(this.element);
-    return blob;
+    const result = await this.pdf.buildBlob();
+    return result.data;
   }
 
 }

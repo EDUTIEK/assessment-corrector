@@ -6,8 +6,13 @@ import Summary from "@/data/Summary";
 import {ref} from "vue";
 import PdfAnnotator from '@/lib/PdfAnnotator';
 
+const apiStore = stores.api();
 const itemsStore = stores.items();
 const summariesStore = stores.summaries();
+const settingsStore = stores.settings();
+const essayStore = stores.essay();
+
+const annotator = new PdfAnnotator();
 
 const pregraded = ref(false);
 
@@ -19,7 +24,19 @@ pregraded.value = summariesStore.isOwnPregraded;
 
 async function set() {
   if (!summariesStore.isOwnAuthorized) {
-    await summariesStore.setOwnPregraded();
+    if (essayStore.hasPdf && settingsStore.markingInPdf) {
+      const item = stores.items().currentItem;
+      const own = await essayStore.buildMarkedPdf('own');
+      const all = await essayStore.buildMarkedPdf('all');
+
+      if (await apiStore.sendMarkedPdf(own, 'own', item.task_id, item.writer_id)
+          && await apiStore.sendMarkedPdf(all, 'all', item.task_id, item.writer_id)
+      ) {
+        await summariesStore.setOwnPregraded();
+      }
+    } else {
+      await summariesStore.setOwnPregraded();
+    }
   }
 
   await itemsStore.setCurrentGradingStatus(summariesStore.editSummary.status);

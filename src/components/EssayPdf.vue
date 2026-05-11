@@ -8,7 +8,6 @@ import createPDFJsApi from 'annotate-pdf/pdfjs-api';
 import {nextTick, onMounted, ref, watch} from 'vue';
 import Comment from "@/data/Comment";
 import Mark from "@/data/Mark";
-import PdfAnnotator from '@/lib/PdfAnnotator';
 
 const essayStore = stores.essay();
 const commentsStore = stores.comments();
@@ -20,8 +19,6 @@ const EssayNode = ref();
 const selectedTool = ref('text');
 const selectedDrawMode= ref('marker');
 const showLabels = ref(true);
-
-const annotator = new PdfAnnotator();
 
 let pdfjs;
 
@@ -214,8 +211,8 @@ watch(() => commentsStore.deletionChange, handleDeleted);
 
 async function download()
 {
-  const blob = await annotator.getSumPdf();
-  const url = URL.createObjectURL(blob.data);
+  const blob = await essayStore.buildMarkedPdf('all');
+  const url = URL.createObjectURL(blob);
 
   const a = document.createElement('a');
   a.href = url;

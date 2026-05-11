@@ -587,6 +587,49 @@ export const useApiStore = defineStore('api', {
     },
 
     /**
+     * Send a marked pdf file
+     * @param {Blob} file
+     * @param {string} scope 'own' or 'all'
+     * @param {int} task_id
+     * @param {int} writer_id
+     * @return {string|false} id of the saved file
+     */
+    async sendMarkedPdf(file, scope, task_id, writer_id) {
+
+      let entity;
+      switch (scope) {
+        case 'own':
+          entity = 'ownpdf';
+          break;
+        case 'all':
+          entity = 'sumpdf';
+          break;
+        default:
+          return false;
+      }
+
+      try {
+        const formData = new FormData();
+        // 'file' is the POST element
+        formData.append('file', file);
+
+        const response = await axios.post(
+          '/corrector/upload/essaytask/' + entity + '/' + task_id + '/' + writer_id,
+          formData,
+          Object.assign(this.getRequestConfig(this.dataToken), {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            }
+          }));
+        return response.data.id;
+
+      } catch (error) {
+        console.log(error);
+        return false;
+      }
+    },
+
+    /**
      * Set the offset between server time and client time
      * The offset is used to calculate the correct remaining time of the task
      * The offset should be set from the response of a REST call

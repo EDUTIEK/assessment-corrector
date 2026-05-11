@@ -6,8 +6,10 @@ import {getStorage} from "@/lib/Storage";
 import {defineStore} from 'pinia';
 import {stores} from "@/store/index";
 import axios from "axios";
+import PdfAnnotator from '@/lib/PdfAnnotator';
 
 const storage = getStorage('essay');
+const annotator = new PdfAnnotator();
 
 export const useEssayStore = defineStore('essay', {
   state: () => {
@@ -63,10 +65,14 @@ export const useEssayStore = defineStore('essay', {
       }
     },
 
-    handleFile(data) {
+    async handleFile(data) {
       if (data['pdf_version'] && stores.settings().markingInPdf) {
         data['url'] = stores.api().getEssayUrl(data['id']);
-        this.fetchFile(data['url']);
+        if (await this.fetchFile(data['url'])) {
+          annotator.load(data['url']);
+        }
+      } else {
+        annotator.unload();
       }
     },
 
@@ -76,10 +82,21 @@ export const useEssayStore = defineStore('essay', {
         await axios(url, {responseType: 'blob', timeout: 60000});
         // resource.objectUrl = URL.createObjectURL(response.data)
         console.log('finished. ');
+        return true;
       } catch (error) {
         console.error(error);
+        return false;
       }
-    }
-  }
+    },
 
+    /**
+     * Apply the marks and comments to the essay pdf
+     * @param {string } scope 'own'|'all'
+     * @returns {Promise<Blob>}
+     */
+    async buildMarkedPdf(scope) {
+      return await annotator.build(scope);
+    }
+
+  },
 });
