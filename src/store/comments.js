@@ -256,6 +256,15 @@ export const useCommentsStore = defineStore('comments', {
       const correctionsStore = stores.corrections();
       const changesStore = stores.changes();
 
+      // restore a deleted comment when a deleted mark is restored
+      if(!comment.comment) {
+        for (const mark of comment.marks) {
+          if (this.lastDeleted?.hasMarkKey(mark.key)) {
+            comment.comment = this.lastDeleted.comment;
+          }
+        }
+      }
+
       // this also sets the item key and the ids
       comment.setCorrectionKey(correctionsStore.ownKey);
 
