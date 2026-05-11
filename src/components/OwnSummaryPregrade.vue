@@ -4,6 +4,7 @@ import SumOfPoints from "@/components/SumOfPoints.vue";
 import Authorization from "@/components/Authorization.vue";
 import Summary from "@/data/Summary";
 import {ref} from "vue";
+import PdfAnnotator from '@/lib/PdfAnnotator';
 
 const itemsStore = stores.items();
 const summariesStore = stores.summaries();

@@ -49,6 +49,14 @@ export const useCommentsStore = defineStore('comments', {
       return '';
     },
 
+    allComments(state) {
+      return state.comments;
+    },
+
+    ownComments(state) {
+      return state.comments.filter(comment => comment.correction_key == stores.corrections().ownKey);
+    },
+
     activeComments(state) {
       const apiStore = stores.api();
       return state.comments.filter(comment =>

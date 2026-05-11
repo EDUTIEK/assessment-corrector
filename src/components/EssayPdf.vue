@@ -8,6 +8,7 @@ import createPDFJsApi from 'annotate-pdf/pdfjs-api';
 import {nextTick, onMounted, ref, watch} from 'vue';
 import Comment from "@/data/Comment";
 import Mark from "@/data/Mark";
+import PdfAnnotator from '@/lib/PdfAnnotator';
 
 const essayStore = stores.essay();
 const commentsStore = stores.comments();
@@ -19,6 +20,8 @@ const EssayNode = ref();
 const selectedTool = ref('text');
 const selectedDrawMode= ref('marker');
 const showLabels = ref(true);
+
+const annotator = new PdfAnnotator();
 
 let pdfjs;
 
@@ -211,8 +214,7 @@ watch(() => commentsStore.deletionChange, handleDeleted);
 
 async function download()
 {
-  const blob = await pdfjs.buildBlob();
-  console.log(blob);
+  const blob = await annotator.getSumPdf();
   const url = URL.createObjectURL(blob.data);
 
   const a = document.createElement('a');
@@ -254,7 +256,7 @@ async function download()
 
       &nbsp;
 
-      <!-- <v-btn variant="text" prepend-icon="mdi-download" @click="download">Download</v-btn> -->
+      <v-btn variant="text" prepend-icon="mdi-download" @click="download">Download</v-btn>
 
     </div>
     <div class="appEssayNode" tabindex="0" ref="EssayNode"></div>
