@@ -47,7 +47,7 @@ export default class PdfAnnotator {
    */
   async #buildFor(comments) {
     const annotations = [];
-    for (const comment of stores.comments().allComments) {
+    for (const comment of comments) {
       for (const annotation of comment.getPdfAnnotations()) {
         annotation.text = comment.comment;
         annotation.label = comment.label;
