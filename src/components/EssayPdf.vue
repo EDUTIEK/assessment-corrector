@@ -28,6 +28,10 @@ onMounted(() => {
   pdfjs.enableFreeFormHighlight(false);
   pdfjs.setDrawMode('marker'); // or 'underline'
   loadMarks();
+  if (summariesStore.isOwnDisabled) {
+    pdfjs.setViewOnly(true);
+    selectedTool.value = '';
+  }
   pdfjs.on('create', createMark);
   pdfjs.on('update', updateMark);
   pdfjs.on('delete', deleteMark);
@@ -50,6 +54,11 @@ function selectTool(tool = null) {
 
     case 'free':
       pdfjs.enableFreeFormHighlight(true);
+      pdfjs.enableTextHighlight(false);
+      break;
+
+    default:
+      pdfjs.enableFreeFormHighlight(false);
       pdfjs.enableTextHighlight(false);
       break;
   }
