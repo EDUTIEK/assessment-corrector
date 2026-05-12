@@ -7,6 +7,7 @@ import Summary from "@/data/Summary";
 import i18n from "@/plugins/i18n";
 
 const apiStore = stores.api();
+const essayStore = stores.essay();
 const itemsStore = stores.items();
 const settingsStore = stores.settings();
 const summariesStore = stores.summaries();
@@ -37,7 +38,22 @@ function getPartialPointsMessage() {
 
 async function setAuthorizedAndContinue() {
 
-  await summariesStore.setOwnAuthorized();
+  if (!summariesStore.isOwnAuthorized && await apiStore.saveChangesToBackend(true)) {
+    if (essayStore.hasPdf && settingsStore.markingInPdf) {
+      const item = stores.items().currentItem;
+      const own = await essayStore.buildMarkedPdf('own');
+      const all = await essayStore.buildMarkedPdf('all');
+
+      if (await apiStore.sendMarkedPdf(own, 'own', item.task_id, item.writer_id)
+          && await apiStore.sendMarkedPdf(all, 'all', item.task_id, item.writer_id)
+      ) {
+        await summariesStore.setOwnAuthorized();
+      }
+    } else {
+      await summariesStore.setOwnAuthorized();
+    }
+  }
+
   if (await apiStore.saveChangesToBackend(true)) {
     showConfirmation.value = false;
     apiStore.loadItemFromBackend(itemsStore.currentKey);

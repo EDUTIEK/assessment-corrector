@@ -23,7 +23,7 @@ pregraded.value = summariesStore.isOwnPregraded;
 
 
 async function set() {
-  if (!summariesStore.isOwnAuthorized) {
+  if (!summariesStore.isOwnAuthorized  && await apiStore.saveChangesToBackend(true)) {
     if (essayStore.hasPdf && settingsStore.markingInPdf) {
       const item = stores.items().currentItem;
       const own = await essayStore.buildMarkedPdf('own');
