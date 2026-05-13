@@ -185,6 +185,20 @@ function getCorrectionTitle(correction) {
       </v-list-item>
 
       <v-divider class="border-opacity-75"></v-divider>
+
+      <v-list-item aria-role="button" class="app-navigation-item" tabindex="0"
+                   @click="closeNavigation(); layoutStore.toggleSnippetList();"
+                   :aria-label="$t('snippetsSnippets') + (layoutStore.showSnippetList ? $t('navBarSelectedAria') : '')"
+                   :title="$t('snippetsSnippets') + (layoutStore.showSnippetList ? $t('navBarSelected') : '')"
+                   :ripple="false"
+      >
+        <template v-slot:prepend>
+          <v-icon aria-role="hidden"
+                  :icon="layoutStore.isLeftVisible && layoutStore.showSnippetList ? 'mdi-card-text': 'mdi-card-text-outline'"></v-icon>
+        </template>
+      </v-list-item>
+
+      <v-divider class="border-opacity-75"></v-divider>
     </v-list>
 
     <template v-slot:append>

@@ -23,7 +23,9 @@ export const useSnippetsStore = defineStore('snippets', {
       insert_text: '',                // text that should be inserted
 
       select: null,                   // data model for selection in Snippets component
-      edit: new Snippet()             // data model for editing in Snippets component
+      edit: new Snippet(),            // data model for editing in Snippets component
+
+      list_purpose: Snippet.FOR_COMMENT,
     }
   },
 
@@ -34,6 +36,17 @@ export const useSnippetsStore = defineStore('snippets', {
 
     sortedSnippets(state) {
       return Object.values(state.snippets).sort(Snippet.order);
+    },
+
+    forList(state) {
+      switch (state.list_purpose) {
+        case Snippet.FOR_COMMENT:
+          return state.forComment;
+        case Snippet.FOR_SUMMARY:
+          return state.forSummary;
+        default:
+          return Object.values(state.snippets);
+      }
     },
 
     forComment(state) {
@@ -123,6 +136,17 @@ export const useSnippetsStore = defineStore('snippets', {
       catch (err) {
         console.log(err);
       }
+    },
+
+    /**
+     * Sort the list of snippets
+     */
+    sortSnippets() {
+      const sorted = {};
+      for (const snippet of this.sortedSnippets) {
+        sorted[snippet.key] = snippet;
+      }
+      this.snippets = sorted;
     },
 
     /**

@@ -33,6 +33,7 @@ declare module 'vue' {
     Resources: typeof import('./src/components/Resources.vue')['default']
     ResourceUrl: typeof import('./src/components/ResourceUrl.vue')['default']
     SendingStatus: typeof import('./src/components/SendingStatus.vue')['default']
+    SnippetList: typeof import('./src/components/SnippetList.vue')['default']
     Snippets: typeof import('./src/components/Snippets.vue')['default']
     Solution: typeof import('./src/components/Solution.vue')['default']
     StartupContent: typeof import('./src/components/StartupContent.vue')['default']

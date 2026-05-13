@@ -34,10 +34,10 @@ export default class Snippet {
   purpose = '';
 
   /**
-   * Snippet title
+   * Snippet shortcut
    * @type {string}
    */
-  title = '';
+  shortcut = '';
 
   /**
    * Snippet text
@@ -66,8 +66,8 @@ export default class Snippet {
     if (data.purpose !== undefined && data.purpose !== null) {
       this.purpose = data.purpose.toString()
     }
-    if (data.title !== undefined && data.title !== null) {
-      this.title = data.title.toString()
+    if (data.shortcut !== undefined && data.shortcut !== null) {
+      this.shortcut = data.shortcut.toString()
     }
     if (data.text !== undefined && data.text !== null) {
       this.text = data.text.toString()

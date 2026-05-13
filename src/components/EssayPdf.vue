@@ -262,7 +262,7 @@ async function download()
 
       &nbsp;
 
-      <v-btn variant="text" prepend-icon="mdi-download" @click="download">Download</v-btn>
+      <!-- <v-btn variant="text" prepend-icon="mdi-download" @click="download">Download</v-btn> -->
 
     </div>
     <div class="appEssayNode" tabindex="0" ref="EssayNode"></div>

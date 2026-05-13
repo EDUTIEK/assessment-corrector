@@ -33,6 +33,8 @@ export const useLayoutStore = defineStore('layout', {
       showLeftSummaryRevision: false,      // display of the revision text on the left summary column
       showRightSummaryRevision: false,     // display of the revision text on the right summary column
 
+      showSnippetList: false,              // display the list of snippets on the left side
+
       // not stored
       leftCorrectionKey: '',               // key of the correction shown on the left side
       rightCorrectionKey: '',              // key of the correction shown on the right side
@@ -163,6 +165,7 @@ export const useLayoutStore = defineStore('layout', {
           this.showRightSummaryCriteria = !!data.showRightSummaryCriteria;
           this.showLeftSummaryText = !!data.showLeftSummaryText;
           this.showRightSummaryText = !!data.showRightSummaryText;
+          this.showSnippetList= !!data.showSnippetList;
         }
 
         if (!this.showMarkingComments && !this.showMarkingGeneralPoints && !this.showMarkingCommentPoints) {
@@ -193,7 +196,8 @@ export const useLayoutStore = defineStore('layout', {
           showLeftSummaryCriteria: this.showLeftSummaryCriteria,
           showRightSummaryCriteria: this.showRightSummaryCriteria,
           showLeftSummaryText: this.showLeftSummaryText,
-          showRightSummaryText: this.showRightSummaryText
+          showRightSummaryText: this.showRightSummaryText,
+          showSnippetList: this.showSnippetList
         })
       }
       catch (err) {
@@ -412,6 +416,14 @@ export const useLayoutStore = defineStore('layout', {
     toggleRightSummaryRevision() {
       this.showRightSummaryRevision = !this.showRightSummaryRevision
       this.saveToStorage()
+    },
+
+    toggleSnippetList() {
+      this.showSnippetList = !this.showSnippetList;
+      this.saveToStorage();
+      if (this.showSnippetList) {
+        this.setFocusChange('appSnippetList');
+      }
     },
 
     selectCorrection(correction_key) {

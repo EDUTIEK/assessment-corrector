@@ -126,6 +126,9 @@ document.addEventListener('keydown', layoutStore.handleKeyDown);
                          :showRevision="layoutStore.showLeftSummaryRevision"
           />
         </div>
+        <div class="col-extra" v-if="layoutStore.showSnippetList">
+          <snippet-list></snippet-list>
+        </div>
       </section>
 
       <!--
@@ -322,6 +325,14 @@ document.addEventListener('keydown', layoutStore.handleKeyDown);
 
 .col-content {
   flex-grow: 1;
+  background-color: white;
+  width: 100%;
+  padding: 10px;
+  overflow-y: hidden;
+}
+
+.col-extra {
+  min-height: 50%;
   background-color: white;
   width: 100%;
   padding: 10px;
