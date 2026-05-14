@@ -145,6 +145,30 @@ async function handleTextKeydown() {
   }
 }
 
+function handleTextKeyUp() {
+  if (event.ctrlKey) {
+  } else {
+    switch (event.key) {
+      case "F1":
+        event.preventDefault();
+        openSnippets();
+        break;
+      default:
+        const textarea = textRef.value;
+        const cursor = textarea.selectionEnd;
+        const text = snippetsStore.autoReplace(Snippet.FOR_COMMENT, textarea.value, cursor)
+        if (text) {
+          const offset = text.length - textarea.value.length;
+          textarea.value = text;
+          // comment.comment = text;
+          textarea.setSelectionRange(cursor + offset, cursor + offset);
+        }
+
+        commentsStore.updateComment(comment);
+    }
+  }
+}
+
 async function handleSumOfPointsKeydown() {
   handleTextKeydown();
   switch (event.key) {
@@ -225,7 +249,7 @@ watch(() => snippetsStore.selection_open, handleSnippet);
                           rows="1" auto-grow
                           :readonly="isDisabled(comment)"
                           @change="commentsStore.updateComment(comment)"
-                          @keyup="commentsStore.updateComment(comment)"
+                          @keyup="handleTextKeyUp()"
                           @keydown="handleTextKeydown()"
                           v-model="comment.comment">
               </v-textarea>

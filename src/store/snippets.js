@@ -8,6 +8,8 @@ import Snippet from "@/data/Snippet";
 import Change from "@/data/Change";
 
 const storage = getStorage('snippets');
+const whitespaceChars = " \n\r";
+const triggerChars = ",;. :-_#‘*+~^°!“$%&/()=?`´{[]}€µ \n\r";
 
 export const useSnippetsStore = defineStore('snippets', {
   state: () => {
@@ -25,7 +27,7 @@ export const useSnippetsStore = defineStore('snippets', {
       select: null,                   // data model for selection in Snippets component
       edit: new Snippet(),            // data model for editing in Snippets component
 
-      list_purpose: Snippet.FOR_COMMENT,
+      list_purpose: Snippet.FOR_COMMENT, // purpose for which the list is opened
     }
   },
 
@@ -33,6 +35,14 @@ export const useSnippetsStore = defineStore('snippets', {
    * Getter functions (with params) start with 'get', simple state queries not
    */
   getters: {
+
+    autoFrom(state) {
+      return state.auto_from
+    },
+
+    autoTo(state) {
+      return state.auto_to
+    },
 
     sortedSnippets(state) {
       return Object.values(state.snippets).sort(Snippet.order);
@@ -226,6 +236,62 @@ export const useSnippetsStore = defineStore('snippets', {
         }
       }
       return changes;
+    },
+
+    /**
+     * Check if text can be replaced when a char is entered
+     * - the char must be a special one to trigger the replacement
+     * - search text is extracted between the last whitespace char and the entered char
+     * - an entered whitespace is not included in the search
+     * - other triggering chars are included
+     *
+     * @param {string} purpose   purpose of the snippets to search
+     * @param {string} text   last entered character
+     * @param {string} key   last entered character
+     * @return {string|null}
+     */
+    autoReplace(purpose, text, position) {
+
+      // set position at last entered character
+      position--;
+      const char = text.charAt(position);
+
+      if (triggerChars.includes(char)) {
+        if (whitespaceChars.includes(char)) {
+          // exclude the whitespace char from replacement
+          position--;
+        }
+
+        let start = position;
+        let search = null;
+
+        while (start >= 0) {
+          if (start == 0) {
+            search = text.slice(0, position + 1);
+            break;
+          }
+          else if (whitespaceChars.includes(text.charAt(start))) {
+            start++;
+            search = text.slice(start, position + 1);
+            break;
+          }
+          start--;
+        }
+        console.log('search', '[' + search + ']');
+
+        if (search) {
+          for (const snippet of this.forComment) {
+            if (snippet.shortcut == search) {
+              text = text.slice(0, start) + snippet.text + text.slice(position + 1);
+              return text;
+            }
+          }
+        }
+      }
+
+
+
+      return null;
     },
   }
 });
