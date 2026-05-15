@@ -8,8 +8,8 @@ import Snippet from "@/data/Snippet";
 import Change from "@/data/Change";
 
 const storage = getStorage('snippets');
-const whitespaceChars = " \n\r";
-const triggerChars = ",;. :-_#‘*+~^°!“$%&/()=?`´{[]}€µ \n\r";
+const whitespaceChars = "<> \n\r";
+const triggerChars = ",;.:-_#‘*+~^°!“$%&/()=?`´{[]}€µ<> \n\r";
 
 export const useSnippetsStore = defineStore('snippets', {
   state: () => {
@@ -28,6 +28,11 @@ export const useSnippetsStore = defineStore('snippets', {
       edit: new Snippet(),            // data model for editing in Snippets component
 
       list_purpose: Snippet.FOR_COMMENT, // purpose for which the list is opened
+
+      last_auto_purpose: null,
+      last_auto_search: null,
+      last_auto_replace: null,
+      last_auto_start: null
     }
   },
 
@@ -240,58 +245,100 @@ export const useSnippetsStore = defineStore('snippets', {
 
     /**
      * Check if text can be replaced when a char is entered
-     * - the char must be a special one to trigger the replacement
+     * - the char must be one to trigger the replacement
      * - search text is extracted between the last whitespace char and the entered char
-     * - an entered whitespace is not included in the search
+     * - an entered whitespace is not included in the search for shortcuts
      * - other triggering chars are included
      *
-     * @param {string} purpose   purpose of the snippets to search
-     * @param {string} text   last entered character
-     * @param {string} key   last entered character
-     * @return {string|null}
+     * @param {string} purpose  purpose of the snippets to search
+     * @param {string} text  the whole text
+     * @param {int} positon  current cursor position (after last entered char)
+     * @return {string|null} changed text or null if nothing is changed
      */
     autoReplace(purpose, text, position) {
 
-      // set position at last entered character
+      let snippets = [];
+
+      // check where to search and cleanup if changed
+      switch (purpose) {
+        case Snippet.FOR_COMMENT:
+          snippets = this.forComment;
+          break;
+        case Snippet.FOR_SUMMARY:
+          snippets = this.forSummary;
+          break;
+      }
+      if (purpose !== this.last_auto_purpose) {
+        this.last_auto_purpose = purpose;
+        this.last_auto_start = null;
+      }
+
+      // set position at last entered char
+      // check if that char triggers an auto replacement
       position--;
       const char = text.charAt(position);
-
       if (triggerChars.includes(char)) {
+
+        // prevent a triggering whitespace char from being replaced
         if (whitespaceChars.includes(char)) {
-          // exclude the whitespace char from replacement
           position--;
         }
 
+        // backward search for a whitespace
         let start = position;
-        let search = null;
-
-        while (start >= 0) {
-          if (start == 0) {
-            search = text.slice(0, position + 1);
-            break;
-          }
-          else if (whitespaceChars.includes(text.charAt(start))) {
-            start++;
-            search = text.slice(start, position + 1);
+        let searches = [];
+        while (start > 0) {
+          if (whitespaceChars.includes(text.charAt(start))) {
+            start++; // dont' include the whitespace char
             break;
           }
           start--;
         }
-        console.log('search', '[' + search + ']');
 
-        if (search) {
-          for (const snippet of this.forComment) {
+        // shortcuts to search for
+        searches.push(text.slice(start, position + 1));   // 1. with trigger char
+        searches.push(text.slice(start, position));       // 2. without trigger char
+
+        for( const search of searches) {
+          // undo has done just before - don't replace again
+          if (start === this.last_auto_start && search === this.last_auto_search) {
+            break;
+          }
+
+          // search for shortcut and replace the first found one
+          for (const snippet of snippets) {
             if (snippet.shortcut == search) {
-              text = text.slice(0, start) + snippet.text + text.slice(position + 1);
+              this.last_auto_start = start;
+              this.last_auto_search = search;
+              this.last_auto_replace = snippet.text;
+
+              text = text.slice(0, start) + snippet.text + text.slice(start + search.length);
               return text;
             }
           }
         }
       }
 
-
-
+      // entered key is not triggering, prevent an undo of the last replacement
+      this.last_auto_start = null;
       return null;
     },
+
+    /**
+     * Undo the last auto replacement
+     * @param {string} text the text where an undo should be done
+     * @return {string|null} changed text or null if nothing is changed
+     */
+    autoUndo(text) {
+      if (this.last_auto_start !== null) {
+        const check = text.slice(this.last_auto_start, this.last_auto_start + this.last_auto_replace.length);
+        if (check == this.last_auto_replace) {
+          return text.slice(0, this.last_auto_start)
+              + this.last_auto_search
+              + text.slice(this.last_auto_start + this.last_auto_replace.length);
+        }
+      }
+      return null;
+    }
   }
 });

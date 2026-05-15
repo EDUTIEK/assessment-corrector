@@ -133,39 +133,50 @@ async function handleTextKeydown() {
         }
         break;
     }
-  } else {
-    switch (event.key) {
-      case "F1":
-        if (!isDisabled(comment)) {
-          event.preventDefault();
-          openSnippets();
-        }
-        break;
-    }
+  // } else {
+  //   switch (event.key) {
+  //     case "F1":
+  //       event.preventDefault();
+  //       openSnippets();
+  //       break;
+  //   }
   }
 }
 
 function handleTextKeyUp() {
-  if (event.ctrlKey) {
-  } else {
-    switch (event.key) {
-      case "F1":
-        event.preventDefault();
-        openSnippets();
-        break;
-      default:
-        const textarea = textRef.value;
-        const cursor = textarea.selectionEnd;
-        const text = snippetsStore.autoReplace(Snippet.FOR_COMMENT, textarea.value, cursor)
-        if (text) {
-          const offset = text.length - textarea.value.length;
-          textarea.value = text;
-          // comment.comment = text;
-          textarea.setSelectionRange(cursor + offset, cursor + offset);
-        }
+  if (isDisabled(comment)) {
+    return;
+  }
 
-        commentsStore.updateComment(comment);
-    }
+  const textarea = textRef.value;
+  const cursor = textarea.selectionEnd;
+  let new_text = null;
+
+  switch (event.key) {
+    case "F1":
+      event.preventDefault();
+      openSnippets();
+      break;
+
+    case "z":
+      if (event.ctrlKey) {
+        new_text = snippetsStore.autoUndo(textarea.value);
+      }
+      break;
+
+    case "Backspace":
+      new_text = snippetsStore.autoUndo(textarea.value);
+      break;
+
+    default:
+      new_text = snippetsStore.autoReplace(Snippet.FOR_COMMENT, textarea.value, cursor)
+  }
+
+  if (new_text) {
+    const offset = new_text.length - textarea.value.length;
+    textarea.value = new_text;
+    textarea.setSelectionRange(cursor + offset, cursor + offset);
+    commentsStore.updateComment(comment);
   }
 }
 
