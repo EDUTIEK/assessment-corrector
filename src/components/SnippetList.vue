@@ -152,7 +152,14 @@ watch(() => layoutStore.focusChange, handleFocusChange);
               </v-textarea>
             </td>
             <td class="col-right">
-              <v-btn class="trashButton" density="compact" size="small" variant="text" prepend-icon="mdi-delete-outline"
+              <v-btn density="compact" size="small" variant="text" prepend-icon="mdi-playlist-plus"
+                     tabindex="0"
+                     @click="create()"
+              >
+                <span class="sr-only">{{ t('snippetsCreate') }}</span>
+              </v-btn>
+
+              <v-btn density="compact" size="small" variant="text" prepend-icon="mdi-delete-outline"
                      tabindex="0"
                      @click="snippetsStore.deleteSnippet(snippet.key);"
               >
@@ -205,11 +212,12 @@ watch(() => layoutStore.focusChange, handleFocusChange);
 }
 
 .col-center {
-  width: 20%;
+  width: 15%;
 }
 
 .col-right {
-  width: 10%;
+  width: 15%;
+  text-align: right;
 }
 
 .snippetDisplay {

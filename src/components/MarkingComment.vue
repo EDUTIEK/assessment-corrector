@@ -174,7 +174,7 @@ function handleTextKeyUp() {
 
   if (new_text) {
     const offset = new_text.length - textarea.value.length;
-    textarea.value = new_text;
+    comment.comment = new_text;
     textarea.setSelectionRange(cursor + offset, cursor + offset);
   }
 

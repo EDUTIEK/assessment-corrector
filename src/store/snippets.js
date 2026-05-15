@@ -8,8 +8,8 @@ import Snippet from "@/data/Snippet";
 import Change from "@/data/Change";
 
 const storage = getStorage('snippets');
-const whitespaceChars = "<> \n\r";
-const triggerChars = ",;.:-_#‘*+~^°!“$%&/()=?`´{[]}€µ<> \n\r";
+const whitespaceChars = "<>  \n\r";
+const triggerChars = ",;.:-_#‘*+~^°!“$%&/()=?`´{[]}€µ<>  \n\r";
 
 export const useSnippetsStore = defineStore('snippets', {
   state: () => {
@@ -256,6 +256,8 @@ export const useSnippetsStore = defineStore('snippets', {
      * @return {string|null} changed text or null if nothing is changed
      */
     autoReplace(purpose, text, position) {
+      // console.log('text', '[' + text + ']');
+      // console.log('position', position);
 
       let snippets = [];
 

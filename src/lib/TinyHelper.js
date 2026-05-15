@@ -250,34 +250,39 @@ export default class TinyHelper {
         }
     }
 
-    /**
-     * Get the html content of the editor
-     * @returns {string|null}
-     */
-    getContent() {
-        try {
-            return this.editor.getContent();
-        } catch (e) {
-            console.log(e);
-            return null;
+
+    getTextNodeAtCursor() {
+        const rng = this.editor.selection.getRng();
+        let node = rng.startContainer;
+
+        // get the first child node if the node is not a text node
+        if (node.nodeType !== Node.TEXT_NODE) {
+            node = node.childNodes[rng.startOffset] ?? node.firstChild;
         }
+
+        return {
+            node,                           // the node
+            cursor: rng.startOffset,        // cursor position in then ode
+            text:   node?.textContent ?? '' //text content
+        };
     }
 
-    /**
-     * Set the html content of the editor
-     * @param {string} content
-     * @returns {boolean} content is successfully replaces
-     */
-    setContent(content) {
-        try {
-            this.editor.setContent(content);
-            return true;
-        } catch (e) {
-            console.log(e);
+    replaceNodeText(node, newText, cursor) {
+        console.log(cursor);
+
+        if (node.nodeType !== Node.TEXT_NODE) {
             return false;
         }
-    }
 
+        node.textContent = newText;
+        const newRng = this.editor.dom.createRng();
+        newRng.setStart(node, cursor);
+        newRng.collapse(true);
+        this.editor.selection.setRng(newRng);
+        this.editor.undoManager.add();
+
+        return true;
+    }
 
     /**
      * Insert a content at caret position
