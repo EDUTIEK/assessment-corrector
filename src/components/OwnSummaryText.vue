@@ -36,6 +36,35 @@ function handleChange() {
 }
 
 function handleKeyUp() {
+
+  // let new_text = null;
+  //
+  // switch (event.key) {
+  //
+  //   case "z":
+  //     if (event.ctrlKey) {
+  //       new_text = snippetsStore.autoUndo(textarea.value);
+  //     }
+  //     break;
+  //
+  //   case "Backspace":
+  //     new_text = snippetsStore.autoUndo(textarea.value);
+  //     break;
+  //
+  //   default:
+  //     const text = helper.getContent();
+  //     const bookmark = helper.getBookmark();
+  //
+  //     new_text = snippetsStore.autoReplace(Snippet.FOR_COMMENT, text);
+  // }
+  //
+  // if (new_text) {
+  //   const offset = new_text.length - textarea.value.length;
+  //   textarea.value = new_text;
+  //   textarea.setSelectionRange(cursor + offset, cursor + offset);
+  // }
+
+
   summariesStore.updateContent(true);
 }
 

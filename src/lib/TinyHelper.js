@@ -224,6 +224,62 @@ export default class TinyHelper {
     }
 
     /**
+     * Get a bookmark object of the current cursor position
+     * @returns {Bookmark|null}
+     */
+    getBookmark() {
+        try {
+            return this.editor.getBookmark();
+        } catch (e) {
+            console.log(e);
+            return null;
+        }
+    }
+
+    /**
+     * Move the cursor position to a bookmark
+     * @returns {boolean} successfully moved
+     */
+    moveToBookmark(bookmark) {
+        try {
+            this.editor.moveToBookmark(bookmark);
+            return true;
+        } catch (e) {
+            console.log(e);
+            return false;
+        }
+    }
+
+    /**
+     * Get the html content of the editor
+     * @returns {string|null}
+     */
+    getContent() {
+        try {
+            return this.editor.getContent();
+        } catch (e) {
+            console.log(e);
+            return null;
+        }
+    }
+
+    /**
+     * Set the html content of the editor
+     * @param {string} content
+     * @returns {boolean} content is successfully replaces
+     */
+    setContent(content) {
+        try {
+            this.editor.setContent(content);
+            return true;
+        } catch (e) {
+            console.log(e);
+            return false;
+        }
+    }
+
+
+    /**
      * Insert a content at caret position
      */
     insertContent(content) {
