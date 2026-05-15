@@ -176,8 +176,9 @@ function handleTextKeyUp() {
     const offset = new_text.length - textarea.value.length;
     textarea.value = new_text;
     textarea.setSelectionRange(cursor + offset, cursor + offset);
-    commentsStore.updateComment(comment);
   }
+
+  commentsStore.updateComment(comment);
 }
 
 async function handleSumOfPointsKeydown() {
