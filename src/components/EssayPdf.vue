@@ -97,6 +97,9 @@ function loadMarks() {
   const all = [];
   for (const comment of commentsStore.activeComments) {
     for (const annotation of comment.getPdfAnnotations()) {
+      if (comment.correction_key != stores.corrections().ownKey || summariesStore.isOwnDisabled) {
+        annotation.noDelete = true;
+      }
       if (!showLabels.value) {
         annotation.label = '';
       }

@@ -55,7 +55,7 @@ export default class PdfAnnotator {
     }
     await this.pdf.setAll(annotations);
 
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    // await new Promise((resolve) => setTimeout(resolve, 500));
 
     const result = await this.pdf.buildBlob();
     return result.data;
