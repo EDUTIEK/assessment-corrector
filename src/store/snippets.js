@@ -334,6 +334,8 @@ export const useSnippetsStore = defineStore('snippets', {
     autoUndo(text) {
       if (this.last_auto_start !== null) {
         const check = text.slice(this.last_auto_start, this.last_auto_start + this.last_auto_replace.length);
+        console.log('last', this.last_auto_replace);
+        console.log('check', check);
         if (check == this.last_auto_replace) {
           return text.slice(0, this.last_auto_start)
               + this.last_auto_search

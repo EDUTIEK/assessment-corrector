@@ -40,21 +40,12 @@ function handleKeyUp() {
   const data = helper.getTextNodeAtCursor();
 
   switch (event.key) {
-    case "z":
-      if (event.ctrlKey) {
-        new_text = snippetsStore.autoUndo(data.text);
-      }
-      break;
-    case "Backspace":
-      new_text = snippetsStore.autoUndo(data.text);
-      break;
     default:
       new_text = snippetsStore.autoReplace(Snippet.FOR_SUMMARY, data.text, data.cursor);
-  }
-
-  if (new_text) {
-    const offset = new_text.length - data.text.length;
-    helper.replaceNodeText(data.node, new_text, data.cursor + offset);
+      if (new_text) {
+        const offset = new_text.length - data.text.length;
+        helper.replaceNodeText(data.node, new_text, data.cursor + offset);
+      }
   }
 
   summariesStore.updateContent(true);
@@ -66,6 +57,17 @@ function handleKeyDown() {
       event.preventDefault();
       helper.openSnippets();
       break;
+
+    case "Backspace":
+      const data = helper.getTextNodeAtCursor();
+      const new_text = snippetsStore.autoUndo(data.text);
+      if (new_text) {
+        event.preventDefault();
+        const offset = new_text.length - data.text.length;
+        helper.replaceNodeText(data.node, new_text, data.cursor + offset);
+      }
+      break;
+
     default:
       layoutStore.handleKeyDown(event);
   }

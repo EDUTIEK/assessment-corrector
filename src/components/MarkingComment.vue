@@ -133,13 +133,23 @@ async function handleTextKeydown() {
         }
         break;
     }
-  // } else {
-  //   switch (event.key) {
-  //     case "F1":
-  //       event.preventDefault();
-  //       openSnippets();
-  //       break;
-  //   }
+  } else {
+    if (isDisabled(comment)) {
+      return;
+    }
+    switch (event.key) {
+      case "Backspace":
+        const textarea = textRef.value;
+        const cursor = textarea.selectionEnd;
+        const new_text = snippetsStore.autoUndo(textarea.value);
+        if (new_text) {
+          event.preventDefault();
+          const offset = new_text.length - textarea.value.length;
+          comment.comment = new_text;
+          textarea.setSelectionRange(cursor + offset, cursor + offset);
+        }
+        break;
+    }
   }
 }
 
@@ -148,34 +158,21 @@ function handleTextKeyUp() {
     return;
   }
 
-  const textarea = textRef.value;
-  const cursor = textarea.selectionEnd;
-  let new_text = null;
-
   switch (event.key) {
     case "F1":
       event.preventDefault();
       openSnippets();
       break;
 
-    case "z":
-      if (event.ctrlKey) {
-        new_text = snippetsStore.autoUndo(textarea.value);
-      }
-      break;
-
-    case "Backspace":
-      new_text = snippetsStore.autoUndo(textarea.value);
-      break;
-
     default:
-      new_text = snippetsStore.autoReplace(Snippet.FOR_COMMENT, textarea.value, cursor)
-  }
-
-  if (new_text) {
-    const offset = new_text.length - textarea.value.length;
-    comment.comment = new_text;
-    textarea.setSelectionRange(cursor + offset, cursor + offset);
+      const textarea = textRef.value;
+      const cursor = textarea.selectionEnd;
+      const new_text = snippetsStore.autoReplace(Snippet.FOR_COMMENT, textarea.value, cursor)
+      if (new_text) {
+        const offset = new_text.length - textarea.value.length;
+        comment.comment = new_text;
+        textarea.setSelectionRange(cursor + offset, cursor + offset);
+      }
   }
 
   commentsStore.updateComment(comment);
