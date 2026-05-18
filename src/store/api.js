@@ -95,7 +95,7 @@ export const useApiStore = defineStore('api', {
        */
       const fn = function (resource) {
         const config = this.getRequestConfig(this.fileToken);
-        return config.baseURL + '/corrector/file/task/resource/' + resource.id + '/resource?' + config.params.toString();
+        return config.baseURL + '/corrector/file/task/resource/' + resource.id + '/inline?' + config.params.toString();
       }
       return fn;
     },
@@ -112,7 +112,7 @@ export const useApiStore = defineStore('api', {
        */
       const fn = function (essay_id) {
         const config = this.getRequestConfig(this.fileToken);
-        return config.baseURL + '/corrector/file/essaytask/essay/' + essay_id + '/pdf?' + config.params.toString();
+        return config.baseURL + '/corrector/file/essaytask/essay/' + essay_id + '/inline?' + config.params.toString();
       }
       return fn;
     },
@@ -129,7 +129,7 @@ export const useApiStore = defineStore('api', {
        */
       const fn = function (page) {
         const config = this.getRequestConfig(this.fileToken);
-        return config.baseURL + '/corrector/file/essaytask/image/' + page.id + '/image?' + config.params.toString();
+        return config.baseURL + '/corrector/file/essaytask/image/' + page.id + '/inline?' + config.params.toString();
       }
       return fn;
     },
@@ -143,7 +143,7 @@ export const useApiStore = defineStore('api', {
        */
       const fn = function (page) {
         const config = this.getRequestConfig(this.fileToken);
-        return config.baseURL + '/corrector/file/essaytask/thumb/' + page.id + '/thumb?' + config.params.toString();
+        return config.baseURL + '/corrector/file/essaytask/thumb/' + page.id + '/inline?' + config.params.toString();
       }
       return fn;
     },
@@ -151,13 +151,27 @@ export const useApiStore = defineStore('api', {
     getSummaryPdfUrl(state) {
 
       /**
-       * Get the Url for loading a page thumbnail
-       * @param {Page} page
+       * Get the Url for loading a summary pdf
+       * @param {Summary} summary
        * @returns {string}
        */
       const fn = function (summary) {
         const config = this.getRequestConfig(this.fileToken);
-        return config.baseURL + '/corrector/file/task/summary/' + summary.id + '/' + summary.pdf + '?' + config.params.toString();
+        return config.baseURL + '/corrector/file/task/summary/' + summary.id + '/inline?' + config.params.toString();
+      }
+      return fn;
+    },
+
+    getSnippetsUrl(state) {
+
+      /**
+       * Get the Url for loading a page thumbnail
+       * @param {string} purpose
+       * @returns {string}
+       */
+      const fn = function (purpose) {
+        const config = this.getRequestConfig(this.fileToken);
+        return config.baseURL + '/corrector/file/task/snippets_' + purpose + '/0/attachment?' + config.params.toString();
       }
       return fn;
     },

@@ -9,6 +9,7 @@ import OwnSummaryUpload from '@/components/OwnSummaryUpload.vue';
 
 const { t } = i18n.global;
 
+const apiStore = stores.api();
 const snippetsStore = stores.snippets();
 const layoutStore = stores.layout();
 
@@ -106,6 +107,17 @@ watch(() => layoutStore.focusChange, handleFocusChange);
       <v-btn id="appSnippetListCreate" size="small" prepend-icon="mdi-playlist-plus" @click="create()">{{ t('snippetsCreate') }}</v-btn>
       &nbsp;
       <v-btn id="appSnippetListSort" size="small" prepend-icon="mdi-sort" @click="sort()">{{ t('snippetsSort') }}</v-btn>
+
+      &nbsp;
+
+      <v-btn
+          :href="apiStore.getSnippetsUrl(snippetsStore.list_purpose)"
+          size="small"
+          prepend-icon="mdi-download"
+      >
+        {{ t('snippetsExport') }}
+      </v-btn>
+
     </div>
 
     <v-table ref="table" class="list" density="compact" fixed-header>

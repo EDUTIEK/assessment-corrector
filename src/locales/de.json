@@ -267,6 +267,8 @@
     "snippetsSort": "Sortieren",
     "snippetsForComment": "Für Kommentare",
     "snippetsForSummary": "Für Gutachten",
+    "snippetsExport": "Exportieren",
+    "snippetsImport": "Importieren",
     "startupContentLoadData": "LadeDaten...",
     "startupContentLoadError": "Fehler beim Laden",
     "startupContentLoadItemError": "Beim Laden der zu korrigierenden Abgabe ist ein Fehler aufgetreten. Die Korrekturoberfläche kann nicht gestartet werden.",
