@@ -10,6 +10,7 @@ import i18n from "@/plugins/i18n";
 import md5 from 'md5';
 import Change from '@/data/Change';
 import Item from '@/data/Item';
+import Snippet from '@/data/Snippet';
 
 const { t } = i18n.global;
 const sendInterval = 1000;      // time (ms) to wait for sending open savings to the backend
@@ -636,6 +637,48 @@ export const useApiStore = defineStore('api', {
             }
           }));
         return response.data.id;
+
+      } catch (error) {
+        console.log(error);
+        return false;
+      }
+    },
+
+    /**
+     * Send a marked pdf file
+     * @param {Blob} file
+     * @param {string} purpose
+     * @return {bool} import is successful
+     */
+    async sendSnippets(file, purpose, onProgress) {
+
+      let entity;
+      switch (purpose) {
+        case Snippet.FOR_COMMENT:
+          entity = 'snippets_for_comment';
+          break;
+        case Snippet.FOR_SUMMARY:
+          entity = 'snippets_for_summary';
+          break;
+        default:
+          return false;
+      }
+
+      try {
+        const formData = new FormData();
+        // 'file' is the POST element
+        formData.append('file', file);
+
+        const response = await axios.post(
+          '/corrector/upload/task/' + entity,
+          formData,
+          Object.assign(this.getRequestConfig(this.dataToken), {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+            onUploadProgress: onProgress
+          }));
+        return response.data;
 
       } catch (error) {
         console.log(error);

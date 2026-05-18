@@ -6,6 +6,7 @@ import { ref, nextTick, watch, onMounted } from 'vue';
 import Snippet from '@/data/Snippet';
 import OwnSummaryTemplate from '@/components/OwnSummaryTemplate.vue';
 import OwnSummaryUpload from '@/components/OwnSummaryUpload.vue';
+import SnippetsImport from '@/components/SnippetsImport.vue';
 
 const { t } = i18n.global;
 
@@ -95,7 +96,7 @@ watch(() => layoutStore.focusChange, handleFocusChange);
         <v-col cols="6" class="ma-0 pa-0 text-right">
           <div class="header-buttons">
             <v-btn-toggle density="compact" variant="outlined" divided v-model="snippetsStore.list_purpose">
-              <v-btn size="small" variant="text" :value="Snippet.FOR_COMMENT" >{{ t('snippetsForComment') }}</v-btn>
+              <v-btn size="small" variant="text" :value="Snippet.FOR_COMMENT">{{ t('snippetsForComment') }}</v-btn>
               <v-btn size="small" variant="text" :value="Snippet.FOR_SUMMARY">{{ t('snippetsForSummary') }}</v-btn>
             </v-btn-toggle>
           </div>
@@ -107,9 +108,7 @@ watch(() => layoutStore.focusChange, handleFocusChange);
       <v-btn id="appSnippetListCreate" size="small" prepend-icon="mdi-playlist-plus" @click="create()">{{ t('snippetsCreate') }}</v-btn>
       &nbsp;
       <v-btn id="appSnippetListSort" size="small" prepend-icon="mdi-sort" @click="sort()">{{ t('snippetsSort') }}</v-btn>
-
       &nbsp;
-
       <v-btn
           :href="apiStore.getSnippetsUrl(snippetsStore.list_purpose)"
           size="small"
@@ -117,6 +116,8 @@ watch(() => layoutStore.focusChange, handleFocusChange);
       >
         {{ t('snippetsExport') }}
       </v-btn>
+      &nbsp;
+      <snippets-import></snippets-import>
 
     </div>
 

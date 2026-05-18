@@ -35,6 +35,7 @@ declare module 'vue' {
     SendingStatus: typeof import('./src/components/SendingStatus.vue')['default']
     SnippetList: typeof import('./src/components/SnippetList.vue')['default']
     Snippets: typeof import('./src/components/Snippets.vue')['default']
+    SnippetsImport: typeof import('./src/components/SnippetsImport.vue')['default']
     Solution: typeof import('./src/components/Solution.vue')['default']
     StartupContent: typeof import('./src/components/StartupContent.vue')['default']
     SummaryColumn: typeof import('./src/components/SummaryColumn.vue')['default']
