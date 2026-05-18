@@ -263,6 +263,7 @@ watch(() => snippetsStore.selection_open, handleSnippet);
                           @change="commentsStore.updateComment(comment)"
                           @keyup="handleTextKeyUp()"
                           @keydown="handleTextKeydown()"
+                          @focus="snippetsStore.list_purpose = Snippet.FOR_COMMENT"
                           v-model="comment.comment">
               </v-textarea>
             </v-col>

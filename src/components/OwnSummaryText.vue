@@ -99,6 +99,7 @@ watch(() => snippetsStore.selection_open, handleSnippet);
         @keyup="handleKeyUp"
         @keydown="handleKeyDown"
         @scroll="helper.saveScrolling"
+        @focus="snippetsStore.list_purpose = Snippet.FOR_SUMMARY"
         licenseKey = 'gpl'
         :init="helper.getInit()"
     />
