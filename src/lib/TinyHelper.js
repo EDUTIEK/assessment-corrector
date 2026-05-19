@@ -91,7 +91,7 @@ export default class TinyHelper {
             table_default_styles: {},         // no inline styles on new tables
             table_default_attributes: {},      // no default attributes like width
             table_resize_bars: false,
-            table_toolbar: 'tabledelete | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol',
+            table_toolbar: 'tabledelete | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol | tablecellbackgroundcolor',
 
             setup: function (editor) {
                 editor.ui.registry.addButton('zoomOut', {tooltip: t('summaryTextZoomOut'), icon: 'zoom-out', onAction: this.zoomOut.bind(this)});
@@ -336,7 +336,7 @@ export default class TinyHelper {
         switch (formatting_options) {
             case 'extended':
                 return {
-                    '*': 'background-color,color,text-align,mce-pagebreak,padding-left'
+                    '*': 'background-color,background,color,text-align,mce-pagebreak,padding-left'
                 };
             default:
                 return {};
