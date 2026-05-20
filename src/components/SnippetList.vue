@@ -85,13 +85,20 @@ function fixLabels(snippet) {
 }
 
 async function handleFocusChange() {
-  console.log("snippet focus");
   if (layoutStore.focusTarget == 'appSnippetList') {
     await nextTick();
     document.getElementById('appSnippetListCreate').focus();
   }
 }
 watch(() => layoutStore.focusChange, handleFocusChange);
+
+
+function rowFocusout(event) {
+  const row = event.currentTarget;
+  if (!row.contains(event.relatedTarget)) {
+    selectedKey.value = '';
+  }
+}
 
 </script>
 
@@ -153,7 +160,7 @@ watch(() => layoutStore.focusChange, handleFocusChange);
               </v-btn>
             </td>
           </tr>
-          <tr :id="'appSnippetRow' + snippet.key" v-if="isSelected(snippet)">
+          <tr :id="'appSnippetRow' + snippet.key" v-if="isSelected(snippet)" tabindex="-1" @focusout="rowFocusout">
             <td class="col-left">
               <v-textarea class="snippetInput" rounded="0" density="compact" variant="solo" rows="1" auto-grow
                           v-model="snippet.text"
