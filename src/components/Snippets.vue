@@ -7,7 +7,7 @@ import i18n from "@/plugins/i18n";
 const { t } = i18n.global;
 const snippetsStore = stores.snippets();
 const appSelect = ref();  // v-autocomplete
-const appEdit = ref();    // v-textarea
+const appEditText = ref();    // v-textarea
 
 let snippets = [];
 
@@ -63,7 +63,7 @@ async function handleSelect() {
 
   snippetsStore.select = null;
   await nextTick();
-  appEdit.value.focus();
+  appEditText.value.focus();
 
 }
 
@@ -78,10 +78,13 @@ async function handleEdit() {
 
 function handleClose() {
   snippetsStore.selection_open = false;
+  if (snippetsStore.open_for_purpose == Snippet.FOR_SUMMARY) {
+    stores.layout().setFocusChange('ownSummary');
+  }
 }
 
 function handleApply() {
-  snippetsStore.selection_open = false;
+  handleClose();
   snippetsStore.insert_text = snippetsStore.edit.text;
 }
 
@@ -94,7 +97,7 @@ async function handleDelete() {
   appSelect.value.focus();
 }
 
-async function handleKeydown() {
+async function handleKeyup() {
   switch (event.key) {
     case "F1":
       event.preventDefault();
@@ -125,19 +128,26 @@ function customFilter (itemTitle, queryText, item) {
               :custom-filter="customFilter"
               :items="snippets"
               @update:modelValue="handleSelect()"
-              @keydown="handleKeydown()"
+              @keyup="handleKeyup()"
               base-color="white"
               item-title="text"
               item-value="key"
           ></v-autocomplete>
           {{ $t('snippetsEdit') }}
           <v-textarea
-              ref="appEdit"
+              ref="appEditText"
               v-model="snippetsStore.edit.text"
               @change="handleEdit()"
-              @keyup="handleEdit()"
-              @keydown ="handleKeydown()"
+              @keyup="handleKeyup()"
           ></v-textarea>
+          {{ $t('snippetsShortcut') }}
+          <v-text-field
+              type="text"
+              v-model="snippetsStore.edit.shortcut"
+              @change="handleEdit()"
+              @keyup="handleKeyup()"
+          >
+          </v-text-field>
         </v-card-text>
         <v-card-actions>
           <v-btn

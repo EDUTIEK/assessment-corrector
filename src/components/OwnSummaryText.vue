@@ -40,6 +40,11 @@ function handleKeyUp() {
   const data = helper.getTextNodeAtCursor();
 
   switch (event.key) {
+    case "F1":
+      event.preventDefault();
+      helper.openSnippets();
+      break;
+
     default:
       new_text = snippetsStore.autoReplace(Snippet.FOR_SUMMARY, data.text, data.cursor);
       if (new_text) {
@@ -53,11 +58,6 @@ function handleKeyUp() {
 
 function handleKeyDown() {
   switch (event.key) {
-    case "F1":
-      event.preventDefault();
-      helper.openSnippets();
-      break;
-
     case "Backspace":
       const data = helper.getTextNodeAtCursor();
       const new_text = snippetsStore.autoUndo(data.text);
