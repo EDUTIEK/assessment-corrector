@@ -39,11 +39,11 @@ function setPurpose(purpose) {
 watch(() => snippetsStore.list_purpose, setPurpose(snippetsStore.list_purpose));
 
 
-async function select(snippet) {
+async function select(snippet, prefix = 'appSnippetText') {
   selectedKey.value = snippet.key;
   await nextTick();
   fixLabels(snippet);
-  document.getElementById('appSnippetText' + snippet.key).focus();
+  document.getElementById(prefix + snippet.key).focus();
 }
 
 async function create() {
@@ -92,6 +92,20 @@ async function handleFocusChange() {
 }
 watch(() => layoutStore.focusChange, handleFocusChange);
 
+
+async function rowKeydown(snippet, prefix) {
+  switch (event.key) {
+    case "Enter":
+      event.preventDefault();
+      await select(snippet, prefix);
+      break;
+
+    case "Delete":
+      event.preventDefault();
+      snippetsStore.deleteSnippet(snippet.key);
+      break;
+  }
+}
 
 function rowFocusout(event) {
   const row = event.currentTarget;
@@ -149,11 +163,11 @@ function rowFocusout(event) {
       <tbody>
         <template v-for="snippet in snippetsStore.forList" :key="snippet.key">
           <tr v-if="!isSelected(snippet)"  @click="select(snippet)">
-            <td class="col-left"><div class="snippetDisplay">{{ snippet.text }}</div></td>
-            <td class="col-center"><div class="snippetDisplay">{{ snippet.shortcut }}</div></td>
+            <td class="col-left"><div class="snippetDisplay" tabindex="0" @keydown="rowKeydown(snippet, 'appSnippetText')">{{ snippet.text }}</div></td>
+            <td class="col-center"><div class="snippetDisplay" tabindex="0" @keydown="rowKeydown(snippet, 'appSnippetShortcut')">{{ snippet.shortcut }}</div></td>
             <td class="col-right">
               <v-btn class="trashButton" density="compact" size="small" variant="text" prepend-icon="mdi-delete-outline"
-                     tabindex="-1"
+                     tabindex="0"
                      @click="snippetsStore.deleteSnippet(snippet.key);"
               >
                 <span class="sr-only">{{ $t('snippetsDelete') }}</span>
