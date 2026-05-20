@@ -161,7 +161,7 @@ function rowFocusout(event) {
         </tr>
       </thead>
       <tbody>
-        <template v-for="snippet in snippetsStore.forList" :key="snippet.key">
+        <template v-for="(snippet, index) in snippetsStore.forList" :key="snippet.key">
           <tr v-if="!isSelected(snippet)"  @click="select(snippet)">
             <td class="col-left"><div class="snippetDisplay" tabindex="0" @keydown="rowKeydown(snippet, 'appSnippetText')">{{ snippet.text }}</div></td>
             <td class="col-center"><div class="snippetDisplay" tabindex="0" @keydown="rowKeydown(snippet, 'appSnippetShortcut')">{{ snippet.shortcut }}</div></td>
@@ -196,7 +196,7 @@ function rowFocusout(event) {
               </v-textarea>
             </td>
             <td class="col-right">
-              <v-btn density="compact" size="small" variant="text" prepend-icon="mdi-playlist-plus"
+              <v-btn v-if="index == snippetsStore.forList.length -1" density="compact" size="small" variant="text" prepend-icon="mdi-playlist-plus"
                      tabindex="0"
                      @click="create()"
               >
