@@ -302,6 +302,10 @@ export const useSnippetsStore = defineStore('snippets', {
         searches.push(text.slice(start, position));       // 2. without trigger char
 
         for( const search of searches) {
+          if (search == '' || whitespaceChars.includes(search)) {
+            continue;
+          }
+
           // undo has done just before - don't replace again
           if (start === this.last_auto_start && search === this.last_auto_search) {
             break;
