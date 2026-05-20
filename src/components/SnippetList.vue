@@ -15,8 +15,10 @@ const snippetsStore = stores.snippets();
 const layoutStore = stores.layout();
 
 const selectedKey = ref('');
+const selectedPurpose = ref('');
 
 onMounted(() => {
+  setPurpose(snippetsStore.list_purpose);
  handleFocusChange();
 });
 
@@ -24,17 +26,25 @@ function isSelected(snippet) {
   return selectedKey.value == snippet.key;
 }
 
+function setPurpose(purpose) {
+  if (purpose === Snippet.FOR_COMMENT || purpose === Snippet.FOR_SUMMARY) {
+    selectedPurpose.value = purpose;
+    selectedKey.value = '';
+
+    if (snippetsStore.list_purpose != purpose) {
+      snippetsStore.list_purpose = purpose;
+    }
+  }
+}
+watch(() => snippetsStore.list_purpose, setPurpose(snippetsStore.list_purpose));
+
+
 async function select(snippet) {
   selectedKey.value = snippet.key;
   await nextTick();
   fixLabels(snippet);
   document.getElementById('appSnippetText' + snippet.key).focus();
 }
-
-function unselect() {
-  selectedKey.value = '';
-}
-watch(() => snippetsStore.list_purpose, unselect);
 
 async function create() {
   const snippet = new Snippet({purpose: snippetsStore.list_purpose});
@@ -95,9 +105,9 @@ watch(() => layoutStore.focusChange, handleFocusChange);
         </v-col>
         <v-col cols="6" class="ma-0 pa-0 text-right">
           <div class="header-buttons">
-            <v-btn-toggle density="compact" variant="outlined" divided v-model="snippetsStore.list_purpose">
-              <v-btn size="small" variant="text" :value="Snippet.FOR_COMMENT">{{ t('snippetsForComment') }}</v-btn>
-              <v-btn size="small" variant="text" :value="Snippet.FOR_SUMMARY">{{ t('snippetsForSummary') }}</v-btn>
+            <v-btn-toggle density="compact" variant="outlined" divided v-model="selectedPurpose">
+              <v-btn size="small" variant="text" :value="Snippet.FOR_COMMENT" @click="setPurpose(Snippet.FOR_COMMENT)">{{ t('snippetsForComment') }}</v-btn>
+              <v-btn size="small" variant="text" :value="Snippet.FOR_SUMMARY" @click="setPurpose(Snippet.FOR_SUMMARY)">{{ t('snippetsForSummary') }}</v-btn>
             </v-btn-toggle>
           </div>
         </v-col>
