@@ -138,6 +138,12 @@ async function handleTextKeydown() {
       return;
     }
     switch (event.key) {
+      case "F1":
+        // needs to be keydown, otherwise chromium opens its help page
+        event.preventDefault();
+        openSnippets();
+        break;
+
       case "Backspace":
         const textarea = textRef.value;
         const cursor = textarea.selectionEnd;
@@ -160,8 +166,8 @@ function handleTextKeyUp() {
 
   switch (event.key) {
     case "F1":
+      // prevent double handling of F1
       event.preventDefault();
-      openSnippets();
       break;
 
     default:

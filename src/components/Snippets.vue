@@ -97,11 +97,22 @@ async function handleDelete() {
   appSelect.value.focus();
 }
 
+
+async function handleKeydown() {
+  switch (event.key) {
+    case "F1":
+      // needs to be keydown, otherwise chromium opens its help page
+      event.preventDefault();
+      handleApply();
+      break;
+  }
+}
+
 async function handleKeyup() {
   switch (event.key) {
     case "F1":
+      // prevent double handling of F1
       event.preventDefault();
-      handleApply();
       break;
   }
 }
@@ -128,6 +139,7 @@ function customFilter (itemTitle, queryText, item) {
               :custom-filter="customFilter"
               :items="snippets"
               @update:modelValue="handleSelect()"
+              @keydown="handleKeydown()"
               @keyup="handleKeyup()"
               base-color="white"
               item-title="text"
@@ -138,6 +150,7 @@ function customFilter (itemTitle, queryText, item) {
               ref="appEditText"
               v-model="snippetsStore.edit.text"
               @change="handleEdit()"
+              @keydown="handleKeydown()"
               @keyup="handleKeyup()"
           ></v-textarea>
           {{ $t('snippetsShortcut') }}
@@ -145,6 +158,7 @@ function customFilter (itemTitle, queryText, item) {
               type="text"
               v-model="snippetsStore.edit.shortcut"
               @change="handleEdit()"
+              @keydown="handleKeydown()"
               @keyup="handleKeyup()"
           >
           </v-text-field>

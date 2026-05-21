@@ -41,8 +41,8 @@ function handleKeyUp() {
 
   switch (event.key) {
     case "F1":
+      // prevent double handling of F1
       event.preventDefault();
-      helper.openSnippets();
       break;
 
     default:
@@ -58,6 +58,12 @@ function handleKeyUp() {
 
 function handleKeyDown() {
   switch (event.key) {
+    case "F1":
+      // needs to be keydown, otherwise chromium opens its help page
+      event.preventDefault();
+      helper.openSnippets();
+      break;
+
     case "Backspace":
       const data = helper.getTextNodeAtCursor();
       const new_text = snippetsStore.autoUndo(data.text);
