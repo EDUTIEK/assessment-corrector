@@ -129,7 +129,7 @@ export const useSnippetsStore = defineStore('snippets', {
         for (const key of keys ?? []) {
           this.snippets[key] = new Snippet(await storage.getItem(key));
         }
-
+        this.sortSnippets();
       }
       catch (err) {
         console.log(err);
@@ -146,6 +146,7 @@ export const useSnippetsStore = defineStore('snippets', {
           await storage.setItem(snippet.key, snippet.getData());
           this.snippets[snippet.key] = snippet;
         }
+        this.sortSnippets();
         await storage.setItem('keys', Object.keys(this.snippets));
       }
       catch (err) {

@@ -19,7 +19,7 @@ const selectedPurpose = ref('');
 
 onMounted(() => {
   setPurpose(snippetsStore.list_purpose);
- handleFocusChange();
+  handleFocusChange();
 });
 
 function isSelected(snippet) {
