@@ -11,13 +11,7 @@ export default class Snippet {
   }
 
   static order(snippet1, snippet2) {
-    if (snippet1.text < snippet2.text) {
-      return -1;
-    } else if (snippet1.text > snippet2.text) {
-      return 1;
-    } else {
-      return 0;
-    }
+    return snippet1.text.localeCompare(snippet2.text, undefined, { sensitivity: 'base', numeric: true });
   }
 
   /**
