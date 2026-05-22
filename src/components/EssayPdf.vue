@@ -16,7 +16,7 @@ const summariesStore = stores.summaries();
 
 const EssayNode = ref();
 
-const selectedTool = ref('text');
+const selectedTool = ref('');
 const selectedDrawMode= ref('marker');
 const showLabels = ref(true);
 
@@ -25,12 +25,13 @@ let pdfjs;
 onMounted(() => {
   pdfjs = createPDFJsApi(EssayNode.value, './annotate-pdf/pdfjs-dist/web/viewer.html', essayStore.url);
   pdfjs.setDefaultColor(stores.config().defaultCommentColorHex);
-  pdfjs.enableFreeFormHighlight(false);
+
   pdfjs.setDrawMode('marker'); // or 'underline'
   loadMarks();
   if (summariesStore.isOwnDisabled) {
-    pdfjs.setViewOnly(true);
-    selectedTool.value = '';
+    selectTool('');
+  } else {
+    selectTool('text');
   }
   pdfjs.on('create', createMark);
   pdfjs.on('update', updateMark);
@@ -243,13 +244,14 @@ async function download()
   <div class ="appEssayWrapper">
     <div class="appTextButtons">
 
-
+<!--
       <v-btn-toggle v-if="stores.settings().Task.enable_comments" density="comfortable" variant="outlined" divided v-model="selectedTool">
         <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-cursor-text" value="text" @click="selectTool('text')"></v-btn>
         <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-draw" value="free" @click="selectTool('free')"></v-btn>
       </v-btn-toggle>
 
       &nbsp;
+-->
 
       <v-btn-toggle v-if="stores.settings().Task.enable_comments" density="comfortable" variant="outlined" divided v-model="selectedDrawMode">
         <v-btn :disabled="summariesStore.isOwnDisabled || selectedTool == 'free'" size="small" icon="mdi-marker" value="marker" @click="selectDrawMode('marker')"></v-btn>
