@@ -37,9 +37,13 @@ async function set() {
     } else {
       await summariesStore.setOwnPregraded();
     }
+
+    if (await apiStore.saveChangesToBackend(true)) {
+      await apiStore.loadItemFromStorage(itemsStore.currentKey);
+      await itemsStore.setCurrentGradingStatus(summariesStore.editSummary.status);
+    }
   }
 
-  await itemsStore.setCurrentGradingStatus(summariesStore.editSummary.status);
   pregraded.value = summariesStore.isOwnPregraded;
   showSet.value = false;
 }
@@ -49,7 +53,11 @@ async function unset() {
     await summariesStore.setOwnOpen();
   }
 
-  await itemsStore.setCurrentGradingStatus(summariesStore.editSummary.status);
+  if (await apiStore.saveChangesToBackend(true)) {
+    await apiStore.loadItemFromStorage(itemsStore.currentKey);
+    await itemsStore.setCurrentGradingStatus(summariesStore.editSummary.status);
+  }
+
   pregraded.value = summariesStore.isOwnPregraded;
   showUnset.value = false;
 }
