@@ -83,6 +83,10 @@ function selectDrawMode(drawMode = null) {
     case 'wave':
       pdfjs.setDrawMode('wave');
       break;
+
+    case 'vline':
+      pdfjs.setDrawMode('vline');
+      break;
   }
 }
 
@@ -146,6 +150,9 @@ async function createMark(event) {
         break;
       case 'wave':
         data.shape = Mark.SHAPE_TEXT_WAVE;
+        break;
+      case 'vline':
+        data.shape = Mark.SHAPE_TEXT_VLINE;
         break;
     }
   }
@@ -257,6 +264,7 @@ async function download()
         <v-btn :disabled="summariesStore.isOwnDisabled || selectedTool == 'free'" size="small" icon="mdi-marker" value="marker" @click="selectDrawMode('marker')"></v-btn>
         <v-btn :disabled="summariesStore.isOwnDisabled || selectedTool == 'free'" size="small" icon="mdi-format-underline" value="underline" @click="selectDrawMode('underline')"></v-btn>
         <v-btn :disabled="summariesStore.isOwnDisabled || selectedTool == 'free'" size="small" icon="mdi-format-underline-wavy" value="wave" @click="selectDrawMode('wave')"></v-btn>
+        <v-btn :disabled="summariesStore.isOwnDisabled || selectedTool == 'free'" size="small" icon="mdi-tally-mark-1" value="vline" @click="selectDrawMode('vline')"></v-btn>
       </v-btn-toggle>
 
       &nbsp;

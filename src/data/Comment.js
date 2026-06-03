@@ -300,6 +300,9 @@ export default class Comment {
           case Mark.SHAPE_TEXT_WAVE:
             type = 'wave';
             break;
+          case Mark.SHAPE_TEXT_VLINE:
+            type = 'vline';
+            break;
         }
 
         all.push({

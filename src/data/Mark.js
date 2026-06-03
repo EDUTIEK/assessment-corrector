@@ -17,11 +17,12 @@ class Mark {
   static SHAPE_TEXT_MARKER = 'text_marker';
   static SHAPE_TEXT_UNDERLINE = 'text_underline';
   static SHAPE_TEXT_WAVE = 'text_wave';
+  static SHAPE_TEXT_VLINE = 'text_vline';
 
 
   static ALLOWED_SHAPES = [
       Mark.SHAPE_CIRCLE, Mark.SHAPE_RECTANGLE, Mark.SHAPE_POLYGON, Mark.SHAPE_LINE, Mark.SHAPE_WAVE,
-      Mark.SHAPE_FREE_MARKER, Mark.SHAPE_TEXT_MARKER, Mark.SHAPE_TEXT_UNDERLINE, Mark.SHAPE_TEXT_WAVE
+      Mark.SHAPE_FREE_MARKER, Mark.SHAPE_TEXT_MARKER, Mark.SHAPE_TEXT_UNDERLINE, Mark.SHAPE_TEXT_WAVE,  Mark.SHAPE_TEXT_VLINE
   ];
 
   static SYMBOL_CHECK = '✓';
@@ -183,6 +184,8 @@ class Mark {
         return 'mdi-format-underline';
       case Mark.SHAPE_TEXT_WAVE:
         return 'mdi-format-underline-wavy';
+      case Mark.SHAPE_TEXT_VLINE:
+        return 'mdi-tally-mark-1';
     }
     return '';
 
