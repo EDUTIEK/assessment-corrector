@@ -6,6 +6,7 @@ import Change from "@/data/Change";
 import i18n from "@/plugins/i18n";
 import Procedure from '@/data/Procedure';
 import Correction from '@/data/Correction';
+import Item from "@/data/Item";
 
 const { t } = i18n.global;
 
@@ -192,7 +193,7 @@ export const useSummariesStore = defineStore('summaries', {
     },
 
     /**
-     * Text to be shown for an authorization if a procedure is needed afterward
+     * Text to be shown for an authorization if a procedure ot stitch decision is needed afterward
      * @returns {string}
      */
     procedureNeededText(state) {
@@ -214,7 +215,7 @@ export const useSummariesStore = defineStore('summaries', {
     },
 
     /**
-     * Text to be shown for an authorization if a procedure is needed afterward
+     * Text to be shown for an revision if a stitch decision is needed afterward
      * @returns {string}
      */
     stitchNeededAfterRevisionText(state) {
@@ -222,17 +223,20 @@ export const useSummariesStore = defineStore('summaries', {
       const itemsStore = stores.items();
       const correctionsStore = stores.corrections();
 
-      if (itemsStore.isInStitch || (itemsStore.isInRevision && correctionsStore.ownCorrection.position == Correction.POSITION_FIRST)) {
-        return '';
-      }
-
-      const reason = state.pointsDifferText;
-      if (reason) {
-        if (settingsStore.Assessment.stitch_after_procedure) {
-          return t('summariesProcedureStitchNeeded', [reason]);
+      // show stitch text if second revision is to be confirmed
+      if (itemsStore.isInRevision) {
+        const otherSummary = state.getForCorrection(stores.corrections().firstOtherCorrection?.key ?? '') ?? null;
+        if (otherSummary?.isRevised()) {
+          const reason = state.pointsDifferText;
+          if (reason) {
+            if (settingsStore.Assessment.stitch_after_procedure) {
+              return t('summariesProcedureStitchNeeded', [reason]);
+            }
+          }
         }
       }
-      return '';
+
+     return '';
     },
 
     /**
