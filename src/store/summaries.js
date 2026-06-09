@@ -14,6 +14,7 @@ const storage = getStorage('summaries');
 
 // set check interval very short to update the grade level according the points
 const checkInterval = 1000;      // time (ms) to wait for a new update check (e.g. 0.2s to 1s)
+const forceInterval = 60000;    // max time to wait for a new update check if update check is locked
 
 let lockUpdate = 0;             // prevent updates during a processing
 
@@ -407,21 +408,26 @@ export const useSummariesStore = defineStore('summaries', {
      * Triggered from the editor component when the content is changed
      * Triggered every checkInterval
      */
-    async updateContent(fromEditor = false, force = false) {
+    async updateContent(fromEditor = false, forced = false) {
       const levelsStore = stores.levels();
       const apiStore = stores.api();
       const changesStore = stores.changes();
 
        // avoid too many checks
       const currentTime = Date.now();
-      if ((currentTime - this.lastCheck < checkInterval) && !force) {
+      if (!forced && currentTime - this.lastCheck < checkInterval) {
         return;
+      }
+
+      // force a check if update is locked for too long
+      if (!forced && currentTime - this.lastCheck > forceInterval) {
+        forced = true;
       }
 
       // avoid parallel updates
       // no need to wait because updateContent is called by interval
       // use post-increment for test-and set
-      if (lockUpdate++ && !force) {
+      if (!forced && lockUpdate++) {
         return;
       }
 
