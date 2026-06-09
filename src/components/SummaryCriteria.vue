@@ -16,49 +16,54 @@ const props = defineProps(['correction_key']);
 watch(() => props, loadCriteria);
 watch(() => apiStore.itemKey, loadCriteria);
 
-const generalCriteriaPoints = reactive({});
-const commentCriteriaPoints = reactive({});
-
+const generalCriteriaPoints = reactive([]);
+const commentCriteriaPoints = reactive([]);
 
 async function loadCriteria() {
   await nextTick();
 
+  const commentByKey = {};
+  const generalByKey = {};
+
   // general points for comments
-  commentCriteriaPoints[''] = {
+  commentByKey[''] = {
     key: '',
     title: t('markingCommentPointsWithoutCriterion'),
     max_points: settingsStore.Assessment.max_points,
     sum_points: 0
   }
+  commentCriteriaPoints.push(commentByKey['']);
 
   // criteria points for comment
   criteriaStore.getCorrectionCommentCriteria(props.correction_key).forEach(criterion => {
-    commentCriteriaPoints[criterion.key] = {
+    commentByKey[criterion.key] = {
       key: criterion.key,
       title: criterion.title,
       max_points: criterion.points,
       sum_points: 0
     }
+    commentCriteriaPoints.push(commentByKey[criterion.key]);
   });
 
   // general criteria points
   criteriaStore.getCorrectionGeneralCriteria(props.correction_key).forEach(criterion => {
-    generalCriteriaPoints[criterion.key] = {
+    generalByKey[criterion.key] = {
       key: criterion.key,
       title: criterion.title,
       max_points: criterion.points,
       sum_points: 0
     }
+    generalCriteriaPoints.push(generalByKey[criterion.key]);
   });
 
   pointsStore.getObjectsForCorrection(props['correction_key']).forEach(points => {
     const key = points.criterion_key;
 
-    if (commentCriteriaPoints[key] !== undefined) {
-      commentCriteriaPoints[key].sum_points += points.points;
+    if (commentByKey[key] !== undefined) {
+      commentByKey[key].sum_points += points.points;
     }
-    if (generalCriteriaPoints[key] !== undefined) {
-      generalCriteriaPoints[key].sum_points += points.points;
+    if (generalByKey[key] !== undefined) {
+      generalByKey[key].sum_points += points.points;
     }
   });
 }
