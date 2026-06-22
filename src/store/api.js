@@ -12,7 +12,7 @@ import Change from '@/data/Change';
 import Item from '@/data/Item';
 
 const { t } = i18n.global;
-const sendInterval = 5000;      // time (ms) to wait for sending open savings to the backend
+const sendInterval = 1000;      // time (ms) to wait for sending open savings to the backend
 
 export const useApiStore = defineStore('api', {
 
