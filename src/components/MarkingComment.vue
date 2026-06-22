@@ -29,6 +29,10 @@ function isSelected(comment) {
   return comment.key == commentsStore.selectedKey;
 }
 
+function isDisabled(comment) {
+  return summariesStore.isOwnDisabled || comment.correction_key != stores.corrections().ownKey
+}
+
 function hasTrash(comment) {
   return comment.correction_key == stores.corrections().ownKey && !summariesStore.isOwnDisabled
 }
@@ -123,15 +127,19 @@ async function handleTextKeydown() {
         commentsStore.setCaretRequest();
         break;
       case "Delete":
-        event.preventDefault();
-        commentsStore.deleteComment(commentsStore.selectedKey);
+        if (!isDisabled(commentsStore.selectedComment)) {
+          event.preventDefault();
+          commentsStore.deleteComment(commentsStore.selectedKey);
+        }
         break;
     }
   } else {
     switch (event.key) {
       case "F1":
-        event.preventDefault();
-        openSnippets();
+        if (!isDisabled(comment)) {
+          event.preventDefault();
+          openSnippets();
+        }
         break;
     }
   }
@@ -165,6 +173,7 @@ function openSnippets() {
 
 async function handleSnippet() {
   if (!snippetsStore.selection_open
+      && !isDisabled(comment)
       && snippetsStore.open_for_purpose == Snippet.FOR_COMMENT
       && snippetsStore.open_for_key == comment.key) {
     const textarea = textRef.value;
@@ -214,7 +223,7 @@ watch(() => snippetsStore.selection_open, handleSnippet);
                           :id="'app-comment-' + comment.key"
                           :label="$t('markingCommentsCommentForLabel', [comment.label])"
                           rows="1" auto-grow
-                          :readonly="summariesStore.isOwnDisabled || comment.correction_key != stores.corrections().ownKey"
+                          :readonly="isDisabled(comment)"
                           @change="commentsStore.updateComment(comment)"
                           @keyup="commentsStore.updateComment(comment)"
                           @keydown="handleTextKeydown()"
@@ -231,6 +240,7 @@ watch(() => snippetsStore.selection_open, handleSnippet);
               <!-- select snippets  -->
               <v-btn class="snippetsButton" density="compact" variant="plain" prepend-icon="mdi-plus"
                      :tabindex="isSelected(comment) ? 0 : -1"
+                     :disabled="isDisabled(comment)"
                      @keydown="handleTextKeydown()"
                      @click="openSnippets"
               >
@@ -238,7 +248,7 @@ watch(() => snippetsStore.selection_open, handleSnippet);
               </v-btn>
             </v-col>
 
-            <!-- enter points -->
+            <!-- show points -->
             <v-col cols="3">
                 <span tabindex="0" class="pointsSum"
                       v-if="stores.settings().Task.enable_partial_points"
@@ -256,7 +266,7 @@ watch(() => snippetsStore.selection_open, handleSnippet);
                       class="ratingInput"
                       v-model="comment.rating_excellent"
                       :id="'ratingExcellent' + comment.key"
-                      :disabled="summariesStore.isOwnDisabled || comment.correction_key != stores.corrections().ownKey"
+                      :disabled="isDisabled(comment)"
                       @change="toggleExcellent(comment)"
                       @keydown="handleTextKeydown()"
                />
@@ -274,7 +284,7 @@ watch(() => snippetsStore.selection_open, handleSnippet);
                        class="ratingInput"
                        v-model="comment.rating_cardinal"
                        :id="'ratingCardinal' + comment.key"
-                       :disabled="summariesStore.isOwnDisabled || comment.correction_key != stores.corrections().ownKey"
+                       :disabled="isDisabled(comment)"
                        @change="toggleCardinal(comment)"
                        @keydown="handleTextKeydown()"
                 />
@@ -332,6 +342,7 @@ watch(() => snippetsStore.selection_open, handleSnippet);
         <v-btn class="trashButton" density="compact" size="small" variant="text" prepend-icon="mdi-delete-outline"
                v-show="hasTrash(comment)"
                :tabindex="isSelected(comment) ? 0 : -1"
+               :disabled="isDisabled(comment)"
                @keydown="handleTextKeydown()"
                @click="commentsStore.deleteComment(comment.key);"
         >
