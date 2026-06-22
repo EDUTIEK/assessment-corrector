@@ -63,6 +63,7 @@ export default class TinyHelper {
             body_class: 'xlas-content headlines-three',
             plugins: 'lists charmap wordcount table pagebreak',
             toolbar: this.tinyToolbar(formatting_options),
+            toolbar_mode: 'wrap',
             valid_elements: this.tinyValidElements(formatting_options),
             valid_styles: this.tinyValidStyles(formatting_options),
             formats: this.tinyFormats(),
@@ -236,16 +237,16 @@ export default class TinyHelper {
     tinyToolbar(formatting_options) {
         switch (formatting_options) {
             case 'extended':
-                return 'zoomIn zoomOut undo redo styles bold italic underline bullist numlist indent outdent forecolor backcolor removeformat charmap table pagebreak wordcount'
+                return 'zoomOut zoomIn undo redo styles bold italic underline bullist numlist indent outdent forecolor backcolor removeformat charmap table pagebreak wordcount'
             case 'full':
-                return 'zoomIn zoomOut undo redo styles bold italic underline bullist numlist removeformat charmap wordcount';
+                return 'zoomOut zoomIn undo redo styles bold italic underline bullist numlist removeformat charmap wordcount';
             case 'medium':
-                return 'zoomIn zoomOut undo redo bold italic underline bullist numlistremoveformat charmap wordcount';
+                return 'zoomOut zoomIn undo redo bold italic underline bullist numlistremoveformat charmap wordcount';
             case 'minimal':
-                return 'zoomIn zoomOut undo redo bold italic underline removeformat charmap wordcount';
+                return 'zoomOut zoomIn undo redo bold italic underline removeformat charmap wordcount';
             case 'none':
             default:
-                return 'zoomIn zoomOut undo redo charmap wordcount';
+                return 'zoomOut zoomIn undo redo charmap wordcount';
         }
     }
 
