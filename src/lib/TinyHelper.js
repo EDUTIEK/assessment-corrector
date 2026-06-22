@@ -93,9 +93,9 @@ export default class TinyHelper {
             table_toolbar: 'tabledelete | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol',
 
             setup: function (editor) {
-                editor.ui.registry.addButton('zoomOut', {tooltip: 'Verkleinern', icon: 'zoom-out', onAction: this.zoomOut.bind(this)});
-                editor.ui.registry.addButton('zoomIn', {tooltip: 'Vergrößern', icon: 'zoom-in', onAction: this.zoomIn.bind(this)});
-                editor.ui.registry.addButton('openSnippets', {tooltip: 'Textbausteine', icon: 'plus', onAction: this.openSnippets.bind(this)});
+                editor.ui.registry.addButton('zoomOut', {tooltip: t('summaryTextZoomOut'), icon: 'zoom-out', onAction: this.zoomOut.bind(this)});
+                editor.ui.registry.addButton('zoomIn', {tooltip: t('summaryTextZoomIn'), icon: 'zoom-in', onAction: this.zoomIn.bind(this)});
+                editor.ui.registry.addButton('openSnippets', {tooltip: t('summaryTextAddSnippet'), icon: 'plus', onAction: this.openSnippets.bind(this)});
             }.bind(this)
         }
     }
@@ -236,16 +236,16 @@ export default class TinyHelper {
     tinyToolbar(formatting_options) {
         switch (formatting_options) {
             case 'extended':
-                return 'undo redo styles bold italic underline bullist numlist indent outdent forecolor backcolor removeformat charmap table pagebreak wordcount'
+                return 'zoomIn zoomOut undo redo styles bold italic underline bullist numlist indent outdent forecolor backcolor removeformat charmap table pagebreak wordcount'
             case 'full':
-                return 'undo redo styles bold italic underline bullist numlist removeformat charmap wordcount';
+                return 'zoomIn zoomOut undo redo styles bold italic underline bullist numlist removeformat charmap wordcount';
             case 'medium':
-                return 'undo redo bold italic underline bullist numlistremoveformat charmap wordcount';
+                return 'zoomIn zoomOut undo redo bold italic underline bullist numlistremoveformat charmap wordcount';
             case 'minimal':
-                return 'undo redo bold italic underline removeformat charmap wordcount';
+                return 'zoomIn zoomOut undo redo bold italic underline removeformat charmap wordcount';
             case 'none':
             default:
-                return 'undo redo charmap wordcount';
+                return 'zoomIn zoomOut undo redo charmap wordcount';
         }
     }
 
