@@ -348,6 +348,7 @@ export const useSummariesStore = defineStore('summaries', {
         for (const key of keys) {
           const summary = new Summary(await storage.getItem(key));
           summary.grade_key = levelsStore.getLevelForPoints(summary.points)?.key;
+          summary.revision_grade_key = levelsStore.getLevelForPoints(summary.revision_points)?.key;
           if (summary.item_key == apiStore.itemKey) {
             this.summaries[key] = summary;
           }
@@ -385,6 +386,7 @@ export const useSummariesStore = defineStore('summaries', {
         for (const item of data) {
           const summary = new Summary(item);
           summary.grade_key = levelsStore.getLevelForPoints(summary.points)?.key;
+          summary.revision_grade_key = levelsStore.getLevelForPoints(summary.revision_points)?.key;
           await storage.setItem(summary.getKey(), summary.getData());
           if (summary.item_key == apiStore.itemKey) {
             this.summaries[summary.getKey()] = summary;

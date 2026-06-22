@@ -20,7 +20,7 @@ function init() {
   if (summary) {
     text.value = summary.revision_text;
     points.value = summary.revision_points;
-    const level = levelsStore.getLevel(summary.grade_key);
+    const level = levelsStore.getLevel(summary.revision_grade_key);
     if (level) {
       grade.value = level.title;
       statement.value = level.statement;
