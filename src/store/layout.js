@@ -202,19 +202,31 @@ export const useLayoutStore = defineStore('layout', {
     },
 
     initForItem() {
-      if (stores.items().isInRevision || stores.items().isInStitch) {
+
+      if (!stores.settings().hasSummaryOverview) {
+        this.showLeftSummaryCriteria = false;
         this.showRightSummaryCriteria = false;
-        this.showRightSummaryRevision = true;
+      }
+
+      if (stores.items().isInRevision || stores.items().isInStitch) {
+        this.showLeftSummaryCriteria = false;
+        this.showRightSummaryCriteria = false;
+
         this.leftContent = 'correction';
-        this.rightContent = 'summary';
         this.leftCorrectionKey = stores.corrections().firstOtherCorrection?.key ?? '';
         if (stores.summaries().getForCorrection(this.leftCorrectionKey)?.isRevised) {
-          this.showLeftSummaryCriteria = false;
           this.showLeftSummaryRevision = true;
         }
-        if (!stores.settings().hasSummaryOverview) {
-          this.showLeftSummaryCriteria = false;
-          this.showRightSummaryCriteria = false;
+
+        if (stores.corrections().ownCorrection !== null) {
+          this.rightContent = 'summary';
+          this.showRightSummaryRevision = true;
+        } else {
+          this.rightContent = 'correction';
+          this.rightCorrectionKey = stores.corrections().secondOtherCorrection?.key ?? '';
+          if (stores.summaries().getForCorrection(this.rightCorrectionKey)?.isRevised) {
+            this.showRightSummaryRevision = true;
+          }
         }
       }
       else {

@@ -30,7 +30,7 @@ let show_revision;
 
 function init() {
   correction = stores.corrections().getCorrection(props.correction_key);
-  position_text = Item.buildPositionText(correction.position);
+  position_text = Item.buildPositionText(correction?.position);
 
   is_own = props.correction_key == stores.corrections().ownKey;
   can_correct = is_own && stores.items().canCorrect;
