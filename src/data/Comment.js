@@ -311,7 +311,7 @@ export default class Comment {
           type: type,
           label: this.label,
           intern: JSON.parse(mark.internal),
-          color: stores.config().getCommentColorHex(this.correction_position)
+          color: stores.config().getCommentColor(this.correction_position, false)
         });
       }
     }

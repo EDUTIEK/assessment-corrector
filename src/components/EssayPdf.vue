@@ -24,7 +24,11 @@ let pdfjs;
 
 onMounted(() => {
   pdfjs = createPDFJsApi(EssayNode.value, './annotate-pdf/pdfjs-dist/web/viewer.html', essayStore.url);
-  pdfjs.setDefaultColor(stores.config().defaultCommentColorHex);
+  pdfjs.setDefaultColor(stores.config().getCommentColor(false, true));
+  //pdfjs.setDefaultLineColor(stores.config().getDefaultCommentColor(false));
+  //pdfjs.setDefaultTokenColor(stores.config().getDefaultCommentColor(false));
+  pdfjs.enableTokenButtons(false);
+  //pdfjs.enableTypeButtons(false);
 
   pdfjs.setDrawMode('marker'); // or 'underline'
   loadMarks();
@@ -40,6 +44,13 @@ onMounted(() => {
   pdfjs.on('pageChanged', pageChanged);
   handleFocusChange();
 });
+
+watch(() => layoutStore.focusChange, handleFocusChange);
+watch(() => commentsStore.markerChange, loadMarks);
+watch(() => commentsStore.filterChange, loadMarks);
+watch(() => commentsStore.showOtherCorrections, loadMarks);
+watch(() => commentsStore.selectionChange, refreshSelection);
+watch(() => commentsStore.deletionChange, handleDeleted);
 
 function selectTool(tool = null) {
 
@@ -96,9 +107,10 @@ async function handleFocusChange() {
     EssayNode.value.focus();
   }
 }
-watch(() => layoutStore.focusChange, handleFocusChange);
 
 function loadMarks() {
+  console.log('loadMarks');
+
   const all = [];
   for (const comment of commentsStore.activeComments) {
     for (const annotation of comment.getPdfAnnotations()) {
@@ -113,10 +125,6 @@ function loadMarks() {
   }
   pdfjs.setAll(all);
 }
-watch(() => commentsStore.markerChange, loadMarks);
-watch(() => commentsStore.filterChange, loadMarks);
-watch(() => commentsStore.showOtherCorrections, loadMarks);
-
 
 function toggleLabels() {
   if (showLabels.value == 1) {
@@ -128,6 +136,7 @@ function toggleLabels() {
 }
 
 async function createMark(event) {
+  console.log('createMark', event.detail);
 
   const annotation = event.detail;
   const data = {
@@ -162,23 +171,46 @@ async function createMark(event) {
     const newComment = new Comment({parent_number: event.detail.page + 1});
     newComment.addMarkData(data);
     await commentsStore.addComment(newComment);
-    commentsStore.selectComment(newComment.key);
+    //commentsStore.selectComment(newComment.key);
   }
 }
 
 function updateMark(event) {
-  // no need to update a mark by pdfjs event
-  // all changes to existing marks are done outside
+  console.log('updateMark', event.detail);
 
-  // const comment = commentsStore.getCommentByMarkKey(event.detail.id);
-  // if (comment) {
-  //   const oldData = comment.getData();
-  //   comment.updateMarkData(data);
-  //   const newData = comment.getData();
-  //   if (JSON.stringify(oldData) != JSON.stringify(newData)) {
-  //     commentsStore.updateComment(comment, true);
-  //   }
-  // }
+  const annotation = event.detail;
+  const data = {
+    key: annotation.id,
+    shape: '',
+    internal: JSON.stringify(annotation.intern),
+    parent_number: annotation.page + 1,
+    pos: {x: annotation.pos.x * 1000, y: annotation.pos.y * 1000}
+  }
+
+  switch(annotation.type) {
+    case 'marker':
+      data.shape = Mark.SHAPE_TEXT_MARKER;
+      break;
+    case 'underline':
+      data.shape = Mark.SHAPE_TEXT_UNDERLINE;
+      break;
+    case 'wave':
+      data.shape = Mark.SHAPE_TEXT_WAVE;
+      break;
+    case 'vline':
+      data.shape = Mark.SHAPE_TEXT_VLINE;
+      break;
+  }
+
+  const comment = commentsStore.getCommentByMarkKey(data.key);
+  if (comment) {
+    const oldData = comment.getData();
+    comment.updateMarkData(data);
+    const newData = comment.getData();
+    if (JSON.stringify(oldData) != JSON.stringify(newData)) {
+      commentsStore.updateComment(comment, false);
+    }
+  }
 }
 
 function deleteMark(event) {
@@ -209,14 +241,20 @@ function pageChanged(event) {
 }
 
 function refreshSelection() {
-  const comment = commentsStore.selectedComment;
-  if (comment) {
+  console.log('refreshSelection', commentsStore.selectedKey);
+
+  const configStore = stores.config();
+  for (const comment of commentsStore.activeComments) {
     for (const mark of comment.marks) {
-      pdfjs.select(mark.key);
+      pdfjs.setColor(mark.key, configStore.getCommentColor(
+          comment.correction_position,
+          comment.key == commentsStore.selectedKey));
+      if (comment.key == commentsStore.selectedKey) {
+        pdfjs.select(mark.key);
+      }
     }
   }
 }
-watch(() => commentsStore.selectionChange, refreshSelection);
 
 function handleDeleted()
 {
@@ -227,7 +265,6 @@ function handleDeleted()
     }
   }
 }
-watch(() => commentsStore.deletionChange, handleDeleted);
 
 async function download()
 {
