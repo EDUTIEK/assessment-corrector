@@ -181,6 +181,8 @@ function updateMark(event) {
   if (comment) {
     const oldData = comment.getData();
     comment.updateMarkData(data);
+    pdfjs.setLabel(annotation.id, comment.getLabelWithSymbol());
+
     const newData = comment.getData();
     if (JSON.stringify(oldData) != JSON.stringify(newData)) {
       commentsStore.updateComment(comment, false);
@@ -244,6 +246,12 @@ function refreshSelection() {
           comment.key == commentsStore.selectedKey));
       if (comment.key == commentsStore.selectedKey) {
         pdfjs.select(mark.key);
+        if (showLabels.value == 0) {
+          pdfjs.setLabel(mark.key, comment.getLabelWithSymbol());
+        }
+      }
+      else if (showLabels.value == 0) {
+        pdfjs.setLabel(mark.key, '');
       }
     }
   }
