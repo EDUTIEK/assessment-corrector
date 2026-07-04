@@ -258,6 +258,18 @@ export default class Comment {
   }
 
   /**
+   * Get the label with added mark symbol
+   */
+  getLabelWithSymbol() {
+    for (const mark of this.marks) {
+      if (mark.symbol) {
+        return this.label + ': ' + mark.symbol;
+      }
+    }
+    return this.label ?? '';
+  }
+
+  /**
    * Get the icon of the mark
    * @return string|null
    */
@@ -289,27 +301,13 @@ export default class Comment {
     const all = [];
     for (const mark of this.marks) {
       if (mark.internal) {
-        let type = '';
-        switch (mark.shape) {
-          case Mark.SHAPE_TEXT_MARKER:
-            type = 'marker';
-            break;
-          case Mark.SHAPE_TEXT_UNDERLINE:
-            type = 'underline';
-            break;
-          case Mark.SHAPE_TEXT_WAVE:
-            type = 'wave';
-            break;
-          case Mark.SHAPE_TEXT_VLINE:
-            type = 'vline';
-            break;
-        }
 
         all.push({
           id: mark.key,
           page: this.parent_number - 1,
-          type: type,
-          label: this.label,
+          type: Mark.shapeToPdfAnnotationType(mark.shape),
+          token: Mark.symbolToPdfAnnotationToken(mark.symbol),
+          label: this.getLabelWithSymbol(),
           intern: JSON.parse(mark.internal),
           color: stores.config().getCommentColor(this.correction_position, false)
         });

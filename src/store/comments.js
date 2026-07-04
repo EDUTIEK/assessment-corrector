@@ -44,7 +44,7 @@ export const useCommentsStore = defineStore('comments', {
     selectedLabel(state) {
       let comment = state.getComment(state.selectedKey);
       if (comment) {
-        return comment.label;
+        return comment.getLabelWithSymbol();
       }
       return '';
     },

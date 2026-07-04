@@ -245,7 +245,7 @@ watch(() => snippetsStore.selection_open, handleSnippet);
         <button tabindex="0"
                 :class="'v-btn commentLabel ' + (comment.key == commentsStore.selectedKey ? 'selected' : '')"
         >
-          {{ comment.label }}
+          {{ comment.getLabelWithSymbol() }}
         </button>
       </v-col>
 
