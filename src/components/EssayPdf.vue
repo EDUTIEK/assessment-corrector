@@ -24,11 +24,14 @@ let pdfjs;
 
 onMounted(() => {
   pdfjs = createPDFJsApi(EssayNode.value, './annotate-pdf/pdfjs-dist/web/viewer.html', essayStore.url);
-  pdfjs.setDefaultColor(stores.config().getCommentColor(false, true));
+  pdfjs.setDefaultColor(stores.config().getDefaultCommentColor(true));
+
+  // this is not needed and causes errors on comment creation in pdf.js
   //pdfjs.setDefaultLineColor(stores.config().getDefaultCommentColor(false));
   //pdfjs.setDefaultTokenColor(stores.config().getDefaultCommentColor(false));
-  pdfjs.enableTokenButtons(false);
-  //pdfjs.enableTypeButtons(false);
+
+  pdfjs.enableTokenButtons(true);
+  pdfjs.enableTypeButtons(true);
 
   pdfjs.setDrawMode('marker'); // or 'underline'
   loadMarks();
@@ -141,7 +144,8 @@ async function createMark(event) {
   const annotation = event.detail;
   const data = {
     key: annotation.id,
-    shape: '',
+    shape: Mark.shapeFromPdfAnnotationType(annotation.type),
+    symbol: Mark.symbolFromPdfAnnotationToken(annotation.token),
     internal: JSON.stringify(annotation.intern),
     parent_number: annotation.page + 1,
     pos: {x: annotation.pos.x * 1000, y: annotation.pos.y * 1000}
@@ -149,21 +153,6 @@ async function createMark(event) {
 
   if (selectedTool.value == 'free') {
     data.shape = Mark.SHAPE_FREE_MARKER;
-  } else {
-    switch(annotation.type) {
-      case 'marker':
-        data.shape = Mark.SHAPE_TEXT_MARKER;
-        break;
-      case 'underline':
-        data.shape = Mark.SHAPE_TEXT_UNDERLINE;
-        break;
-      case 'wave':
-        data.shape = Mark.SHAPE_TEXT_WAVE;
-        break;
-      case 'vline':
-        data.shape = Mark.SHAPE_TEXT_VLINE;
-        break;
-    }
   }
 
   if (!commentsStore.getCommentByMarkKey(data.key)) {
@@ -181,25 +170,11 @@ function updateMark(event) {
   const annotation = event.detail;
   const data = {
     key: annotation.id,
-    shape: '',
+    shape: Mark.shapeFromPdfAnnotationType(annotation.type),
+    symbol: Mark.symbolFromPdfAnnotationToken(annotation.token),
     internal: JSON.stringify(annotation.intern),
     parent_number: annotation.page + 1,
     pos: {x: annotation.pos.x * 1000, y: annotation.pos.y * 1000}
-  }
-
-  switch(annotation.type) {
-    case 'marker':
-      data.shape = Mark.SHAPE_TEXT_MARKER;
-      break;
-    case 'underline':
-      data.shape = Mark.SHAPE_TEXT_UNDERLINE;
-      break;
-    case 'wave':
-      data.shape = Mark.SHAPE_TEXT_WAVE;
-      break;
-    case 'vline':
-      data.shape = Mark.SHAPE_TEXT_VLINE;
-      break;
   }
 
   const comment = commentsStore.getCommentByMarkKey(data.key);
@@ -212,6 +187,24 @@ function updateMark(event) {
     }
   }
 }
+
+function shapeFromType(type) {
+  switch(type) {
+  case 'marker':
+    return Mark.SHAPE_TEXT_MARKER;
+    break;
+  case 'underline':
+    return Mark.SHAPE_TEXT_UNDERLINE;
+    break;
+  case 'wave':
+    return Mark.SHAPE_TEXT_WAVE;
+    break;
+  case 'vline':
+    return Mark.SHAPE_TEXT_VLINE;
+    break;
+  }
+}
+
 
 function deleteMark(event) {
   const comment = commentsStore.getCommentByMarkKey(event.detail.id);

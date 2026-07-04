@@ -28,6 +28,68 @@ class Mark {
   static SYMBOL_CHECK = '✓';
   static SYMBOL_CROSS = '✗';
   static SYMBOL_QUESTION = '?';
+  static SYMBOL_EXCLAMATION = "!";
+  static SYMBOL_MISSING = "⌈"
+
+  static shapeFromPdfAnnotationType(type) {
+    switch(type) {
+      case 'marker':
+        return Mark.SHAPE_TEXT_MARKER;
+      case 'underline':
+        return Mark.SHAPE_TEXT_UNDERLINE;
+      case 'wave':
+        return Mark.SHAPE_TEXT_WAVE;
+      case 'vline':
+        return Mark.SHAPE_TEXT_VLINE;
+    }
+    return '';
+  }
+
+  static shapeToPdfAnnotationType(shape) {
+    switch(shape) {
+      case Mark.SHAPE_TEXT_MARKER:
+        return 'marker';
+      case Mark.SHAPE_TEXT_UNDERLINE:
+        return 'underline';
+      case Mark.SHAPE_TEXT_WAVE:
+        return 'wave';
+      case Mark.SHAPE_TEXT_VLINE:
+        return 'vline';
+    }
+    return '';
+  }
+
+  static symbolFromPdfAnnotationToken(token) {
+    switch(token) {
+      case 'check':
+        return Mark.SYMBOL_CHECK;
+      case 'cross':
+        return Mark.SYMBOL_CROSS;
+      case 'question-mark':
+        return Mark.SYMBOL_QUESTION;
+      case 'exclamation-point':
+        return Mark.SYMBOL_EXCLAMATION;
+      case 'missing':
+        return Mark.SYMBOL_MISSING;
+    }
+    return '';
+  }
+
+  static symbolToPdfAnnotationToken(symbol) {
+    switch(symbol) {
+      case Mark.SYMBOL_CHECK:
+        return 'check';
+      case Mark.SYMBOL_CROSS:
+        return 'cross';
+      case Mark.SYMBOL_QUESTION:
+        return 'question-mark';
+      case Mark.SYMBOL_EXCLAMATION:
+        return 'exclamation-point';
+      case  Mark.SYMBOL_MISSING:
+        return 'missing';
+    }
+    return '';
+  }
 
 
   /**
