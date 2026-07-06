@@ -25,15 +25,12 @@ let pdfjs;
 onMounted(() => {
   pdfjs = createPDFJsApi(EssayNode.value, './annotate-pdf/pdfjs-dist/web/viewer.html', essayStore.url);
   pdfjs.setDefaultColor(stores.config().getDefaultCommentColor(true));
-
-  // this is not needed and causes errors on comment creation in pdf.js
-  //pdfjs.setDefaultLineColor(stores.config().getDefaultCommentColor(false));
-  //pdfjs.setDefaultTokenColor(stores.config().getDefaultCommentColor(false));
-
+  pdfjs.setDefaultLineColor(stores.config().getDefaultCommentColor(true));
+  pdfjs.setDefaultTokenColor(stores.config().getDefaultCommentColor(true));
   pdfjs.enableTokenButtons(true);
   pdfjs.enableTypeButtons(true);
+  pdfjs.setDrawMode('marker');
 
-  pdfjs.setDrawMode('marker'); // or 'underline'
   loadMarks();
   if (summariesStore.isOwnDisabled) {
     selectTool('');

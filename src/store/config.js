@@ -21,16 +21,6 @@ const startState = {
   corrector3_color: null          // marking color of corrector 3
 }
 
-function hexToRgba(hex, alpha) {
-  hex = hex.replace(/^#/, '');
-
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-}
-
 export const useConfigStore = defineStore('config', {
   state: () => {
     return startState;
@@ -79,41 +69,18 @@ export const useConfigStore = defineStore('config', {
        * Get the color used for marking a comment
        *
        * @param {number} position
-       * @returns {string}
+       * @returns {string}  with alpha value, e. g. #AABBCC00
        */
       const fn = function (position, selected = false) {
         switch (position) {
           case 0:
-            return hexToRgba(state.corrector1_color, selected ? 1: 0.4);
+            return '#' + state.corrector1_color.toUpperCase() + (selected ? 'FF' : '66');
           case 1:
-            return hexToRgba(state.corrector2_color, selected ? 1: 0.4);
+            return '#' + state.corrector2_color.toUpperCase() + (selected ? 'FF' : '66');
           case 2:
-            return hexToRgba(state.corrector3_color, selected ? 1: 0.4);
+            return '#' + state.corrector3_color.toUpperCase() + (selected ? 'FF' : '66');
           default:
-            return hexToRgba('CCCCCC', selected ? 1: 0.4);
-        }
-      }
-      return fn;
-    },
-
-    getCommentColorHex(state) {
-
-      /**
-       * Get the color used for marking a comment
-       *
-       * @param {number} position
-       * @returns {string}
-       */
-      const fn = function (position) {
-        switch (position) {
-          case 0:
-            return '#' + state.corrector1_color;
-          case 1:
-            return '#' + state.corrector2_color;
-          case 2:
-            return '#' + state.corrector3_color;
-          default:
-            return '#CCCCCC';
+            return '#CCCCCC' + (selected ? 'FF' : '66');
         }
       }
       return fn;
