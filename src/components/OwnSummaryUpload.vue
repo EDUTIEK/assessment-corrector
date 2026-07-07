@@ -45,7 +45,6 @@ function updateProgress(progressEvent) {
 }
 
 async function uploadFile() {
-  console.log(selectedFile.value);
   if (!selectedFile.value) {
     message.value = 'Bitte wählen Sie eine Datei';
     isSuccess.value = false;

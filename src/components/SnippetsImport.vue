@@ -42,7 +42,6 @@ function updateProgress(progressEvent) {
 }
 
 async function uploadFile() {
-  console.log(selectedFile.value);
   if (!selectedFile.value) {
     message.value = t('allFileSelectEmpty');
     isSuccess.value = false;

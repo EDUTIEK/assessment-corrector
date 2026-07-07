@@ -109,8 +109,6 @@ async function handleFocusChange() {
 }
 
 function loadMarks() {
-  console.log('loadMarks');
-
   const all = [];
   for (const comment of commentsStore.activeComments) {
     for (const annotation of comment.getPdfAnnotations()) {
@@ -136,8 +134,6 @@ function toggleLabels() {
 }
 
 async function createMark(event) {
-  console.log('createMark', event.detail);
-
   const annotation = event.detail;
   const data = {
     key: annotation.id,
@@ -162,8 +158,6 @@ async function createMark(event) {
 }
 
 function updateMark(event) {
-  console.log('updateMark', event.detail);
-
   const annotation = event.detail;
   const data = {
     key: annotation.id,
@@ -233,8 +227,6 @@ function pageChanged(event) {
 }
 
 function refreshSelection() {
-  console.log('refreshSelection', commentsStore.selectedKey);
-
   const configStore = stores.config();
   for (const comment of commentsStore.activeComments) {
     for (const mark of comment.marks) {

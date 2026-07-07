@@ -268,7 +268,6 @@ export default class TinyHelper {
     }
 
     replaceNodeText(node, newText, cursor) {
-        console.log(cursor);
 
         if (node.nodeType !== Node.TEXT_NODE) {
             return false;
