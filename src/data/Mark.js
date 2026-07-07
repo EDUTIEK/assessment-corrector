@@ -5,24 +5,30 @@ import MarkPoint from '@/data/MarkPoint';
  */
 class Mark {
 
-  // image shapes
+  // Image shapes
   static SHAPE_CIRCLE = 'circle';
   static SHAPE_RECTANGLE = 'rectangle';
   static SHAPE_POLYGON = 'polygon';
   static SHAPE_LINE = 'line';
   static SHAPE_WAVE = 'wave';
 
-  // pdf shapes
+  // Pdf shapes
   static SHAPE_FREE_MARKER = 'free_marker';
   static SHAPE_TEXT_MARKER = 'text_marker';
   static SHAPE_TEXT_UNDERLINE = 'text_underline';
   static SHAPE_TEXT_WAVE = 'text_wave';
   static SHAPE_TEXT_VLINE = 'text_vline';
 
-
+  // These shapes can be set in setData
   static ALLOWED_SHAPES = [
       Mark.SHAPE_CIRCLE, Mark.SHAPE_RECTANGLE, Mark.SHAPE_POLYGON, Mark.SHAPE_LINE, Mark.SHAPE_WAVE,
-      Mark.SHAPE_FREE_MARKER, Mark.SHAPE_TEXT_MARKER, Mark.SHAPE_TEXT_UNDERLINE, Mark.SHAPE_TEXT_WAVE,  Mark.SHAPE_TEXT_VLINE
+      Mark.SHAPE_FREE_MARKER, Mark.SHAPE_TEXT_MARKER, Mark.SHAPE_TEXT_UNDERLINE, Mark.SHAPE_TEXT_WAVE, Mark.SHAPE_TEXT_VLINE
+  ];
+
+  // These shapes get a lighter color when not being selected
+  static FILLED_SHAPED = [
+    Mark.SHAPE_CIRCLE, Mark.SHAPE_RECTANGLE, Mark.SHAPE_POLYGON,
+    Mark.SHAPE_FREE_MARKER, Mark.SHAPE_TEXT_MARKER
   ];
 
   static SYMBOL_CHECK = '✓';
@@ -214,7 +220,6 @@ class Mark {
     }
   }
 
-
   /**
    * Get the icon of the mark
    * @return string
@@ -230,14 +235,7 @@ class Mark {
       case Mark.SHAPE_POLYGON:
         return 'mdi-vector-triangle';
       case Mark.SHAPE_CIRCLE:
-        switch (this.symbol) {
-          case Mark.SYMBOL_CHECK:
-            return 'mdi-check';
-          case Mark.SYMBOL_CROSS:
-            return 'mdi-close';
-          case Mark.SYMBOL_QUESTION:
-            return 'mdi-help';
-        }
+        return 'mdi-circle-outline';
       case Mark.SHAPE_FREE_MARKER:
         return 'mdi-draw';
       case Mark.SHAPE_TEXT_MARKER:
@@ -250,7 +248,15 @@ class Mark {
         return 'mdi-tally-mark-1';
     }
     return '';
+  }
 
+  /**
+   * Get if the shape is filled
+   * These shapes get a lighter color when not being selected
+   * @returns {boolean}
+   */
+  isFilled() {
+    return Mark.FILLED_SHAPED.includes(this.shape);
   }
 }
 

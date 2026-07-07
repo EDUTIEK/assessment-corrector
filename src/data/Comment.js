@@ -309,7 +309,7 @@ export default class Comment {
           token: Mark.symbolToPdfAnnotationToken(mark.symbol),
           label: this.getLabelWithSymbol(),
           intern: JSON.parse(mark.internal),
-          color: stores.config().getCommentColor(this.correction_position, false)
+          color: stores.config().getCommentColor(this.correction_position, false, mark.isFilled())
         });
       }
     }

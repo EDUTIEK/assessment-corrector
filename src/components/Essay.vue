@@ -47,9 +47,10 @@ function refreshSelection() {
 
   let comment = commentsStore.getComment(commentsStore.selectedKey);
   if (comment) {
-    const style = configStore.getCommentStyle(comment.correction_position, true);
+    const style = configStore.getCommentStyle(comment.correction_position, true, true);
     marker.showMark(Comment.CLASS_SELECTED, style, comment.start_position, comment.end_position);
     marker.addLabel('labelled', comment.label, comment.start_position);
+    marker.addLabel('selected', comment.label, comment.start_position);
     marker.scrollToMark(comment.start_position, comment.end_position);
   }
 }
@@ -74,9 +75,12 @@ function updateMark(comment) {
   }
   const style = configStore.getCommentStyle(
       comment.correction_position,
-      comment.key == commentsStore.selectedKey);
+      comment.key == commentsStore.selectedKey, true);
   marker.showMark(comment.getCssClass(), style, comment.start_position, comment.end_position);
   marker.addLabel('labelled', comment.label, comment.start_position);
+  if (comment.key == commentsStore.selectedKey) {
+    marker.addLabel('selected', comment.label, comment.start_position);
+  }
 }
 
 /**

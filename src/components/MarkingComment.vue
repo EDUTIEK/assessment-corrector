@@ -76,7 +76,8 @@ onMounted(() => {
  */
 function getBgColor(comment) {
 
-  return configStore.getCommentColor(comment.correction_position, comment.key == commentsStore.selectedKey);
+  // the text field is always filled
+  return configStore.getCommentColor(comment.correction_position, comment.key == commentsStore.selectedKey, true);
 }
 
 function getPointsInputStyle(comment) {

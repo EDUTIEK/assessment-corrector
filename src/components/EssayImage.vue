@@ -120,8 +120,8 @@ function onSelection(selected, event) {
           const mark_data = {
             ...mark.getData(),
             label: showLabels.value ? comment.label : '',
-            color: configStore.getCommentColor(comment.correction_position, false),
-            selectedColor: configStore.getCommentColor(comment.correction_position, true),
+            color: configStore.getCommentColor(comment.correction_position, false, mark.isFilled()),
+            selectedColor: configStore.getCommentColor(comment.correction_position, true, mark.isFilled()),
             locked: comment.correction_key != stores.corrections().ownKey || summariesStore.isOwnDisabled
           }
           marker.updateMark(mark_data);
@@ -206,8 +206,8 @@ function refreshMarks() {
         const mark_data = {
           ...mark.getData(),
           label: showLabels.value ? comment.label : '',
-          color: configStore.getCommentColor(comment.correction_position, false),
-          selectedColor: configStore.getCommentColor(comment.correction_position, true),
+          color: configStore.getCommentColor(comment.correction_position, false, mark.isFilled()),
+          selectedColor: configStore.getCommentColor(comment.correction_position, true, mark.isFilled()),
           locked: comment.correction_key != stores.corrections().ownKey || summariesStore.isOwnDisabled
         }
         if (currentKeys.includes(mark.key)) {

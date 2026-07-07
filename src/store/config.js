@@ -57,8 +57,8 @@ export const useConfigStore = defineStore('config', {
       /**
        * Get the default color used for marking an own comment
        */
-      const fn = function (selected = false) {
-        return state.getCommentColor(own_position, selected);
+      const fn = function (selected = false, filled = false) {
+        return state.getCommentColor(own_position, selected, filled);
       }
       return fn;
     },
@@ -68,19 +68,21 @@ export const useConfigStore = defineStore('config', {
       /**
        * Get the color used for marking a comment
        *
-       * @param {number} position
-       * @returns {string}  with alpha value, e. g. #AABBCC00
+       * @param {number} position the correctors grading position (0 to 2)
+       * @param {bool} selected the color is for selected comments
+       * @param {bool} filled the color is for filled markup (e.g. text highlight)
+       * @returns {string} color hex code with alpha value, e.g. #AABBCC00
        */
-      const fn = function (position, selected = false) {
+      const fn = function (position, selected = false, filled = false) {
         switch (position) {
           case 0:
-            return '#' + state.corrector1_color.toUpperCase() + (selected ? 'FF' : '66');
+            return '#' + state.corrector1_color.toUpperCase() + (selected || !filled ? 'FF' : '33');
           case 1:
-            return '#' + state.corrector2_color.toUpperCase() + (selected ? 'FF' : '66');
+            return '#' + state.corrector2_color.toUpperCase() + (selected || !filled ? 'FF' : '33');
           case 2:
-            return '#' + state.corrector3_color.toUpperCase() + (selected ? 'FF' : '66');
+            return '#' + state.corrector3_color.toUpperCase() + (selected || !filled ? 'FF' : '33');
           default:
-            return '#CCCCCC' + (selected ? 'FF' : '66');
+            return '#CCCCCC' + (selected || !filled  ? 'FF' : '33');
         }
       }
       return fn;
@@ -92,10 +94,12 @@ export const useConfigStore = defineStore('config', {
        * Get the style attribute for a comment by correction position and selection
        *
        * @param {number} position
+       * @param {bool} selected the color is for selected comments
+       * @param {bool} filled the color is for filled markup (e.g. text highlight)
        * @returns {string}
        */
-      const fn = function (position, selected) {
-        return 'background-color: ' +  state.getCommentColor(position, selected);
+      const fn = function (position, selected = false, filled = false) {
+        return 'background-color: ' +  state.getCommentColor(position, selected, filled) + ';';
       }
       return fn;
     }

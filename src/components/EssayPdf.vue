@@ -25,10 +25,13 @@ let pdfjs;
 onMounted(() => {
   pdfjs = createPDFJsApi(EssayNode.value, './annotate-pdf/pdfjs-dist/web/viewer.html', essayStore.url);
   pdfjs.setDefaultColor(stores.config().getDefaultCommentColor(true));
-  pdfjs.setDefaultLineColor(stores.config().getDefaultCommentColor(true));
-  pdfjs.setDefaultTokenColor(stores.config().getDefaultCommentColor(true));
-  pdfjs.enableTokenButtons(true);
-  pdfjs.enableTypeButtons(true);
+
+  // causes errors in current annotate-pdf, will be foxed by lscharmer
+  // pdfjs.setDefaultLineColor(stores.config().getDefaultCommentColor(true));
+  // pdfjs.setDefaultTokenColor(stores.config().getDefaultCommentColor(true));
+  // pdfjs.enableTokenButtons(true);
+  // pdfjs.enableTypeButtons(true);
+
   pdfjs.setDrawMode('marker');
 
   loadMarks();
@@ -231,8 +234,8 @@ function refreshSelection() {
   for (const comment of commentsStore.activeComments) {
     for (const mark of comment.marks) {
       pdfjs.setColor(mark.key, configStore.getCommentColor(
-          comment.correction_position,
-          comment.key == commentsStore.selectedKey));
+          comment.correction_position, comment.key == commentsStore.selectedKey, mark.isFilled()),
+      );
       if (comment.key == commentsStore.selectedKey) {
         pdfjs.select(mark.key);
         if (showLabels.value == 0) {
