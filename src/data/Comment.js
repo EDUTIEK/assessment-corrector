@@ -391,4 +391,11 @@ export default class Comment {
       marks: marks
     }
   }
+
+  /**
+   * Get a clone of the comment
+   */
+  clone() {
+    return new Comment(this.getData());
+  }
 }

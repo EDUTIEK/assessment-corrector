@@ -388,9 +388,7 @@ export const useCommentsStore = defineStore('comments', {
      * @private
      */
     async sortAndLabelComments() {
-      const apiStore = stores.api();
       const correctionsStore = stores.corrections();
-      const configStore = stores.config();
 
       this.comments = this.comments.sort(Comment.order);
 
