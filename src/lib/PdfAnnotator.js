@@ -68,7 +68,7 @@ export default class PdfAnnotator {
       }
 
       if (this.hasDetailsToShow(comment)) {
-        comment.label = initials + ' ' + parent.toString() + '.' + number.toString();
+        comment.label = initials + ' ' + parent_no.toString() + '.' + number.toString();
         number++;
       } else {
         comment.label = '';

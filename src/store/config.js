@@ -109,13 +109,13 @@ export const useConfigStore = defineStore('config', {
       const fn = function (position) {
         switch (position) {
           case 0:
-            return hexToRgba(state.corrector1_color.toUpperCase(), 1);
+            return '#' + state.corrector1_color.toUpperCase();
           case 1:
-            return hexToRgba(state.corrector2_color.toUpperCase(), 1);
+            return '#' + state.corrector2_color.toUpperCase();
           case 2:
-            return hexToRgba(state.corrector3_color.toUpperCase(), 1);
+            return '#' + state.corrector3_color.toUpperCase();
           default:
-            return hexToRgba('CCCCCC', 1);
+            return '#CCCCCC';
         }
       }
       return fn;
