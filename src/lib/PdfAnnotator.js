@@ -49,7 +49,7 @@ export default class PdfAnnotator {
     const annotations = [];
     for (const comment of comments) {
       for (const annotation of comment.getPdfAnnotations()) {
-        annotation.text = '[' + comment.getLabelWithSymbol() + '] ' + comment.comment;
+        annotation.text = comment.getLabelAndComment();
         annotations.push(annotation);
       }
     }

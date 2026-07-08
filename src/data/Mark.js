@@ -1,4 +1,6 @@
 import MarkPoint from '@/data/MarkPoint';
+import i18n from "@/plugins/i18n";
+const { t } = i18n.global;
 
 /**
  * Correction Mark
@@ -95,6 +97,36 @@ class Mark {
         return 'missing';
     }
     return '';
+  }
+
+  static symbolToText(symbol) {
+    switch (symbol) {
+      case Mark.SYMBOL_CHECK:
+        return t('symbolCheck');
+      case Mark.SYMBOL_CROSS:
+        return t('symbolCross');
+      case Mark.SYMBOL_QUESTION:
+        return t('symbolQuestion');
+      case Mark.SYMBOL_EXCLAMATION:
+        return t('symbolExclamation');
+      case  Mark.SYMBOL_MISSING:
+        return t('symbolMissing');
+    }
+  }
+
+  static symbolToLabel(symbol) {
+    switch (symbol) {
+      case Mark.SYMBOL_CHECK:
+        return '√';
+      case Mark.SYMBOL_CROSS:
+        return '×';
+      case Mark.SYMBOL_QUESTION:
+        return '?';
+      case Mark.SYMBOL_EXCLAMATION:
+        return '!';
+      case  Mark.SYMBOL_MISSING:
+        return '¬';
+    }
   }
 
 

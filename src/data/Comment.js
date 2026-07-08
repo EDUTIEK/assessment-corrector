@@ -263,11 +263,29 @@ export default class Comment {
   getLabelWithSymbol() {
     for (const mark of this.marks) {
       if (mark.symbol) {
-        return this.label + ': ' + mark.symbol;
+        return this.label + '   ' + Mark.symbolToLabel(mark.symbol);
       }
     }
     return this.label ?? '';
   }
+
+  getLabelAndComment() {
+    let text = this.label;
+    for (const mark of this.marks) {
+      if (mark.symbol) {
+        text = text + ' ' + Mark.symbolToText(mark.symbol);
+        break;
+      }
+    }
+    if (this.comment) {
+      if (text) {
+        text = text + ':\n'
+      }
+      text = text + this.comment;
+    }
+    return text;
+  }
+
 
   /**
    * Get the icon of the mark
@@ -309,7 +327,7 @@ export default class Comment {
           token: Mark.symbolToPdfAnnotationToken(mark.symbol),
           label: this.getLabelWithSymbol(),
           intern: JSON.parse(mark.internal),
-          color: stores.config().getCommentColor(this.correction_position, false, mark.isFilled())
+          color: stores.config().getCommentColor(this.correction_position, false, false)
         });
       }
     }
