@@ -52,29 +52,24 @@ export default class PdfAnnotator {
   filterAndRenumber(original_comments) {
     const correctionStore = stores.corrections();
 
-    let parent = 0;
-    let numbers = {};
+    let current_parent = 0;
+    let number = 1;
     const comments = [];
 
     for (const original of original_comments) {
-
       const comment = original.clone();
-
       const correction = correctionStore.getCorrection(comment.correction_key);
-      const initials = correction ? correction.initials : '??';
+      const initials = correction ? correction.initials : '';
+
+      const parent_no = comment.parent_number;
+      if (parent_no !== current_parent) {
+        current_parent = parent_no;
+        number = 1;
+      }
 
       if (this.hasDetailsToShow(comment)) {
-        if (comment.parent_number > parent) {
-          parent = comment.parent_number;
-          for (const key of correctionStore.correctionKeys) {
-            numbers[key] = 0;                       // reset all numbers for the new parent
-          }
-          numbers[comment.correction_key] = 1;     // set the number of the first comment
-
-        } else {
-          numbers[comment.correction_key]++;
-        }
-        comment.label = initials + ' ' + parent.toString() + '.' + numbers[comment.correction_key].toString();
+        comment.label = initials + ' ' + parent.toString() + '.' + number.toString();
+        number++;
       } else {
         comment.label = '';
       }
@@ -113,7 +108,7 @@ export default class PdfAnnotator {
   async #buildFor(comments) {
     const annotations = [];
     for (const comment of comments) {
-      for (const annotation of comment.getPdfAnnotations()) {
+      for (const annotation of comment.getPdfAnnotations(true)) {
         annotation.text = comment.getLabelAndComment();
         annotations.push(annotation);
       }

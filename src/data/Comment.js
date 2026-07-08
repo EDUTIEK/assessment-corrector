@@ -315,7 +315,7 @@ export default class Comment {
   /**
    * Get the annotations for pdfjs from the marks
    */
-  getPdfAnnotations() {
+  getPdfAnnotations(to_save = false) {
     const all = [];
     for (const mark of this.marks) {
       if (mark.internal) {
@@ -327,7 +327,9 @@ export default class Comment {
           token: Mark.symbolToPdfAnnotationToken(mark.symbol),
           label: this.getLabelWithSymbol(),
           intern: JSON.parse(mark.internal),
-          color: stores.config().getCommentColor(this.correction_position, false, false)
+          color: to_save
+            ? stores.config().getCommentColorToSave(this.correction_position)
+            : stores.config().getCommentColor(this.correction_position, false, false)
         });
       }
     }

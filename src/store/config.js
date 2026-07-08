@@ -21,6 +21,16 @@ const startState = {
   corrector3_color: null          // marking color of corrector 3
 }
 
+function hexToRgba(hex, alpha) {
+  hex = hex.replace(/^#/, '');
+
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 export const useConfigStore = defineStore('config', {
   state: () => {
     return startState;
@@ -83,6 +93,29 @@ export const useConfigStore = defineStore('config', {
             return '#' + state.corrector3_color.toUpperCase() + (selected || !filled ? 'FF' : '33');
           default:
             return '#CCCCCC' + (selected || !filled  ? 'FF' : '33');
+        }
+      }
+      return fn;
+    },
+
+    getCommentColorToSave(state) {
+
+      /**
+       * Get the color used to save in a pd fime
+       *
+       * @param {number} position the correctors grading position (0 to 2)
+       * @returns {string} color hex code without alpha value
+       */
+      const fn = function (position) {
+        switch (position) {
+          case 0:
+            return hexToRgba(state.corrector1_color.toUpperCase(), 1);
+          case 1:
+            return hexToRgba(state.corrector2_color.toUpperCase(), 1);
+          case 2:
+            return hexToRgba(state.corrector3_color.toUpperCase(), 1);
+          default:
+            return hexToRgba('CCCCCC', 1);
         }
       }
       return fn;
