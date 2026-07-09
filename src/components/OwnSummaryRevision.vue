@@ -23,6 +23,7 @@ const props = defineProps(['editorId']);
 const helper = new TinyHelper(props.editorId);
 
 const points = ref(null);
+const grade = ref('');
 const message = ref('');
 const messageClass = ref('');
 const withText = ref(true);
@@ -30,11 +31,13 @@ const corridor = summariesStore.pointsCorridor;
 
 watch(points, () => {
   summariesStore.updateRevisionPoints(points.value);
+  grade.value = summariesStore.currentRevisionGradeTitle;
   message.value = summariesStore.currentRevisionGradeStatement;
 });
 
 points.value = summariesStore.editSummary.revision_points;
 withText.value = stores.corrections().ownCorrection.can_enter_revision_text;
+grade.value = summariesStore.currentRevisionGradeTitle;
 message.value = summariesStore.currentRevisionGradeStatement;
 
 function check(value) {
@@ -135,7 +138,7 @@ watch(() => snippetsStore.selection_open, handleSnippet);
                 v-model="points"
             ></v-number-input>
             &nbsp;
-            <span class="middle"><strong>{{ $t('allGrade') }}</strong> {{ summariesStore.currentRevisionGradeTitle }}</span>
+            <span class="middle"><strong>{{ $t('allGrade') }}</strong> {{ grade }}</span>
           </p>
 
           <p :class="messageClass">{{ message }}</p>
