@@ -776,6 +776,13 @@ export const useApiStore = defineStore('api', {
     },
 
     /**
+     * Clear a timer interval
+     */
+    clearInterval(name) {
+      clearInterval(this.intervals[name]);
+    },
+
+    /**
      * Clear all timer intervals
      */
     clearAllIntervals() {

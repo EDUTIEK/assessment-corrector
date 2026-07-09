@@ -167,6 +167,9 @@ export default class Summary {
     if (data.revision_points !== undefined && data.revision_points !== null) {
       this.revision_points = parseFloat(data.revision_points)
     }
+    if (data.revision_grade_key !== undefined && data.revision_grade_key !== null) {
+      this.revision_grade_key = data.revision_grade_key.toString()
+    }
     if (data.require_other_revision !== undefined && data.require_other_revision !== null) {
       this.require_other_revision = !!data.require_other_revision
     }

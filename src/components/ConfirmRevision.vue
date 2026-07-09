@@ -19,6 +19,7 @@ const preferencesStore = stores.preferences();
 const { t } = i18n.global
 
 const showConfirmation = ref(false);
+const requireOtherRevision = ref(null);
 
 function dialogTitle() {
   switch (settingsStore.Assessment.procedure) {
@@ -33,12 +34,18 @@ function dialogTitle() {
 
 function requireOtherRevisionPossible() {
   return settingsStore.Assessment.procedure === Procedure.APPROXIMATION
-    && correctionsStore.ownCorrection?.position === Correction.POSITION_FIRST;
+    && correctionsStore.ownCorrection?.position === Correction.POSITION_FIRST
+      && summariesStore.stitchNeededAfterRevisionText !== '';
+}
+
+function cancel() {
+  showConfirmation.value = false;
+  requireOtherRevision.value = null;
 }
 
 async function setRevisedAndContinue() {
 
-  await summariesStore.setOwnRevised();
+  await summariesStore.setOwnRevised(requireOtherRevision.value);
   if (await apiStore.saveChangesToBackend(true)) {
     showConfirmation.value = false;
     apiStore.loadItemFromBackend(itemsStore.currentKey);
@@ -63,12 +70,6 @@ async function setRevisedAndContinue() {
       <v-card>
         <v-card-title>{{ dialogTitle() }}</v-card-title>
         <v-card-text>
-          <div class="appRow" v-if="summariesStore.editSummary.hasRevisionText()">
-            <strong>{{ $t('revisionTextLabel') }}</strong>
-            <div class="appText xlas-content headlines-three" v-html="summariesStore.editSummary.revision_text">
-            </div>
-          </div>
-
           <div class="appRow">
             <span v-if="summariesStore.editSummary.hasRevisionPoints()">
               <strong>{{ $t('revisionPointsLabel') }}</strong>
@@ -99,28 +100,39 @@ async function setRevisedAndContinue() {
               {{ summariesStore.stitchNeededAfterRevisionText }}
             </v-alert>
 
-            <div class="appRow" v-if="summariesStore.isOwnValidForRevision">
-              <v-checkbox
-                  v-if="requireOtherRevisionPossible()"
-                  v-model="summariesStore.editSummary.require_other_revision"
-                  :label="t('revisionRequireOtherRevision')"
-              ></v-checkbox>
-            </div>
-
-            <div class="appRow" v-if="summariesStore.isOwnValidForRevision">
-              {{ $t('revisionWarnFinalize') }}
-            </div>
-
+            <v-alert v-show="summariesStore.stitchNeededAfterRevisionText === ''"
+                     color="#0000A0" type="info" variant="text" density="compact">
+              {{ settingsStore.Assessment.procedure === Procedure.APPROXIMATION
+                ? $t('revisionApproximationFinalizes')
+                : $t('revisionConsultingFinalizes')
+              }}
+            </v-alert>
           </div>
+
+          <div class="appRow appChoices" v-if="summariesStore.isOwnValidForRevision">
+            <v-radio-group
+                v-if="requireOtherRevisionPossible()"
+                v-model="requireOtherRevision"
+            >
+              <v-radio :label="t('revisionRequireStitchDecision')" :value="false"></v-radio>
+              <v-radio :label="t('revisionRequireOtherRevision')" :value="true"></v-radio>
+            </v-radio-group>
+          </div>
+
+          <div class="appRow" v-if="summariesStore.isOwnValidForRevision">
+            {{ $t('revisionWarnFinalize') }}
+          </div>
+
+
         </v-card-text>
         <v-card-actions>
           <v-btn
-              :disabled="!summariesStore.isOwnValidForRevision"
+              :disabled="!summariesStore.isOwnValidForRevision || (requireOtherRevisionPossible() && requireOtherRevision === null)"
               @click="setRevisedAndContinue()">
             <v-icon left icon="mdi-check"></v-icon>
             <span>{{ $t('revisionFix') }}</span>
           </v-btn>
-          <v-btn @click="showConfirmation = false">
+          <v-btn @click="cancel()">
             <v-icon left icon="mdi-close"></v-icon>
             <span>{{ $t('allCancel') }}</span>
           </v-btn>
@@ -134,6 +146,10 @@ async function setRevisedAndContinue() {
 
 .appRow {
   margin-bottom: 10px;
+}
+
+.appChoices {
+  margin-left: 50px;
 }
 
 .appPoints {

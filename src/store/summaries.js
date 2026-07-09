@@ -28,7 +28,7 @@ export const useSummariesStore = defineStore('summaries', {
       summaries: {},              // list of all summary objects for the current item, indexed by key
 
       // not saved in storage
-      editSummary: new Summary(), // summary of the currector correction that is actively edited
+      editSummary: new Summary(), // summary of the corrector correction that is actively edited
       lastCheck: 0,               // timestamp (ms) of the last check if an update needs a storage
     }
 
@@ -38,6 +38,28 @@ export const useSummariesStore = defineStore('summaries', {
    * Getter functions (with params) start with 'get', simple state queries not
    */
   getters: {
+
+    /**
+     * Get the corresponding summary for a first or second corrector
+     * @return Summary|null
+     */
+    ownSummary(state) {
+      return state.editSummary;
+    },
+
+    /**
+     * Get the corresponding summary for a first or second corrector
+     * @return Summary|null
+     */
+    otherSummary(state) {
+      switch (stores.corrections().ownCorrection?.position) {
+        case Correction.POSITION_FIRST:
+          return state.getForCorrection(stores.corrections().secondCorrection?.key ?? '') ?? null;
+        case Correction.POSITION_SECOND:
+          return state.getForCorrection(stores.corrections().firstCorrection?.key ?? '') ?? null;
+      }
+      return null;
+    },
 
     allSummaries(state) {
       return Object.values(state.summaries);
@@ -198,17 +220,16 @@ export const useSummariesStore = defineStore('summaries', {
      * @returns {string}
      */
     procedureNeededText(state) {
-      const settingsStore = stores.settings();
-      const itemsStore = stores.items();
       const reason = state.pointsDifferText;
-      if (reason && !itemsStore.isInStitch) {
-        switch (settingsStore.Assessment.procedure) {
+      if (reason) {
+        switch (stores.settings().Assessment.procedure) {
           case Procedure.APPROXIMATION:
             return t('summariesProcedureApproximationNeeded', [reason]);
           case Procedure.CONSULTING:
             return t('summariesProcedureConsultingNeeded', [reason]);
         }
-        if (settingsStore.Assessment.stitch_after_procedure) {
+        // a stitch decision can be required without a procedure
+        if (stores.settings().Assessment.stitch_after_procedure) {
           return t('summariesProcedureStitchNeeded', [reason]);
         }
       }
@@ -220,23 +241,12 @@ export const useSummariesStore = defineStore('summaries', {
      * @returns {string}
      */
     stitchNeededAfterRevisionText(state) {
-      const settingsStore = stores.settings();
-      const itemsStore = stores.items();
-      const correctionsStore = stores.corrections();
-
-      // show stitch text if second revision is to be confirmed
-      if (itemsStore.isInRevision) {
-        const otherSummary = state.getForCorrection(stores.corrections().firstOtherCorrection?.key ?? '') ?? null;
-        if (otherSummary?.isRevised()) {
-          const reason = state.pointsDifferText;
-          if (reason) {
-            if (settingsStore.Assessment.stitch_after_procedure) {
-              return t('summariesProcedureStitchNeeded', [reason]);
-            }
-          }
+      const reason = state.pointsDifferText;
+      if (reason) {
+        if (stores.settings().Assessment.stitch_after_procedure) {
+          return t('summariesProcedureStitchNeeded', [reason]);
         }
       }
-
      return '';
     },
 
@@ -245,21 +255,22 @@ export const useSummariesStore = defineStore('summaries', {
      * @returns {string}
      */
     pointsDifferText(state) {
-      const ownSummary = state.editSummary;
-      const otherSummary = state.getForCorrection(stores.corrections().firstOtherCorrection?.key ?? '') ?? null;
+      const ownSummary = state.ownSummary;
+      const otherSummary = state.otherSummary;
+
+      if (ownSummary === null || otherSummary === null) {
+        return '';
+      }
 
       let own_points = null;
       let other_points = null;
 
-      // revision or stitch decision checks already revised points first
-      if (stores.items().canRevise || stores.corrections().ownCorrection?.position == Correction.POSITION_STITCH) {
-        own_points = ownSummary?.revision_points ?? ownSummary?.points;
-        other_points = otherSummary?.revision_points ?? otherSummary?.points;
-      }
-      // normal authorization checks only original points
-      else {
-        own_points = ownSummary?.points;
-        other_points = otherSummary?.points;
+      if (stores.items().canAuthorize) {
+        own_points = ownSummary.points;
+        other_points = otherSummary.points;
+      } else if (stores.items().canRevise) {
+        own_points = ownSummary.revision_points ?? ownSummary.points;
+        other_points = otherSummary.revision_points ?? otherSummary.points;
       }
 
       if (own_points === null || other_points === null) {
@@ -347,8 +358,8 @@ export const useSummariesStore = defineStore('summaries', {
         const keys = await storage.getItem('keys');
         for (const key of keys) {
           const summary = new Summary(await storage.getItem(key));
-          summary.grade_key = levelsStore.getLevelForPoints(summary.points)?.key;
-          summary.revision_grade_key = levelsStore.getLevelForPoints(summary.revision_points)?.key;
+          summary.grade_key = levelsStore.getLevelForPoints(summary.points)?.key ?? '';
+          summary.revision_grade_key = levelsStore.getLevelForPoints(summary.revision_points)?.key ?? '';
           if (summary.item_key == apiStore.itemKey) {
             this.summaries[key] = summary;
           }
@@ -385,8 +396,8 @@ export const useSummariesStore = defineStore('summaries', {
 
         for (const item of data) {
           const summary = new Summary(item);
-          summary.grade_key = levelsStore.getLevelForPoints(summary.points)?.key;
-          summary.revision_grade_key = levelsStore.getLevelForPoints(summary.revision_points)?.key;
+          summary.grade_key = levelsStore.getLevelForPoints(summary.points)?.key ?? '';
+          summary.revision_grade_key = levelsStore.getLevelForPoints(summary.revision_points)?.key ?? '';
           await storage.setItem(summary.getKey(), summary.getData());
           if (summary.item_key == apiStore.itemKey) {
             this.summaries[summary.getKey()] = summary;
@@ -429,7 +440,9 @@ export const useSummariesStore = defineStore('summaries', {
       // avoid parallel updates
       // no need to wait because updateContent is called by interval
       // use post-increment for test-and set
-      if (!forced && lockUpdate++) {
+      if (forced) {
+        lockUpdate++;
+      } else if (lockUpdate++) {
         return;
       }
 
@@ -580,6 +593,7 @@ export const useSummariesStore = defineStore('summaries', {
     async setOwnPregraded() {
       this.editSummary.status = Summary.STATUS_PRE_GRADED;
       await this.updateContent(false, true);
+      stores.api().clearInterval('summariesStore.updateContent');
     },
 
     /**
@@ -588,14 +602,17 @@ export const useSummariesStore = defineStore('summaries', {
     async setOwnAuthorized() {
       this.editSummary.status = Summary.STATUS_AUTHORIZED;
       await this.updateContent(false, true);
+      stores.api().clearInterval('summariesStore.updateContent');
     },
 
     /**
      * Set the own current summary as revised
      */
-    async setOwnRevised() {
+    async setOwnRevised(require_other_revision) {
+      this.editSummary.require_other_revision = !!require_other_revision;
       this.editSummary.status = Summary.STATUS_REVISED;
       await this.updateContent(false, true);
+      stores.api().clearInterval('summariesStore.updateContent');
     },
   }
 
