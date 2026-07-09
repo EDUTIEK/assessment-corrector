@@ -115,6 +115,8 @@ class Mark {
   }
 
   static symbolToLabel(symbol) {
+    return symbol;
+
     switch (symbol) {
       case Mark.SYMBOL_CHECK:
         return '√';

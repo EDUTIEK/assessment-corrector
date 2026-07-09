@@ -19,6 +19,7 @@ const EssayNode = ref();
 const selectedTool = ref('');
 const selectedDrawMode= ref('marker');
 const showLabels = ref(true);
+const selectWords = ref(true);
 
 let pdfjs;
 
@@ -27,10 +28,9 @@ onMounted(() => {
   pdfjs.setDefaultColor(stores.config().getDefaultCommentColor(true));
 
   // causes errors in current annotate-pdf, will be foxed by lscharmer
-  // pdfjs.setDefaultLineColor(stores.config().getDefaultCommentColor(true));
-  // pdfjs.setDefaultTokenColor(stores.config().getDefaultCommentColor(true));
-  // pdfjs.enableTokenButtons(true);
-  // pdfjs.enableTypeButtons(true);
+  pdfjs.enableTokenButtons(true);
+  pdfjs.enableTypeButtons(true);
+  pdfjs.enableWordSelection(!!selectWords.value);
 
   pdfjs.setDrawMode('marker');
 
@@ -136,6 +136,15 @@ function toggleLabels() {
   loadMarks();
 }
 
+function toggleWords() {
+  if (selectWords.value == 1) {
+    selectWords.value = 0;
+  } else {
+    selectWords.value = 1;
+  }
+  pdfjs.enableWordSelection(!!selectWords.value);
+}
+
 async function createMark(event) {
   const annotation = event.detail;
   const data = {
@@ -175,7 +184,7 @@ function updateMark(event) {
   if (comment) {
     const oldData = comment.getData();
     comment.updateMarkData(data);
-    pdfjs.setLabel(annotation.id, comment.getLabelWithSymbol());
+    pdfjs.setLabel(annotation.id, comment.label);
 
     const newData = comment.getData();
     if (JSON.stringify(oldData) != JSON.stringify(newData)) {
@@ -239,7 +248,7 @@ function refreshSelection() {
       if (comment.key == commentsStore.selectedKey) {
         pdfjs.select(mark.key);
         if (showLabels.value == 0) {
-          pdfjs.setLabel(mark.key, comment.getLabelWithSymbol());
+          pdfjs.setLabel(mark.key, comment.label);
         }
       }
       else if (showLabels.value == 0) {
@@ -301,6 +310,7 @@ async function download()
 
       <v-btn-group v-if="stores.settings().Task.enable_comments" density="comfortable" variant="outlined" divided>
         <v-btn size="small" :active="!!showLabels" icon="mdi-label-outline" @click="toggleLabels"></v-btn>
+        <v-btn size="small" :active="!!selectWords" @click="toggleWords">{{ $t('essayPdfSelectWords') }}</v-btn>
       </v-btn-group>
 
       &nbsp;

@@ -325,7 +325,7 @@ export default class Comment {
           page: this.parent_number - 1,
           type: Mark.shapeToPdfAnnotationType(mark.shape),
           token: Mark.symbolToPdfAnnotationToken(mark.symbol),
-          label: this.getLabelWithSymbol(),
+          label: this.label,
           intern: JSON.parse(mark.internal),
           color: to_save
             ? stores.config().getCommentColorToSave(this.correction_position)
