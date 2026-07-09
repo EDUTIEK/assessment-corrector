@@ -71,6 +71,16 @@ async function setRevisedAndContinue() {
         <v-card-title>{{ dialogTitle() }}</v-card-title>
         <v-card-text>
           <div class="appRow">
+            <span v-if="summariesStore.editSummary.hasPoints()">
+              <strong>{{ $t('revisionOriginalPointsLabel') }}</strong>
+              {{ preferencesStore.formatNumber(summariesStore.editSummary.points) }}
+              {{ $t('allPoints', summariesStore.editSummary.points) }}
+              <strong>{{ $t('allGrade') }}</strong> {{ levelsStore.getLevelForPoints(summariesStore.editSummary.points)?.title}}
+            </span>
+            <p>{{ levelsStore.getLevelForPoints(summariesStore.editSummary.points)?.statement }}</p>
+          </div>
+
+          <div class="appRow">
             <span v-if="summariesStore.editSummary.hasRevisionPoints()">
               <strong>{{ $t('revisionPointsLabel') }}</strong>
               {{ preferencesStore.formatNumber(summariesStore.editSummary.revision_points) }}
