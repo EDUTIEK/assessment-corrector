@@ -77,22 +77,11 @@ async function setAuthorizedAndContinue() {
 
     <v-dialog max-width="60em" persistent v-model="showConfirmation">
       <v-card>
-        <v-card-title>{{ $t('authorizationTitle', [itemsStore.currentItem.title]) }}</v-card-title>
+        <v-card-title>{{ $t('authorizationTitle') }}</v-card-title>
         <v-card-text>
-
-          <div v-if="summariesStore.editSummary.hasTextOrPdf()"
-               class="appRow"><strong>{{ $t('authorizationSummaryLabel') }}</strong>
-            <div class="appText xlas-content headlines-three"
-                 v-if="summariesStore.editSummary.text" v-html="summariesStore.editSummary.text">
-            </div>
-            <object class="appPdf" v-if="summariesStore.editSummary.pdf"
-                    type="application/pdf"
-                    :data="apiStore.getSummaryPdfUrl(summariesStore.editSummary)"
-            >
-            </object>
-          </div>
-
-          <div v-if="settingsStore.Task.enable_partial_points" class="appRow">
+          <div class="appRow"
+              v-if="settingsStore.Task.enable_partial_points"
+              v-show = "pointsStore.getSumOfPointsForCorrection(stores.corrections().ownKey)">
             <sum-of-points class='sumOfPoints' :correction_key="stores.corrections().ownKey"></sum-of-points>
           </div>
 
