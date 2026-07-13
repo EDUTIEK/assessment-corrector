@@ -60,6 +60,7 @@ export default class PdfAnnotator {
       const comment = original.clone();
       const correction = correctionStore.getCorrection(comment.correction_key);
       const initials = correction ? correction.initials : '';
+      comment.correction_position = correction ? correction.position : '';
 
       const parent_no = comment.parent_number;
       if (parent_no !== current_parent) {
@@ -108,7 +109,7 @@ export default class PdfAnnotator {
   async #buildFor(comments) {
     const annotations = [];
     for (const comment of comments) {
-      for (const annotation of comment.getPdfAnnotations(true)) {
+      for (const annotation of comment.getPdfAnnotations()) {
         annotation.text = comment.getLabelAndComment();
         annotations.push(annotation);
       }

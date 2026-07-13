@@ -98,28 +98,6 @@ export const useConfigStore = defineStore('config', {
       return fn;
     },
 
-    getCommentColorToSave(state) {
-
-      /**
-       * Get the color used to save in a pd fime
-       *
-       * @param {number} position the correctors grading position (0 to 2)
-       * @returns {string} color hex code without alpha value
-       */
-      const fn = function (position) {
-        switch (position) {
-          case 0:
-            return '#' + state.corrector1_color.toUpperCase();
-          case 1:
-            return '#' + state.corrector2_color.toUpperCase();
-          case 2:
-            return '#' + state.corrector3_color.toUpperCase();
-          default:
-            return '#CCCCCC';
-        }
-      }
-      return fn;
-    },
 
     getCommentStyle(state) {
 

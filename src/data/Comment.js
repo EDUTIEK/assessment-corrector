@@ -134,13 +134,15 @@ export default class Comment {
   rating_cardinal = false;
 
   /**
-   * position of the correction to which this comment belongs (not stored, dynamically assigned)
+   * position of the correction to which this comment belongs
+   * (not stored, dynamically assigned in sortAndLabelComments)
    * @type {string}
    */
   correction_position = null;
 
   /**
-   * label that should be shown for the comment (not stored, dynamically assigned)
+   * label that should be shown for the comment
+   * (not stored, dynamically assigned in sortAndLabelComments)
    * @type {string}
    */
   label = '';
@@ -273,13 +275,13 @@ export default class Comment {
     let text = this.label;
     for (const mark of this.marks) {
       if (mark.symbol) {
-        text = text + ' ' + Mark.symbolToText(mark.symbol);
+        text = text + ' ' + Mark.symbolToLabel(mark.symbol);
         break;
       }
     }
     if (this.comment) {
       if (text) {
-        text = text + ':\n'
+        text = text + '\n'
       }
       text = text + this.comment;
     }
@@ -315,7 +317,7 @@ export default class Comment {
   /**
    * Get the annotations for pdfjs from the marks
    */
-  getPdfAnnotations(to_save = false) {
+  getPdfAnnotations() {
     const all = [];
     for (const mark of this.marks) {
       if (mark.internal) {
@@ -327,9 +329,7 @@ export default class Comment {
           token: Mark.symbolToPdfAnnotationToken(mark.symbol),
           label: this.label,
           intern: JSON.parse(mark.internal),
-          color: to_save
-            ? stores.config().getCommentColorToSave(this.correction_position)
-            : stores.config().getCommentColor(this.correction_position, false, false)
+          color: stores.config().getCommentColor(this.correction_position, false, false)
         });
       }
     }
@@ -390,7 +390,7 @@ export default class Comment {
       parent_number: this.parent_number,
       comment: this.comment,
       rating: this.rating_excellent ? Comment.RAITNG_EXCELLENT : (this.rating_cardinal ? Comment.RATING_CARDINAL : ''),
-      marks: marks
+      marks: marks,
     }
   }
 

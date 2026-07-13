@@ -385,6 +385,7 @@ export const useCommentsStore = defineStore('comments', {
     /**
      * Sort the comments by position of their first marked word
      * Add labels with paragraph and comment number
+     * Set the correction position
      * @private
      */
     async sortAndLabelComments() {

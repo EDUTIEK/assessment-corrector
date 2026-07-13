@@ -37,7 +37,7 @@ class Mark {
   static SYMBOL_CROSS = '✗';
   static SYMBOL_QUESTION = '?';
   static SYMBOL_EXCLAMATION = "!";
-  static SYMBOL_MISSING = "⌈"
+  static SYMBOL_MISSING = "∀"
 
   static shapeFromPdfAnnotationType(type) {
     switch(type) {
@@ -117,18 +117,18 @@ class Mark {
   static symbolToLabel(symbol) {
     return symbol;
 
-    switch (symbol) {
-      case Mark.SYMBOL_CHECK:
-        return '√';
-      case Mark.SYMBOL_CROSS:
-        return '×';
-      case Mark.SYMBOL_QUESTION:
-        return '?';
-      case Mark.SYMBOL_EXCLAMATION:
-        return '!';
-      case  Mark.SYMBOL_MISSING:
-        return '¬';
-    }
+    // switch (symbol) {
+    //   case Mark.SYMBOL_CHECK:
+    //     return '√';
+    //   case Mark.SYMBOL_CROSS:
+    //     return '×';
+    //   case Mark.SYMBOL_QUESTION:
+    //     return '?';
+    //   case Mark.SYMBOL_EXCLAMATION:
+    //     return '!';
+    //   case  Mark.SYMBOL_MISSING:
+    //     return '∀';
+    // }
   }
 
 
