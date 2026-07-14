@@ -21,9 +21,6 @@ const selectedDrawMode= ref('marker');
 const showLabels = ref(true);
 const selectWords = ref(true);
 
-// an update event should not behandled if the update is just caused by selection
-let prevent_update = false;
-
 let pdfjs;
 
 onMounted(() => {
@@ -173,9 +170,6 @@ async function createMark(event) {
 }
 
 function updateMark(event) {
-  if (prevent_update) {
-    return;
-  }
   const annotation = event.detail;
   const data = {
     key: annotation.id,
@@ -245,7 +239,6 @@ function pageChanged(event) {
 }
 
 function refreshSelection() {
-  prevent_update = true;
   const configStore = stores.config();
   for (const comment of commentsStore.activeComments) {
     for (const mark of comment.marks) {
@@ -263,7 +256,6 @@ function refreshSelection() {
       }
     }
   }
-  prevent_update = false;
 }
 
 function handleDeleted()
