@@ -317,7 +317,9 @@ export default class TinyHelper {
         switch (formatting_options) {
             case 'extended':
                 return '@[style|border|colspan|rowspan],'
-                    + 'p/div,br,strong/b,em/i,u,s,ol,ul,li,h1,h2,h3,h4,h5,h6,pre,code,blockquote,span,sub,sup,table,thead,tbody,th,tr,td,hr,'
+                    // #td/#th: pad empty cells with &nbsp; so caret/arrow-key navigation works after reload
+                    // (fresh inserts already get this; loaded HTML with custom valid_elements does not otherwise)
+                    + 'p/div,br,strong/b,em/i,u,s,ol,ul,li,h1,h2,h3,h4,h5,h6,pre,code,blockquote,span,sub,sup,table,thead,tbody,#th,tr,#td,hr,'
                     + 'img[class<mce-pagebreak|src|data-mce-resize|data-mce-placeholder|data-mce-selected]';
             case 'full':
                 return 'p/div,br,strong/b,em/i,u,ol,ul,li,h1,h2,h3,h4,h5,h6,pre';
