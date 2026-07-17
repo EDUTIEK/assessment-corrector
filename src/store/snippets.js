@@ -287,16 +287,14 @@ export const useSnippetsStore = defineStore('snippets', {
           position--;
         }
 
-        // backward search for a whitespace
+        // backward search for a whitespace (include index 0 so a leading
+        // &nbsp; from empty/pasted table cells is treated as a word boundary)
         let start = position;
         let searches = [];
-        while (start > 0) {
-          if (whitespaceChars.includes(text.charAt(start))) {
-            start++; // dont' include the whitespace char
-            break;
-          }
+        while (start >= 0 && !whitespaceChars.includes(text.charAt(start))) {
           start--;
         }
+        start++; // don't include the whitespace char (or stay at 0)
 
         // shortcuts to search for
         searches.push(text.slice(start, position + 1));   // 1. with trigger char
