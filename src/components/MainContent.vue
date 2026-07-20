@@ -9,6 +9,7 @@ import EssayPdf from '@/components/EssayPdf.vue';
 import SummaryColumn from "@/components/SummaryColumn.vue";
 import Marking from "@/components/Marking.vue";
 import Snippets from "@/components/Snippets.vue";
+import SnippetList from "@/components/SnippetList.vue";
 import { nextTick, watch } from 'vue';
 
 const apiStore = stores.api();
@@ -332,7 +333,7 @@ document.addEventListener('keydown', layoutStore.handleKeyDown);
 }
 
 .col-extra {
-  min-height: 50%;
+  height:50%;
   background-color: white;
   width: 100%;
   padding: 10px;
