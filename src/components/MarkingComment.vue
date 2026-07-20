@@ -16,14 +16,14 @@ const configStore = stores.config();
 
 const { t } = i18n.global;
 const props = defineProps(['comment']);
-
 const comment = props.comment;
-
 const textRef = ref();
 
 let comment_points = ref(0);
 const pointsObject = pointsStore.getObjectByData(comment.correction_key, comment.key, '');
 comment_points.value = pointsObject ? pointsObject.points : 0;
+
+let prevent_next_keyup_auto_replace = false;
 
 function isSelected(comment) {
   return comment.key == commentsStore.selectedKey;
@@ -138,6 +138,12 @@ async function handleTextKeydown() {
     if (isDisabled(comment)) {
       return;
     }
+    console.log('keydown', event.key);
+
+    let textarea;
+    let cursor;
+    let new_text;
+
     switch (event.key) {
       case "F1":
         // needs to be keydown, otherwise chromium opens its help page
@@ -145,15 +151,29 @@ async function handleTextKeydown() {
         openSnippets();
         break;
 
-      case "Backspace":
-        const textarea = textRef.value;
-        const cursor = textarea.selectionEnd;
-        const new_text = snippetsStore.autoUndo(textarea.value);
+      case "Tab":
+        textarea = textRef.value;
+        cursor = textarea.selectionEnd;
+        new_text = snippetsStore.autoReplace(Snippet.FOR_COMMENT, textarea.value, cursor, true)
         if (new_text) {
           event.preventDefault();
           const offset = new_text.length - textarea.value.length;
           comment.comment = new_text;
           textarea.setSelectionRange(cursor + offset, cursor + offset);
+          prevent_next_keyup_auto_replace = true;
+        }
+        break;
+
+      case "Backspace":
+        textarea = textRef.value;
+        cursor = textarea.selectionEnd;
+        new_text = snippetsStore.autoUndo(textarea.value);
+        if (new_text) {
+          event.preventDefault();
+          const offset = new_text.length - textarea.value.length;
+          comment.comment = new_text;
+          textarea.setSelectionRange(cursor + offset, cursor + offset);
+          prevent_next_keyup_auto_replace = false;
         }
         break;
     }
@@ -171,16 +191,24 @@ function handleTextKeyUp() {
       event.preventDefault();
       break;
 
+    case "Backspace":
+      break;
+
     default:
-      const textarea = textRef.value;
-      const cursor = textarea.selectionEnd;
-      const new_text = snippetsStore.autoReplace(Snippet.FOR_COMMENT, textarea.value, cursor)
-      if (new_text) {
-        const offset = new_text.length - textarea.value.length;
-        comment.comment = new_text;
-        textarea.setSelectionRange(cursor + offset, cursor + offset);
+      console.log('keydown', event.key);
+
+      if (!prevent_next_keyup_auto_replace) {
+        const textarea = textRef.value;
+        const cursor = textarea.selectionEnd;
+        const new_text = snippetsStore.autoReplace(Snippet.FOR_COMMENT, textarea.value, cursor)
+        if (new_text) {
+          const offset = new_text.length - textarea.value.length;
+          comment.comment = new_text;
+          textarea.setSelectionRange(cursor + offset, cursor + offset);
+        }
       }
   }
+  prevent_next_keyup_auto_replace = false;
 
   commentsStore.updateComment(comment);
 }

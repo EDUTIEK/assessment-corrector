@@ -16,6 +16,8 @@ const snippetsStore = stores.snippets();
 const props = defineProps(['editorId']);
 const helper = new TinyHelper(props.editorId);
 
+let prevent_next_keyup_auto_replace = false;
+
 watch(() => layoutStore.focusChange, handleFocusChange);
 
 function handleInit() {
@@ -45,18 +47,27 @@ function handleKeyUp() {
       event.preventDefault();
       break;
 
+    case "Backspace":
+      break;
+
     default:
-      new_text = snippetsStore.autoReplace(Snippet.FOR_SUMMARY, data.text, data.cursor);
-      if (new_text) {
-        const offset = new_text.length - data.text.length;
-        helper.replaceNodeText(data.node, new_text, data.cursor + offset);
+      if (!prevent_next_keyup_auto_replace) {
+        new_text = snippetsStore.autoReplace(Snippet.FOR_SUMMARY, data.text, data.cursor);
+        if (new_text) {
+          const offset = new_text.length - data.text.length;
+          helper.replaceNodeText(data.node, new_text, data.cursor + offset);
+        }
       }
   }
+  prevent_next_keyup_auto_replace = false;
 
   summariesStore.updateContent(true);
 }
 
 function handleKeyDown() {
+  let data;
+  let new_text;
+
   switch (event.key) {
     case "F1":
       // needs to be keydown, otherwise chromium opens its help page
@@ -64,13 +75,31 @@ function handleKeyDown() {
       helper.openSnippets();
       break;
 
-    case "Backspace":
-      const data = helper.getTextNodeAtCursor();
-      const new_text = snippetsStore.autoUndo(data.text);
+    case "Tab":
+      console.log('keydown', event.key);
+      data = helper.getTextNodeAtCursor();
+      console.log(data);
+      new_text = snippetsStore.autoReplace(Snippet.FOR_SUMMARY, data.text, data.cursor, true);
       if (new_text) {
         event.preventDefault();
+        event.stopImmediatePropagation();
+
         const offset = new_text.length - data.text.length;
         helper.replaceNodeText(data.node, new_text, data.cursor + offset);
+        prevent_next_keyup_auto_replace = true;
+      }
+      break;
+
+    case "Backspace":
+      console.log('keydown', event.key);
+      data = helper.getTextNodeAtCursor();
+      new_text = snippetsStore.autoUndo(data.text);
+      if (new_text) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        const offset = new_text.length - data.text.length;
+        helper.replaceNodeText(data.node, new_text, data.cursor + offset);
+        prevent_next_keyup_auto_replace = false;
       }
       break;
 
@@ -104,12 +133,10 @@ watch(() => snippetsStore.selection_open, handleSnippet);
         v-model="summariesStore.editSummary.text"
         @init="handleInit"
         @change="handleChange"
-        @keyup="handleKeyUp"
-        @keydown="handleKeyDown"
         @scroll="helper.saveScrolling"
         @focus="snippetsStore.list_purpose = Snippet.FOR_SUMMARY"
         licenseKey = 'gpl'
-        :init="helper.getInit()"
+        :init="helper.getInit(handleKeyDown, handleKeyUp)"
     />
   </div>
 </template>

@@ -8,8 +8,8 @@ import Snippet from "@/data/Snippet";
 import Change from "@/data/Change";
 
 const storage = getStorage('snippets');
-const whitespaceChars = "<>  \n\r";
-const triggerChars = ",;.:-_#‘*+~^°!“$%&/()=?`´{[]}€µ<>  \n\r";
+const whitespaceChars = "<>  \t\n\r";
+const triggerChars = ",;.:-_#‘*+~^°!“$%&/()=?`´{[]}€µ<>  \t\n\r";
 
 export const useSnippetsStore = defineStore('snippets', {
   state: () => {
@@ -256,7 +256,7 @@ export const useSnippetsStore = defineStore('snippets', {
      * @param {int} positon  current cursor position (after last entered char)
      * @return {string|null} changed text or null if nothing is changed
      */
-    autoReplace(purpose, text, position) {
+    autoReplace(purpose, text, position, force = false) {
       // console.log('text', '[' + text + ']');
       // console.log('position', position);
 
@@ -280,7 +280,7 @@ export const useSnippetsStore = defineStore('snippets', {
       // check if that char triggers an auto replacement
       position--;
       const char = text.charAt(position);
-      if (triggerChars.includes(char)) {
+      if (force || triggerChars.includes(char)) {
 
         // prevent a triggering whitespace char from being replaced
         if (whitespaceChars.includes(char)) {
@@ -306,7 +306,7 @@ export const useSnippetsStore = defineStore('snippets', {
           }
 
           // undo has done just before - don't replace again
-          if (start === this.last_auto_start && search === this.last_auto_search) {
+          if (start === this.last_auto_start && search === this.last_auto_search && !force) {
             break;
           }
 
@@ -316,6 +316,7 @@ export const useSnippetsStore = defineStore('snippets', {
               this.last_auto_start = start;
               this.last_auto_search = search;
               this.last_auto_replace = snippet.text;
+              console.log('replace', this.last_auto_start, this.last_auto_search, this.last_auto_replace);
 
               text = text.slice(0, start) + snippet.text + text.slice(start + search.length);
               return text;
@@ -325,6 +326,7 @@ export const useSnippetsStore = defineStore('snippets', {
       }
 
       // entered key is not triggering, prevent an undo of the last replacement
+      console.log('keep', this.last_auto_search);
       this.last_auto_start = null;
       return null;
     },
@@ -335,10 +337,10 @@ export const useSnippetsStore = defineStore('snippets', {
      * @return {string|null} changed text or null if nothing is changed
      */
     autoUndo(text) {
+      console.log('undo', this.last_auto_start, this.last_auto_search, this.last_auto_replace);
+
       if (this.last_auto_start !== null) {
         const check = text.slice(this.last_auto_start, this.last_auto_start + this.last_auto_replace.length);
-        console.log('last', this.last_auto_replace);
-        console.log('check', check);
         if (check == this.last_auto_replace) {
           return text.slice(0, this.last_auto_start)
               + this.last_auto_search

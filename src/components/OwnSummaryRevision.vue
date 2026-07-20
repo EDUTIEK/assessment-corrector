@@ -109,7 +109,7 @@ watch(() => snippetsStore.selection_open, handleSnippet);
           @keydown="handleKeyDown"
           @scroll="helper.saveScrolling"
           licenseKey = 'gpl'
-          :init="helper.getInit()"
+          :init="helper.getInit(handleKeyDown, handleKeyUp)"
       />
     </div>
 

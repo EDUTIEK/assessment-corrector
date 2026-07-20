@@ -52,7 +52,7 @@ export default class TinyHelper {
         snippetsStore = stores.snippets();
     }
 
-    getInit() {
+    getInit(keydownHandler, keyupHandler) {
         return {
             license_key: 'gpl',
             language: 'de',
@@ -84,6 +84,7 @@ export default class TinyHelper {
             paste_remove_styles_if_webkit: true,  // default
             paste_webkit_styles: 'none',          // default
             table_appearance_options: false,
+            table_tab_navigation: true,        // conflict with auto text
             table_advtab: false,
             table_cell_advtab: false,
             table_row_advtab: false,
@@ -97,6 +98,10 @@ export default class TinyHelper {
                 editor.ui.registry.addButton('zoomOut', {tooltip: t('summaryTextZoomOut'), icon: 'zoom-out', onAction: this.zoomOut.bind(this)});
                 editor.ui.registry.addButton('zoomIn', {tooltip: t('summaryTextZoomIn'), icon: 'zoom-in', onAction: this.zoomIn.bind(this)});
                 editor.ui.registry.addButton('openSnippets', {tooltip: t('summaryTextAddSnippet'), icon: 'plus', onAction: this.openSnippets.bind(this)});
+
+                editor.on('keydown', keydownHandler);
+                editor.on('keyup', keyupHandler);
+
             }.bind(this)
         }
     }
