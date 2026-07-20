@@ -112,23 +112,11 @@ class Mark {
       case  Mark.SYMBOL_MISSING:
         return t('symbolMissing');
     }
+    return '';
   }
 
   static symbolToLabel(symbol) {
     return symbol;
-
-    // switch (symbol) {
-    //   case Mark.SYMBOL_CHECK:
-    //     return '√';
-    //   case Mark.SYMBOL_CROSS:
-    //     return '×';
-    //   case Mark.SYMBOL_QUESTION:
-    //     return '?';
-    //   case Mark.SYMBOL_EXCLAMATION:
-    //     return '!';
-    //   case  Mark.SYMBOL_MISSING:
-    //     return '∀';
-    // }
   }
 
 

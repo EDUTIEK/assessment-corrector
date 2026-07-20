@@ -211,6 +211,7 @@ async function updateMark(event) {
     const oldData = comment.getData();
     comment.updateMarkData(data);
     pdfjs.setLabel(annotation.id, comment.label);
+    pdfjs.setAltLabel(annotation.id, comment.getAltLabel());
 
     const newData = comment.getData();
     if (JSON.stringify(oldData) != JSON.stringify(newData)) {

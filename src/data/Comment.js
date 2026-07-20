@@ -260,6 +260,18 @@ export default class Comment {
   }
 
   /**
+   * Get the alternative label and symbol for accessible PDF
+   */
+  getAltLabel() {
+    for (const mark of this.marks) {
+      if (mark.symbol) {
+        return this.label + ' ' + Mark.symbolToText(mark.symbol);
+      }
+    }
+    return this.label ?? '';
+  }
+
+  /**
    * Get the label with added mark symbol
    */
   getLabelWithSymbol() {
@@ -328,6 +340,7 @@ export default class Comment {
           type: Mark.shapeToPdfAnnotationType(mark.shape),
           token: Mark.symbolToPdfAnnotationToken(mark.symbol),
           label: this.label,
+          altLabel: this.getAltLabel(),
           intern: JSON.parse(mark.internal),
           color: stores.config().getCommentColor(this.correction_position, false, false)
         });
