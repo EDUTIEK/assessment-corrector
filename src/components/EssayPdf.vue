@@ -111,7 +111,7 @@ async function handleFocusChange() {
   }
 }
 
-function loadMarks() {
+async function loadMarks() {
   const all = [];
   for (const comment of commentsStore.activeComments) {
     for (const annotation of comment.getPdfAnnotations()) {
@@ -124,7 +124,34 @@ function loadMarks() {
       all.push(annotation);
     }
   }
-  pdfjs.setAll(all);
+  await pdfjs.setAll(all);
+  // setAll recreates editors; CommentPopup may steal focus again after createMark
+  await reclaimCommentFocus();
+}
+
+/**
+ * True when keyboard focus is in the PDF pane (iframe or wrapper).
+ * Used to reclaim focus for the comment textarea after annotate-pdf steals it.
+ */
+function isFocusInPdf() {
+  const active = document.activeElement;
+  return !!EssayNode.value && (active === EssayNode.value || EssayNode.value.contains(active));
+}
+
+/**
+ * After annotate-pdf selects a mark, it may re-focus the editor/popup via setTimeout(0).
+ * Reclaim focus for the sidebar textarea when focus is still in the PDF.
+ * A second tick covers editor.focus()'s own delayed focus.
+ */
+async function reclaimCommentFocus() {
+  await new Promise(resolve => setTimeout(resolve, 0));
+  if (commentsStore.selectedKey && isFocusInPdf()) {
+    commentsStore.setFocusRequest();
+  }
+  await new Promise(resolve => setTimeout(resolve, 50));
+  if (commentsStore.selectedKey && isFocusInPdf()) {
+    commentsStore.setFocusRequest();
+  }
 }
 
 function toggleLabels() {
@@ -165,7 +192,6 @@ async function createMark(event) {
     const newComment = new Comment({parent_number: event.detail.page + 1});
     newComment.addMarkData(data);
     await commentsStore.addComment(newComment);
-    //commentsStore.selectComment(newComment.key);
   }
 }
 
@@ -238,15 +264,17 @@ function pageChanged(event) {
   }
 }
 
-function refreshSelection() {
+async function refreshSelection() {
   const configStore = stores.config();
+  const selectedKey = commentsStore.selectedKey;
+  const selectIds = [];
   for (const comment of commentsStore.activeComments) {
     for (const mark of comment.marks) {
       pdfjs.setColor(mark.key, configStore.getCommentColor(
-          comment.correction_position, comment.key == commentsStore.selectedKey, mark.isFilled()),
+          comment.correction_position, comment.key == selectedKey, mark.isFilled()),
       );
-      if (comment.key == commentsStore.selectedKey) {
-        pdfjs.select(mark.key);
+      if (comment.key == selectedKey) {
+        selectIds.push(mark.key);
         if (showLabels.value == 0) {
           pdfjs.setLabel(mark.key, comment.label);
         }
@@ -255,6 +283,12 @@ function refreshSelection() {
         pdfjs.setLabel(mark.key, '');
       }
     }
+  }
+  if (selectIds.length && selectedKey) {
+    for (const id of selectIds) {
+      await pdfjs.select(id);
+    }
+    await reclaimCommentFocus();
   }
 }
 

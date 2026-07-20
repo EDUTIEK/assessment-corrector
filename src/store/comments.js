@@ -21,7 +21,8 @@ export const useCommentsStore = defineStore('comments', {
       markerChange: 0,                // for watchers: timestamp of the last change that affects the text markers (not the selection)
       selectionChange: 0,             // for watchers: timestamp of the last change of the selected comment
       filterChange: 0,                // for watchers: timestamp of the last change of the comments filter
-      caretRequest: 0,                // for watchers: timestamp of the last request to set the caret to the mark of selected comment
+      caretRequest: 0,                // for watchers: timestamp of the last request to set the caret to the mark of the selected comment
+      focusRequest: 0,                // for watchers: timestamp of the last request to focus the selected comment textarea
       deletionChange: 0,              // for watchers: timestamp of the last comment deletion (see lastDeleted)
 
       selectedKey: '',                // key of the currently selected comment
@@ -213,11 +214,21 @@ export const useCommentsStore = defineStore('comments', {
     },
 
     /**
-     * Set timestamp of the last request to set the carent to the selected comment
+     * Set timestamp of the last request to set the caret to the selected comment
+     * Used for accessible keyboard navigation between comments and marked text
      * @public
      */
     setCaretRequest() {
       this.caretRequest = Date.now();
+    },
+
+    /**
+     * Request focusing the selected comment textarea
+     * Used after annotate-pdf finishes selecting a mark (its CommentPopup steals focus)
+     * @public
+     */
+    setFocusRequest() {
+      this.focusRequest = Date.now();
     },
 
     /**

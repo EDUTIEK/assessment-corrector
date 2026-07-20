@@ -436,6 +436,15 @@ watch(() => snippetsStore.selection_open, handleSnippet);
   margin-bottom: 5px;
 }
 
+/*
+ * Vuetify keeps empty textareas at opacity:0 until the field is active/dirty.
+ * Labels are sr-only here, so empty comments would show no caret even when focused
+ * if the active class lags or focus flickers. Always show the real input.
+ */
+.commentInput :deep(textarea.v-field__input:not(.v-textarea__sizer)) {
+  opacity: 1;
+}
+
 .commentDisplay {
   width: 100%;
   font-family: serif;
