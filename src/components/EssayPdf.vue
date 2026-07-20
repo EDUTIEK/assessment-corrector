@@ -195,7 +195,7 @@ async function createMark(event) {
   }
 }
 
-function updateMark(event) {
+async function updateMark(event) {
   const annotation = event.detail;
   const data = {
     key: annotation.id,
@@ -216,6 +216,8 @@ function updateMark(event) {
     if (JSON.stringify(oldData) != JSON.stringify(newData)) {
       commentsStore.updateComment(comment, false);
     }
+
+    await reclaimCommentFocus();
   }
 }
 
