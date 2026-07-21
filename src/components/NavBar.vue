@@ -187,6 +187,7 @@ function getCorrectionTitle(correction) {
       <v-divider class="border-opacity-75"></v-divider>
 
       <v-list-item aria-role="button" class="app-navigation-item" tabindex="0"
+                   v-if="correctionsStore.hasCorrection"
                    @click="closeNavigation(); layoutStore.toggleSnippetList();"
                    :aria-label="$t('snippetsSnippets') + (layoutStore.showSnippetList ? $t('navBarSelectedAria') : '')"
                    :title="$t('snippetsSnippets') + (layoutStore.showSnippetList ? $t('navBarSelected') : '')"

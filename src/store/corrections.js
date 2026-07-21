@@ -27,6 +27,10 @@ export const useCorrectionsStore = defineStore('corrections', {
    */
   getters: {
 
+    hasCorrection(state) {
+      return state.ownKey != '';
+    },
+
     allCorrections(state) {
       return Object.values(state.corrections)
     },

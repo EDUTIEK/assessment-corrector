@@ -21,6 +21,7 @@ const commentsStore = stores.comments();
 const criteriaStore = stores.criteria();
 const pagesStore = stores.pages();
 const settingsStore = stores.settings();
+const correctionsStore = stores.corrections();
 
 async function handleFocusChange() {
   if (layoutStore.focusTarget == 'appHeadLeft') {
@@ -127,7 +128,7 @@ document.addEventListener('keydown', layoutStore.handleKeyDown);
                          :showRevision="layoutStore.showLeftSummaryRevision"
           />
         </div>
-        <div class="col-extra" v-if="layoutStore.showSnippetList">
+        <div class="col-extra" v-if="layoutStore.showSnippetList && correctionsStore.hasCorrection">
           <snippet-list></snippet-list>
         </div>
       </section>
