@@ -59,24 +59,17 @@ function handleInit() {
   helper.init();
 }
 
+async function handleFocusChange() {
+  if (layoutStore.focusTarget == 'ownSummaryRevision') {
+    helper.applyFocus();
+    await nextTick();
+    helper.restoreScrolling();
+  }
+}
+
 function handleChange() {
   summariesStore.updateContent(true);
   helper.applyZoom();
-}
-
-function handleKeyUp() {
-  summariesStore.updateContent(true);
-}
-
-function handleKeyDown() {
-  switch (event.key) {
-    case "F1":
-      event.preventDefault();
-      helper.openSnippets();
-      break;
-    default:
-      layoutStore.handleKeyDown(event);
-  }
 }
 
 async function handleSnippet() {
@@ -105,11 +98,9 @@ watch(() => snippetsStore.selection_open, handleSnippet);
           v-model="summariesStore.editSummary.revision_text"
           @init="handleInit"
           @change="handleChange"
-          @keyup="handleKeyUp"
-          @keydown="handleKeyDown"
           @scroll="helper.saveScrolling"
           licenseKey = 'gpl'
-          :init="helper.getInit(handleKeyDown, handleKeyUp)"
+          :init="helper.getInit()"
       />
     </div>
 
