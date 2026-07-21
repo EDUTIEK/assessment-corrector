@@ -45,6 +45,7 @@ onMounted(() => {
   pdfjs.on('delete', deleteMark);
   pdfjs.on('select', selectMark);
   pdfjs.on('pageChanged', pageChanged);
+  pdfjs.on('focus-end', focusEnd);
   handleFocusChange();
 });
 
@@ -265,6 +266,10 @@ function pageChanged(event) {
     let comment = comments.shift();
     commentsStore.setFirstVisibleComment(comment.key);
   }
+}
+
+function focusEnd(event) {
+  // console.log('focusEnd', event);
 }
 
 async function refreshSelection() {
