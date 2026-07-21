@@ -37,7 +37,7 @@ function handleChange() {
   helper.applyZoom();
 }
 
-function handleKeyUp() {
+function handleKeyUp(event) {
   let new_text = null;
   const data = helper.getTextNodeAtCursor();
 
@@ -51,6 +51,8 @@ function handleKeyUp() {
       break;
 
     default:
+      // mainly for visible characters
+      // data.cursor is then already behind the inserted character
       if (!prevent_next_keyup_auto_replace) {
         new_text = snippetsStore.autoReplace(Snippet.FOR_SUMMARY, data.text, data.cursor);
         if (new_text) {
@@ -64,7 +66,7 @@ function handleKeyUp() {
   summariesStore.updateContent(true);
 }
 
-function handleKeyDown() {
+function handleKeyDown(event) {
   let data;
   let new_text;
 
@@ -76,30 +78,29 @@ function handleKeyDown() {
       break;
 
     case "Tab":
-      console.log('keydown', event.key);
       data = helper.getTextNodeAtCursor();
-      console.log(data);
       new_text = snippetsStore.autoReplace(Snippet.FOR_SUMMARY, data.text, data.cursor, true);
       if (new_text) {
+        // Must use TinyMCE's event (not window.event): table_tab_navigation
+        // only skips when evt.isDefaultPrevented() is true on the wrapped event.
         event.preventDefault();
-        event.stopImmediatePropagation();
 
         const offset = new_text.length - data.text.length;
         helper.replaceNodeText(data.node, new_text, data.cursor + offset);
         prevent_next_keyup_auto_replace = true;
+        return false;
       }
       break;
 
     case "Backspace":
-      console.log('keydown', event.key);
       data = helper.getTextNodeAtCursor();
       new_text = snippetsStore.autoUndo(data.text);
       if (new_text) {
         event.preventDefault();
-        event.stopImmediatePropagation();
         const offset = new_text.length - data.text.length;
         helper.replaceNodeText(data.node, new_text, data.cursor + offset);
         prevent_next_keyup_auto_replace = false;
+        return false;
       }
       break;
 
