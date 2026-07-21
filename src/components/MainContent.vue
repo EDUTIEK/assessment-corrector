@@ -93,6 +93,15 @@ document.addEventListener('keydown', layoutStore.handleKeyDown);
               <span class="sr-only">{{$t('allShow') + (layoutStore.showLeftSummaryRevision ? $t('allIsSelected') : '')}}</span>
             </v-btn>
 
+            <!-- toggle snippet list  -->
+            <v-btn size="small"
+                   v-if="correctionsStore.hasCorrection"
+                   @click="layoutStore.toggleSnippetList()">
+              <v-icon v-show="layoutStore.showSnippetList" icon="mdi-checkbox-outline"></v-icon>
+              <v-icon v-show="!layoutStore.showSnippetList" icon="mdi-checkbox-blank-outline"></v-icon>
+              <span>{{ $t('snippetsSnippets') }}</span>
+            </v-btn>
+
             <!-- expand right column -->
             <v-btn size="small" @click="layoutStore.setLeftExpanded(false)" v-show="layoutStore.isLeftExpanded">
               <v-icon icon="mdi-chevron-left"></v-icon>
@@ -128,7 +137,10 @@ document.addEventListener('keydown', layoutStore.handleKeyDown);
                          :showRevision="layoutStore.showLeftSummaryRevision"
           />
         </div>
-        <div class="col-extra" v-if="layoutStore.showSnippetList && correctionsStore.hasCorrection">
+        <div class="col-extra"
+             v-if="correctionsStore.hasCorrection"
+             v-show="layoutStore.showSnippetList"
+        >
           <snippet-list></snippet-list>
         </div>
       </section>
