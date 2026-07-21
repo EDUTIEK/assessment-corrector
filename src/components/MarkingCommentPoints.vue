@@ -14,6 +14,7 @@ const preferencesStore = stores.preferences();
 let comment_key = ref('');
 let correction_key = ref('');
 let criteriaPoints = ref({});
+const openDescriptions = ref({});
 
 async function loadPoints() {
   const comment = commentsStore.getComment(commentsStore.selectedKey);
@@ -21,6 +22,7 @@ async function loadPoints() {
   correction_key.value = comment ? comment.correction_key : stores.corrections().ownKey;
 
   criteriaPoints.value = {};
+  openDescriptions.value = {};
   for (const criterion of criteriaStore.getCorrectionCommentCriteria(correction_key.value)) {
     const pointsObject = pointsStore.getObjectByData(correction_key.value, comment_key.value, criterion.key);
     criteriaPoints.value[criterion.key] = pointsObject?.points ?? 0;
@@ -35,6 +37,14 @@ watch(() => commentsStore.selectionChange, loadPoints);
 
 function savePoints(criterionKey) {
   pointsStore.setValueByCommentOrCriterion(commentsStore.selectedKey, criterionKey, criteriaPoints.value[criterionKey]);
+}
+
+function isDescriptionOpen(criterionKey) {
+  return openDescriptions.value[criterionKey] === true;
+}
+
+function toggleDescription(criterionKey) {
+  openDescriptions.value[criterionKey] = !isDescriptionOpen(criterionKey);
 }
 
 async function handleFocusChange() {
@@ -52,6 +62,16 @@ async function handleKeyDown(event) {
       event.preventDefault();
       layoutStore.focusMarkingCommentPointsSum();
       break;
+  }
+}
+
+function handleDescriptionKeyDown(event, criterionKey) {
+  if (event.key === 'Escape' && isDescriptionOpen(criterionKey)) {
+    event.preventDefault();
+    event.stopPropagation();
+    openDescriptions.value[criterionKey] = false;
+  } else {
+    handleKeyDown(event);
   }
 }
 
@@ -100,17 +120,32 @@ async function handleKeyDown(event) {
       <!-- criteria points -->
       <tr v-for="criterion in criteriaStore.getCorrectionCommentCriteria(correction_key)" :key="criterion.key">
         <td class="col-left">
-          <label :id="'app-points-label-' + criterion.key" tabindex="0" @keydown="handleKeyDown" :for="'app-points-input-' + criterion.key">
+          <label tabindex="0" @keydown="handleKeyDown" :for="'app-points-input-' + criterion.key">
             {{ criterion.title }}
-            <span v-if="criterion.description"> 🛈</span>
           </label>
-          <v-menu v-if="criterion.description" :activator="'#app-points-label-' + criterion.key">
-            <v-list>
-              <v-list-item class="tooltip">
-                {{ criterion.description }}
-              </v-list-item>
-            </v-list>
-          </v-menu>
+          <button
+            v-if="criterion.description"
+            type="button"
+            class="criterion-info"
+            :aria-expanded="isDescriptionOpen(criterion.key)"
+            :aria-controls="'criterion-desc-' + criterion.key"
+            :aria-label="isDescriptionOpen(criterion.key)
+              ? $t('markingCommentPointsHideDescription')
+              : $t('markingCommentPointsShowDescription')"
+            @click="toggleDescription(criterion.key)"
+            @keydown="handleDescriptionKeyDown($event, criterion.key)"
+          >
+            <span aria-hidden="true">🛈</span>
+          </button>
+          <div
+            v-if="criterion.description && isDescriptionOpen(criterion.key)"
+            :id="'criterion-desc-' + criterion.key"
+            class="criterion-description"
+            role="region"
+            :aria-label="$t('markingCommentPointsDescription', [criterion.title])"
+          >
+            {{ criterion.description }}
+          </div>
         </td>
         <td class="col-mid text-right">
           <input class="appPoints" type="number" v-model="criteriaPoints[criterion.key]"
@@ -172,8 +207,29 @@ th, td {
   color: red;
 }
 
-.tooltip {
+.criterion-info {
+  margin-left: 1em;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  line-height: 1;
+  vertical-align: baseline;
+}
+
+.criterion-info:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.criterion-description {
+  margin-top: 0.35em;
+  padding: 0.5em 0.75em;
   max-width: 40em;
+  background: #fff;
+  font-style: italic;
 }
 
 </style>
