@@ -85,7 +85,7 @@ async function handleKeyDown(event) {
         </td>
         <td class="col-mid text-right">
           <input class="appPoints" type="number" v-model="criteriaPoints['']"
-                 id="pp-points-input-without"
+                 id="app-points-input-without"
                  :disabled="summariesStore.isOwnDisabled || comment_key == '' || correction_key != stores.corrections().ownKey"
                  :max="settingStore.Assessment.max_points"
                  @change="savePoints('')"
@@ -100,7 +100,17 @@ async function handleKeyDown(event) {
       <!-- criteria points -->
       <tr v-for="criterion in criteriaStore.getCorrectionCommentCriteria(correction_key)" :key="criterion.key">
         <td class="col-left">
-          <label tabindex="0" @keydown="handleKeyDown" :for="'app-points-input-' + criterion.key">{{ criterion.title }}</label>
+          <label :id="'app-points-label-' + criterion.key" tabindex="0" @keydown="handleKeyDown" :for="'app-points-input-' + criterion.key">
+            {{ criterion.title }}
+            <span v-if="criterion.description"> 🛈</span>
+          </label>
+          <v-menu v-if="criterion.description" :activator="'#app-points-label-' + criterion.key">
+            <v-list>
+              <v-list-item class="tooltip">
+                {{ criterion.description }}
+              </v-list-item>
+            </v-list>
+          </v-menu>
         </td>
         <td class="col-mid text-right">
           <input class="appPoints" type="number" v-model="criteriaPoints[criterion.key]"
@@ -162,5 +172,8 @@ th, td {
   color: red;
 }
 
+.tooltip {
+  max-width: 40em;
+}
 
 </style>
