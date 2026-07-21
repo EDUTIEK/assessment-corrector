@@ -40,6 +40,7 @@ export default class TinyHelper {
     editor = null;
     scroll_top = 0;
     scroll_left = 0;
+    prevent_next_keyup_auto_replace = false;
 
     wordCount = ref(0);
     characterCount = ref(0);
@@ -52,7 +53,7 @@ export default class TinyHelper {
         snippetsStore = stores.snippets();
     }
 
-    getInit(keydownHandler, keyupHandler) {
+    getInit() {
         return {
             license_key: 'gpl',
             language: 'de',
@@ -99,8 +100,8 @@ export default class TinyHelper {
                 editor.ui.registry.addButton('zoomIn', {tooltip: t('summaryTextZoomIn'), icon: 'zoom-in', onAction: this.zoomIn.bind(this)});
                 editor.ui.registry.addButton('openSnippets', {tooltip: t('summaryTextAddSnippet'), icon: 'plus', onAction: this.openSnippets.bind(this)});
 
-                editor.on('keydown', keydownHandler);
-                editor.on('keyup', keyupHandler);
+                editor.on('keydown', this.handleKeyDown.bind(this));
+                editor.on('keyup', this.handleKeyUp.bind(this));
 
             }.bind(this)
         }
@@ -462,4 +463,73 @@ export default class TinyHelper {
         }
     }
 
+    handleKeyUp(event) {
+        let new_text = null;
+        const data = this.getTextNodeAtCursor();
+
+        switch (event.key) {
+            case "F1":
+                // prevent double handling of F1
+                event.preventDefault();
+                break;
+
+            case "Backspace":
+                break;
+
+            default:
+                // mainly for visible characters
+                // data.cursor is then already behind the inserted character
+                if (!this.prevent_next_keyup_auto_replace) {
+                    new_text = snippetsStore.autoReplace(Snippet.FOR_SUMMARY, data.text, data.cursor);
+                    if (new_text) {
+                        const offset = new_text.length - data.text.length;
+                        this.replaceNodeText(data.node, new_text, data.cursor + offset);
+                    }
+                }
+        }
+        this.prevent_next_keyup_auto_replace = false;
+    }
+
+    handleKeyDown(event) {
+        let data;
+        let new_text;
+
+        switch (event.key) {
+            case "F1":
+                // needs to be keydown, otherwise chromium opens its help page
+                event.preventDefault();
+                this.openSnippets();
+                break;
+
+            case "Tab":
+                data = this.getTextNodeAtCursor();
+                new_text = snippetsStore.autoReplace(Snippet.FOR_SUMMARY, data.text, data.cursor, true);
+                if (new_text) {
+                    // Must use TinyMCE's event (not window.event): table_tab_navigation
+                    // only skips when evt.isDefaultPrevented() is true on the wrapped event.
+                    event.preventDefault();
+
+                    const offset = new_text.length - data.text.length;
+                    this.replaceNodeText(data.node, new_text, data.cursor + offset);
+                    this.prevent_next_keyup_auto_replace = true;
+                    return false;
+                }
+                break;
+
+            case "Backspace":
+                data = this.getTextNodeAtCursor();
+                new_text = snippetsStore.autoUndo(data.text);
+                if (new_text) {
+                    event.preventDefault();
+                    const offset = new_text.length - data.text.length;
+                    this.replaceNodeText(data.node, new_text, data.cursor + offset);
+                    this.prevent_next_keyup_auto_replace = false;
+                    return false;
+                }
+                break;
+
+            default:
+                layoutStore.handleKeyDown(event);
+        }
+    }
 }

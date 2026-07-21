@@ -16,9 +16,9 @@ const snippetsStore = stores.snippets();
 const props = defineProps(['editorId']);
 const helper = new TinyHelper(props.editorId);
 
-let prevent_next_keyup_auto_replace = false;
 
 watch(() => layoutStore.focusChange, handleFocusChange);
+watch(() => snippetsStore.selection_open, handleSnippet);
 
 function handleInit() {
   helper.init();
@@ -37,78 +37,6 @@ function handleChange() {
   helper.applyZoom();
 }
 
-function handleKeyUp(event) {
-  let new_text = null;
-  const data = helper.getTextNodeAtCursor();
-
-  switch (event.key) {
-    case "F1":
-      // prevent double handling of F1
-      event.preventDefault();
-      break;
-
-    case "Backspace":
-      break;
-
-    default:
-      // mainly for visible characters
-      // data.cursor is then already behind the inserted character
-      if (!prevent_next_keyup_auto_replace) {
-        new_text = snippetsStore.autoReplace(Snippet.FOR_SUMMARY, data.text, data.cursor);
-        if (new_text) {
-          const offset = new_text.length - data.text.length;
-          helper.replaceNodeText(data.node, new_text, data.cursor + offset);
-        }
-      }
-  }
-  prevent_next_keyup_auto_replace = false;
-
-  summariesStore.updateContent(true);
-}
-
-function handleKeyDown(event) {
-  let data;
-  let new_text;
-
-  switch (event.key) {
-    case "F1":
-      // needs to be keydown, otherwise chromium opens its help page
-      event.preventDefault();
-      helper.openSnippets();
-      break;
-
-    case "Tab":
-      data = helper.getTextNodeAtCursor();
-      new_text = snippetsStore.autoReplace(Snippet.FOR_SUMMARY, data.text, data.cursor, true);
-      if (new_text) {
-        // Must use TinyMCE's event (not window.event): table_tab_navigation
-        // only skips when evt.isDefaultPrevented() is true on the wrapped event.
-        event.preventDefault();
-
-        const offset = new_text.length - data.text.length;
-        helper.replaceNodeText(data.node, new_text, data.cursor + offset);
-        prevent_next_keyup_auto_replace = true;
-        return false;
-      }
-      break;
-
-    case "Backspace":
-      data = helper.getTextNodeAtCursor();
-      new_text = snippetsStore.autoUndo(data.text);
-      if (new_text) {
-        event.preventDefault();
-        const offset = new_text.length - data.text.length;
-        helper.replaceNodeText(data.node, new_text, data.cursor + offset);
-        prevent_next_keyup_auto_replace = false;
-        return false;
-      }
-      break;
-
-    default:
-      layoutStore.handleKeyDown(event);
-  }
-}
-
 async function handleSnippet() {
   if (!snippetsStore.selection_open
       && snippetsStore.open_for_purpose == Snippet.FOR_SUMMARY
@@ -121,7 +49,6 @@ async function handleSnippet() {
     }
   }
 }
-watch(() => snippetsStore.selection_open, handleSnippet);
 
 </script>
 
@@ -137,7 +64,7 @@ watch(() => snippetsStore.selection_open, handleSnippet);
         @scroll="helper.saveScrolling"
         @focus="snippetsStore.list_purpose = Snippet.FOR_SUMMARY"
         licenseKey = 'gpl'
-        :init="helper.getInit(handleKeyDown, handleKeyUp)"
+        :init="helper.getInit()"
     />
   </div>
 </template>
