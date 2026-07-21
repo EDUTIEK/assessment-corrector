@@ -6,6 +6,7 @@ import {getStorage} from "@/lib/Storage";
 import i18n from "@/plugins/i18n";
 import {defineStore} from 'pinia';
 import Comment from "@/data/Comment";
+import Correction from "@/data/Correction";
 import {stores} from "@/store/index";
 
 const storage = getStorage('config');
@@ -98,7 +99,6 @@ export const useConfigStore = defineStore('config', {
       return fn;
     },
 
-
     getCommentStyle(state) {
 
       /**
@@ -113,7 +113,42 @@ export const useConfigStore = defineStore('config', {
         return 'background-color: ' +  state.getCommentColor(position, selected, filled) + ';';
       }
       return fn;
+    },
+
+    getCorrectionHeaderStyle(state) {
+
+      /**
+       * Get the style attribute for section headers of marking and summary columns
+       *
+       * @param {number} position
+       * @returns {string}
+       */
+      const fn = function (position) {
+        if (Correction.ALLOWED_POSITIONS.includes(position)) {
+          return 'background-color: ' +  state.getCommentColor(position, false, true) + ';';
+        }
+        return '';
+      }
+      return fn;
+    },
+
+    getCorrectionIconStyle(state) {
+
+      /**
+       * Get the style attribute for the nav bar icon of a corrector
+       *
+       * @param {number} position
+       * @returns {string}
+       */
+      const fn = function (position) {
+        if (Correction.ALLOWED_POSITIONS.includes(position)) {
+          return 'background-color: ' +  state.getCommentColor(position, true, false) + '!important;';
+        }
+        return '';
+      }
+      return fn;
     }
+
   },
 
   actions: {

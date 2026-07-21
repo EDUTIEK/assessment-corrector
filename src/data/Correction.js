@@ -12,6 +12,8 @@ export default class Correction {
   static POSITION_SECOND = 1;
   static POSITION_STITCH = 2;
 
+  static ALLOWED_POSITIONS = [Correction.POSITION_FIRST, Correction.POSITION_SECOND, Correction.POSITION_STITCH];
+
   static order(correction1, correction2) {
     return correction1.position < correction2.position ? -1
       : correction1.position > correction2.position ? 1

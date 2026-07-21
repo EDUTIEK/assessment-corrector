@@ -7,6 +7,7 @@ import Item from "@/data/Item";
 const apiStore = stores.api();
 const layoutStore = stores.layout();
 const itemsStore = stores.items();
+const configStore = stores.config();
 const resourcesStore = stores.resources();
 const correctionsStore = stores.corrections();
 const taskStore = stores.tasks();
@@ -110,7 +111,9 @@ function getCorrectionTitle(correction) {
       >
         <template v-slot:prepend>
           <v-icon aria-role="hidden"
-                  :icon="layoutStore.getCorrectionIsVisible(correction.key) ? 'mdi-account-school' : 'mdi-account-school-outline'"></v-icon>
+                  :icon="layoutStore.getCorrectionIsVisible(correction.key) ? 'mdi-account-school' : 'mdi-account-school-outline'"
+                  :style="configStore.getCorrectionIconStyle(correction.position)"
+          ></v-icon>
         </template>
       </v-list-item>
 

@@ -15,7 +15,9 @@ import SummaryFile from '@/components/SummaryFile.vue';
 const apiStore = stores.api();
 const layoutStore = stores.layout();
 const itemsStore = stores.items();
+const configStore = stores.config();
 const commentsStore = stores.comments();
+const correctionStore = stores.corrections();
 const criteriaStore = stores.criteria();
 const summariesStore = stores.summaries();
 const settingsStore = stores.settings();
@@ -63,6 +65,18 @@ function expansionClass() {
   }
 }
 
+function commentPointsHeaderStyle() {
+  const correction_key = commentsStore.selectedComment?.correction_key;
+  const position = correctionStore.getCorrection(correction_key)?.position;
+  return configStore.getCorrectionHeaderStyle(position);
+}
+
+function generalPointsHeaderStyle() {
+  const position = correctionStore.ownCorrection?.position;
+  return configStore.getCorrectionHeaderStyle(position);
+}
+
+
 </script>
 
 <template>
@@ -73,23 +87,23 @@ function expansionClass() {
     </div>
 
     <div v-if="MarkingCommentPointsShown()" :class="expansionClass()">
-      <h2 class="headline">{{ $t('allPartialPointsLong') }}<span v-show="commentsStore.selectedKey != ''"
+      <h2 class="headline" :style="commentPointsHeaderStyle()">{{ $t('allPartialPointsLong') }}<span v-show="commentsStore.selectedKey != ''"
                                                           class="commentLabel">{{ commentsStore.selectedLabel }}</span> </h2>
       <marking-comment-points class="content with-scrollbar"></marking-comment-points>
     </div>
 
 
     <div v-if="MarkingGeneralPointsShown()" :class="expansionClass()">
-      <h2 class="headline">{{ $t('allGeneralPointsLong') }}</h2>
+      <h2 class="headline" :style="generalPointsHeaderStyle()">{{ $t('allGeneralPointsLong') }}</h2>
       <marking-general-points class="content with-scrollbar"></marking-general-points>
     </div>
 
     <!-- v-if neeed to avoid simultaneous data binding with summary text  -->
     <div v-if="markingTextShown() && !stores.summaries().isOwnDisabled" :class="expansionClass()">
       <v-container class="ma-0 pa-0">
-        <v-row class="section-header ma-0">
+        <v-row class="section-header ma-0" :style="generalPointsHeaderStyle()">
           <v-col cols="6" class="ma-0 pa-0">
-            <h2 class="headline">{{ $t('allOwnSummary') }}</h2>
+            <h2 class="headline" :style="generalPointsHeaderStyle()">{{ $t('allOwnSummary') }}</h2>
           </v-col>
           <v-col cols="6" class="ma-0 pa-0 text-right">
             <own-summary-template v-if="!summariesStore.isOwnDisabled"></own-summary-template>

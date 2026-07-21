@@ -10,11 +10,13 @@ import OwnSummaryTemplate from "@/components/OwnSummaryTemplate.vue";
 import OwnSummaryUpload from "@/components/OwnSummaryUpload.vue";
 import OwnSummaryRevision from "@/components/OwnSummaryRevision.vue";
 import {stores} from "@/store";
-import {watch} from "vue";
+import {watch, ref} from "vue";
 import Item from '@/data/Item';
 import OwnSummaryPregrade from "@/components/OwnSummaryPregrade.vue";
 
 const props = defineProps(['correction_key', 'showCriteria', 'showText', 'showRevision']);
+
+const headerStyle = ref('');
 
 let correction;
 let position_text;
@@ -31,6 +33,8 @@ let show_revision;
 function init() {
   correction = stores.corrections().getCorrection(props.correction_key);
   position_text = Item.buildPositionText(correction?.position);
+
+  headerStyle.value = stores.config().getCorrectionHeaderStyle(correction?.position);
 
   is_own = props.correction_key == stores.corrections().ownKey;
   can_correct = is_own && stores.items().canCorrect;
@@ -71,13 +75,13 @@ function expansionClass() {
   <div id="app-summary-wrapper">
 
     <div v-if="show_criteria" :class="expansionClass()">
-      <h2 class="headline">{{ $t('summaryOverview') }} {{ position_text }}</h2>
+      <h2 class="headline" :style="headerStyle">{{ $t('summaryOverview') }} {{ position_text }}</h2>
       <summary-criteria class="content with-scrollbar" :correction_key="props.correction_key"></summary-criteria>
     </div>
 
     <div v-if="show_text && is_own && !stores.summaries().isOwnDisabled" :class="expansionClass()">
       <v-container class="ma-0 pa-0">
-        <v-row class="section-header ma-0">
+        <v-row class="section-header ma-0" :style="headerStyle">
           <v-col cols="6" class="ma-0 pa-0">
             <h2 class="headline">{{ $t('allSummary') }} {{ position_text }}</h2>
           </v-col>
@@ -93,14 +97,14 @@ function expansionClass() {
       <summary-file v-if="summary.pdf" class="content without-scrollbar" :correction_key="props.correction_key"></summary-file>
     </div>
     <div v-if="show_text && (!is_own || stores.summaries().isOwnDisabled)" :class="expansionClass()">
-      <h2 class="headline">{{ $t('allSummary') }} {{ position_text }}</h2>
+      <h2 class="headline" :style="headerStyle">{{ $t('allSummary') }} {{ position_text }}</h2>
       <summary-text v-if="!summary.pdf" class="content with-scrollbar" :correction_key="props.correction_key"></summary-text>
       <summary-file v-if="summary.pdf" class="content without-scrollbar" :correction_key="props.correction_key"></summary-file>
     </div>
 
     <div id="app-own-summary-points" v-if="can_correct">
       <v-container class="ma-0 pa-0">
-        <v-row class="section-header ma-0">
+        <v-row class="section-header ma-0" :style="headerStyle">
           <v-col cols="6" class="ma-0 pa-0">
             <h2 class="headline">{{ $t('allTotalRating') }} {{ position_text }}</h2>
           </v-col>
@@ -115,16 +119,16 @@ function expansionClass() {
     </div>
 
     <div id="app-summary-points" v-if="!can_correct && is_authorized" >
-      <h2 class="headline">{{ $t('allTotalRating') }} {{ position_text }}</h2>
+      <h2 class="headline" :style="headerStyle">{{ $t('allTotalRating') }} {{ position_text }}</h2>
       <summary-points class="content with-scrollbar" :correction_key="props.correction_key"></summary-points>
     </div>
 
     <div v-if="show_revision && can_revise" :class="expansionClass()">
-      <h2 class="headline">{{ stores.settings().procedureText }} {{ position_text }}</h2>
+      <h2 class="headline" :style="headerStyle">{{ stores.settings().procedureText }} {{ position_text }}</h2>
       <own-summary-revision class="content without-scrollbar" :editorId="'revision'"></own-summary-revision>
     </div>
     <div v-if="show_revision && !can_revise && is_revised" :class="expansionClass()">
-      <h2 class="headline">{{ stores.settings().procedureText }} {{ position_text }}</h2>
+      <h2 class="headline" :style="headerStyle">{{ stores.settings().procedureText }} {{ position_text }}</h2>
       <summary-revision class="content without-scrollbar" :correction_key="props.correction_key"></summary-revision>
     </div>
 
