@@ -338,7 +338,8 @@ document.addEventListener('keydown', layoutStore.handleKeyDown);
 }
 
 .col-content {
-  flex-grow: 1;
+  flex: 1 1 0;
+  min-height: 0;
   background-color: white;
   width: 100%;
   padding: 10px;
@@ -346,7 +347,8 @@ document.addEventListener('keydown', layoutStore.handleKeyDown);
 }
 
 .col-extra {
-  height:50%;
+  flex: 0 0 50%;
+  min-height: 0;
   background-color: white;
   width: 100%;
   padding: 10px;
