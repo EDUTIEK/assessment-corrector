@@ -22,7 +22,7 @@ watch(() => layoutStore.focusChange, handleFocusChange);
 </script>
 
 <template>
-  <div id="app-solution" class="xlas-content"
+  <div id="app-solution" class="xlas-content with-scrollbar"
        contenteditable="true"
        @beforeinput="handleBeforeinput"
        v-html="taskStore.currentTask?.solution"></div>

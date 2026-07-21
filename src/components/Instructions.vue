@@ -21,7 +21,7 @@ watch(() => layoutStore.focusChange, handleFocusChange);
 </script>
 
 <template>
-  <div id="app-instructions" class="xlas-content"
+  <div id="app-instructions" class="xlas-content with-scrollbar"
        contenteditable="true"
        @beforeinput="handleBeforeinput"
        v-html="taskStore.currentTask?.instructions"></div>
@@ -39,7 +39,6 @@ watch(() => layoutStore.focusChange, handleFocusChange);
   height: 100%;
   padding: 20px;
   border: 1px solid #cccccc;
-  overflow-y: scroll;
 }
 
 </style>

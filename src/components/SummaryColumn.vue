@@ -72,7 +72,7 @@ function expansionClass() {
 
     <div v-if="show_criteria" :class="expansionClass()">
       <h2 class="headline">{{ $t('summaryOverview') }} {{ position_text }}</h2>
-      <summary-criteria class="content" :correction_key="props.correction_key"></summary-criteria>
+      <summary-criteria class="content with-scrollbar" :correction_key="props.correction_key"></summary-criteria>
     </div>
 
     <div v-if="show_text && is_own && !stores.summaries().isOwnDisabled" :class="expansionClass()">
@@ -89,13 +89,13 @@ function expansionClass() {
           </v-col>
         </v-row>
       </v-container>
-      <own-summary-text v-show="!summary.pdf" class="content-noscroll" :editorId="'summary'"></own-summary-text>
-      <summary-file v-if="summary.pdf" class="content-noscroll" :correction_key="props.correction_key"></summary-file>
+      <own-summary-text v-show="!summary.pdf" class="content without-scrollbar" :editorId="'summary'"></own-summary-text>
+      <summary-file v-if="summary.pdf" class="content without-scrollbar" :correction_key="props.correction_key"></summary-file>
     </div>
     <div v-if="show_text && (!is_own || stores.summaries().isOwnDisabled)" :class="expansionClass()">
       <h2 class="headline">{{ $t('allSummary') }} {{ position_text }}</h2>
-      <summary-text v-if="!summary.pdf" class="content" :correction_key="props.correction_key"></summary-text>
-      <summary-file v-if="summary.pdf" class="content-noscroll" :correction_key="props.correction_key"></summary-file>
+      <summary-text v-if="!summary.pdf" class="content with-scrollbar" :correction_key="props.correction_key"></summary-text>
+      <summary-file v-if="summary.pdf" class="content without-scrollbar" :correction_key="props.correction_key"></summary-file>
     </div>
 
     <div id="app-own-summary-points" v-if="can_correct">
@@ -111,21 +111,21 @@ function expansionClass() {
           </v-col>
         </v-row>
       </v-container>
-      <own-summary-points class="content" ></own-summary-points>
+      <own-summary-points class="content with-scrollbar" ></own-summary-points>
     </div>
 
     <div id="app-summary-points" v-if="!can_correct && is_authorized" >
       <h2 class="headline">{{ $t('allTotalRating') }} {{ position_text }}</h2>
-      <summary-points class="content" :correction_key="props.correction_key"></summary-points>
+      <summary-points class="content with-scrollbar" :correction_key="props.correction_key"></summary-points>
     </div>
 
     <div v-if="show_revision && can_revise" :class="expansionClass()">
       <h2 class="headline">{{ stores.settings().procedureText }} {{ position_text }}</h2>
-      <own-summary-revision class="content-noscroll" :editorId="'revision'"></own-summary-revision>
+      <own-summary-revision class="content without-scrollbar" :editorId="'revision'"></own-summary-revision>
     </div>
     <div v-if="show_revision && !can_revise && is_revised" :class="expansionClass()">
       <h2 class="headline">{{ stores.settings().procedureText }} {{ position_text }}</h2>
-      <summary-revision class="content-noscroll" :correction_key="props.correction_key"></summary-revision>
+      <summary-revision class="content without-scrollbar" :correction_key="props.correction_key"></summary-revision>
     </div>
 
     <div v-if="!can_correct && !is_authorized" >
@@ -168,12 +168,6 @@ function expansionClass() {
 
 .content {
   height: calc(100% - 40px);
-  overflow-y: scroll;
-}
-
-.content-noscroll {
-  height: calc(100% - 40px);
-  overflow-y: hidden;
 }
 
 .hidden {

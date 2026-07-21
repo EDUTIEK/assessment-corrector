@@ -69,19 +69,19 @@ function expansionClass() {
   <div id="app-marking-wrapper">
     <div v-if="markingCommentsShown()" :class="expansionClass()">
       <h2 class="headline">{{ $t('allComments') }}</h2>
-      <marking-comments class="content"></marking-comments>
+      <marking-comments class="content with-scrollbar"></marking-comments>
     </div>
 
     <div v-if="MarkingCommentPointsShown()" :class="expansionClass()">
       <h2 class="headline">{{ $t('allPartialPointsLong') }}<span v-show="commentsStore.selectedKey != ''"
                                                           class="commentLabel">{{ commentsStore.selectedLabel }}</span> </h2>
-      <marking-comment-points class="content"></marking-comment-points>
+      <marking-comment-points class="content with-scrollbar"></marking-comment-points>
     </div>
 
 
     <div v-if="MarkingGeneralPointsShown()" :class="expansionClass()">
       <h2 class="headline">{{ $t('allGeneralPointsLong') }}</h2>
-      <marking-general-points class="content"></marking-general-points>
+      <marking-general-points class="content with-scrollbar"></marking-general-points>
     </div>
 
     <!-- v-if neeed to avoid simultaneous data binding with summary text  -->
@@ -97,13 +97,13 @@ function expansionClass() {
           </v-col>
         </v-row>
       </v-container>
-      <own-summary-text v-if="!summariesStore.editSummary.pdf" class="content" :editorId="'marking'"></own-summary-text>
-      <summary-file v-if="summariesStore.editSummary.pdf" class="content" :correction_key="summariesStore.editSummary.correction_key"></summary-file>
+      <own-summary-text v-if="!summariesStore.editSummary.pdf" class="content with-scrollbar" :editorId="'marking'"></own-summary-text>
+      <summary-file v-if="summariesStore.editSummary.pdf" class="content without-scrollbar" :correction_key="summariesStore.editSummary.correction_key"></summary-file>
     </div>
     <div v-if="markingTextShown() && stores.summaries().isOwnDisabled" :class="expansionClass()">
       <h2 class="headline">{{ $t('allSummary') }}</h2>
-      <summary-text v-if="!summariesStore.editSummary.pdf" class="content" :correction_key="summariesStore.editSummary.correction_key"></summary-text>
-      <summary-file v-if="summariesStore.editSummary.pdf" class="content" :correction_key="summariesStore.editSummary.correction_key"></summary-file>
+      <summary-text v-if="!summariesStore.editSummary.pdf" class="content with-scrollbar" :correction_key="summariesStore.editSummary.correction_key"></summary-text>
+      <summary-file v-if="summariesStore.editSummary.pdf" class="content without-scrollbar" :correction_key="summariesStore.editSummary.correction_key"></summary-file>
     </div>
 
     <div v-if="!itemsStore.canAct && !summariesStore.isOneAuthorized">
@@ -147,7 +147,6 @@ function expansionClass() {
 
 .content {
   height: calc(100% - 40px);
-  overflow-y: scroll;
 }
 
 .hidden {

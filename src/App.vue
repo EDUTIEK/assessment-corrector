@@ -130,4 +130,19 @@ div[aria-label="Zelleigenschaften"]
   font-size: 40px;
 }
 
+/*
+ * Firefox: always-visible track + thumb.
+ * Arrow buttons cannot be forced via CSS in Firefox (OS/theme only);
+ * ::-webkit-scrollbar-button is Chromium-only.
+ */
+.with-scrollbar {
+  scrollbar-width: auto;
+  scrollbar-color: #8c8c8c #f0f0f0;
+  overflow-y: scroll;
+}
+
+.without-scrollbar {
+  overflow-y: hidden;
+}
+
 </style>
