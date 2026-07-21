@@ -37,7 +37,7 @@ class Mark {
   static SYMBOL_CROSS = '✗';
   static SYMBOL_QUESTION = '?';
   static SYMBOL_EXCLAMATION = "!";
-  static SYMBOL_MISSING = "∀"
+  static SYMBOL_MISSING = "⩝";
 
   static shapeFromPdfAnnotationType(type) {
     switch(type) {
@@ -116,6 +116,14 @@ class Mark {
   }
 
   static symbolToLabel(symbol) {
+    return symbol;
+  }
+
+  static symbolToComment(symbol) {
+    switch(symbol) {
+      case  Mark.SYMBOL_MISSING:
+        return '∀';
+    }
     return symbol;
   }
 

@@ -262,7 +262,7 @@ export default class Comment {
   /**
    * Get the alternative label and symbol for accessible PDF
    */
-  getAltLabel() {
+  getAltText() {
     for (const mark of this.marks) {
       if (mark.symbol) {
         return this.label + ' ' + Mark.symbolToText(mark.symbol);
@@ -287,7 +287,7 @@ export default class Comment {
     let text = this.label;
     for (const mark of this.marks) {
       if (mark.symbol) {
-        text = text + ' ' + Mark.symbolToLabel(mark.symbol);
+        text = text + ' ' + Mark.symbolToComment(mark.symbol);
         break;
       }
     }
@@ -340,7 +340,7 @@ export default class Comment {
           type: Mark.shapeToPdfAnnotationType(mark.shape),
           token: Mark.symbolToPdfAnnotationToken(mark.symbol),
           label: this.label,
-          altLabel: this.getAltLabel(),
+          altText: this.getAltText(),
           intern: JSON.parse(mark.internal),
           color: stores.config().getCommentColor(this.correction_position, false, false)
         });

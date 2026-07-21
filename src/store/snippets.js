@@ -257,9 +257,6 @@ export const useSnippetsStore = defineStore('snippets', {
      * @return {string|null} changed text or null if nothing is changed
      */
     autoReplace(purpose, text, position, force = false) {
-      // console.log('text', '[' + text + ']');
-      // console.log('position', position);
-
       let snippets = [];
 
       // check where to search and cleanup if changed
@@ -316,7 +313,6 @@ export const useSnippetsStore = defineStore('snippets', {
               this.last_auto_start = start;
               this.last_auto_search = search;
               this.last_auto_replace = snippet.text;
-              console.log('replace', this.last_auto_start, this.last_auto_search, this.last_auto_replace);
 
               text = text.slice(0, start) + snippet.text + text.slice(start + search.length);
               return text;
@@ -326,7 +322,6 @@ export const useSnippetsStore = defineStore('snippets', {
       }
 
       // entered key is not triggering, prevent an undo of the last replacement
-      console.log('keep', this.last_auto_search);
       this.last_auto_start = null;
       return null;
     },
@@ -337,8 +332,6 @@ export const useSnippetsStore = defineStore('snippets', {
      * @return {string|null} changed text or null if nothing is changed
      */
     autoUndo(text) {
-      console.log('undo', this.last_auto_start, this.last_auto_search, this.last_auto_replace);
-
       if (this.last_auto_start !== null) {
         const check = text.slice(this.last_auto_start, this.last_auto_start + this.last_auto_replace.length);
         if (check == this.last_auto_replace) {

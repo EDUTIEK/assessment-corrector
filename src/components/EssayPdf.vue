@@ -211,7 +211,7 @@ async function updateMark(event) {
     const oldData = comment.getData();
     comment.updateMarkData(data);
     pdfjs.setLabel(annotation.id, comment.label);
-    pdfjs.setAltLabel(annotation.id, comment.getAltLabel());
+    pdfjs.setAltText(annotation.id, comment.getAltText());
 
     const newData = comment.getData();
     if (JSON.stringify(oldData) != JSON.stringify(newData)) {
@@ -352,7 +352,7 @@ async function download()
 
       &nbsp;
 
-      <!-- <v-btn variant="text" prepend-icon="mdi-download" @click="download">Download</v-btn> -->
+      <v-btn variant="text" prepend-icon="mdi-download" @click="download">Download</v-btn>
 
     </div>
     <div class="appEssayNode" tabindex="0" ref="EssayNode"></div>

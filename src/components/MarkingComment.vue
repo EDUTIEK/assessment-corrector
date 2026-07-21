@@ -138,7 +138,6 @@ async function handleTextKeydown() {
     if (isDisabled(comment)) {
       return;
     }
-    console.log('keydown', event.key);
 
     let textarea;
     let cursor;
@@ -195,7 +194,6 @@ function handleTextKeyUp() {
       break;
 
     default:
-      console.log('keydown', event.key);
 
       if (!prevent_next_keyup_auto_replace) {
         const textarea = textRef.value;
