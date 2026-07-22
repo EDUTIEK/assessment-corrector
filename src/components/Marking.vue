@@ -65,45 +65,50 @@ function expansionClass() {
   }
 }
 
-function commentPointsHeaderStyle() {
+function commonHeaderStyle() {
+  return {
+    backgroundColor: '#f0f0f0',
+  };
+}
+
+function commentPositionHeaderStyle() {
   const correction_key = commentsStore.selectedComment?.correction_key;
   const position = correctionStore.getCorrection(correction_key)?.position;
   return configStore.getCorrectionHeaderStyle(position);
 }
 
-function generalPointsHeaderStyle() {
+function ownPositionHeaderStyle() {
   const position = correctionStore.ownCorrection?.position;
   return configStore.getCorrectionHeaderStyle(position);
 }
-
 
 </script>
 
 <template>
   <div id="app-marking-wrapper">
     <div v-if="markingCommentsShown()" :class="expansionClass()">
-      <h2 class="headline">{{ $t('allComments') }}</h2>
+      <h2 class="headline" :style="commonHeaderStyle()">{{ $t('allComments') }}</h2>
       <marking-comments class="content with-scrollbar"></marking-comments>
     </div>
 
     <div v-if="MarkingCommentPointsShown()" :class="expansionClass()">
-      <h2 class="headline" :style="commentPointsHeaderStyle()">{{ $t('allPartialPointsLong') }}<span v-show="commentsStore.selectedKey != ''"
+      <h2 class="headline" :style="commentPositionHeaderStyle()">{{ $t('allPartialPointsLong') }}<span v-show="commentsStore.selectedKey != ''"
                                                           class="commentLabel">{{ commentsStore.selectedLabel }}</span> </h2>
       <marking-comment-points class="content with-scrollbar"></marking-comment-points>
     </div>
 
 
     <div v-if="MarkingGeneralPointsShown()" :class="expansionClass()">
-      <h2 class="headline" :style="generalPointsHeaderStyle()">{{ $t('allGeneralPointsLong') }}</h2>
+      <h2 class="headline" :style="ownPositionHeaderStyle()">{{ $t('allGeneralPointsLong') }}</h2>
       <marking-general-points class="content with-scrollbar"></marking-general-points>
     </div>
 
     <!-- v-if neeed to avoid simultaneous data binding with summary text  -->
     <div v-if="markingTextShown() && !stores.summaries().isOwnDisabled" :class="expansionClass()">
       <v-container class="ma-0 pa-0">
-        <v-row class="section-header ma-0" :style="generalPointsHeaderStyle()">
+        <v-row class="ma-0" :style="ownPositionHeaderStyle()">
           <v-col cols="6" class="ma-0 pa-0">
-            <h2 class="headline" :style="generalPointsHeaderStyle()">{{ $t('allOwnSummary') }}</h2>
+            <h2 class="headline">{{ $t('allOwnSummary') }}</h2>
           </v-col>
           <v-col cols="6" class="ma-0 pa-0 text-right">
             <own-summary-template v-if="!summariesStore.isOwnDisabled"></own-summary-template>
@@ -114,8 +119,9 @@ function generalPointsHeaderStyle() {
       <own-summary-text v-if="!summariesStore.editSummary.pdf" class="content with-scrollbar" :editorId="'marking'"></own-summary-text>
       <summary-file v-if="summariesStore.editSummary.pdf" class="content without-scrollbar" :correction_key="summariesStore.editSummary.correction_key"></summary-file>
     </div>
+
     <div v-if="markingTextShown() && stores.summaries().isOwnDisabled" :class="expansionClass()">
-      <h2 class="headline">{{ $t('allSummary') }}</h2>
+      <h2 class="headline" :style="ownPositionHeaderStyle()">{{ $t('allSummary') }}</h2>
       <summary-text v-if="!summariesStore.editSummary.pdf" class="content with-scrollbar" :correction_key="summariesStore.editSummary.correction_key"></summary-text>
       <summary-file v-if="summariesStore.editSummary.pdf" class="content without-scrollbar" :correction_key="summariesStore.editSummary.correction_key"></summary-file>
     </div>
@@ -133,17 +139,12 @@ function generalPointsHeaderStyle() {
   height: 100%;
 }
 
-.section-header {
-  background-color: #f0f0f0;
-}
-
 .headline {
   font-size: 1rem;
   font-weight: normal;
   height: 40px;
   padding-top: 10px;
   padding-left: 10px;
-  background-color: #f0f0f0;
   width: 100%;
 }
 

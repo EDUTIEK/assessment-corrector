@@ -110,7 +110,7 @@ export const useConfigStore = defineStore('config', {
        * @returns {string}
        */
       const fn = function (position, selected = false, filled = false) {
-        return 'background-color: ' +  state.getCommentColor(position, selected, filled) + ';';
+        return 'background-color: ' +  state.getCommentColor(position, selected, filled);
       }
       return fn;
     },
@@ -125,9 +125,9 @@ export const useConfigStore = defineStore('config', {
        */
       const fn = function (position) {
         if (Correction.ALLOWED_POSITIONS.includes(position)) {
-          return 'background-color: ' +  state.getCommentColor(position, false, true) + ';';
+          return 'background-color: ' +  state.getCommentColor(position, false, true);
         }
-        return '';
+        return 'background-color: #f0f0f0';
       }
       return fn;
     },

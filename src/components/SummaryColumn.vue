@@ -81,7 +81,7 @@ function expansionClass() {
 
     <div v-if="show_text && is_own && !stores.summaries().isOwnDisabled" :class="expansionClass()">
       <v-container class="ma-0 pa-0">
-        <v-row class="section-header ma-0" :style="headerStyle">
+        <v-row class="ma-0" :style="headerStyle">
           <v-col cols="6" class="ma-0 pa-0">
             <h2 class="headline">{{ $t('allSummary') }} {{ position_text }}</h2>
           </v-col>
@@ -104,7 +104,7 @@ function expansionClass() {
 
     <div id="app-own-summary-points" v-if="can_correct">
       <v-container class="ma-0 pa-0">
-        <v-row class="section-header ma-0" :style="headerStyle">
+        <v-row class="ma-0" :style="headerStyle">
           <v-col cols="6" class="ma-0 pa-0">
             <h2 class="headline">{{ $t('allTotalRating') }} {{ position_text }}</h2>
           </v-col>
@@ -153,17 +153,12 @@ function expansionClass() {
   height: 160px;
 }
 
-.section-header {
-  background-color: #f0f0f0;
-}
-
 .headline {
   font-size: 1rem;
   font-weight: normal;
   height: 40px;
   padding-top: 10px;
   padding-left: 10px;
-  background-color: #f0f0f0;
 }
 
 .header-buttons {
