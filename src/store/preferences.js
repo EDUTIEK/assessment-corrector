@@ -8,6 +8,7 @@ import {defineStore} from 'pinia';
 import {stores} from "@/store/index";
 import Summary from '@/data/Summary';
 import Change from '@/data/Change';
+import Mark from '@/data/Mark';
 
 const storage = getStorage('preferences');
 
@@ -18,6 +19,9 @@ export const usePreferencesStore = defineStore('preferences', {
       essay_page_zoom: 0.25,                              // zoom of a pdf page display
       essay_text_zoom: 1,                                 // zoom of an essay text display
       summary_text_zoom: 1,                               // zoom in the editor of the correction summary
+      default_shape: Mark.SHAPE_TEXT_MARKER,              // default shape for new pdf annotations
+      display_labels: false,                              // show marking labels in the essay
+      select_words: true,                                 // do pdf text selection by words
 
       // not saved
       locale: 'de-DE'                                     // currently fixed
@@ -91,6 +95,11 @@ export const usePreferencesStore = defineStore('preferences', {
         if (data.summary_text_zoom) {
           this.summary_text_zoom = data.summary_text_zoom;
         }
+        if (Mark.ALLOWED_SHAPES.includes(data.default_shape)) {
+          this.default_shape = data.default_shape;
+        }
+        this.display_labels = !!data.display_labels;
+        this.select_words = !!data.select_words;
         await this.saveToStorage();
       }
       catch (err) {

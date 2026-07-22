@@ -14,26 +14,28 @@ const correctionsStore = stores.corrections();
 const commentsStore = stores.comments();
 const layoutStore = stores.layout();
 const summariesStore = stores.summaries();
+const preferencesStore = stores.preferences();
 
 const EssayNode = ref();
 
 const selectedTool = ref('');
 const selectedDrawMode= ref('marker');
-const showLabels = ref(true);
+const showLabels = ref(false);
 const selectWords = ref(true);
 
 let pdfjs;
 
 onMounted(() => {
+  selectedDrawMode.value = Mark.shapeToPdfAnnotationType(preferencesStore.default_shape);
+  showLabels.value = preferencesStore.display_labels;
+  selectWords.value = preferencesStore.select_words;
+
   pdfjs = createPDFJsApi(EssayNode.value, './annotate-pdf/pdfjs-dist/web/viewer.html', essayStore.url);
   pdfjs.setDefaultColor(stores.config().getDefaultCommentColor(true));
-
-  // causes errors in current annotate-pdf, will be foxed by lscharmer
+  pdfjs.setDrawMode(selectedDrawMode.value);
+  pdfjs.enableWordSelection(!!selectWords.value);
   pdfjs.enableTokenButtons(true);
   pdfjs.enableTypeButtons(true);
-  pdfjs.enableWordSelection(!!selectWords.value);
-
-  pdfjs.setDrawMode('marker');
 
   loadMarks();
   if (summariesStore.isOwnDisabled) {
@@ -89,11 +91,6 @@ function selectDrawMode(drawMode = null) {
 
   let shape;
   switch (selectedDrawMode.value) {
-    case 'marker':
-      shape = Mark.SHAPE_TEXT_MARKER;
-      pdfjs.setDrawMode('marker');
-      break;
-
     case 'underline':
       shape = Mark.SHAPE_TEXT_UNDERLINE;
       pdfjs.setDrawMode('underline');
@@ -108,10 +105,21 @@ function selectDrawMode(drawMode = null) {
       shape = Mark.SHAPE_TEXT_VLINE;
       pdfjs.setDrawMode('vline');
       break;
+
+    case 'marker':
+    default:
+      shape = Mark.SHAPE_TEXT_MARKER;
+      pdfjs.setDrawMode('marker');
+      break;
+  }
+
+  if (preferencesStore.default_shape !== shape) {
+    preferencesStore.default_shape = shape;
+    preferencesStore.update();
   }
 
   const comment = commentsStore.selectedComment;
-  if (shape && comment && comment.correction_key == correctionsStore.ownKey && !summariesStore.isOwnDisabled) {
+  if (comment && comment.correction_key == correctionsStore.ownKey && !summariesStore.isOwnDisabled) {
     let changed = false;
     for (const mark of comment.marks) {
       if (mark.shape !== shape) {
@@ -177,21 +185,21 @@ async function reclaimCommentFocus() {
 }
 
 function toggleLabels() {
-  if (showLabels.value == 1) {
-    showLabels.value = 0;
-  } else {
-    showLabels.value = 1;
+  showLabels.value = !showLabels.value;
+  if (preferencesStore.display_labels !== showLabels.value) {
+    preferencesStore.display_labels = showLabels.value;
+    preferencesStore.update();
   }
   loadMarks();
 }
 
 function toggleWords() {
-  if (selectWords.value == 1) {
-    selectWords.value = 0;
-  } else {
-    selectWords.value = 1;
+  selectWords.value = !selectWords.value;
+  if (preferencesStore.select_words !== selectWords.value) {
+    preferencesStore.select_words = selectWords.value;
+    preferencesStore.update();
   }
-  pdfjs.enableWordSelection(!!selectWords.value);
+  pdfjs.enableWordSelection(selectWords.value);
 }
 
 async function createMark(event) {

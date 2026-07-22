@@ -64,7 +64,7 @@ class Mark {
       case Mark.SHAPE_TEXT_VLINE:
         return 'vline';
     }
-    return '';
+    return 'marker';
   }
 
   static symbolFromPdfAnnotationToken(token) {
