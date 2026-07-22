@@ -111,8 +111,10 @@ function ownPositionHeaderStyle() {
             <h2 class="headline">{{ $t('allOwnSummary') }}</h2>
           </v-col>
           <v-col cols="6" class="ma-0 pa-0 text-right">
-            <own-summary-template v-if="!summariesStore.isOwnDisabled"></own-summary-template>
-            <own-summary-upload v-if="!summariesStore.isOwnDisabled"></own-summary-upload>
+            <div class="header-buttons">
+              <own-summary-template v-if="!summariesStore.isOwnDisabled"></own-summary-template>
+              <own-summary-upload v-if="!summariesStore.isOwnDisabled"></own-summary-upload>
+            </div>
           </v-col>
         </v-row>
       </v-container>
@@ -146,6 +148,10 @@ function ownPositionHeaderStyle() {
   padding-top: 10px;
   padding-left: 10px;
   width: 100%;
+}
+
+.header-buttons {
+  padding-top: 5px;
 }
 
 .commentLabel {
