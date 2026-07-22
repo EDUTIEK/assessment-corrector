@@ -103,6 +103,8 @@ function selectDrawMode(drawMode = null) {
       pdfjs.setDrawMode('vline');
       break;
   }
+
+
 }
 
 async function handleFocusChange() {
@@ -253,11 +255,10 @@ function selectMark(event) {
     const comment = commentsStore.getCommentByMarkKey(event.detail.id);
     if (comment) {
       commentsStore.selectComment(comment.key);
-    }
-    else {
-      commentsStore.selectComment('');
+      return;
     }
   }
+  commentsStore.selectComment('');
 }
 
 function pageChanged(event) {
