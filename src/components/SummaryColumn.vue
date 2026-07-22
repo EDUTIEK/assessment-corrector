@@ -43,7 +43,7 @@ function init() {
   is_authorized = summary.isAuthorized();
   is_revised = summary.isRevised();
 
-  show_criteria = props.showCriteria && (stores.settings().Task.enable_comment_ratings || stores.settings().Task.enable_partial_points);
+  show_criteria = props.showCriteria && (is_own || is_authorized) && (stores.settings().Task.enable_comment_ratings || stores.settings().Task.enable_partial_points);
   show_text = props.showText && (is_own || is_authorized);
   show_revision = props.showRevision && (is_own  && can_revise || is_revised);
 }
