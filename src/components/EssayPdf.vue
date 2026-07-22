@@ -10,6 +10,7 @@ import Comment from "@/data/Comment";
 import Mark from "@/data/Mark";
 
 const essayStore = stores.essay();
+const correctionsStore = stores.corrections();
 const commentsStore = stores.comments();
 const layoutStore = stores.layout();
 const summariesStore = stores.summaries();
@@ -86,25 +87,43 @@ function selectDrawMode(drawMode = null) {
     selectedDrawMode.value = drawMode;
   }
 
+  let shape;
   switch (selectedDrawMode.value) {
     case 'marker':
+      shape = Mark.SHAPE_TEXT_MARKER;
       pdfjs.setDrawMode('marker');
       break;
 
     case 'underline':
+      shape = Mark.SHAPE_TEXT_UNDERLINE;
       pdfjs.setDrawMode('underline');
       break;
 
     case 'wave':
+      shape = Mark.SHAPE_TEXT_WAVE;
       pdfjs.setDrawMode('wave');
       break;
 
     case 'vline':
+      shape = Mark.SHAPE_TEXT_VLINE;
       pdfjs.setDrawMode('vline');
       break;
   }
 
-
+  const comment = commentsStore.selectedComment;
+  if (shape && comment && comment.correction_key == correctionsStore.ownKey && !summariesStore.isOwnDisabled) {
+    let changed = false;
+    for (const mark of comment.marks) {
+      if (mark.shape !== shape) {
+        mark.shape = shape;
+        changed = true;
+        pdfjs.setType(mark.key, Mark.shapeToPdfAnnotationType(shape));
+      }
+    }
+    if (changed) {
+      commentsStore.updateComment(comment);
+    }
+  }
 }
 
 async function handleFocusChange() {
