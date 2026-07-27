@@ -31,6 +31,7 @@ const headline_scheme = 'three';
 let settingsStore;
 let preferencesStore;
 let snippetsStore;
+let layoutStore;
 
 const { t } = i18n.global;
 
@@ -51,6 +52,7 @@ export default class TinyHelper {
         settingsStore = stores.settings();
         preferencesStore = stores.preferences();
         snippetsStore = stores.snippets();
+        layoutStore = stores.layout();
     }
 
     getInit() {
@@ -529,7 +531,11 @@ export default class TinyHelper {
                 break;
 
             default:
-                layoutStore.handleKeyDown(event);
+                // Forward Alt-shortcuts only. A throw here would abort TinyMCE's
+                // remaining keydown handlers (incl. vertical table cell navigation).
+                if (event.altKey) {
+                    layoutStore.handleKeyDown(event);
+                }
         }
     }
 }
