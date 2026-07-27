@@ -1,10 +1,8 @@
 <script setup>
 import {stores} from "@/store";
-import SumOfPoints from "@/components/SumOfPoints.vue";
-import Authorization from "@/components/Authorization.vue";
-import Summary from "@/data/Summary";
 import {ref} from "vue";
 import PdfAnnotator from '@/lib/PdfAnnotator';
+import AuthorizationInfos from '@/components/AuthorizationInfos.vue';
 
 const apiStore = stores.api();
 const itemsStore = stores.items();
@@ -96,10 +94,15 @@ async function unset() {
       <v-card class="pa-4">
         <v-card-title>{{ $t('ownSummaryPregradedSet') }}</v-card-title>
         <v-card-text>
-          {{ $t('ownSummaryPregradedSetInfo') }}
+          <authorization-infos></authorization-infos>
+          <div v-if="summariesStore.isOwnValidForAuthorization" class="appRow">
+            {{ $t('ownSummaryPregradedSetInfo') }}
+          </div>
         </v-card-text>
         <v-card-actions>
-          <v-btn @click="set()">
+          <v-btn
+              :disabled="!summariesStore.isOwnValidForAuthorization"
+              @click="set()">
             <v-icon left icon="mdi-star"></v-icon>
             {{ $t('ownSummaryPregradedSet') }}
           </v-btn>
@@ -134,18 +137,6 @@ async function unset() {
 </template>
 
 <style scoped>
-
-.appPoints {
-  width: 4em;
-  border: 1px solid #aaaaaa;
-  border-radius: 5px;
-  padding: 3px;
-}
-
-.appCheckbox {
-  margin: 0 5px 15px 0;
-  padding: 0;
-}
 
 .headline-button {
   margin-left: 5px;
