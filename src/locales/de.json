@@ -279,7 +279,7 @@
     "snippetsImportDescription": "Bitte wählen Sie eine Excel-Datei zum Import. Das erste Tabellenblatt muss zwei Spalten mit den Überschriften 'text' und 'shortcut' in der ersten Zeile haben. Die folgenden Zeilen enthalten darunter die Textbausteine und ihre Kurzeingaben.",
     "snippetsImportNoExcel": "Die ausgewählte Datei ist keine Excel-Datei",
     "snippetsImportError": "Die Textbausteine konnten nicht importiert werden!",
-    "startupContentLoadData": "LadeDaten...",
+    "startupContentLoadData": "Lade Daten...",
     "startupContentLoadError": "Fehler beim Laden",
     "startupContentLoadItemError": "Beim Laden der zu korrigierenden Abgabe ist ein Fehler aufgetreten. Die Korrekturoberfläche kann nicht gestartet werden.",
     "startupContentMyCorrections": "Meine Korrekturen",
