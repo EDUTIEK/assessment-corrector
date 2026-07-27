@@ -23,6 +23,10 @@ const selectedDrawMode= ref('marker');
 const showLabels = ref(false);
 const selectWords = ref(true);
 
+// timestamp of the last mark creation
+// needed to distinct a 'select' event by mark creation from the click on an empty place
+let markCreated = 0;
+
 let pdfjs;
 
 onMounted(() => {
@@ -197,6 +201,8 @@ function toggleWords() {
 }
 
 async function createMark(event) {
+  markCreated = Date.now();
+
   const annotation = event.detail;
   const data = {
     key: annotation.id,
@@ -277,7 +283,10 @@ function selectMark(event) {
       return;
     }
   }
-  commentsStore.selectComment('');
+
+  if (Date.now() - markCreated > 200) {
+    commentsStore.selectComment('');
+  }
 }
 
 function pageChanged(event) {
