@@ -155,8 +155,8 @@ async function loadMarks() {
     }
   }
   await pdfjs.setAll(all);
-  // setAll recreates editors; CommentPopup may steal focus again after createMark
-  await reclaimCommentFocus();
+  // setAll may leave focus in the iframe without firing focus-end (noFocus add path)
+  reclaimCommentFocus();
 }
 
 /**
@@ -169,16 +169,10 @@ function isFocusInPdf() {
 }
 
 /**
- * After annotate-pdf selects a mark, it may re-focus the editor/popup via setTimeout(0).
- * Reclaim focus for the sidebar textarea when focus is still in the PDF.
- * A second tick covers editor.focus()'s own delayed focus.
+ * Reclaim focus for the sidebar textarea when the PDF pane still holds it.
+ * Delayed steals (editor.moveInDOM / toolbar) are handled via the focus-end event.
  */
-async function reclaimCommentFocus() {
-  await new Promise(resolve => setTimeout(resolve, 0));
-  if (commentsStore.selectedKey && isFocusInPdf()) {
-    commentsStore.setFocusRequest();
-  }
-  await new Promise(resolve => setTimeout(resolve, 50));
+function reclaimCommentFocus() {
   if (commentsStore.selectedKey && isFocusInPdf()) {
     commentsStore.setFocusRequest();
   }
@@ -225,7 +219,7 @@ async function createMark(event) {
   }
 }
 
-async function updateMark(event) {
+function updateMark(event) {
   const annotation = event.detail;
   const data = {
     key: annotation.id,
@@ -247,8 +241,6 @@ async function updateMark(event) {
     if (JSON.stringify(oldData) != JSON.stringify(newData)) {
       commentsStore.updateComment(comment, false);
     }
-
-    await reclaimCommentFocus();
   }
 }
 
@@ -296,8 +288,18 @@ function pageChanged(event) {
   }
 }
 
+/**
+ * annotate-pdf fires focus-end after PDF.js finishes restoring focus in moveEditorInDOM
+ * That is the reliable point to take focus back for the comment textarea
+ */
 function focusEnd(event) {
-  // console.log('focusEnd', event);
+  if (!event?.detail?.id || !commentsStore.selectedKey) {
+    return;
+  }
+  const comment = commentsStore.getCommentByMarkKey(event.detail.id);
+  if (comment && comment.key === commentsStore.selectedKey) {
+    reclaimCommentFocus();
+  }
 }
 
 async function refreshSelection() {
@@ -324,7 +326,8 @@ async function refreshSelection() {
     for (const id of selectIds) {
       await pdfjs.select(id);
     }
-    await reclaimCommentFocus();
+    // Immediate reclaim if select left focus in the PDF; delayed steals use focus-end
+    reclaimCommentFocus();
   }
 }
 

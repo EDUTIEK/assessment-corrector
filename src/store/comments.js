@@ -224,7 +224,7 @@ export const useCommentsStore = defineStore('comments', {
 
     /**
      * Request focusing the selected comment textarea
-     * Used after annotate-pdf finishes selecting a mark (its CommentPopup steals focus)
+     * Used after annotate-pdf's focus-end (or after setAll/select left focus in the PDF)
      * @public
      */
     setFocusRequest() {

@@ -12,9 +12,10 @@ watch(() => commentsStore.firstVisibleKey, scrollToFirstVisible);
 /**
  * Focus the currently selected comment textarea.
  *
- * annotate-pdf may steal focus asynchronously (CommentPopup / editor.focus via
- * setTimeout(0)). Empty Vuetify textareas also use opacity:0 until active — if
- * focus is lost, no caret is visible (unlike dirty fields which stay opaque).
+ * Triggered by selectionChange and by focusRequest (from EssayPdf after
+ * annotate-pdf's focus-end, or after setAll/select left focus in the PDF).
+ * Empty Vuetify textareas use opacity:0 until active — labels are sr-only here,
+ * so setSelectionRange keeps the caret visible on empty fields.
  */
 async function focusSelected() {
   const key = commentsStore.selectedKey;
@@ -22,44 +23,27 @@ async function focusSelected() {
     return;
   }
 
-  const getTextarea = () => document.getElementById('app-comment-' + key);
-
-  const tryFocus = () => {
-    if (commentsStore.selectedKey !== key) {
-      return 'abort';
-    }
-    const tx = getTextarea();
-    if (!tx || tx.disabled) {
-      return 'missing';
-    }
-    if (document.activeElement === tx) {
-      return 'done';
-    }
-    tx.focus();
-    // Make caret visible immediately in empty fields
-    try {
-      const pos = tx.value ? tx.value.length : 0;
-      tx.setSelectionRange(pos, pos);
-    } catch (_) {
-      // ignore unsupported selection on some hosts
-    }
-    return document.activeElement === tx ? 'done' : 'retry';
-  };
-
   await nextTick();
 
-  // Retry briefly while annotate-pdf re-focuses the iframe after select()
-  const deadline = Date.now() + 350;
-  let delay = 0;
-  while (Date.now() <= deadline) {
-    const result = tryFocus();
-    if (result === 'abort' || result === 'done') {
-      return;
-    }
-    await new Promise(resolve => setTimeout(resolve, delay));
-    delay = delay === 0 ? 25 : Math.min(delay + 25, 100);
+  if (commentsStore.selectedKey !== key) {
+    return;
   }
-  tryFocus();
+
+  const tx = document.getElementById('app-comment-' + key);
+  if (!tx || tx.disabled) {
+    return;
+  }
+  if (document.activeElement === tx) {
+    return;
+  }
+
+  tx.focus();
+  try {
+    const pos = tx.value ? tx.value.length : 0;
+    tx.setSelectionRange(pos, pos);
+  } catch (_) {
+    // ignore unsupported selection on some hosts
+  }
 }
 
 
