@@ -7,7 +7,7 @@ import {stores} from "@/store";
   <v-main fill-height>
 
     <v-app-bar elevation="1" color="white" density="compact">
-      <p>{{ $t('startupContentLoadData') }}</p>
+      <v-app-bar-title>{{ $t('startupContentLoadData') }}</v-app-bar-title>
       <v-spacer></v-spacer>
       <v-btn :href="stores.api().returnUrl">
         <v-icon left icon="mdi-logout-variant"></v-icon>
