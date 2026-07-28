@@ -100,7 +100,6 @@ async function toggleExcellent(comment) {
   if (comment.rating_excellent) {
     comment.rating_cardinal = false;
   }
-  commentsStore.setMarkerChange();
   commentsStore.updateComment(comment);
 }
 
@@ -108,7 +107,6 @@ async function toggleCardinal(comment) {
   if (comment.rating_cardinal) {
     comment.rating_excellent = false;
   }
-  commentsStore.setMarkerChange();
   commentsStore.updateComment(comment);
 }
 
