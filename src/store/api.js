@@ -402,7 +402,7 @@ export const useApiStore = defineStore('api', {
       this.clearAllIntervals();
 
       const itemsStore = stores.items();
-      if (itemKey == '' || itemsStore.getItem(itemKey) == undefined) {
+      if (itemKey == '' || stores.items().hasItems && itemsStore.getItem(itemKey) == undefined) {
         itemKey = itemsStore.firstKey
       }
 
@@ -480,7 +480,7 @@ export const useApiStore = defineStore('api', {
       this.clearAllIntervals();
 
       const itemsStore = stores.items();
-      if (itemKey == '' || !stores.items().getItem(itemKey)) {
+      if (itemKey == '' || stores.items().hasItems && !stores.items().getItem(itemKey)) {
         itemKey = itemsStore.firstKey ?? '';
       }
 
