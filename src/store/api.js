@@ -480,7 +480,7 @@ export const useApiStore = defineStore('api', {
       this.clearAllIntervals();
 
       const itemsStore = stores.items();
-      if (itemKey == '' || stores.items().hasItems && !stores.items().getItem(itemKey)) {
+      if (itemKey == '' && stores.items().hasItems && !stores.items().getItem(itemKey)) {
         itemKey = itemsStore.firstKey ?? '';
       }
 
