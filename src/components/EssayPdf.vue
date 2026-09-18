@@ -18,8 +18,7 @@ const preferencesStore = stores.preferences();
 
 const EssayNode = ref();
 
-const selectedTool = ref('');
-const selectedDrawMode= ref('marker');
+const selectedShape = ref('');
 const showLabels = ref(false);
 const selectWords = ref(true);
 
@@ -30,22 +29,20 @@ let markCreated = 0;
 let pdfjs;
 
 onMounted(() => {
-  selectedDrawMode.value = Mark.shapeToPdfAnnotationType(preferencesStore.default_shape);
   showLabels.value = preferencesStore.display_labels;
   selectWords.value = preferencesStore.select_words;
 
   pdfjs = createPDFJsApi(EssayNode.value, './annotate-pdf/pdfjs-dist/web/viewer.html', essayStore.url);
   pdfjs.setDefaultColor(stores.config().getDefaultCommentColor(true));
-  pdfjs.setDrawMode(selectedDrawMode.value);
   pdfjs.enableWordSelection(!!selectWords.value);
   pdfjs.enableTokenButtons(true);
   pdfjs.enableTypeButtons(true);
 
   loadMarks();
   if (summariesStore.isOwnDisabled) {
-    selectTool('');
+    selectShape('');
   } else {
-    selectTool('text');
+    selectShape(preferencesStore.default_shape);
   }
   pdfjs.on('create', createMark);
   pdfjs.on('update', updateMark);
@@ -63,78 +60,44 @@ watch(() => commentsStore.showOtherCorrections, loadMarks);
 watch(() => commentsStore.selectionChange, refreshSelection);
 watch(() => commentsStore.deletionChange, handleDeleted);
 
-function selectTool(tool = null) {
+function selectShape(shape = null) {
 
-  if (tool) {
-    selectedTool.value = tool;
+  if (shape) {
+    selectedShape.value = shape;
+    if (preferencesStore.default_shape !== selectedShape.value) {
+      preferencesStore.default_shape = selectedShape.value;
+      preferencesStore.update();
+    }
   }
 
-  switch (selectedTool.value) {
-    case 'text':
-      pdfjs.enableFreeFormHighlight(false);
-      pdfjs.enableTextHighlight(true);
-      break;
+  if (Mark.TEXT_SHAPES.includes(selectedShape.value)) {
+    pdfjs.enableFreeFormHighlight(false);
+    pdfjs.enableTextHighlight(true);
+    pdfjs.setDrawMode(Mark.shapeToPdfAnnotationType(selectedShape.value));
 
-    case 'free':
-      pdfjs.enableFreeFormHighlight(true);
-      pdfjs.enableTextHighlight(false);
-      break;
-
-    default:
-      pdfjs.enableFreeFormHighlight(false);
-      pdfjs.enableTextHighlight(false);
-      break;
-  }
-}
-
-function selectDrawMode(drawMode = null) {
-
-  if (drawMode) {
-    selectedDrawMode.value = drawMode;
-  }
-
-  let shape;
-  switch (selectedDrawMode.value) {
-    case 'underline':
-      shape = Mark.SHAPE_TEXT_UNDERLINE;
-      pdfjs.setDrawMode('underline');
-      break;
-
-    case 'wave':
-      shape = Mark.SHAPE_TEXT_WAVE;
-      pdfjs.setDrawMode('wave');
-      break;
-
-    case 'vline':
-      shape = Mark.SHAPE_TEXT_VLINE;
-      pdfjs.setDrawMode('vline');
-      break;
-
-    case 'marker':
-    default:
-      shape = Mark.SHAPE_TEXT_MARKER;
-      pdfjs.setDrawMode('marker');
-      break;
-  }
-
-  if (preferencesStore.default_shape !== shape) {
-    preferencesStore.default_shape = shape;
-    preferencesStore.update();
-  }
-
-  const comment = commentsStore.selectedComment;
-  if (comment && comment.correction_key == correctionsStore.ownKey && !summariesStore.isOwnDisabled) {
-    let changed = false;
-    for (const mark of comment.marks) {
-      if (mark.shape !== shape) {
-        mark.shape = shape;
-        changed = true;
-        pdfjs.setType(mark.key, Mark.shapeToPdfAnnotationType(shape));
+    const comment = commentsStore.selectedComment;
+    if (comment && comment.correction_key == correctionsStore.ownKey && !summariesStore.isOwnDisabled) {
+      let changed = false;
+      for (const mark of comment.marks) {
+        if (mark.shape !== shape && Mark.TEXT_SHAPES.includes(mark.shape)) {
+          mark.shape = shape;
+          changed = true;
+          pdfjs.setType(mark.key, Mark.shapeToPdfAnnotationType(shape));
+        }
+      }
+      if (changed) {
+        commentsStore.updateComment(comment);
       }
     }
-    if (changed) {
-      commentsStore.updateComment(comment);
-    }
+
+  } else if (Mark.FREE_SHAPES.includes(selectedShape.value)) {
+    pdfjs.enableFreeFormHighlight(true);
+    pdfjs.enableTextHighlight(false);
+    pdfjs.setDefaultFreeFormType(Mark.shapeToPdfFreeFormType(selectedShape.value));
+
+  } else {
+    pdfjs.enableFreeFormHighlight(false);
+    pdfjs.enableTextHighlight(false);
   }
 }
 
@@ -204,6 +167,8 @@ async function createMark(event) {
   markCreated = Date.now();
 
   const annotation = event.detail;
+  console.log('created mark', event.detail);
+
   const data = {
     key: annotation.id,
     shape: Mark.shapeFromPdfAnnotationType(annotation.type),
@@ -211,10 +176,6 @@ async function createMark(event) {
     internal: JSON.stringify(annotation.intern),
     parent_number: annotation.page + 1,
     pos: {x: annotation.pos.x * 1000, y: annotation.pos.y * 1000}
-  }
-
-  if (selectedTool.value == 'free') {
-    data.shape = Mark.SHAPE_FREE_MARKER;
   }
 
   if (!commentsStore.getCommentByMarkKey(data.key)) {
@@ -372,20 +333,19 @@ async function download()
   <div class ="appEssayWrapper">
     <div class="appTextButtons">
 
-<!--
-      <v-btn-toggle v-if="stores.settings().Task.enable_comments" density="comfortable" variant="outlined" divided v-model="selectedTool">
-        <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-cursor-text" value="text" @click="selectTool('text')"></v-btn>
-        <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-draw" value="free" @click="selectTool('free')"></v-btn>
+      <v-btn-toggle v-if="stores.settings().Task.enable_comments" density="comfortable" variant="outlined" divided v-model="selectedShape">
+        <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-marker" :value="Mark.SHAPE_TEXT_MARKER" @click="selectShape(Mark.SHAPE_TEXT_MARKER)"></v-btn>
+        <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-format-underline" :value="Mark.SHAPE_TEXT_UNDERLINE" @click="selectShape(Mark.SHAPE_TEXT_UNDERLINE)"></v-btn>
+        <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-format-underline-wavy" :value="Mark.SHAPE_TEXT_WAVE" @click="selectShape(Mark.SHAPE_TEXT_WAVE)"></v-btn>
+        <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-align-horizontal-left" :value="Mark.SHAPE_TEXT_VLINE" @click="selectShape(Mark.SHAPE_TEXT_VLINE)"></v-btn>
       </v-btn-toggle>
 
       &nbsp;
--->
 
-      <v-btn-toggle v-if="stores.settings().Task.enable_comments" density="comfortable" variant="outlined" divided v-model="selectedDrawMode">
-        <v-btn :disabled="summariesStore.isOwnDisabled || selectedTool == 'free'" size="small" icon="mdi-marker" value="marker" @click="selectDrawMode('marker')"></v-btn>
-        <v-btn :disabled="summariesStore.isOwnDisabled || selectedTool == 'free'" size="small" icon="mdi-format-underline" value="underline" @click="selectDrawMode('underline')"></v-btn>
-        <v-btn :disabled="summariesStore.isOwnDisabled || selectedTool == 'free'" size="small" icon="mdi-format-underline-wavy" value="wave" @click="selectDrawMode('wave')"></v-btn>
-        <v-btn :disabled="summariesStore.isOwnDisabled || selectedTool == 'free'" size="small" icon="mdi-tally-mark-1" value="vline" @click="selectDrawMode('vline')"></v-btn>
+      <v-btn-toggle v-if="stores.settings().Task.enable_comments" density="comfortable" variant="outlined" divided v-model="selectedShape">
+        <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-minus" :value="Mark.SHAPE_FREE_LINE" @click="selectShape(Mark.SHAPE_FREE_LINE)"></v-btn>
+        <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-wave" :value="Mark.SHAPE_FREE_WAVE" @click="selectShape(Mark.SHAPE_FREE_WAVE)"></v-btn>
+        <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-circle-outline" :value="Mark.SHAPE_FREE_CIRCLE" @click="selectShape(Mark.SHAPE_FREE_CIRCLE)"></v-btn>
       </v-btn-toggle>
 
       &nbsp;

@@ -14,23 +14,42 @@ class Mark {
   static SHAPE_LINE = 'line';
   static SHAPE_WAVE = 'wave';
 
-  // Pdf shapes
-  static SHAPE_FREE_MARKER = 'free_marker';
+  // Pdf text shapes
   static SHAPE_TEXT_MARKER = 'text_marker';
   static SHAPE_TEXT_UNDERLINE = 'text_underline';
   static SHAPE_TEXT_WAVE = 'text_wave';
   static SHAPE_TEXT_VLINE = 'text_vline';
 
+  // Pdf free form shapes
+  static SHAPE_FREE_MARKER = 'free_marker';
+  static SHAPE_FREE_LINE = 'free_line';
+  static SHAPE_FREE_CIRCLE = 'free_circle';
+  static SHAPE_FREE_WAVE = 'free_wave';
+
   // These shapes can be set in setData
   static ALLOWED_SHAPES = [
-      Mark.SHAPE_CIRCLE, Mark.SHAPE_RECTANGLE, Mark.SHAPE_POLYGON, Mark.SHAPE_LINE, Mark.SHAPE_WAVE,
-      Mark.SHAPE_FREE_MARKER, Mark.SHAPE_TEXT_MARKER, Mark.SHAPE_TEXT_UNDERLINE, Mark.SHAPE_TEXT_WAVE, Mark.SHAPE_TEXT_VLINE
+    Mark.SHAPE_CIRCLE, Mark.SHAPE_RECTANGLE, Mark.SHAPE_POLYGON, Mark.SHAPE_LINE, Mark.SHAPE_WAVE,
+    Mark.SHAPE_TEXT_MARKER, Mark.SHAPE_TEXT_UNDERLINE, Mark.SHAPE_TEXT_WAVE, Mark.SHAPE_TEXT_VLINE,
+    Mark.SHAPE_FREE_MARKER, Mark.SHAPE_FREE_LINE, Mark.SHAPE_FREE_CIRCLE, Mark.SHAPE_FREE_WAVE,
   ];
+
+  static IMAGE_SHAPES = [
+    Mark.SHAPE_CIRCLE, Mark.SHAPE_RECTANGLE, Mark.SHAPE_POLYGON, Mark.SHAPE_LINE, Mark.SHAPE_WAVE
+  ]
+
+  static TEXT_SHAPES = [
+    Mark.SHAPE_TEXT_MARKER, Mark.SHAPE_TEXT_UNDERLINE, Mark.SHAPE_TEXT_WAVE, Mark.SHAPE_TEXT_VLINE
+  ];
+
+  static FREE_SHAPES = [
+    Mark.SHAPE_FREE_MARKER, Mark.SHAPE_FREE_LINE, Mark.SHAPE_FREE_CIRCLE, Mark.SHAPE_FREE_WAVE
+  ]
+
 
   // These shapes get a lighter color when not being selected
   static FILLED_SHAPED = [
     Mark.SHAPE_CIRCLE, Mark.SHAPE_RECTANGLE, Mark.SHAPE_POLYGON,
-    Mark.SHAPE_FREE_MARKER, Mark.SHAPE_TEXT_MARKER
+    Mark.SHAPE_FREE_MARKER, Mark.SHAPE_FREE_CIRCLE, Mark.SHAPE_TEXT_MARKER
   ];
 
   static SYMBOL_CHECK = '✓';
@@ -65,6 +84,31 @@ class Mark {
         return 'vline';
     }
     return 'marker';
+  }
+
+  static shapeFromPdfFreeFormType(type) {
+    switch(type) {
+      case 'line':
+        return Mark.SHAPE_FREE_LINE;
+      case 'circle':
+        return Mark.SHAPE_FREE_CIRCLE;
+      case 'wave':
+        return Mark.SHAPE_FREE_WAVE;
+
+    }
+    return '';
+  }
+
+  static shapeToPdfFreeFormType(shape) {
+    switch(shape) {
+      case Mark.SHAPE_FREE_LINE:
+        return 'line';
+      case Mark.SHAPE_FREE_CIRCLE:
+        return 'circle';
+      case Mark.SHAPE_FREE_WAVE:
+        return 'wave';
+    }
+    return '';
   }
 
   static symbolFromPdfAnnotationToken(token) {
@@ -275,7 +319,13 @@ class Mark {
       case Mark.SHAPE_TEXT_WAVE:
         return 'mdi-format-underline-wavy';
       case Mark.SHAPE_TEXT_VLINE:
-        return 'mdi-tally-mark-1';
+        return 'mdi-align-horizontal-left';
+      case Mark.SHAPE_FREE_LINE:
+        return 'mdi-minus';
+      case Mark.SHAPE_FREE_WAVE:
+        return 'mdi-wave';
+      case Mark.SHAPE_FREE_CIRCLE:
+        return 'mdi-circle-outline';
     }
     return '';
   }
