@@ -75,20 +75,20 @@ function selectShape(shape = null) {
     pdfjs.enableTextHighlight(true);
     pdfjs.setDrawMode(Mark.shapeToPdfAnnotationType(selectedShape.value));
 
-    const comment = commentsStore.selectedComment;
-    if (comment && comment.correction_key == correctionsStore.ownKey && !summariesStore.isOwnDisabled) {
-      let changed = false;
-      for (const mark of comment.marks) {
-        if (mark.shape !== shape && Mark.TEXT_SHAPES.includes(mark.shape)) {
-          mark.shape = shape;
-          changed = true;
-          pdfjs.setType(mark.key, Mark.shapeToPdfAnnotationType(shape));
-        }
-      }
-      if (changed) {
-        commentsStore.updateComment(comment);
-      }
-    }
+    // const comment = commentsStore.selectedComment;
+    // if (comment && comment.correction_key == correctionsStore.ownKey && !summariesStore.isOwnDisabled) {
+    //   let changed = false;
+    //   for (const mark of comment.marks) {
+    //     if (mark.shape !== shape && Mark.TEXT_SHAPES.includes(mark.shape)) {
+    //       mark.shape = shape;
+    //       changed = true;
+    //       pdfjs.setType(mark.key, Mark.shapeToPdfAnnotationType(shape));
+    //     }
+    //   }
+    //   if (changed) {
+    //     commentsStore.updateComment(comment);
+    //   }
+    // }
 
   } else if (Mark.FREE_SHAPES.includes(selectedShape.value)) {
     pdfjs.enableFreeFormHighlight(true);
