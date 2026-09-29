@@ -68,6 +68,12 @@ class Mark {
         return Mark.SHAPE_TEXT_WAVE;
       case 'vline':
         return Mark.SHAPE_TEXT_VLINE;
+      case 'freeform-line':
+        return Mark.SHAPE_FREE_LINE;
+      case 'freeform-wave':
+        return Mark.SHAPE_FREE_WAVE;
+      case 'freeform-circle':
+        return Mark.SHAPE_FREE_CIRCLE;
     }
     return '';
   }
@@ -82,19 +88,12 @@ class Mark {
         return 'wave';
       case Mark.SHAPE_TEXT_VLINE:
         return 'vline';
-    }
-    return 'marker';
-  }
-
-  static shapeFromPdfFreeFormType(type) {
-    switch(type) {
-      case 'line':
-        return Mark.SHAPE_FREE_LINE;
-      case 'circle':
-        return Mark.SHAPE_FREE_CIRCLE;
-      case 'wave':
-        return Mark.SHAPE_FREE_WAVE;
-
+      case Mark.SHAPE_FREE_LINE:
+        return 'freeform-line';
+      case Mark.SHAPE_FREE_WAVE:
+        return 'freeform-wave';
+      case Mark.SHAPE_FREE_CIRCLE:
+        return 'freeform-circle';
     }
     return '';
   }

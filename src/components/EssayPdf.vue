@@ -62,7 +62,7 @@ watch(() => commentsStore.deletionChange, handleDeleted);
 
 function selectShape(shape = null) {
 
-  if (shape) {
+  if (shape !== null) {
     selectedShape.value = shape;
     if (preferencesStore.default_shape !== selectedShape.value) {
       preferencesStore.default_shape = selectedShape.value;
@@ -70,25 +70,29 @@ function selectShape(shape = null) {
     }
   }
 
-  if (Mark.TEXT_SHAPES.includes(selectedShape.value)) {
+  if (selectedShape.value == '') {
+    pdfjs.enableFreeFormHighlight(false);
+    pdfjs.enableTextHighlight(false);
+
+  } else if (Mark.TEXT_SHAPES.includes(selectedShape.value)) {
     pdfjs.enableFreeFormHighlight(false);
     pdfjs.enableTextHighlight(true);
     pdfjs.setDrawMode(Mark.shapeToPdfAnnotationType(selectedShape.value));
 
-    // const comment = commentsStore.selectedComment;
-    // if (comment && comment.correction_key == correctionsStore.ownKey && !summariesStore.isOwnDisabled) {
-    //   let changed = false;
-    //   for (const mark of comment.marks) {
-    //     if (mark.shape !== shape && Mark.TEXT_SHAPES.includes(mark.shape)) {
-    //       mark.shape = shape;
-    //       changed = true;
-    //       pdfjs.setType(mark.key, Mark.shapeToPdfAnnotationType(shape));
-    //     }
-    //   }
-    //   if (changed) {
-    //     commentsStore.updateComment(comment);
-    //   }
-    // }
+    const comment = commentsStore.selectedComment;
+    if (comment && comment.correction_key == correctionsStore.ownKey && !summariesStore.isOwnDisabled) {
+      let changed = false;
+      for (const mark of comment.marks) {
+        if (mark.shape !== shape && Mark.TEXT_SHAPES.includes(mark.shape)) {
+          mark.shape = shape;
+          changed = true;
+          pdfjs.setType(mark.key, Mark.shapeToPdfAnnotationType(shape));
+        }
+      }
+      if (changed) {
+        commentsStore.updateComment(comment);
+      }
+    }
 
   } else if (Mark.FREE_SHAPES.includes(selectedShape.value)) {
     pdfjs.enableFreeFormHighlight(true);
@@ -211,24 +215,6 @@ function updateMark(event) {
   }
 }
 
-function shapeFromType(type) {
-  switch(type) {
-  case 'marker':
-    return Mark.SHAPE_TEXT_MARKER;
-    break;
-  case 'underline':
-    return Mark.SHAPE_TEXT_UNDERLINE;
-    break;
-  case 'wave':
-    return Mark.SHAPE_TEXT_WAVE;
-    break;
-  case 'vline':
-    return Mark.SHAPE_TEXT_VLINE;
-    break;
-  }
-}
-
-
 function deleteMark(event) {
   const comment = commentsStore.getCommentByMarkKey(event.detail.id);
   if (comment) {
@@ -333,29 +319,39 @@ async function download()
   <div class ="appEssayWrapper">
     <div class="appTextButtons">
 
-      <v-btn-toggle v-if="stores.settings().Task.enable_comments" density="comfortable" variant="outlined" divided v-model="selectedShape">
-        <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-marker" :value="Mark.SHAPE_TEXT_MARKER" @click="selectShape(Mark.SHAPE_TEXT_MARKER)"></v-btn>
-        <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-format-underline" :value="Mark.SHAPE_TEXT_UNDERLINE" @click="selectShape(Mark.SHAPE_TEXT_UNDERLINE)"></v-btn>
-        <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-format-underline-wavy" :value="Mark.SHAPE_TEXT_WAVE" @click="selectShape(Mark.SHAPE_TEXT_WAVE)"></v-btn>
-        <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-align-horizontal-left" :value="Mark.SHAPE_TEXT_VLINE" @click="selectShape(Mark.SHAPE_TEXT_VLINE)"></v-btn>
-      </v-btn-toggle>
+      <div class="appTextButtonsGroup">
+        <label class="appTextButtonsLabel" for="appTextShapesToggle">{{ $t('essayPdfTextSelect') }}</label>
+        <v-btn-toggle id="appTextSelection" density="comfortable" variant="outlined" divided v-model="selectedShape">
+          <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-cursor-text" value="" @click="selectShape('')"></v-btn>
+        </v-btn-toggle>
+      </div>
 
-      &nbsp;
+      <div class="appTextButtonsGroup">
+        <label class="appTextButtonsLabel" for="appTextShapesToggle">{{ $t('essayPdfTextShapes') }}</label>
+        <v-btn-toggle id="appTextShapesToggle" v-if="stores.settings().Task.enable_comments" density="comfortable" variant="outlined" divided v-model="selectedShape">
+          <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-marker" :value="Mark.SHAPE_TEXT_MARKER" @click="selectShape(Mark.SHAPE_TEXT_MARKER)"></v-btn>
+          <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-format-underline" :value="Mark.SHAPE_TEXT_UNDERLINE" @click="selectShape(Mark.SHAPE_TEXT_UNDERLINE)"></v-btn>
+          <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-format-underline-wavy" :value="Mark.SHAPE_TEXT_WAVE" @click="selectShape(Mark.SHAPE_TEXT_WAVE)"></v-btn>
+          <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-align-horizontal-left" :value="Mark.SHAPE_TEXT_VLINE" @click="selectShape(Mark.SHAPE_TEXT_VLINE)"></v-btn>
+        </v-btn-toggle>
+      </div>
 
-      <v-btn-toggle v-if="stores.settings().Task.enable_comments" density="comfortable" variant="outlined" divided v-model="selectedShape">
-        <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-minus" :value="Mark.SHAPE_FREE_LINE" @click="selectShape(Mark.SHAPE_FREE_LINE)"></v-btn>
-        <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-wave" :value="Mark.SHAPE_FREE_WAVE" @click="selectShape(Mark.SHAPE_FREE_WAVE)"></v-btn>
-        <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-circle-outline" :value="Mark.SHAPE_FREE_CIRCLE" @click="selectShape(Mark.SHAPE_FREE_CIRCLE)"></v-btn>
-      </v-btn-toggle>
+      <div class="appTextButtonsGroup">
+        <label class="appTextButtonsLabel" for="appFreeShapesToggle">{{ $t('essayPdfFreeShapes') }}</label>
+        <v-btn-toggle id="appFreeShapesToggle" v-if="stores.settings().Task.enable_comments" density="comfortable" variant="outlined" divided v-model="selectedShape">
+          <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-minus" :value="Mark.SHAPE_FREE_LINE" @click="selectShape(Mark.SHAPE_FREE_LINE)"></v-btn>
+          <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-wave" :value="Mark.SHAPE_FREE_WAVE" @click="selectShape(Mark.SHAPE_FREE_WAVE)"></v-btn>
+          <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-circle-outline" :value="Mark.SHAPE_FREE_CIRCLE" @click="selectShape(Mark.SHAPE_FREE_CIRCLE)"></v-btn>
+        </v-btn-toggle>
+      </div>
 
-      &nbsp;
-
-      <v-btn-group v-if="stores.settings().Task.enable_comments" density="comfortable" variant="outlined" divided>
-        <v-btn size="small" :active="!!showLabels" icon="mdi-label-outline" @click="toggleLabels"></v-btn>
-        <v-btn size="small" :active="!!selectWords" @click="toggleWords">{{ $t('essayPdfSelectWords') }}</v-btn>
-      </v-btn-group>
-
-      &nbsp;
+      <div class="appTextButtonsGroup">
+        <label class="appTextButtonsLabel" for="appFreeShapesToggle">{{ $t('essayPdfOptions') }}</label>
+        <v-btn-group v-if="stores.settings().Task.enable_comments" density="comfortable" variant="outlined" divided>
+          <v-btn size="small" :active="!!showLabels" icon="mdi-label-outline" @click="toggleLabels"></v-btn>
+          <v-btn size="small" :active="!!selectWords" @click="toggleWords">{{ $t('essayPdfSelectWords') }}</v-btn>
+        </v-btn-group>
+      </div>
 
       <!-- <v-btn variant="text" prepend-icon="mdi-download" @click="download">Download</v-btn> -->
 
@@ -370,13 +366,27 @@ async function download()
   height: 100%;
   display: flex;
   flex-direction: column;
+  margin-top: -10px;
 }
 
 .appTextButtons {
-  text-align: center;
   padding-bottom: 5px;
-  height: 50px;
+  height: 70px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
 }
+
+.appTextButtonsGroup {
+  padding: 0 10px 0 10px;
+  margin: 0;
+}
+
+.appTextButtonsLabel {
+  display:block;
+  font-size: 12px;
+}
+
 
 .appEssayNode {
   flex-grow: 1;

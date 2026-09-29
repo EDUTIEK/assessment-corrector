@@ -19,7 +19,7 @@ export const usePreferencesStore = defineStore('preferences', {
       essay_page_zoom: 0.25,                              // zoom of a pdf page display
       essay_text_zoom: 1,                                 // zoom of an essay text display
       summary_text_zoom: 1,                               // zoom in the editor of the correction summary
-      default_shape: Mark.SHAPE_TEXT_MARKER,              // default shape for new pdf annotations
+      default_shape: '',                                  // default shape for new pdf annotations
       display_labels: false,                              // show marking labels in the essay
       select_words: true,                                 // do pdf text selection by words
 
