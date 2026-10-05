@@ -352,7 +352,7 @@ async function download(marked)
         <v-btn-toggle id="appFreeShapesToggle" density="comfortable" variant="outlined" divided v-model="selectedShape">
           <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-minus" :value="Mark.SHAPE_FREE_LINE" @click="selectShape(Mark.SHAPE_FREE_LINE)"></v-btn>
           <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-wave" :value="Mark.SHAPE_FREE_WAVE" @click="selectShape(Mark.SHAPE_FREE_WAVE)"></v-btn>
-          <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-circle-outline" :value="Mark.SHAPE_FREE_CIRCLE" @click="selectShape(Mark.SHAPE_FREE_CIRCLE)"></v-btn>
+          <!-- <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-circle-outline" :value="Mark.SHAPE_FREE_CIRCLE" @click="selectShape(Mark.SHAPE_FREE_CIRCLE)"></v-btn>-->
         </v-btn-toggle>
       </div>
 
