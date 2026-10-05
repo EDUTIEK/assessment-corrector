@@ -294,7 +294,7 @@ function handleDeleted()
   }
 }
 
-async function download()
+async function downloadMarkedWriting()
 {
   const blob = await essayStore.buildMarkedPdf('all');
   const url = URL.createObjectURL(blob);
@@ -305,9 +305,20 @@ async function download()
 
   document.body.appendChild(a); // required in Firefox
   a.click();
-
   document.body.removeChild(a);
+
   URL.revokeObjectURL(url); // free memory
+}
+
+async function downloadPureWriting()
+{
+  const a = document.createElement('a');
+  a.href = essayStore.url;
+  a.download = 'writing.pdf';
+
+  document.body.appendChild(a); // required in Firefox
+  a.click();
+  document.body.removeChild(a);
 }
 
 </script>
@@ -323,9 +334,9 @@ async function download()
         </v-btn-toggle>
       </div>
 
-      <div class="appTextButtonsGroup">
+      <div class="appTextButtonsGroup" v-if="stores.settings().Task.enable_comments">
         <label class="appTextButtonsLabel" for="appTextShapesToggle">{{ $t('essayPdfTextShapes') }}</label>
-        <v-btn-toggle id="appTextShapesToggle" v-if="stores.settings().Task.enable_comments" density="comfortable" variant="outlined" divided v-model="selectedShape">
+        <v-btn-toggle id="appTextShapesToggle" density="comfortable" variant="outlined" divided v-model="selectedShape">
           <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-marker" :value="Mark.SHAPE_TEXT_MARKER" @click="selectShape(Mark.SHAPE_TEXT_MARKER)"></v-btn>
           <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-format-underline" :value="Mark.SHAPE_TEXT_UNDERLINE" @click="selectShape(Mark.SHAPE_TEXT_UNDERLINE)"></v-btn>
           <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-format-underline-wavy" :value="Mark.SHAPE_TEXT_WAVE" @click="selectShape(Mark.SHAPE_TEXT_WAVE)"></v-btn>
@@ -333,24 +344,30 @@ async function download()
         </v-btn-toggle>
       </div>
 
-      <div class="appTextButtonsGroup">
+      <div class="appTextButtonsGroup" v-if="stores.settings().Task.enable_comments" >
         <label class="appTextButtonsLabel" for="appFreeShapesToggle">{{ $t('essayPdfFreeShapes') }}</label>
-        <v-btn-toggle id="appFreeShapesToggle" v-if="stores.settings().Task.enable_comments" density="comfortable" variant="outlined" divided v-model="selectedShape">
+        <v-btn-toggle id="appFreeShapesToggle" density="comfortable" variant="outlined" divided v-model="selectedShape">
           <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-minus" :value="Mark.SHAPE_FREE_LINE" @click="selectShape(Mark.SHAPE_FREE_LINE)"></v-btn>
           <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-wave" :value="Mark.SHAPE_FREE_WAVE" @click="selectShape(Mark.SHAPE_FREE_WAVE)"></v-btn>
           <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-circle-outline" :value="Mark.SHAPE_FREE_CIRCLE" @click="selectShape(Mark.SHAPE_FREE_CIRCLE)"></v-btn>
         </v-btn-toggle>
       </div>
 
-      <div class="appTextButtonsGroup">
+      <div class="appTextButtonsGroup" v-if="stores.settings().Task.enable_comments">
         <label class="appTextButtonsLabel" for="appFreeShapesToggle">{{ $t('essayPdfOptions') }}</label>
-        <v-btn-group v-if="stores.settings().Task.enable_comments" density="comfortable" variant="outlined" divided>
+        <v-btn-group density="comfortable" variant="outlined" divided>
           <v-btn size="small" :active="!!showLabels" icon="mdi-label-outline" @click="toggleLabels"></v-btn>
           <v-btn size="small" :active="!!selectWords" @click="toggleWords">{{ $t('essayPdfSelectWords') }}</v-btn>
         </v-btn-group>
       </div>
 
-      <!-- <v-btn variant="text" prepend-icon="mdi-download" @click="download">Download</v-btn> -->
+      <div class="appTextButtonsGroup" v-if="stores.settings().Assessment.download_writing || stores.settings().Assessment.download_correction">
+        <label class="appTextButtonsLabel" for="appDownloads">{{ $t('essayPdfDownload') }}</label>
+        <v-btn-group density="comfortable" variant="outlined" divided>
+          <v-btn size="small" v-if="stores.settings().Assessment.download_writing" @click="downloadPureWriting">{{ $t('essayPdfPureWriting') }}</v-btn>
+          <v-btn size="small" v-if="stores.settings().Assessment.download_correction" @click="downloadMarkedWriting">{{ $t('essayPdfMarkedWriting') }}</v-btn>
+        </v-btn-group>
+      </div>
 
     </div>
     <div class="appEssayNode" tabindex="0" ref="EssayNode"></div>
