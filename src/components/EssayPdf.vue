@@ -49,15 +49,13 @@ onMounted(() => {
   pdfjs.on('delete', deleteMark);
   pdfjs.on('select', selectMark);
   pdfjs.on('pageChanged', pageChanged);
-  pdfjs.on('focus-end', focusEnd);
+  // pdfjs.on('focus-end', focusEnd);
   handleFocusChange();
 });
 
 watch(() => layoutStore.focusChange, handleFocusChange);
-watch(() => commentsStore.markerChange, loadMarks);
-watch(() => commentsStore.filterChange, loadMarks);
 watch(() => commentsStore.showOtherCorrections, loadMarks);
-watch(() => commentsStore.selectionChange, refreshSelection);
+watch(() => commentsStore.selectionChange, refreshMarks);
 watch(() => commentsStore.deletionChange, handleDeleted);
 
 function selectShape(shape = null) {
@@ -155,7 +153,7 @@ function toggleLabels() {
     preferencesStore.display_labels = showLabels.value;
     preferencesStore.update();
   }
-  loadMarks();
+  refreshMarks();
 }
 
 function toggleWords() {
@@ -171,8 +169,6 @@ async function createMark(event) {
   markCreated = Date.now();
 
   const annotation = event.detail;
-  console.log('created mark', event.detail);
-
   const data = {
     key: annotation.id,
     shape: Mark.shapeFromPdfAnnotationType(annotation.type),
@@ -212,14 +208,18 @@ function updateMark(event) {
     if (JSON.stringify(oldData) != JSON.stringify(newData)) {
       commentsStore.updateComment(comment, false);
     }
+    if (comment.key === commentsStore.selectedKey && Date.now() - markCreated > 200) {
+      reclaimCommentFocus();
+    }
   }
 }
 
-function deleteMark(event) {
+async function deleteMark(event) {
   const comment = commentsStore.getCommentByMarkKey(event.detail.id);
   if (comment) {
-    commentsStore.deleteComment(comment.key);
+    await commentsStore.deleteComment(comment.key);
   }
+  refreshMarks();
 }
 
 function selectMark(event) {
@@ -229,9 +229,7 @@ function selectMark(event) {
       commentsStore.selectComment(comment.key);
       return;
     }
-  }
-
-  if (Date.now() - markCreated > 200) {
+  } else if (Date.now() - markCreated > 200) {
     commentsStore.selectComment('');
   }
 }
@@ -245,8 +243,10 @@ function pageChanged(event) {
 }
 
 /**
- * annotate-pdf fires focus-end after PDF.js finishes restoring focus in moveEditorInDOM
+ * annotate-pdf fires focus-end for the creation of a new comment
+ * after PDF.js finishes restoring focus in moveEditorInDOM
  * That is the reliable point to take focus back for the comment textarea
+ * @deprecated
  */
 function focusEnd(event) {
   if (!event?.detail?.id || !commentsStore.selectedKey) {
@@ -258,7 +258,7 @@ function focusEnd(event) {
   }
 }
 
-async function refreshSelection() {
+async function refreshMarks() {
   const configStore = stores.config();
   const selectedKey = commentsStore.selectedKey;
   const selectIds = [];
@@ -267,14 +267,11 @@ async function refreshSelection() {
       pdfjs.setColor(mark.key, configStore.getCommentColor(
           comment.correction_position, comment.key == selectedKey, mark.isFilled()),
       );
+      pdfjs.setLabel(mark.key,
+          (showLabels.value || comment.key == selectedKey) ? comment.label:  ''
+      );
       if (comment.key == selectedKey) {
         selectIds.push(mark.key);
-        if (showLabels.value == 0) {
-          pdfjs.setLabel(mark.key, comment.label);
-        }
-      }
-      else if (showLabels.value == 0) {
-        pdfjs.setLabel(mark.key, '');
       }
     }
   }
