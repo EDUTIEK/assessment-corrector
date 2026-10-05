@@ -8,6 +8,8 @@ import createPDFJsApi from 'annotate-pdf/pdfjs-api';
 import {nextTick, onMounted, ref, watch} from 'vue';
 import Comment from "@/data/Comment";
 import Mark from "@/data/Mark";
+import axios from 'axios';
+import i18n from "@/plugins/i18n";
 
 const essayStore = stores.essay();
 const correctionsStore = stores.corrections();
@@ -15,6 +17,8 @@ const commentsStore = stores.comments();
 const layoutStore = stores.layout();
 const summariesStore = stores.summaries();
 const preferencesStore = stores.preferences();
+
+const { t } = i18n.global;
 
 const EssayNode = ref();
 
@@ -294,31 +298,30 @@ function handleDeleted()
   }
 }
 
-async function downloadMarkedWriting()
+async function download(marked)
 {
-  const blob = await essayStore.buildMarkedPdf('all');
-  const url = URL.createObjectURL(blob);
+  let blob;
+  let title;
 
+  if (marked) {
+    blob = await essayStore.buildMarkedPdf('all');
+    title = stores.api().getDownloadTitle(t('essayPdfMarkedWriting'));
+  } else {
+    const response = await fetch(essayStore.url);
+    blob = await response.blob();
+    title = stores.api().getDownloadTitle(t('essayPdfPureWriting'));
+  }
+
+  const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'correction.pdf';
+  a.download = title
 
   document.body.appendChild(a); // required in Firefox
   a.click();
   document.body.removeChild(a);
 
   URL.revokeObjectURL(url); // free memory
-}
-
-async function downloadPureWriting()
-{
-  const a = document.createElement('a');
-  a.href = essayStore.url;
-  a.download = 'writing.pdf';
-
-  document.body.appendChild(a); // required in Firefox
-  a.click();
-  document.body.removeChild(a);
 }
 
 </script>
@@ -364,8 +367,8 @@ async function downloadPureWriting()
       <div class="appTextButtonsGroup" v-if="stores.settings().Assessment.download_writing || stores.settings().Assessment.download_correction">
         <label class="appTextButtonsLabel" for="appDownloads">{{ $t('essayPdfDownload') }}</label>
         <v-btn-group density="comfortable" variant="outlined" divided>
-          <v-btn size="small" v-if="stores.settings().Assessment.download_writing" @click="downloadPureWriting">{{ $t('essayPdfPureWriting') }}</v-btn>
-          <v-btn size="small" v-if="stores.settings().Assessment.download_correction" @click="downloadMarkedWriting">{{ $t('essayPdfMarkedWriting') }}</v-btn>
+          <v-btn size="small" v-if="stores.settings().Assessment.download_writing" @click="download(false)">{{ $t('essayPdfPureWriting') }}</v-btn>
+          <v-btn size="small" v-if="stores.settings().Assessment.download_correction" @click="download(true)">{{ $t('essayPdfMarkedWriting') }}</v-btn>
         </v-btn-group>
       </div>
 

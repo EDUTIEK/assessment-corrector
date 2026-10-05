@@ -189,6 +189,27 @@ export const useApiStore = defineStore('api', {
       }
       return fn;
     },
+
+    getDownloadTitle(state) {
+
+      /**
+       * Get a full title for downloading files
+       * @param {string} title
+       * @returns {string}
+       */
+      const fn = function (title) {
+        let elements = [];
+        elements.push(stores.settings().Assessment.title ?? '');
+        if (stores.tasks().countTasks > 1) {
+          elements.push(stores.tasks().currentTitle ?? '');
+        }
+        elements.push(stores.items().currentItem.pseudonym ?? '');
+        elements.push(title);
+
+        return elements.filter(el => el !== '').join(' - ');
+      }
+      return fn;
+    },
   },
 
   actions: {

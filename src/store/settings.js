@@ -17,6 +17,7 @@ export const useSettingsStore = defineStore('settings', {
   state: () => {
     return {
       Assessment: {
+        title: '',                      // assessment title
         multiple_correctors: false,     // has a submission multiple corrections
         mutual_visibility: false,       // correction sees other corrections
         procedure_when_distance: false, // should a revision procedure follow when points differ
