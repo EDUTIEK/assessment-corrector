@@ -54,6 +54,8 @@ onMounted(() => {
   pdfjs.on('select', selectMark);
   pdfjs.on('pageChanged', pageChanged);
   // pdfjs.on('focus-end', focusEnd);
+
+  suppressPdfViewerLetterShortcuts(EssayNode.value);
   handleFocusChange();
 });
 
@@ -130,6 +132,39 @@ async function loadMarks() {
   await pdfjs.setAll(all);
   // setAll may leave focus in the iframe without firing focus-end (noFocus add path)
   reclaimCommentFocus();
+}
+
+/**
+ * pdfjs binds unmodified letters on the viewer window (r rotates, j/k turn pages, …).
+ * Stop those in the capture phase so they never reach that handler.
+ * Ctrl, Alt and Meta stay intact, as do letters typed into viewer text fields.
+ */
+function suppressPdfViewerLetterShortcuts(container) {
+  const frame = container?.querySelector('iframe');
+  if (!frame) {
+    return;
+  }
+  frame.addEventListener('load', () => {
+    frame.contentWindow?.addEventListener('keydown', blockPlainLetterShortcut, true);
+  });
+}
+
+function blockPlainLetterShortcut(event) {
+  if (event.ctrlKey || event.altKey || event.metaKey || event.isComposing) {
+    return;
+  }
+  if (!/^[a-z]$/i.test(event.key)) {
+    return;
+  }
+  const el = event.target instanceof Element ? event.target : event.target?.parentElement;
+  if (el?.closest('input, textarea, select')
+      || el?.isContentEditable
+      || el.classList.contains('toolbarHorizontalGroup')
+  ) {
+    return;
+  }
+  event.preventDefault();
+  event.stopPropagation();
 }
 
 /**
@@ -283,7 +318,6 @@ async function refreshMarks() {
     for (const id of selectIds) {
       await pdfjs.select(id);
     }
-    // Immediate reclaim if select left focus in the PDF; delayed steals use focus-end
     reclaimCommentFocus();
   }
 }
