@@ -195,15 +195,20 @@ export const useApiStore = defineStore('api', {
       /**
        * Get a full title for downloading files
        * @param {string} title
+       * @param {boolean} with_details
        * @returns {string}
        */
-      const fn = function (title) {
+      const fn = function (title, with_details = true) {
         let elements = [];
         elements.push(stores.settings().Assessment.title ?? '');
-        if (stores.tasks().countTasks > 1) {
-          elements.push(stores.tasks().currentTitle ?? '');
+
+        if (with_details) {
+          if (stores.tasks().countTasks > 1) {
+            elements.push(stores.tasks().currentTitle ?? '');
+          }
+          elements.push(stores.items().currentItem.pseudonym ?? '');
         }
-        elements.push(stores.items().currentItem.pseudonym ?? '');
+
         elements.push(title);
 
         return elements.filter(el => el !== '').join(' - ');

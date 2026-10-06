@@ -114,6 +114,25 @@ function rowFocusout(event) {
   }
 }
 
+async function download()
+{
+  const response = await fetch(stores.api().getSnippetsUrl(snippetsStore.list_purpose));
+  const blob = await response.blob();
+  const title = stores.api().getDownloadTitle(t('snippetsExportFile'), false);
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = title
+
+  document.body.appendChild(a); // required in Firefox
+  a.click();
+  document.body.removeChild(a);
+
+  URL.revokeObjectURL(url); // free memory
+}
+
+
 </script>
 
 <template>
@@ -140,13 +159,7 @@ function rowFocusout(event) {
       &nbsp;
       <v-btn id="appSnippetListSort" size="small" prepend-icon="mdi-sort" @click="sort()">{{ t('snippetsSort') }}</v-btn>
       &nbsp;
-      <v-btn
-          :href="apiStore.getSnippetsUrl(snippetsStore.list_purpose)"
-          size="small"
-          prepend-icon="mdi-download"
-      >
-        {{ t('snippetsExport') }}
-      </v-btn>
+      <v-btn size="small" prepend-icon="mdi-download" @click="download()">{{ t('snippetsExport') }}</v-btn>
       &nbsp;
       <snippets-import></snippets-import>
 

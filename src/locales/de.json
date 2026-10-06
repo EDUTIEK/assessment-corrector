@@ -281,6 +281,7 @@
     "snippetsForComment": "Für Anmerkungen",
     "snippetsForSummary": "Für Gutachten",
     "snippetsExport": "Exportieren",
+    "snippetsExportFile": "Textbausteine.xlsx",
     "snippetsImport": "Importieren",
     "snippetsImportTitle": "Textbausteine importieren",
     "snippetsImportDescription": "Bitte wählen Sie eine Excel-Datei zum Import. Das erste Tabellenblatt muss zwei Spalten mit den Überschriften 'text' und 'shortcut' in der ersten Zeile haben. Die folgenden Zeilen enthalten darunter die Textbausteine und ihre Kurzeingaben.",
