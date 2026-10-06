@@ -342,7 +342,7 @@ export default class Comment {
           label: this.label,
           altText: this.getAltText(),
           intern: JSON.parse(mark.internal),
-          color: stores.config().getCommentColor(this.correction_position, false, false)
+          color: stores.config().getCommentColor(this.correction_position, false, mark.isFilled())
         });
       }
     }
