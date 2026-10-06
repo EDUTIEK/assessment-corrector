@@ -87,15 +87,37 @@ function deleteFile() {
   showDelete.value = false;
 }
 
+async function downloadFile()
+{
+  const response = await fetch(stores.api().getSummaryPdfUrl(summariesStore.editSummary));
+  const blob = await response.blob();
+  const title = stores.api().getDownloadTitle(t('ownSummaryExportFile'));
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = title
+
+  document.body.appendChild(a); // required in Firefox
+  a.click();
+  document.body.removeChild(a);
+
+  URL.revokeObjectURL(url); // free memory
+}
+
 </script>
 
 <template>
   <span id="app-own-summary-upload-wrapper">
-    <v-btn class="headline-button" size="small" v-if="!summariesStore.editSummary.pdf" flat @click="openUpload">
+    <v-btn class="headline-button" size="small" v-if="!summariesStore.isOwnDisabled && !summariesStore.editSummary.pdf" flat @click="openUpload">
       <v-icon left icon="mdi-upload"></v-icon>
       <span>{{ $t('allUpload') + '...' }}</span>
     </v-btn>
-    <v-btn class="headline-button" size="small" v-if="summariesStore.editSummary.pdf" flat @click="showDelete = true">
+    <v-btn class="headline-button" size="small" v-if="summariesStore.editSummary.pdf" flat @click="downloadFile">
+      <v-icon left icon="mdi-download"></v-icon>
+      <span>{{ $t('allDownload') }}</span>
+    </v-btn>
+    <v-btn class="headline-button" size="small" v-if="!summariesStore.isOwnDisabled && summariesStore.editSummary.pdf" flat @click="showDelete = true">
       <v-icon left icon="mdi-delete-outline"></v-icon>
       <span>{{ $t('allDelete') + '...' }}</span>
     </v-btn>
