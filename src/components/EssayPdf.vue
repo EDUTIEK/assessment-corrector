@@ -64,24 +64,22 @@ watch(() => commentsStore.showOtherCorrections, loadMarks);
 watch(() => commentsStore.selectionChange, refreshMarks);
 watch(() => commentsStore.deletionChange, handleDeleted);
 
-function selectShape(shape = null) {
+/**
+ * Select the drawing shape
+ * An empty shape means selection for copy
+ */
+function selectShape(shape) {
 
-  if (shape !== null) {
-    selectedShape.value = shape;
-    if (preferencesStore.default_shape !== selectedShape.value) {
-      preferencesStore.default_shape = selectedShape.value;
-      preferencesStore.update();
-    }
+  selectedShape.value = shape;
+  if (shape?.length && preferencesStore.default_shape !== selectedShape.value) {
+    preferencesStore.default_shape = selectedShape.value;
+    preferencesStore.update();
   }
 
-  if (selectedShape.value == '') {
-    pdfjs.enableFreeFormHighlight(false);
-    pdfjs.enableTextHighlight(false);
-
-  } else if (Mark.TEXT_SHAPES.includes(selectedShape.value)) {
+   if (Mark.TEXT_SHAPES.includes(shape)) {
     pdfjs.enableFreeFormHighlight(false);
     pdfjs.enableTextHighlight(true);
-    pdfjs.setDrawMode(Mark.shapeToPdfAnnotationType(selectedShape.value));
+    pdfjs.setDrawMode(Mark.shapeToPdfAnnotationType(shape));
 
     const comment = commentsStore.selectedComment;
     if (comment && comment.correction_key == correctionsStore.ownKey && !summariesStore.isOwnDisabled) {
@@ -98,7 +96,7 @@ function selectShape(shape = null) {
       }
     }
 
-  } else if (Mark.FREE_SHAPES.includes(selectedShape.value)) {
+  } else if (Mark.FREE_SHAPES.includes(shape)) {
     pdfjs.enableFreeFormHighlight(true);
     pdfjs.enableTextHighlight(false);
     pdfjs.setDefaultFreeFormType(Mark.shapeToPdfFreeFormType(selectedShape.value));
@@ -339,11 +337,16 @@ async function download(marked)
 
   if (marked) {
     blob = await essayStore.buildMarkedPdf('all');
-    title = stores.api().getDownloadTitle(t('essayPdfMarkedWriting'));
+    if (stores.items().isFinal) {
+      title = stores.api().getDownloadTitle(t('essayPdfMarkedWritingFile'));
+    } else {
+      title = stores.api().getDownloadTitle(t('essayPdfMarkedWritingDraft'));
+    }
+
   } else {
     const response = await fetch(essayStore.url);
     blob = await response.blob();
-    title = stores.api().getDownloadTitle(t('essayPdfPureWriting'));
+    title = stores.api().getDownloadTitle(t('essayPdfPureWritingFile'));
   }
 
   const url = URL.createObjectURL(blob);
@@ -365,9 +368,9 @@ async function download(marked)
     <div class="appTextButtons">
 
       <div class="appTextButtonsGroup">
-        <label class="appTextButtonsLabel" for="appTextShapesToggle">{{ $t('essayPdfTextSelect') }}</label>
+        <label class="appTextButtonsLabel" for="appTextShapesToggle">{{ $t('essayPdfTextCopy') }}</label>
         <v-btn-toggle id="appTextSelection" density="comfortable" variant="outlined" divided v-model="selectedShape">
-          <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-cursor-text" value="" @click="selectShape('')"></v-btn>
+          <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-content-copy" value="" @click="selectShape('')"></v-btn>
         </v-btn-toggle>
       </div>
 
