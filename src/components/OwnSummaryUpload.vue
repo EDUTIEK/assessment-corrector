@@ -2,11 +2,13 @@
 import {ref} from 'vue';
 import i18n from "@/plugins/i18n";
 import {stores} from "@/store";
+import Item from "@/data/Item"
+
+const props = defineProps(['summary', 'upload', 'download']);
 
 const { t } = i18n.global;
 
 const apiStore = stores.api();
-const summariesStore = stores.summaries();
 const settingsStore = stores.settings();
 const layoutStore = stores.layout();
 
@@ -46,27 +48,27 @@ function updateProgress(progressEvent) {
 
 async function uploadFile() {
   if (!selectedFile.value) {
-    message.value = 'Bitte wählen Sie eine Datei';
+    message.value = t('ownSummaryUploadSelect');
     isSuccess.value = false;
     return;
   }
 
-  const id = await apiStore.sendSummaryPdf(summariesStore.editSummary, selectedFile.value, updateProgress);
+  const id = await apiStore.sendSummaryPdf(props.summary, selectedFile.value, updateProgress);
   if (id) {
-    summariesStore.editSummary.pdf = id;
-    summariesStore.editSummary.text = '';
+    props.summary.pdf = id;
+    props.summary.text = '';
     closeUpload();
     return;
   }
 
-  message.value = 'Fehler beim Hochladen!'
+  message.value = t('ownSummaryUploadError');
   isSuccess.value = false;
   uploadPercentage.value = 0;
 }
 
 
 function openUpload() {
-  if (summariesStore.editSummary.text) {
+  if (props.summary.text) {
     showTextWarning.value = true;
   } else {
     showUpload.value = true;
@@ -83,15 +85,19 @@ function closeUpload() {
 }
 
 function deleteFile() {
-  summariesStore.editSummary.pdf = null;
+  props.summary.pdf = null;
   showDelete.value = false;
 }
 
 async function downloadFile()
 {
-  const response = await fetch(stores.api().getSummaryPdfUrl(summariesStore.editSummary));
+  const response = await fetch(stores.api().getSummaryPdfUrl(props.summary));
   const blob = await response.blob();
-  const title = stores.api().getDownloadTitle(t('ownSummaryExportFile'));
+  const title = stores.api().getDownloadTitle(
+      t('ownSummaryExportFile')
+      + ' ' + Item.buildPositionText(stores.corrections().getCorrection(props.summary.correction_key)?.position)
+      + (stores.items().isFinal ? '' : ' - ' + t('ownSummaryExportDraft'))
+  );
 
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -109,15 +115,15 @@ async function downloadFile()
 
 <template>
   <span id="app-own-summary-upload-wrapper">
-    <v-btn class="headline-button" size="small" v-if="!summariesStore.isOwnDisabled && !summariesStore.editSummary.pdf" flat @click="openUpload">
+    <v-btn class="headline-button" size="small" v-if="props.upload && !props.summary.pdf" flat @click="openUpload">
       <v-icon left icon="mdi-upload"></v-icon>
       <span>{{ $t('allUpload') + '...' }}</span>
     </v-btn>
-    <v-btn class="headline-button" size="small" v-if="summariesStore.editSummary.pdf" flat @click="downloadFile">
+    <v-btn class="headline-button" size="small" v-if="props.download && props.summary.pdf" flat @click="downloadFile">
       <v-icon left icon="mdi-download"></v-icon>
       <span>{{ $t('allDownload') }}</span>
     </v-btn>
-    <v-btn class="headline-button" size="small" v-if="!summariesStore.isOwnDisabled && summariesStore.editSummary.pdf" flat @click="showDelete = true">
+    <v-btn class="headline-button" size="small" v-if="props.upload && props.summary.pdf" flat @click="showDelete = true">
       <v-icon left icon="mdi-delete-outline"></v-icon>
       <span>{{ $t('allDelete') + '...' }}</span>
     </v-btn>
@@ -151,7 +157,7 @@ async function downloadFile()
 
           <v-file-input
               variant="outlined"
-              label="Dateiauswahl"
+              :label="$t('ownSummaryUploadSelect')"
               v-model="selectedFile"
               prepend-icon="mdi-file-check-outline"
               show-size

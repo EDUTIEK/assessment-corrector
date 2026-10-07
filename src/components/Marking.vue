@@ -113,7 +113,11 @@ function ownPositionHeaderStyle() {
           <v-col cols="6" class="ma-0 pa-0 text-right">
             <div class="header-buttons">
               <own-summary-template v-if="!summariesStore.isOwnDisabled && !summariesStore.editSummary.pdf"></own-summary-template>
-              <own-summary-upload></own-summary-upload>
+              <own-summary-upload
+                  :summary="summariesStore.editSummary"
+                  :upload="!stores.summaries().isOwnDisabled"
+                  :download="stores.settings().Assessment.download_correction"
+              ></own-summary-upload>
             </div>
           </v-col>
         </v-row>

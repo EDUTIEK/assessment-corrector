@@ -88,7 +88,11 @@ function expansionClass() {
           <v-col cols="6" class="ma-0 pa-0 text-right">
             <div class="header-buttons">
               <own-summary-template v-if="is_own && !stores.summaries().isOwnDisabled && !summary.pdf"></own-summary-template>
-              <own-summary-upload v-if="is_own"></own-summary-upload>
+              <own-summary-upload
+                  :summary="summary"
+                  :upload="is_own && !stores.summaries().isOwnDisabled"
+                  :download="stores.settings().Assessment.download_correction"
+              ></own-summary-upload>
             </div>
           </v-col>
         </v-row>
