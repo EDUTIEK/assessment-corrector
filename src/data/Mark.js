@@ -25,12 +25,14 @@ class Mark {
   static SHAPE_FREE_LINE = 'free_line';
   static SHAPE_FREE_CIRCLE = 'free_circle';
   static SHAPE_FREE_WAVE = 'free_wave';
+  static SHAPE_FREE_RECT = 'free_rect';
+  static SHAPE_FREE_DOT = 'free_dot';
 
   // These shapes can be set in setData
   static ALLOWED_SHAPES = [
     Mark.SHAPE_CIRCLE, Mark.SHAPE_RECTANGLE, Mark.SHAPE_POLYGON, Mark.SHAPE_LINE, Mark.SHAPE_WAVE,
     Mark.SHAPE_TEXT_MARKER, Mark.SHAPE_TEXT_UNDERLINE, Mark.SHAPE_TEXT_WAVE, Mark.SHAPE_TEXT_VLINE,
-    Mark.SHAPE_FREE_MARKER, Mark.SHAPE_FREE_LINE, Mark.SHAPE_FREE_CIRCLE, Mark.SHAPE_FREE_WAVE,
+    Mark.SHAPE_FREE_MARKER, Mark.SHAPE_FREE_LINE, Mark.SHAPE_FREE_WAVE, Mark.SHAPE_FREE_RECT, Mark.SHAPE_FREE_DOT, Mark.SHAPE_FREE_CIRCLE,
   ];
 
   static IMAGE_SHAPES = [
@@ -42,14 +44,14 @@ class Mark {
   ];
 
   static FREE_SHAPES = [
-    Mark.SHAPE_FREE_MARKER, Mark.SHAPE_FREE_LINE, Mark.SHAPE_FREE_CIRCLE, Mark.SHAPE_FREE_WAVE
+    Mark.SHAPE_FREE_MARKER, Mark.SHAPE_FREE_LINE, Mark.SHAPE_FREE_WAVE,  Mark.SHAPE_FREE_RECT, Mark.SHAPE_FREE_DOT, Mark.SHAPE_FREE_CIRCLE,
   ]
 
 
   // These shapes get a lighter color when not being selected
   static FILLED_SHAPED = [
     Mark.SHAPE_CIRCLE, Mark.SHAPE_RECTANGLE, Mark.SHAPE_POLYGON,
-    Mark.SHAPE_FREE_MARKER, Mark.SHAPE_FREE_CIRCLE, Mark.SHAPE_TEXT_MARKER
+    Mark.SHAPE_FREE_MARKER, Mark.SHAPE_FREE_RECT, Mark.SHAPE_FREE_CIRCLE, Mark.SHAPE_TEXT_MARKER
   ];
 
   static SYMBOL_CHECK = '✓';
@@ -72,6 +74,10 @@ class Mark {
         return Mark.SHAPE_FREE_LINE;
       case 'freeform-wave':
         return Mark.SHAPE_FREE_WAVE;
+      case 'freeform-rect':
+        return Mark.SHAPE_FREE_RECT;
+      case 'freeform-dot':
+        return Mark.SHAPE_FREE_DOT;
       case 'freeform-circle':
         return Mark.SHAPE_FREE_CIRCLE;
     }
@@ -92,6 +98,10 @@ class Mark {
         return 'freeform-line';
       case Mark.SHAPE_FREE_WAVE:
         return 'freeform-wave';
+      case Mark.SHAPE_FREE_RECT:
+        return 'freeform-rect';
+      case Mark.SHAPE_FREE_DOT:
+        return 'freeform-dot';
       case Mark.SHAPE_FREE_CIRCLE:
         return 'freeform-circle';
     }
@@ -102,10 +112,14 @@ class Mark {
     switch(shape) {
       case Mark.SHAPE_FREE_LINE:
         return 'line';
-      case Mark.SHAPE_FREE_CIRCLE:
-        return 'circle';
       case Mark.SHAPE_FREE_WAVE:
         return 'wave';
+      case Mark.SHAPE_FREE_RECT:
+        return 'rect';
+      case Mark.SHAPE_FREE_DOT:
+        return 'dot';
+      case Mark.SHAPE_FREE_CIRCLE:
+        return 'circle';
     }
     return '';
   }
@@ -323,6 +337,10 @@ class Mark {
         return 'mdi-minus';
       case Mark.SHAPE_FREE_WAVE:
         return 'mdi-wave';
+      case Mark.SHAPE_FREE_RECT:
+        return 'mdi-rectangle-outline';
+      case Mark.SHAPE_FREE_DOT:
+        return 'mdi-circle-small';
       case Mark.SHAPE_FREE_CIRCLE:
         return 'mdi-circle-outline';
     }

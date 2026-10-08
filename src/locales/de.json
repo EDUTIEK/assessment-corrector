@@ -88,6 +88,8 @@
     "essayPdfSelectWordsInfo": "Die Textmarkierung auf ganze Worte am Anfang und Ende erweitern",
     "essayPdfShapeFreeLineInfo": "Frei positionierte gerade Linie zeichnen",
     "essayPdfShapeFreeWaveInfo": "Frei positionierte Wellenlinie zeichnen",
+    "essayPdfShapeFreeRectInfo": "Frei positioniertes Rechteck zeichnen",
+    "essayPdfShapeFreeDotInfo": "Frei positioniertes Symbol setzen",
     "essayPdfShapeFreeCircleInfo": "Frei positionierten Kreis zeichnen",
     "essayPdfShapeTextMarkerInfo": "Text für Anmerkung farbig hinterlegen",
     "essayPdfShapeTextUnderlineInfo": "Text für Anmerkung gerade unterstreichen",

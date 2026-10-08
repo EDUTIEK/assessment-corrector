@@ -417,6 +417,16 @@ async function download(marked)
               <v-btn :disabled="summariesStore.isOwnDisabled" v-bind="props" size="small" icon="mdi-wave" :value="Mark.SHAPE_FREE_WAVE" @click="selectShape(Mark.SHAPE_FREE_WAVE)"></v-btn>
             </template>
           </v-tooltip>
+          <v-tooltip location="bottom" :text ="$t('essayPdfShapeFreeRectInfo')">
+            <template v-slot:activator="{props}">
+              <v-btn :disabled="summariesStore.isOwnDisabled" v-bind="props" size="small" icon="mdi-rectangle-outline" :value="Mark.SHAPE_FREE_RECT" @click="selectShape(Mark.SHAPE_FREE_RECT)"></v-btn>
+            </template>
+          </v-tooltip>
+          <v-tooltip location="bottom" :text ="$t('essayPdfShapeFreeDotInfo')">
+            <template v-slot:activator="{props}">
+              <v-btn :disabled="summariesStore.isOwnDisabled" v-bind="props" size="small" icon="mdi-circle-small" :value="Mark.SHAPE_FREE_DOT" @click="selectShape(Mark.SHAPE_FREE_DOT)"></v-btn>
+            </template>
+          </v-tooltip>
 <!--          <v-tooltip location="bottom" :text ="$t('essayPdfShapeFreeCircleInfo')">-->
 <!--            <template v-slot:activator="{props}">-->
 <!--              <v-btn :disabled="summariesStore.isOwnDisabled" v-bind="props" size="small" icon="mdi-circle-outline" :value="Mark.SHAPE_FREE_CIRCLE" @click="selectShape(Mark.SHAPE_FREE_CIRCLE)"></v-btn>-->
