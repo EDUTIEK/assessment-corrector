@@ -396,15 +396,29 @@ async function download(marked)
       <div class="appTextButtonsGroup" v-if="stores.settings().Task.enable_comments">
         <label class="appTextButtonsLabel" for="appFreeShapesToggle">{{ $t('essayPdfOptions') }}</label>
         <v-btn-group density="comfortable" variant="outlined" divided>
-          <v-btn size="small" :active="!!showLabels" icon="mdi-label-outline" @click="toggleLabels"></v-btn>
-          <v-btn size="small" :active="!!selectWords" @click="toggleWords">{{ $t('essayPdfSelectWords') }}</v-btn>
+          <v-tooltip location="bottom" :text ="$t('essayPdfToggleLabelsInfo')">
+            <template v-slot:activator="{props}">
+              <v-btn size="small" v-bind="props" :active="!!showLabels" icon="mdi-label-outline" @click="toggleLabels"></v-btn>
+            </template>
+          </v-tooltip>
+          <v-tooltip location="bottom" :text ="$t('essayPdfSelectWordsInfo')">
+            <template v-slot:activator="{props}">
+              <v-btn size="small" v-bind="props" :active="!!selectWords" @click="toggleWords">{{ $t('essayPdfSelectWords') }}</v-btn>
+            </template>
+          </v-tooltip>
+
+
         </v-btn-group>
       </div>
 
       <div class="appTextButtonsGroup" v-if="stores.settings().Assessment.download_writing || stores.settings().Assessment.download_correction">
         <label class="appTextButtonsLabel" for="appDownloads">{{ $t('essayPdfDownload') }}</label>
         <v-btn-group density="comfortable" variant="outlined" divided>
-          <v-btn size="small" v-if="stores.settings().Assessment.download_writing" @click="download(false)">{{ $t('essayPdfPureWriting') }}</v-btn>
+          <v-tooltip v-if="stores.settings().Assessment.download_writing" location="bottom" :text ="$t('essayPdfPureWritingInfo')">
+            <template v-slot:activator="{props}">
+              <v-btn size="small" v-bind="props" @click="download(false)">{{ $t('essayPdfPureWriting') }}</v-btn>
+            </template>
+          </v-tooltip>
           <!-- <v-btn size="small" v-if="stores.settings().Assessment.download_correction" @click="download(true)">{{ $t('essayPdfMarkedWriting') }}</v-btn> -->
         </v-btn-group>
       </div>
