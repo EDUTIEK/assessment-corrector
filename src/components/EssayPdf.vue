@@ -405,7 +405,7 @@ async function download(marked)
         <label class="appTextButtonsLabel" for="appDownloads">{{ $t('essayPdfDownload') }}</label>
         <v-btn-group density="comfortable" variant="outlined" divided>
           <v-btn size="small" v-if="stores.settings().Assessment.download_writing" @click="download(false)">{{ $t('essayPdfPureWriting') }}</v-btn>
-          <v-btn size="small" v-if="stores.settings().Assessment.download_correction" @click="download(true)">{{ $t('essayPdfMarkedWriting') }}</v-btn>
+          <!-- <v-btn size="small" v-if="stores.settings().Assessment.download_correction" @click="download(true)">{{ $t('essayPdfMarkedWriting') }}</v-btn> -->
         </v-btn-group>
       </div>
 
