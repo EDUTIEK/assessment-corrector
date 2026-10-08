@@ -370,26 +370,58 @@ async function download(marked)
       <div class="appTextButtonsGroup">
         <label class="appTextButtonsLabel" for="appTextShapesToggle">{{ $t('essayPdfTextCopy') }}</label>
         <v-btn-toggle id="appTextSelection" density="comfortable" variant="outlined" divided v-model="selectedShape">
-          <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-content-copy" value="" @click="selectShape('')"></v-btn>
+          <v-tooltip location="bottom" :text ="$t('essayPdfSelectForCopyInfo')">
+            <template v-slot:activator="{props}">
+              <v-btn :disabled="summariesStore.isOwnDisabled" v-bind="props" size="small" icon="mdi-content-copy" value="" @click="selectShape('')"></v-btn>
+            </template>
+          </v-tooltip>
         </v-btn-toggle>
       </div>
 
       <div class="appTextButtonsGroup" v-if="stores.settings().Task.enable_comments">
         <label class="appTextButtonsLabel" for="appTextShapesToggle">{{ $t('essayPdfTextShapes') }}</label>
         <v-btn-toggle id="appTextShapesToggle" density="comfortable" variant="outlined" divided v-model="selectedShape">
-          <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-marker" :value="Mark.SHAPE_TEXT_MARKER" @click="selectShape(Mark.SHAPE_TEXT_MARKER)"></v-btn>
-          <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-format-underline" :value="Mark.SHAPE_TEXT_UNDERLINE" @click="selectShape(Mark.SHAPE_TEXT_UNDERLINE)"></v-btn>
-          <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-format-underline-wavy" :value="Mark.SHAPE_TEXT_WAVE" @click="selectShape(Mark.SHAPE_TEXT_WAVE)"></v-btn>
-          <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-align-horizontal-left" :value="Mark.SHAPE_TEXT_VLINE" @click="selectShape(Mark.SHAPE_TEXT_VLINE)"></v-btn>
+          <v-tooltip location="bottom" :text ="$t('essayPdfShapeTextMarkerInfo')">
+            <template v-slot:activator="{props}">
+              <v-btn :disabled="summariesStore.isOwnDisabled" v-bind="props" size="small" icon="mdi-marker" :value="Mark.SHAPE_TEXT_MARKER" @click="selectShape(Mark.SHAPE_TEXT_MARKER)"></v-btn>
+            </template>
+          </v-tooltip>
+          <v-tooltip location="bottom" :text ="$t('essayPdfShapeTextUnderlineInfo')">
+            <template v-slot:activator="{props}">
+              <v-btn :disabled="summariesStore.isOwnDisabled" v-bind="props" size="small" icon="mdi-format-underline" :value="Mark.SHAPE_TEXT_UNDERLINE" @click="selectShape(Mark.SHAPE_TEXT_UNDERLINE)"></v-btn>
+            </template>
+          </v-tooltip>
+          <v-tooltip location="bottom" :text ="$t('essayPdfShapeTextWaveInfo')">
+            <template v-slot:activator="{props}">
+              <v-btn :disabled="summariesStore.isOwnDisabled" v-bind="props" size="small" icon="mdi-format-underline-wavy" :value="Mark.SHAPE_TEXT_WAVE" @click="selectShape(Mark.SHAPE_TEXT_WAVE)"></v-btn>
+            </template>
+          </v-tooltip>
+          <v-tooltip location="bottom" :text ="$t('essayPdfShapeTextVlineInfo')">
+            <template v-slot:activator="{props}">
+              <v-btn :disabled="summariesStore.isOwnDisabled" v-bind="props" size="small" icon="mdi-align-horizontal-left" :value="Mark.SHAPE_TEXT_VLINE" @click="selectShape(Mark.SHAPE_TEXT_VLINE)"></v-btn>
+            </template>
+          </v-tooltip>
         </v-btn-toggle>
       </div>
 
       <div class="appTextButtonsGroup" v-if="stores.settings().Task.enable_comments" >
         <label class="appTextButtonsLabel" for="appFreeShapesToggle">{{ $t('essayPdfFreeShapes') }}</label>
         <v-btn-toggle id="appFreeShapesToggle" density="comfortable" variant="outlined" divided v-model="selectedShape">
-          <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-minus" :value="Mark.SHAPE_FREE_LINE" @click="selectShape(Mark.SHAPE_FREE_LINE)"></v-btn>
-          <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-wave" :value="Mark.SHAPE_FREE_WAVE" @click="selectShape(Mark.SHAPE_FREE_WAVE)"></v-btn>
-          <!-- <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-circle-outline" :value="Mark.SHAPE_FREE_CIRCLE" @click="selectShape(Mark.SHAPE_FREE_CIRCLE)"></v-btn>-->
+          <v-tooltip location="bottom" :text ="$t('essayPdfShapeFreeLineInfo')">
+            <template v-slot:activator="{props}">
+              <v-btn :disabled="summariesStore.isOwnDisabled" v-bind="props" size="small" icon="mdi-minus" :value="Mark.SHAPE_FREE_LINE" @click="selectShape(Mark.SHAPE_FREE_LINE)"></v-btn>
+            </template>
+          </v-tooltip>
+          <v-tooltip location="bottom" :text ="$t('essayPdfShapeFreeWaveInfo')">
+            <template v-slot:activator="{props}">
+              <v-btn :disabled="summariesStore.isOwnDisabled" v-bind="props" size="small" icon="mdi-wave" :value="Mark.SHAPE_FREE_WAVE" @click="selectShape(Mark.SHAPE_FREE_WAVE)"></v-btn>
+            </template>
+          </v-tooltip>
+<!--          <v-tooltip location="bottom" :text ="$t('essayPdfShapeFreeCircleInfo')">-->
+<!--            <template v-slot:activator="{props}">-->
+<!--              <v-btn :disabled="summariesStore.isOwnDisabled" v-bind="props" size="small" icon="mdi-circle-outline" :value="Mark.SHAPE_FREE_CIRCLE" @click="selectShape(Mark.SHAPE_FREE_CIRCLE)"></v-btn>-->
+<!--            </template>-->
+<!--          </v-tooltip>-->
         </v-btn-toggle>
       </div>
 
