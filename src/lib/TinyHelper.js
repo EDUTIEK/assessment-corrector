@@ -475,6 +475,11 @@ export default class TinyHelper {
                 event.preventDefault();
                 break;
 
+            case "Tab":
+                // caret is already in the cell
+                this.editor.selection.scrollIntoView();
+                break;
+
             case "Backspace":
                 break;
 
