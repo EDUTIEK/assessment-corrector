@@ -434,7 +434,7 @@ watch(() => snippetsStore.selection_open, handleSnippet);
 
 .commentInput {
   width: 100%;
-  font-family: serif;
+  font-family: sans-serif;
   font-size: 0.9rem;
   line-height: 1.4;
   padding: 2px 15px;
@@ -451,7 +451,7 @@ watch(() => snippetsStore.selection_open, handleSnippet);
 
 .commentDisplay {
   width: 100%;
-  font-family: serif;
+  font-family: sans-serif;
   font-size: 0.9rem;
   line-height: 1.4;
   padding: 2px 15px;

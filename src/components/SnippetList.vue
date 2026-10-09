@@ -278,14 +278,14 @@ async function download()
 }
 
 .snippetDisplay {
-  font-family: serif;
+  font-family: sans-serif;
   margin-top: 5px;
   padding-left: 15px;
   padding-right: 15px;
 }
 
 .snippetInput {
-  font-family: serif;
+  font-family: sans-serif;
   margin-top: 5px;
 }
 
