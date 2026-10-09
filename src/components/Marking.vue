@@ -104,7 +104,7 @@ function ownPositionHeaderStyle() {
     </div>
 
     <!-- v-if neeed to avoid simultaneous data binding with summary text  -->
-    <div v-if="markingTextShown() && !stores.summaries().isOwnDisabled" :class="expansionClass()">
+    <div v-if="markingTextShown()" :class="expansionClass()">
       <v-container class="ma-0 pa-0">
         <v-row class="ma-0" :style="ownPositionHeaderStyle()">
           <v-col cols="6" class="ma-0 pa-0">
@@ -112,19 +112,18 @@ function ownPositionHeaderStyle() {
           </v-col>
           <v-col cols="6" class="ma-0 pa-0 text-right">
             <div class="header-buttons">
-              <own-summary-template v-if="!summariesStore.isOwnDisabled"></own-summary-template>
-              <own-summary-upload v-if="!summariesStore.isOwnDisabled"></own-summary-upload>
+              <own-summary-template v-if="!summariesStore.isOwnDisabled && !summariesStore.editSummary.pdf"></own-summary-template>
+              <own-summary-upload
+                  :summary="summariesStore.editSummary"
+                  :upload="!stores.summaries().isOwnDisabled"
+                  :download="stores.settings().Assessment.download_correction"
+              ></own-summary-upload>
             </div>
           </v-col>
         </v-row>
       </v-container>
-      <own-summary-text v-if="!summariesStore.editSummary.pdf" class="content with-scrollbar" :editorId="'marking'"></own-summary-text>
-      <summary-file v-if="summariesStore.editSummary.pdf" class="content without-scrollbar" :correction_key="summariesStore.editSummary.correction_key"></summary-file>
-    </div>
-
-    <div v-if="markingTextShown() && stores.summaries().isOwnDisabled" :class="expansionClass()">
-      <h2 class="headline" :style="ownPositionHeaderStyle()">{{ $t('allSummary') }}</h2>
-      <summary-text v-if="!summariesStore.editSummary.pdf" class="content with-scrollbar" :correction_key="summariesStore.editSummary.correction_key"></summary-text>
+      <own-summary-text v-if="!summariesStore.isOwnDisabled && !summariesStore.editSummary.pdf" class="content with-scrollbar" :editorId="'marking'"></own-summary-text>
+      <summary-text v-if="summariesStore.isOwnDisabled && !summariesStore.editSummary.pdf" class="content with-scrollbar" :correction_key="summariesStore.editSummary.correction_key"></summary-text>
       <summary-file v-if="summariesStore.editSummary.pdf" class="content without-scrollbar" :correction_key="summariesStore.editSummary.correction_key"></summary-file>
     </div>
 

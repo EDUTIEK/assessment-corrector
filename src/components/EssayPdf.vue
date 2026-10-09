@@ -8,6 +8,8 @@ import createPDFJsApi from 'annotate-pdf/pdfjs-api';
 import {nextTick, onMounted, ref, watch} from 'vue';
 import Comment from "@/data/Comment";
 import Mark from "@/data/Mark";
+import axios from 'axios';
+import i18n from "@/plugins/i18n";
 
 const essayStore = stores.essay();
 const correctionsStore = stores.corrections();
@@ -16,10 +18,11 @@ const layoutStore = stores.layout();
 const summariesStore = stores.summaries();
 const preferencesStore = stores.preferences();
 
+const { t } = i18n.global;
+
 const EssayNode = ref();
 
-const selectedTool = ref('');
-const selectedDrawMode= ref('marker');
+const selectedShape = ref('');
 const showLabels = ref(false);
 const selectWords = ref(true);
 
@@ -30,111 +33,77 @@ let markCreated = 0;
 let pdfjs;
 
 onMounted(() => {
-  selectedDrawMode.value = Mark.shapeToPdfAnnotationType(preferencesStore.default_shape);
   showLabels.value = preferencesStore.display_labels;
   selectWords.value = preferencesStore.select_words;
 
   pdfjs = createPDFJsApi(EssayNode.value, './annotate-pdf/pdfjs-dist/web/viewer.html', essayStore.url);
   pdfjs.setDefaultColor(stores.config().getDefaultCommentColor(true));
-  pdfjs.setDrawMode(selectedDrawMode.value);
   pdfjs.enableWordSelection(!!selectWords.value);
   pdfjs.enableTokenButtons(true);
   pdfjs.enableTypeButtons(true);
 
   loadMarks();
   if (summariesStore.isOwnDisabled) {
-    selectTool('');
+    selectShape('');
   } else {
-    selectTool('text');
+    selectShape(preferencesStore.default_shape);
   }
   pdfjs.on('create', createMark);
   pdfjs.on('update', updateMark);
   pdfjs.on('delete', deleteMark);
   pdfjs.on('select', selectMark);
   pdfjs.on('pageChanged', pageChanged);
-  pdfjs.on('focus-end', focusEnd);
+  // pdfjs.on('focus-end', focusEnd);
+
+  suppressPdfViewerLetterShortcuts(EssayNode.value);
   handleFocusChange();
 });
 
 watch(() => layoutStore.focusChange, handleFocusChange);
-watch(() => commentsStore.markerChange, loadMarks);
-watch(() => commentsStore.filterChange, loadMarks);
 watch(() => commentsStore.showOtherCorrections, loadMarks);
-watch(() => commentsStore.selectionChange, refreshSelection);
+watch(() => commentsStore.selectionChange, refreshMarks);
 watch(() => commentsStore.deletionChange, handleDeleted);
 
-function selectTool(tool = null) {
+/**
+ * Select the drawing shape
+ * An empty shape means selection for copy
+ */
+function selectShape(shape) {
 
-  if (tool) {
-    selectedTool.value = tool;
-  }
-
-  switch (selectedTool.value) {
-    case 'text':
-      pdfjs.enableFreeFormHighlight(false);
-      pdfjs.enableTextHighlight(true);
-      break;
-
-    case 'free':
-      pdfjs.enableFreeFormHighlight(true);
-      pdfjs.enableTextHighlight(false);
-      break;
-
-    default:
-      pdfjs.enableFreeFormHighlight(false);
-      pdfjs.enableTextHighlight(false);
-      break;
-  }
-}
-
-function selectDrawMode(drawMode = null) {
-
-  if (drawMode) {
-    selectedDrawMode.value = drawMode;
-  }
-
-  let shape;
-  switch (selectedDrawMode.value) {
-    case 'underline':
-      shape = Mark.SHAPE_TEXT_UNDERLINE;
-      pdfjs.setDrawMode('underline');
-      break;
-
-    case 'wave':
-      shape = Mark.SHAPE_TEXT_WAVE;
-      pdfjs.setDrawMode('wave');
-      break;
-
-    case 'vline':
-      shape = Mark.SHAPE_TEXT_VLINE;
-      pdfjs.setDrawMode('vline');
-      break;
-
-    case 'marker':
-    default:
-      shape = Mark.SHAPE_TEXT_MARKER;
-      pdfjs.setDrawMode('marker');
-      break;
-  }
-
-  if (preferencesStore.default_shape !== shape) {
-    preferencesStore.default_shape = shape;
+  selectedShape.value = shape;
+  if (shape?.length && preferencesStore.default_shape !== selectedShape.value) {
+    preferencesStore.default_shape = selectedShape.value;
     preferencesStore.update();
   }
 
-  const comment = commentsStore.selectedComment;
-  if (comment && comment.correction_key == correctionsStore.ownKey && !summariesStore.isOwnDisabled) {
-    let changed = false;
-    for (const mark of comment.marks) {
-      if (mark.shape !== shape) {
-        mark.shape = shape;
-        changed = true;
-        pdfjs.setType(mark.key, Mark.shapeToPdfAnnotationType(shape));
+   if (Mark.TEXT_SHAPES.includes(shape)) {
+    pdfjs.enableFreeFormHighlight(false);
+    pdfjs.enableTextHighlight(true);
+    pdfjs.setDrawMode(Mark.shapeToPdfAnnotationType(shape));
+
+    const comment = commentsStore.selectedComment;
+    if (comment && comment.correction_key == correctionsStore.ownKey && !summariesStore.isOwnDisabled) {
+      let changed = false;
+      for (const mark of comment.marks) {
+        if (mark.shape !== shape && Mark.TEXT_SHAPES.includes(mark.shape)) {
+          mark.shape = shape;
+          changed = true;
+          pdfjs.setType(mark.key, Mark.shapeToPdfAnnotationType(shape));
+        }
+      }
+      if (changed) {
+        commentsStore.updateComment(comment);
       }
     }
-    if (changed) {
-      commentsStore.updateComment(comment);
-    }
+
+  } else if (Mark.FREE_SHAPES.includes(shape)) {
+    pdfjs.enableFreeFormHighlight(true);
+    pdfjs.enableTextHighlight(false);
+    pdfjs.setDefaultFreeFormType(Mark.shapeToPdfFreeFormType(selectedShape.value));
+
+  } else {
+    pdfjs.enableFreeFormHighlight(false);
+    pdfjs.enableTextHighlight(false);
   }
 }
 
@@ -164,6 +133,39 @@ async function loadMarks() {
 }
 
 /**
+ * pdfjs binds unmodified letters on the viewer window (r rotates, j/k turn pages, …).
+ * Stop those in the capture phase so they never reach that handler.
+ * Ctrl, Alt and Meta stay intact, as do letters typed into viewer text fields.
+ */
+function suppressPdfViewerLetterShortcuts(container) {
+  const frame = container?.querySelector('iframe');
+  if (!frame) {
+    return;
+  }
+  frame.addEventListener('load', () => {
+    frame.contentWindow?.addEventListener('keydown', blockPlainLetterShortcut, true);
+  });
+}
+
+function blockPlainLetterShortcut(event) {
+  if (event.ctrlKey || event.altKey || event.metaKey || event.isComposing) {
+    return;
+  }
+  if (!/^[a-z]$/i.test(event.key)) {
+    return;
+  }
+  const el = event.target instanceof Element ? event.target : event.target?.parentElement;
+  if (el?.closest('input, textarea, select')
+      || el?.isContentEditable
+      || el.classList.contains('toolbarHorizontalGroup')
+  ) {
+    return;
+  }
+  event.preventDefault();
+  event.stopPropagation();
+}
+
+/**
  * True when keyboard focus is in the PDF pane (iframe or wrapper).
  * Used to reclaim focus for the comment textarea after annotate-pdf steals it.
  */
@@ -188,7 +190,7 @@ function toggleLabels() {
     preferencesStore.display_labels = showLabels.value;
     preferencesStore.update();
   }
-  loadMarks();
+  refreshMarks();
 }
 
 function toggleWords() {
@@ -211,10 +213,6 @@ async function createMark(event) {
     internal: JSON.stringify(annotation.intern),
     parent_number: annotation.page + 1,
     pos: {x: annotation.pos.x * 1000, y: annotation.pos.y * 1000}
-  }
-
-  if (selectedTool.value == 'free') {
-    data.shape = Mark.SHAPE_FREE_MARKER;
   }
 
   if (!commentsStore.getCommentByMarkKey(data.key)) {
@@ -247,32 +245,18 @@ function updateMark(event) {
     if (JSON.stringify(oldData) != JSON.stringify(newData)) {
       commentsStore.updateComment(comment, false);
     }
+    if (comment.key === commentsStore.selectedKey && Date.now() - markCreated > 200) {
+      reclaimCommentFocus();
+    }
   }
 }
 
-function shapeFromType(type) {
-  switch(type) {
-  case 'marker':
-    return Mark.SHAPE_TEXT_MARKER;
-    break;
-  case 'underline':
-    return Mark.SHAPE_TEXT_UNDERLINE;
-    break;
-  case 'wave':
-    return Mark.SHAPE_TEXT_WAVE;
-    break;
-  case 'vline':
-    return Mark.SHAPE_TEXT_VLINE;
-    break;
-  }
-}
-
-
-function deleteMark(event) {
+async function deleteMark(event) {
   const comment = commentsStore.getCommentByMarkKey(event.detail.id);
   if (comment) {
-    commentsStore.deleteComment(comment.key);
+    await commentsStore.deleteComment(comment.key);
   }
+  refreshMarks();
 }
 
 function selectMark(event) {
@@ -282,9 +266,7 @@ function selectMark(event) {
       commentsStore.selectComment(comment.key);
       return;
     }
-  }
-
-  if (Date.now() - markCreated > 200) {
+  } else if (Date.now() - markCreated > 200) {
     commentsStore.selectComment('');
   }
 }
@@ -298,8 +280,10 @@ function pageChanged(event) {
 }
 
 /**
- * annotate-pdf fires focus-end after PDF.js finishes restoring focus in moveEditorInDOM
+ * annotate-pdf fires focus-end for the creation of a new comment
+ * after PDF.js finishes restoring focus in moveEditorInDOM
  * That is the reliable point to take focus back for the comment textarea
+ * @deprecated
  */
 function focusEnd(event) {
   if (!event?.detail?.id || !commentsStore.selectedKey) {
@@ -311,7 +295,7 @@ function focusEnd(event) {
   }
 }
 
-async function refreshSelection() {
+async function refreshMarks() {
   const configStore = stores.config();
   const selectedKey = commentsStore.selectedKey;
   const selectIds = [];
@@ -320,14 +304,11 @@ async function refreshSelection() {
       pdfjs.setColor(mark.key, configStore.getCommentColor(
           comment.correction_position, comment.key == selectedKey, mark.isFilled()),
       );
+      pdfjs.setLabel(mark.key,
+          (showLabels.value || comment.key == selectedKey) ? comment.label:  ''
+      );
       if (comment.key == selectedKey) {
         selectIds.push(mark.key);
-        if (showLabels.value == 0) {
-          pdfjs.setLabel(mark.key, comment.label);
-        }
-      }
-      else if (showLabels.value == 0) {
-        pdfjs.setLabel(mark.key, '');
       }
     }
   }
@@ -335,7 +316,6 @@ async function refreshSelection() {
     for (const id of selectIds) {
       await pdfjs.select(id);
     }
-    // Immediate reclaim if select left focus in the PDF; delayed steals use focus-end
     reclaimCommentFocus();
   }
 }
@@ -350,19 +330,34 @@ function handleDeleted()
   }
 }
 
-async function download()
+async function download(marked)
 {
-  const blob = await essayStore.buildMarkedPdf('all');
-  const url = URL.createObjectURL(blob);
+  let blob;
+  let title;
 
+  if (marked) {
+    blob = await essayStore.buildMarkedPdf('all');
+    if (stores.items().isFinal) {
+      title = stores.api().getDownloadTitle(t('essayPdfMarkedWritingFile'));
+    } else {
+      title = stores.api().getDownloadTitle(t('essayPdfMarkedWritingDraft'));
+    }
+
+  } else {
+    const response = await fetch(essayStore.url);
+    blob = await response.blob();
+    title = stores.api().getDownloadTitle(t('essayPdfPureWritingFile'));
+  }
+
+  const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'correction.pdf';
+  a.download = title
 
   document.body.appendChild(a); // required in Firefox
   a.click();
-
   document.body.removeChild(a);
+
   URL.revokeObjectURL(url); // free memory
 }
 
@@ -372,32 +367,103 @@ async function download()
   <div class ="appEssayWrapper">
     <div class="appTextButtons">
 
-<!--
-      <v-btn-toggle v-if="stores.settings().Task.enable_comments" density="comfortable" variant="outlined" divided v-model="selectedTool">
-        <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-cursor-text" value="text" @click="selectTool('text')"></v-btn>
-        <v-btn :disabled="summariesStore.isOwnDisabled" size="small" icon="mdi-draw" value="free" @click="selectTool('free')"></v-btn>
-      </v-btn-toggle>
+      <div class="appTextButtonsGroup">
+        <label class="appTextButtonsLabel" for="appTextShapesToggle">{{ $t('essayPdfTextCopy') }}</label>
+        <v-btn-toggle id="appTextSelection" density="comfortable" variant="outlined" divided v-model="selectedShape">
+          <v-tooltip max-width="200" location="bottom" :text ="$t('essayPdfSelectForCopyInfo')">
+            <template v-slot:activator="{props}">
+              <v-btn :disabled="summariesStore.isOwnDisabled" v-bind="props" size="small" icon="mdi-content-copy" value="" @click="selectShape('')"></v-btn>
+            </template>
+          </v-tooltip>
+        </v-btn-toggle>
+      </div>
 
-      &nbsp;
--->
+      <div class="appTextButtonsGroup" v-if="stores.settings().Task.enable_comments">
+        <label class="appTextButtonsLabel" for="appTextShapesToggle">{{ $t('essayPdfTextShapes') }}</label>
+        <v-btn-toggle id="appTextShapesToggle" density="comfortable" variant="outlined" divided v-model="selectedShape">
+          <v-tooltip max-width="200" location="bottom" :text ="$t('essayPdfShapeTextMarkerInfo')">
+            <template v-slot:activator="{props}">
+              <v-btn :disabled="summariesStore.isOwnDisabled" v-bind="props" size="small" icon="mdi-marker" :value="Mark.SHAPE_TEXT_MARKER" @click="selectShape(Mark.SHAPE_TEXT_MARKER)"></v-btn>
+            </template>
+          </v-tooltip>
+          <v-tooltip max-width="200" location="bottom" :text ="$t('essayPdfShapeTextUnderlineInfo')">
+            <template v-slot:activator="{props}">
+              <v-btn :disabled="summariesStore.isOwnDisabled" v-bind="props" size="small" icon="mdi-format-underline" :value="Mark.SHAPE_TEXT_UNDERLINE" @click="selectShape(Mark.SHAPE_TEXT_UNDERLINE)"></v-btn>
+            </template>
+          </v-tooltip>
+          <v-tooltip max-width="200" location="bottom" :text ="$t('essayPdfShapeTextWaveInfo')">
+            <template v-slot:activator="{props}">
+              <v-btn :disabled="summariesStore.isOwnDisabled" v-bind="props" size="small" icon="mdi-format-underline-wavy" :value="Mark.SHAPE_TEXT_WAVE" @click="selectShape(Mark.SHAPE_TEXT_WAVE)"></v-btn>
+            </template>
+          </v-tooltip>
+          <v-tooltip max-width="200" location="bottom" :text ="$t('essayPdfShapeTextVlineInfo')">
+            <template v-slot:activator="{props}">
+              <v-btn :disabled="summariesStore.isOwnDisabled" v-bind="props" size="small" icon="mdi-align-horizontal-left" :value="Mark.SHAPE_TEXT_VLINE" @click="selectShape(Mark.SHAPE_TEXT_VLINE)"></v-btn>
+            </template>
+          </v-tooltip>
+        </v-btn-toggle>
+      </div>
 
-      <v-btn-toggle v-if="stores.settings().Task.enable_comments" density="comfortable" variant="outlined" divided v-model="selectedDrawMode">
-        <v-btn :disabled="summariesStore.isOwnDisabled || selectedTool == 'free'" size="small" icon="mdi-marker" value="marker" @click="selectDrawMode('marker')"></v-btn>
-        <v-btn :disabled="summariesStore.isOwnDisabled || selectedTool == 'free'" size="small" icon="mdi-format-underline" value="underline" @click="selectDrawMode('underline')"></v-btn>
-        <v-btn :disabled="summariesStore.isOwnDisabled || selectedTool == 'free'" size="small" icon="mdi-format-underline-wavy" value="wave" @click="selectDrawMode('wave')"></v-btn>
-        <v-btn :disabled="summariesStore.isOwnDisabled || selectedTool == 'free'" size="small" icon="mdi-tally-mark-1" value="vline" @click="selectDrawMode('vline')"></v-btn>
-      </v-btn-toggle>
+<!--      <div class="appTextButtonsGroup" v-if="stores.settings().Task.enable_comments" >-->
+<!--        <label class="appTextButtonsLabel" for="appFreeShapesToggle">{{ $t('essayPdfFreeShapes') }}</label>-->
+<!--        <v-btn-toggle id="appFreeShapesToggle" density="comfortable" variant="outlined" divided v-model="selectedShape">-->
+<!--          <v-tooltip max-width="200" location="bottom" :text ="$t('essayPdfShapeFreeLineInfo')">-->
+<!--            <template v-slot:activator="{props}">-->
+<!--              <v-btn :disabled="summariesStore.isOwnDisabled" v-bind="props" size="small" icon="mdi-minus" :value="Mark.SHAPE_FREE_LINE" @click="selectShape(Mark.SHAPE_FREE_LINE)"></v-btn>-->
+<!--            </template>-->
+<!--          </v-tooltip>-->
+<!--          <v-tooltip  max-width="200" location="bottom" :text ="$t('essayPdfShapeFreeWaveInfo')">-->
+<!--            <template v-slot:activator="{props}">-->
+<!--              <v-btn :disabled="summariesStore.isOwnDisabled" v-bind="props" size="small" icon="mdi-wave" :value="Mark.SHAPE_FREE_WAVE" @click="selectShape(Mark.SHAPE_FREE_WAVE)"></v-btn>-->
+<!--            </template>-->
+<!--          </v-tooltip>-->
+<!--          <v-tooltip  max-width="200" location="bottom" :text ="$t('essayPdfShapeFreeRectInfo')">-->
+<!--            <template v-slot:activator="{props}">-->
+<!--              <v-btn :disabled="summariesStore.isOwnDisabled" v-bind="props" size="small" icon="mdi-rectangle-outline" :value="Mark.SHAPE_FREE_RECT" @click="selectShape(Mark.SHAPE_FREE_RECT)"></v-btn>-->
+<!--            </template>-->
+<!--          </v-tooltip>-->
+<!--          <v-tooltip  max-width="200" location="bottom" :text ="$t('essayPdfShapeFreeDotInfo')">-->
+<!--            <template v-slot:activator="{props}">-->
+<!--              <v-btn :disabled="summariesStore.isOwnDisabled" v-bind="props" size="small" icon="mdi-circle-small" :value="Mark.SHAPE_FREE_DOT" @click="selectShape(Mark.SHAPE_FREE_DOT)"></v-btn>-->
+<!--            </template>-->
+<!--          </v-tooltip>-->
+<!--          <v-tooltip  max-width="200" location="bottom" :text ="$t('essayPdfShapeFreeCircleInfo')">-->
+<!--            <template v-slot:activator="{props}">-->
+<!--              <v-btn :disabled="summariesStore.isOwnDisabled" v-bind="props" size="small" icon="mdi-circle-outline" :value="Mark.SHAPE_FREE_CIRCLE" @click="selectShape(Mark.SHAPE_FREE_CIRCLE)"></v-btn>-->
+<!--            </template>-->
+<!--          </v-tooltip>-->
+<!--        </v-btn-toggle>-->
+<!--      </div>-->
 
-      &nbsp;
+      <div class="appTextButtonsGroup" v-if="stores.settings().Task.enable_comments">
+        <label class="appTextButtonsLabel" for="appFreeShapesToggle">{{ $t('essayPdfOptions') }}</label>
+        <v-btn-group density="comfortable" variant="outlined" divided>
+          <v-tooltip  max-width="200" location="bottom" :text ="$t('essayPdfToggleLabelsInfo')">
+            <template v-slot:activator="{props}">
+              <v-btn size="small" v-bind="props" :active="!!showLabels" icon="mdi-label-outline" @click="toggleLabels"></v-btn>
+            </template>
+          </v-tooltip>
+          <v-tooltip  max-width="200" location="bottom" :text ="$t('essayPdfSelectWordsInfo')">
+            <template v-slot:activator="{props}">
+              <v-btn size="small" v-bind="props" :active="!!selectWords" @click="toggleWords">{{ $t('essayPdfSelectWords') }}</v-btn>
+            </template>
+          </v-tooltip>
 
-      <v-btn-group v-if="stores.settings().Task.enable_comments" density="comfortable" variant="outlined" divided>
-        <v-btn size="small" :active="!!showLabels" icon="mdi-label-outline" @click="toggleLabels"></v-btn>
-        <v-btn size="small" :active="!!selectWords" @click="toggleWords">{{ $t('essayPdfSelectWords') }}</v-btn>
-      </v-btn-group>
 
-      &nbsp;
+        </v-btn-group>
+      </div>
 
-      <!-- <v-btn variant="text" prepend-icon="mdi-download" @click="download">Download</v-btn> -->
+      <div class="appTextButtonsGroup" v-if="stores.settings().Assessment.download_writing || stores.settings().Assessment.download_correction">
+        <label class="appTextButtonsLabel" for="appDownloads">{{ $t('essayPdfDownload') }}</label>
+        <v-btn-group density="comfortable" variant="outlined" divided>
+          <v-tooltip  max-width="200" v-if="stores.settings().Assessment.download_writing" location="bottom" :text ="$t('essayPdfPureWritingInfo')">
+            <template v-slot:activator="{props}">
+              <v-btn size="small" v-bind="props" @click="download(false)">{{ $t('essayPdfPureWriting') }}</v-btn>
+            </template>
+          </v-tooltip>
+          <!-- <v-btn size="small" v-if="stores.settings().Assessment.download_correction" @click="download(true)">{{ $t('essayPdfMarkedWriting') }}</v-btn> -->
+        </v-btn-group>
+      </div>
 
     </div>
     <div class="appEssayNode" tabindex="0" ref="EssayNode"></div>
@@ -410,13 +476,28 @@ async function download()
   height: 100%;
   display: flex;
   flex-direction: column;
+  margin-top: -10px;
 }
 
 .appTextButtons {
-  text-align: center;
   padding-bottom: 5px;
-  height: 50px;
+  height: 70px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
 }
+
+.appTextButtonsGroup {
+  padding: 0 10px 0 10px;
+  margin: 0;
+}
+
+.appTextButtonsLabel {
+  display:block;
+  font-size: 12px;
+  color: #555555;
+}
+
 
 .appEssayNode {
   flex-grow: 1;

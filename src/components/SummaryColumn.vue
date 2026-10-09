@@ -79,7 +79,7 @@ function expansionClass() {
       <summary-criteria class="content with-scrollbar" :correction_key="props.correction_key"></summary-criteria>
     </div>
 
-    <div v-if="show_text && is_own && !stores.summaries().isOwnDisabled" :class="expansionClass()">
+    <div v-if="show_text" :class="expansionClass()">
       <v-container class="ma-0 pa-0">
         <v-row class="ma-0" :style="headerStyle">
           <v-col cols="6" class="ma-0 pa-0">
@@ -87,18 +87,18 @@ function expansionClass() {
           </v-col>
           <v-col cols="6" class="ma-0 pa-0 text-right">
             <div class="header-buttons">
-              <own-summary-template v-if="!summary.pdf"></own-summary-template>
-              <own-summary-upload></own-summary-upload>
+              <own-summary-template v-if="is_own && !stores.summaries().isOwnDisabled && !summary.pdf"></own-summary-template>
+              <own-summary-upload
+                  :summary="summary"
+                  :upload="is_own && !stores.summaries().isOwnDisabled"
+                  :download="stores.settings().Assessment.download_correction"
+              ></own-summary-upload>
             </div>
           </v-col>
         </v-row>
       </v-container>
-      <own-summary-text v-show="!summary.pdf" class="content without-scrollbar" :editorId="'summary'"></own-summary-text>
-      <summary-file v-if="summary.pdf" class="content without-scrollbar" :correction_key="props.correction_key"></summary-file>
-    </div>
-    <div v-if="show_text && (!is_own || stores.summaries().isOwnDisabled)" :class="expansionClass()">
-      <h2 class="headline" :style="headerStyle">{{ $t('allSummary') }} {{ position_text }}</h2>
-      <summary-text v-if="!summary.pdf" class="content with-scrollbar" :correction_key="props.correction_key"></summary-text>
+      <own-summary-text v-if="is_own && !stores.summaries().isOwnDisabled && !summary.pdf" class="content without-scrollbar" :editorId="'summary'"></own-summary-text>
+      <summary-text v-if="(!is_own || stores.summaries().isOwnDisabled) && !summary.pdf" class="content with-scrollbar" :correction_key="props.correction_key"></summary-text>
       <summary-file v-if="summary.pdf" class="content without-scrollbar" :correction_key="props.correction_key"></summary-file>
     </div>
 

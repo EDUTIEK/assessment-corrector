@@ -17,6 +17,7 @@ export const useSettingsStore = defineStore('settings', {
   state: () => {
     return {
       Assessment: {
+        title: '',                      // assessment title
         multiple_correctors: false,     // has a submission multiple corrections
         mutual_visibility: false,       // correction sees other corrections
         procedure_when_distance: false, // should a revision procedure follow when points differ
@@ -26,6 +27,8 @@ export const useSettingsStore = defineStore('settings', {
         stitch_after_procedure: false,  // the procedure is followed by a stich decision when needed
         max_points: 0,                  // maximum points that can be given
         no_manual_decimals: false,      // manually given points must not have decimals
+        download_writing: false,        // enable a download of the writing
+        download_correction: false      // enable a download of the correction
       },
       Task: {
         pdf_marking: 'images',                            // type of PDF marking function

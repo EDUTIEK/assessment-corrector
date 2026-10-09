@@ -14,8 +14,7 @@ watch(() => commentsStore.firstVisibleKey, scrollToFirstVisible);
  *
  * Triggered by selectionChange and by focusRequest (from EssayPdf after
  * annotate-pdf's focus-end, or after setAll/select left focus in the PDF).
- * Empty Vuetify textareas use opacity:0 until active — labels are sr-only here,
- * so setSelectionRange keeps the caret visible on empty fields.
+ * Places the caret at the end of the text.
  */
 async function focusSelected() {
   const key = commentsStore.selectedKey;

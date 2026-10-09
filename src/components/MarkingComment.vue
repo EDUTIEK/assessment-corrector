@@ -1,6 +1,6 @@
 <script setup xmlns="http://www.w3.org/1999/html">
 import {stores} from "@/store";
-import {nextTick, onMounted, ref, watch} from 'vue';
+import {nextTick, ref, watch} from 'vue';
 import i18n from "@/plugins/i18n";
 import Snippet from "@/data/Snippet";
 
@@ -40,33 +40,6 @@ function hasTrash(comment) {
 function hasDetails(comment) {
   return comment.rating_excellent || comment.rating_cardinal || pointsStore.getSumOfPointsForComment(comment.key) > 0;
 }
-
-
-/**
- * Ugly fix for accessibility issue in v-textarea component of vuetify
- */
-onMounted(() => {
-  const container = document.getElementById('appCommentContainer' + comment.key);
-  for (const label of container.getElementsByTagName('label')) {
-    if (label.getAttribute('for').includes('app-comment-')) {
-      label.classList.add('sr-only');
-      if (label.getAttribute('aria-hidden') == 'true') {
-        if (!label.getAttribute('for').includes('-sizer')) {
-          label.setAttribute('for', label.getAttribute('for') + '-sizer');
-        }
-      } else {
-        label.setAttribute('id', 'app-comment-' + comment.key + '-messages');
-      }
-    }
-  }
-  for (const textarea of container.getElementsByTagName('textarea')) {
-    textarea.style.marginTop = '-15px';
-    textarea.style.fontSize = '0.9rem';
-  }
-  for (const div of container.getElementsByClassName('v-input__details')) {
-   div.style.display ='none';
-  }
-});
 
 
 /**
@@ -156,7 +129,8 @@ async function handleTextKeydown() {
           event.preventDefault();
           const offset = new_text.length - textarea.value.length;
           comment.comment = new_text;
-          textarea.setSelectionRange(cursor + offset, cursor + offset);
+          const pos = cursor + offset;
+          nextTick(() => textarea.setSelectionRange(pos, pos));
           prevent_next_keyup_auto_replace = true;
         }
         break;
@@ -169,7 +143,8 @@ async function handleTextKeydown() {
           event.preventDefault();
           const offset = new_text.length - textarea.value.length;
           comment.comment = new_text;
-          textarea.setSelectionRange(cursor + offset, cursor + offset);
+          const pos = cursor + offset;
+          nextTick(() => textarea.setSelectionRange(pos, pos));
           prevent_next_keyup_auto_replace = false;
         }
         break;
@@ -200,7 +175,8 @@ function handleTextKeyUp() {
         if (new_text) {
           const offset = new_text.length - textarea.value.length;
           comment.comment = new_text;
-          textarea.setSelectionRange(cursor + offset, cursor + offset);
+          const pos = cursor + offset;
+          nextTick(() => textarea.setSelectionRange(pos, pos));
         }
       }
   }
@@ -282,18 +258,20 @@ watch(() => snippetsStore.selection_open, handleSnippet);
 
           <v-row dense v-show="isSelected(comment)">
             <v-col cols="12">
-              <v-textarea class="commentInput" :bg-color="getBgColor(comment)" rounded="0" density="compact" variant="solo"
+              <label class="sr-only" :for="'app-comment-' + comment.key">
+                {{ $t('markingCommentsCommentForLabel', [comment.label]) }}
+              </label>
+              <growing-textarea class="commentInput" :bg-color="getBgColor(comment)"
                           ref="textRef"
                           :id="'app-comment-' + comment.key"
-                          :label="$t('markingCommentsCommentForLabel', [comment.label])"
-                          rows="1" auto-grow
+                          rows="1"
                           :readonly="isDisabled(comment)"
                           @change="commentsStore.updateComment(comment)"
                           @keyup="handleTextKeyUp()"
                           @keydown="handleTextKeydown()"
                           @focus="snippetsStore.list_purpose = Snippet.FOR_COMMENT"
                           v-model="comment.comment">
-              </v-textarea>
+              </growing-textarea>
             </v-col>
           </v-row>
 
@@ -456,23 +434,26 @@ watch(() => snippetsStore.selection_open, handleSnippet);
 
 .commentInput {
   width: 100%;
-  font-family: serif;
+  font-family: sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  padding: 2px 15px;
   margin-bottom: 5px;
+  border: none;
+  border-radius: 0;
+  color: inherit;
 }
 
-/*
- * Vuetify keeps empty textareas at opacity:0 until the field is active/dirty.
- * Labels are sr-only here, so empty comments would show no caret even when focused
- * if the active class lags or focus flickers. Always show the real input.
- */
-.commentInput :deep(textarea.v-field__input:not(.v-textarea__sizer)) {
-  opacity: 1;
+.commentInput:focus {
+  outline: 2px solid blue;
+  outline-offset: -2px;
 }
 
 .commentDisplay {
   width: 100%;
-  font-family: serif;
+  font-family: sans-serif;
   font-size: 0.9rem;
+  line-height: 1.4;
   padding: 2px 15px;
   margin-bottom: 5px;
 }
