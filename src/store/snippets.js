@@ -258,7 +258,7 @@ export const useSnippetsStore = defineStore('snippets', {
      */
     autoReplace(purpose, text, position, force = false) {
       let snippets = [];
-      let search_with_trigger = false;
+      let search_without_last = false;
 
       // check where to search and cleanup if changed
       switch (purpose) {
@@ -280,11 +280,12 @@ export const useSnippetsStore = defineStore('snippets', {
       const char = text.charAt(position);
       if (force || triggerChars.includes(char)) {
 
-        // prevent a triggering whitespace char from being replaced
         if (whitespaceChars.includes(char)) {
+          // prevent a triggering whitespace char from being replaced
           position--;
         } else if (triggerChars.includes(char)) {
-          search_with_trigger = true;
+          // triggering char may be part of the snippet or not, search both
+          search_without_last = true;
         }
 
         // backward search for a whitespace (include index 0 so a leading
@@ -297,10 +298,10 @@ export const useSnippetsStore = defineStore('snippets', {
         start++; // don't include the whitespace char (or stay at 0)
 
         // shortcuts to search for
-        if (search_with_trigger) {
-          searches.push(text.slice(start, position + 1));   // 1. with trigger char
+        searches.push(text.slice(start, position + 1));   // 1. with trigger char
+        if (search_without_last) {
+          searches.push(text.slice(start, position));     // 2. without trigger char
         }
-        searches.push(text.slice(start, position));       // 2. without trigger char
 
         for( const search of searches) {
           if (search == '' || whitespaceChars.includes(search)) {
