@@ -404,36 +404,36 @@ async function download(marked)
         </v-btn-toggle>
       </div>
 
-      <div class="appTextButtonsGroup" v-if="stores.settings().Task.enable_comments" >
-        <label class="appTextButtonsLabel" for="appFreeShapesToggle">{{ $t('essayPdfFreeShapes') }}</label>
-        <v-btn-toggle id="appFreeShapesToggle" density="comfortable" variant="outlined" divided v-model="selectedShape">
-          <v-tooltip max-width="200" location="bottom" :text ="$t('essayPdfShapeFreeLineInfo')">
-            <template v-slot:activator="{props}">
-              <v-btn :disabled="summariesStore.isOwnDisabled" v-bind="props" size="small" icon="mdi-minus" :value="Mark.SHAPE_FREE_LINE" @click="selectShape(Mark.SHAPE_FREE_LINE)"></v-btn>
-            </template>
-          </v-tooltip>
-          <v-tooltip  max-width="200" location="bottom" :text ="$t('essayPdfShapeFreeWaveInfo')">
-            <template v-slot:activator="{props}">
-              <v-btn :disabled="summariesStore.isOwnDisabled" v-bind="props" size="small" icon="mdi-wave" :value="Mark.SHAPE_FREE_WAVE" @click="selectShape(Mark.SHAPE_FREE_WAVE)"></v-btn>
-            </template>
-          </v-tooltip>
-          <v-tooltip  max-width="200" location="bottom" :text ="$t('essayPdfShapeFreeRectInfo')">
-            <template v-slot:activator="{props}">
-              <v-btn :disabled="summariesStore.isOwnDisabled" v-bind="props" size="small" icon="mdi-rectangle-outline" :value="Mark.SHAPE_FREE_RECT" @click="selectShape(Mark.SHAPE_FREE_RECT)"></v-btn>
-            </template>
-          </v-tooltip>
-          <v-tooltip  max-width="200" location="bottom" :text ="$t('essayPdfShapeFreeDotInfo')">
-            <template v-slot:activator="{props}">
-              <v-btn :disabled="summariesStore.isOwnDisabled" v-bind="props" size="small" icon="mdi-circle-small" :value="Mark.SHAPE_FREE_DOT" @click="selectShape(Mark.SHAPE_FREE_DOT)"></v-btn>
-            </template>
-          </v-tooltip>
+<!--      <div class="appTextButtonsGroup" v-if="stores.settings().Task.enable_comments" >-->
+<!--        <label class="appTextButtonsLabel" for="appFreeShapesToggle">{{ $t('essayPdfFreeShapes') }}</label>-->
+<!--        <v-btn-toggle id="appFreeShapesToggle" density="comfortable" variant="outlined" divided v-model="selectedShape">-->
+<!--          <v-tooltip max-width="200" location="bottom" :text ="$t('essayPdfShapeFreeLineInfo')">-->
+<!--            <template v-slot:activator="{props}">-->
+<!--              <v-btn :disabled="summariesStore.isOwnDisabled" v-bind="props" size="small" icon="mdi-minus" :value="Mark.SHAPE_FREE_LINE" @click="selectShape(Mark.SHAPE_FREE_LINE)"></v-btn>-->
+<!--            </template>-->
+<!--          </v-tooltip>-->
+<!--          <v-tooltip  max-width="200" location="bottom" :text ="$t('essayPdfShapeFreeWaveInfo')">-->
+<!--            <template v-slot:activator="{props}">-->
+<!--              <v-btn :disabled="summariesStore.isOwnDisabled" v-bind="props" size="small" icon="mdi-wave" :value="Mark.SHAPE_FREE_WAVE" @click="selectShape(Mark.SHAPE_FREE_WAVE)"></v-btn>-->
+<!--            </template>-->
+<!--          </v-tooltip>-->
+<!--          <v-tooltip  max-width="200" location="bottom" :text ="$t('essayPdfShapeFreeRectInfo')">-->
+<!--            <template v-slot:activator="{props}">-->
+<!--              <v-btn :disabled="summariesStore.isOwnDisabled" v-bind="props" size="small" icon="mdi-rectangle-outline" :value="Mark.SHAPE_FREE_RECT" @click="selectShape(Mark.SHAPE_FREE_RECT)"></v-btn>-->
+<!--            </template>-->
+<!--          </v-tooltip>-->
+<!--          <v-tooltip  max-width="200" location="bottom" :text ="$t('essayPdfShapeFreeDotInfo')">-->
+<!--            <template v-slot:activator="{props}">-->
+<!--              <v-btn :disabled="summariesStore.isOwnDisabled" v-bind="props" size="small" icon="mdi-circle-small" :value="Mark.SHAPE_FREE_DOT" @click="selectShape(Mark.SHAPE_FREE_DOT)"></v-btn>-->
+<!--            </template>-->
+<!--          </v-tooltip>-->
 <!--          <v-tooltip  max-width="200" location="bottom" :text ="$t('essayPdfShapeFreeCircleInfo')">-->
 <!--            <template v-slot:activator="{props}">-->
 <!--              <v-btn :disabled="summariesStore.isOwnDisabled" v-bind="props" size="small" icon="mdi-circle-outline" :value="Mark.SHAPE_FREE_CIRCLE" @click="selectShape(Mark.SHAPE_FREE_CIRCLE)"></v-btn>-->
 <!--            </template>-->
 <!--          </v-tooltip>-->
-        </v-btn-toggle>
-      </div>
+<!--        </v-btn-toggle>-->
+<!--      </div>-->
 
       <div class="appTextButtonsGroup" v-if="stores.settings().Task.enable_comments">
         <label class="appTextButtonsLabel" for="appFreeShapesToggle">{{ $t('essayPdfOptions') }}</label>
