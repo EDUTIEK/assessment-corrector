@@ -370,7 +370,7 @@ async function download(marked)
       <div class="appTextButtonsGroup">
         <label class="appTextButtonsLabel" for="appTextShapesToggle">{{ $t('essayPdfTextCopy') }}</label>
         <v-btn-toggle id="appTextSelection" density="comfortable" variant="outlined" divided v-model="selectedShape">
-          <v-tooltip location="bottom" :text ="$t('essayPdfSelectForCopyInfo')">
+          <v-tooltip max-width="200" location="bottom" :text ="$t('essayPdfSelectForCopyInfo')">
             <template v-slot:activator="{props}">
               <v-btn :disabled="summariesStore.isOwnDisabled" v-bind="props" size="small" icon="mdi-content-copy" value="" @click="selectShape('')"></v-btn>
             </template>
@@ -381,22 +381,22 @@ async function download(marked)
       <div class="appTextButtonsGroup" v-if="stores.settings().Task.enable_comments">
         <label class="appTextButtonsLabel" for="appTextShapesToggle">{{ $t('essayPdfTextShapes') }}</label>
         <v-btn-toggle id="appTextShapesToggle" density="comfortable" variant="outlined" divided v-model="selectedShape">
-          <v-tooltip location="bottom" :text ="$t('essayPdfShapeTextMarkerInfo')">
+          <v-tooltip max-width="200" location="bottom" :text ="$t('essayPdfShapeTextMarkerInfo')">
             <template v-slot:activator="{props}">
               <v-btn :disabled="summariesStore.isOwnDisabled" v-bind="props" size="small" icon="mdi-marker" :value="Mark.SHAPE_TEXT_MARKER" @click="selectShape(Mark.SHAPE_TEXT_MARKER)"></v-btn>
             </template>
           </v-tooltip>
-          <v-tooltip location="bottom" :text ="$t('essayPdfShapeTextUnderlineInfo')">
+          <v-tooltip max-width="200" location="bottom" :text ="$t('essayPdfShapeTextUnderlineInfo')">
             <template v-slot:activator="{props}">
               <v-btn :disabled="summariesStore.isOwnDisabled" v-bind="props" size="small" icon="mdi-format-underline" :value="Mark.SHAPE_TEXT_UNDERLINE" @click="selectShape(Mark.SHAPE_TEXT_UNDERLINE)"></v-btn>
             </template>
           </v-tooltip>
-          <v-tooltip location="bottom" :text ="$t('essayPdfShapeTextWaveInfo')">
+          <v-tooltip max-width="200" location="bottom" :text ="$t('essayPdfShapeTextWaveInfo')">
             <template v-slot:activator="{props}">
               <v-btn :disabled="summariesStore.isOwnDisabled" v-bind="props" size="small" icon="mdi-format-underline-wavy" :value="Mark.SHAPE_TEXT_WAVE" @click="selectShape(Mark.SHAPE_TEXT_WAVE)"></v-btn>
             </template>
           </v-tooltip>
-          <v-tooltip location="bottom" :text ="$t('essayPdfShapeTextVlineInfo')">
+          <v-tooltip max-width="200" location="bottom" :text ="$t('essayPdfShapeTextVlineInfo')">
             <template v-slot:activator="{props}">
               <v-btn :disabled="summariesStore.isOwnDisabled" v-bind="props" size="small" icon="mdi-align-horizontal-left" :value="Mark.SHAPE_TEXT_VLINE" @click="selectShape(Mark.SHAPE_TEXT_VLINE)"></v-btn>
             </template>
@@ -407,27 +407,27 @@ async function download(marked)
       <div class="appTextButtonsGroup" v-if="stores.settings().Task.enable_comments" >
         <label class="appTextButtonsLabel" for="appFreeShapesToggle">{{ $t('essayPdfFreeShapes') }}</label>
         <v-btn-toggle id="appFreeShapesToggle" density="comfortable" variant="outlined" divided v-model="selectedShape">
-          <v-tooltip location="bottom" :text ="$t('essayPdfShapeFreeLineInfo')">
+          <v-tooltip max-width="200" location="bottom" :text ="$t('essayPdfShapeFreeLineInfo')">
             <template v-slot:activator="{props}">
               <v-btn :disabled="summariesStore.isOwnDisabled" v-bind="props" size="small" icon="mdi-minus" :value="Mark.SHAPE_FREE_LINE" @click="selectShape(Mark.SHAPE_FREE_LINE)"></v-btn>
             </template>
           </v-tooltip>
-          <v-tooltip location="bottom" :text ="$t('essayPdfShapeFreeWaveInfo')">
+          <v-tooltip  max-width="200" location="bottom" :text ="$t('essayPdfShapeFreeWaveInfo')">
             <template v-slot:activator="{props}">
               <v-btn :disabled="summariesStore.isOwnDisabled" v-bind="props" size="small" icon="mdi-wave" :value="Mark.SHAPE_FREE_WAVE" @click="selectShape(Mark.SHAPE_FREE_WAVE)"></v-btn>
             </template>
           </v-tooltip>
-          <v-tooltip location="bottom" :text ="$t('essayPdfShapeFreeRectInfo')">
+          <v-tooltip  max-width="200" location="bottom" :text ="$t('essayPdfShapeFreeRectInfo')">
             <template v-slot:activator="{props}">
               <v-btn :disabled="summariesStore.isOwnDisabled" v-bind="props" size="small" icon="mdi-rectangle-outline" :value="Mark.SHAPE_FREE_RECT" @click="selectShape(Mark.SHAPE_FREE_RECT)"></v-btn>
             </template>
           </v-tooltip>
-          <v-tooltip location="bottom" :text ="$t('essayPdfShapeFreeDotInfo')">
+          <v-tooltip  max-width="200" location="bottom" :text ="$t('essayPdfShapeFreeDotInfo')">
             <template v-slot:activator="{props}">
               <v-btn :disabled="summariesStore.isOwnDisabled" v-bind="props" size="small" icon="mdi-circle-small" :value="Mark.SHAPE_FREE_DOT" @click="selectShape(Mark.SHAPE_FREE_DOT)"></v-btn>
             </template>
           </v-tooltip>
-<!--          <v-tooltip location="bottom" :text ="$t('essayPdfShapeFreeCircleInfo')">-->
+<!--          <v-tooltip  max-width="200" location="bottom" :text ="$t('essayPdfShapeFreeCircleInfo')">-->
 <!--            <template v-slot:activator="{props}">-->
 <!--              <v-btn :disabled="summariesStore.isOwnDisabled" v-bind="props" size="small" icon="mdi-circle-outline" :value="Mark.SHAPE_FREE_CIRCLE" @click="selectShape(Mark.SHAPE_FREE_CIRCLE)"></v-btn>-->
 <!--            </template>-->
@@ -438,12 +438,12 @@ async function download(marked)
       <div class="appTextButtonsGroup" v-if="stores.settings().Task.enable_comments">
         <label class="appTextButtonsLabel" for="appFreeShapesToggle">{{ $t('essayPdfOptions') }}</label>
         <v-btn-group density="comfortable" variant="outlined" divided>
-          <v-tooltip location="bottom" :text ="$t('essayPdfToggleLabelsInfo')">
+          <v-tooltip  max-width="200" location="bottom" :text ="$t('essayPdfToggleLabelsInfo')">
             <template v-slot:activator="{props}">
               <v-btn size="small" v-bind="props" :active="!!showLabels" icon="mdi-label-outline" @click="toggleLabels"></v-btn>
             </template>
           </v-tooltip>
-          <v-tooltip location="bottom" :text ="$t('essayPdfSelectWordsInfo')">
+          <v-tooltip  max-width="200" location="bottom" :text ="$t('essayPdfSelectWordsInfo')">
             <template v-slot:activator="{props}">
               <v-btn size="small" v-bind="props" :active="!!selectWords" @click="toggleWords">{{ $t('essayPdfSelectWords') }}</v-btn>
             </template>
@@ -456,7 +456,7 @@ async function download(marked)
       <div class="appTextButtonsGroup" v-if="stores.settings().Assessment.download_writing || stores.settings().Assessment.download_correction">
         <label class="appTextButtonsLabel" for="appDownloads">{{ $t('essayPdfDownload') }}</label>
         <v-btn-group density="comfortable" variant="outlined" divided>
-          <v-tooltip v-if="stores.settings().Assessment.download_writing" location="bottom" :text ="$t('essayPdfPureWritingInfo')">
+          <v-tooltip  max-width="200" v-if="stores.settings().Assessment.download_writing" location="bottom" :text ="$t('essayPdfPureWritingInfo')">
             <template v-slot:activator="{props}">
               <v-btn size="small" v-bind="props" @click="download(false)">{{ $t('essayPdfPureWriting') }}</v-btn>
             </template>
@@ -495,6 +495,7 @@ async function download(marked)
 .appTextButtonsLabel {
   display:block;
   font-size: 12px;
+  color: #555555;
 }
 
 
