@@ -364,7 +364,10 @@ export const useApiStore = defineStore('api', {
     },
 
     /**
-     * init after the keeping the data of the item with open sendings
+     * Init after the keeping the data of the item with open sendings
+     *
+     * - Load the basic assessment data from the backend to get a current list of items
+     * - If the item with open sendings is not in the list, add it afterward
      */
     async initAfterKeepDataConfirmed() {
       console.log('initAfterKeepDataConfirmed');
@@ -428,7 +431,7 @@ export const useApiStore = defineStore('api', {
       this.clearAllIntervals();
 
       const itemsStore = stores.items();
-      if (itemKey == '' || stores.items().hasItems && itemsStore.getItem(itemKey) == undefined) {
+      if (itemKey == '' || (stores.items().hasItems && itemsStore.getItem(itemKey) == undefined)) {
         itemKey = itemsStore.firstKey
       }
 
@@ -505,8 +508,9 @@ export const useApiStore = defineStore('api', {
       this.setLoading(true);
       this.clearAllIntervals();
 
+      // take first item if none is chosen or if chosen item does not exist
       const itemsStore = stores.items();
-      if (itemKey == '' && stores.items().hasItems && !stores.items().getItem(itemKey)) {
+      if (itemKey == '' || (stores.items().hasItems && !stores.items().getItem(itemKey))) {
         itemKey = itemsStore.firstKey ?? '';
       }
 

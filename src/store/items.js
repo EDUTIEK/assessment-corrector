@@ -45,6 +45,7 @@ export const useItemsStore = defineStore('items', {
     sortedItems(state) {
       let items = Object.values(state.items);
 
+      // item selection determines task selection
       if (stores.api().itemKey && !!state.items[stores.api().itemKey]) {
         const task_id = Item.extractTaskId(stores.api().itemKey)
         items = items.filter(item => item.task_id == task_id)
