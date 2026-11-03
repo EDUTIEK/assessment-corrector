@@ -32,11 +32,11 @@ let markCreated = 0;
 
 let pdfjs;
 
-onMounted(() => {
+onMounted(async () => {
   showLabels.value = preferencesStore.display_labels;
   selectWords.value = preferencesStore.select_words;
 
-  pdfjs = createPDFJsApi(EssayNode.value, './annotate-pdf/pdfjs-dist/web/viewer.html', essayStore.url);
+  pdfjs = createPDFJsApi(EssayNode.value, './annotate-pdf/pdfjs-dist/web/viewer.html', await essayStore.waitForUrl(), {headers: stores.api().getRequestConfig().headers});
   pdfjs.setDefaultColor(stores.config().getDefaultCommentColor(true));
   pdfjs.enableWordSelection(!!selectWords.value);
   pdfjs.enableTokenButtons(true);

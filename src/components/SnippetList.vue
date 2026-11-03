@@ -116,7 +116,7 @@ function rowFocusout(event) {
 
 async function download()
 {
-  const response = await fetch(stores.api().getSnippetsUrl(snippetsStore.list_purpose));
+  const response = await stores.api().loadSnippetsUrl(snippetsStore.list_purpose);
   const blob = await response.blob();
   const title = stores.api().getDownloadTitle(t('snippetsExportFile'), false);
 
