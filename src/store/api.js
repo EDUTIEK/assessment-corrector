@@ -28,7 +28,6 @@ export const useApiStore = defineStore('api', {
       itemKey: '',                        // identifying key of the correction item
       loginToken: '',                     // authentication token for login
       dataToken: '',                      // authentication token for transmission if data
-      fileToken: '',                      // authentication token for loading files
       timeOffset: 0,                      // difference between server time and client time (ms)
 
       // not saved
@@ -81,8 +80,8 @@ export const useApiStore = defineStore('api', {
        * @param {string} token
        * @returns {{baseURL: (string|*), responseType: string, responseEncoding: string, params: URLSearchParams, timeout: number}}
        */
-      const fn = function (token) {
-        let baseURL = stores.config().backendUrl;
+      const fn = () => {
+        let baseURL = state.backendUrl;
         let params = new URLSearchParams();
 
         // cut query string and set it as params
@@ -95,18 +94,16 @@ export const useApiStore = defineStore('api', {
 
         // add authentication info as url parameters
         // use signature instead of token because it is visible
-        params.append('user_id', state.userId);
-        params.append('ass_id', state.assId);
         params.append('context_id', state.contextId);
         params.append('as_admin', state.asAdmin);
-        params.append('signature', md5(state.userId + state.assId + state.contextId + token));
 
         return {
           baseURL: baseURL,
           params: params,
           timeout: 30000,             // milliseconds
           responseType: 'json',       // default
-          responseEncoding: 'utf8',   // default
+          responseEncoding: 'utf8',   // default,
+          headers: {Authorization: 'Bearer ' + state.dataToken},
         }
       }
       return fn;
@@ -121,8 +118,7 @@ export const useApiStore = defineStore('api', {
        * @returns {string}
        */
       const fn = function (resource) {
-        const config = this.getRequestConfig(this.fileToken);
-        return config.baseURL + '/corrector/file/task/resource/' + resource.id + '/inline?' + config.params.toString();
+        return '/corrector/file/task/resource/' + resource.id + '/inline';
       }
       return fn;
     },
@@ -138,7 +134,7 @@ export const useApiStore = defineStore('api', {
        * @returns {string}
        */
       const fn = function (essay_id) {
-        const config = this.getRequestConfig(this.fileToken);
+        const config = this.getRequestConfig();
         return config.baseURL + '/corrector/file/essaytask/essay/' + essay_id + '/inline?' + config.params.toString();
       }
       return fn;
@@ -155,7 +151,7 @@ export const useApiStore = defineStore('api', {
        * @returns {string}
        */
       const fn = function (page) {
-        const config = this.getRequestConfig(this.fileToken);
+        const config = this.getRequestConfig();
         return config.baseURL + '/corrector/file/essaytask/image/' + page.id + '/inline?' + config.params.toString();
       }
       return fn;
@@ -169,7 +165,7 @@ export const useApiStore = defineStore('api', {
        * @returns {string}
        */
       const fn = function (page) {
-        const config = this.getRequestConfig(this.fileToken);
+        const config = this.getRequestConfig();
         return config.baseURL + '/corrector/file/essaytask/thumb/' + page.id + '/inline?' + config.params.toString();
       }
       return fn;
@@ -183,7 +179,7 @@ export const useApiStore = defineStore('api', {
        * @returns {string}
        */
       const fn = function (summary) {
-        const config = this.getRequestConfig(this.fileToken);
+        const config = this.getRequestConfig();
         return config.baseURL + '/corrector/file/task/summary/' + summary.id + '/inline?' + config.params.toString();
       }
       return fn;
@@ -197,7 +193,7 @@ export const useApiStore = defineStore('api', {
        * @returns {string}
        */
       const fn = function (purpose) {
-        const config = this.getRequestConfig(this.fileToken);
+        const config = this.getRequestConfig();
         return config.baseURL + '/corrector/file/task/snippets_' + purpose + '/0/attachment?' + config.params.toString();
       }
       return fn;
@@ -244,6 +240,22 @@ export const useApiStore = defineStore('api', {
   },
 
   actions: {
+    request(method, url, config = {}) {
+      return axios.request(Object.assign({
+        method: method.toUpperCase(),
+        url,
+      }, this.getRequestConfig(), config)).then(r => {
+        if (r.headers['x-edutiek-token']) {
+          console.log('new token', r.headers['x-edutiek-token']);
+          this.dataToken = r.headers['x-edutiek-token'];
+        }
+        return r;
+      });
+    },
+
+    loadEssayUrl(essay_id) {
+      return this.request('get', '/corrector/file/essaytask/essay/' + essay_id + '/inline', {responseType: 'blob'}).then(r => r.status === 200 ? r.data : null);
+    },
 
     /**
      * Clear the store
@@ -274,7 +286,6 @@ export const useApiStore = defineStore('api', {
       this.itemKey = localStorage.getItem('xlasCorrectorItemKey') ?? '';
       this.loginToken = localStorage.getItem('xlasCorrectorLoginToken') ?? '';
       this.dataToken = localStorage.getItem('xlasCorrectorDataToken') ?? '';
-      this.fileToken = localStorage.getItem('xlasCorrectorFileToken') ?? '';
       this.timeOffset = Math.floor(localStorage.getItem('xlasCorrectorTimeOffset') ?? 0);
 
       // check if context given by cookies differs and force a reload if neccessary
@@ -319,9 +330,6 @@ export const useApiStore = defineStore('api', {
       if (Cookies.get('xlasDataToken') != undefined && Cookies.get('xlasDataToken') != this.dataToken) {
         this.dataToken = Cookies.get('xlasDataToken');
       }
-      if (Cookies.get('xlasFileToken') != undefined && Cookies.get('xlasFileToken') != this.dataToken) {
-        this.fileToken = Cookies.get('xlasFileToken');
-      }
 
       // remove the cookies
       // needed to distinct the call from the backend from a later reload
@@ -334,7 +342,6 @@ export const useApiStore = defineStore('api', {
       Cookies.remove('xlasTaskId');
       Cookies.remove('xlasWriterId');
       Cookies.remove('xlasDataToken');
-      Cookies.remove('xlasFileToken');
 
       // save the state
       configStore.saveToStorage();
@@ -344,7 +351,6 @@ export const useApiStore = defineStore('api', {
       localStorage.setItem('xlasCorrectorAsAdmin', this.asAdmin);
       localStorage.setItem('xlasCorrectorItemKey', this.itemKey);
       localStorage.setItem('xlasCorrectorDataToken', this.dataToken);
-      localStorage.setItem('xlasCorrectorFileToken', this.fileToken);
 
       if (!configStore.backendUrl) {
         stores.layout().initFailure = t('apiMissingBackendUrl');
@@ -352,7 +358,7 @@ export const useApiStore = defineStore('api', {
       }
 
       if (!this.userId || !this.assId || !this.contextId
-        || !this.dataToken || !this.fileToken) {
+        || !this.dataToken) {
         await stores.user().loadFromStorage();
         return;
       }
@@ -497,7 +503,7 @@ export const useApiStore = defineStore('api', {
 
       let response = {};
       try {
-        response = await axios.get('/corrector/data', this.getRequestConfig(this.dataToken));
+        response = await this.request('get', '/corrector/data');
         this.setTimeOffset(response);
         this.refreshToken(response);
       }
@@ -546,7 +552,7 @@ export const useApiStore = defineStore('api', {
       const task_id = Item.extractTaskId(itemKey);
       const writer_id = Item.extractWriterId(itemKey);
       try {
-        response = await axios.get('/corrector/item/' + task_id + '/' + writer_id, this.getRequestConfig(this.dataToken));
+        response = await this.request('get', '/corrector/item/' + task_id + '/' + writer_id);
         this.setTimeOffset(response);
         this.refreshToken(response);
       }
@@ -609,7 +615,7 @@ export const useApiStore = defineStore('api', {
             data['Task'][Change.TYPE_POINTS] = await stores.points().getChangedData(this.lastSendingTry);
             data['Task'][Change.TYPE_SUMMARY] = await stores.summaries().getChangedData(this.lastSendingTry);
 
-            const response = await axios.put('/corrector/changes', data, this.getRequestConfig(this.dataToken));
+            const response = await this.request('put', '/corrector/changes', {data});
             this.setTimeOffset(response);
             this.refreshToken(response);
 
@@ -730,21 +736,30 @@ export const useApiStore = defineStore('api', {
         // 'file' is the POST element
         formData.append('file', file);
 
-        const response = await axios.post(
-            '/corrector/upload/task/summary/' + summary.task_id + '/' + summary.writer_id,
-            formData,
-            Object.assign(this.getRequestConfig(this.dataToken), {
-              headers: {
-                'Content-Type': 'multipart/form-data',
-              },
-              onUploadProgress: onProgress
-            }));
+        const response = await this.request(
+          'post',
+          '/corrector/upload/task/summary/' + summary.task_id + '/' + summary.writer_id,
+          {
+            data: formData,
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+            onUploadProgress: onProgress
+          });
         return response.data.id;
 
       } catch (error) {
         console.log(error);
         return false;
       }
+    },
+
+    loadSummaryPdfUrl(summary) {
+        return this.request('get', this.getSummaryPdfUrl(summary)).then(r => r.data);
+    },
+
+    loadSnippetsUrl(purpose) {
+      return this.request('get', this.getSnippetsUrl(purpose));
     },
 
     /**
@@ -774,14 +789,15 @@ export const useApiStore = defineStore('api', {
         // 'file' is the POST element
         formData.append('file', file);
 
-        const response = await axios.post(
+        const response = await this.request(
+          'post',
           '/corrector/upload/essaytask/' + entity + '/' + task_id + '/' + writer_id,
-          formData,
-          Object.assign(this.getRequestConfig(this.dataToken), {
+          {
+            data: formData,
             headers: {
               'Content-Type': 'multipart/form-data',
             }
-          }));
+          });
         return response.data.id;
 
       } catch (error) {
@@ -815,15 +831,16 @@ export const useApiStore = defineStore('api', {
         // 'file' is the POST element
         formData.append('file', file);
 
-        const response = await axios.post(
+        const response = await this.request(
+          'post',
           '/corrector/upload/task/' + entity,
-          formData,
-          Object.assign(this.getRequestConfig(this.dataToken), {
+          {
+            data: formData,
             headers: {
               'Content-Type': 'multipart/form-data',
             },
             onUploadProgress: onProgress
-          }));
+          });
         return response.data;
 
       } catch (error) {
@@ -863,11 +880,6 @@ export const useApiStore = defineStore('api', {
       if (response.headers['xlasdatatoken']) {
         this.dataToken = response.headers['xlasdatatoken'];
         localStorage.setItem('xlasCorrectorDataToken', this.dataToken);
-      }
-
-      if (response.headers['xlasfiletoken']) {
-        this.fileToken = response.headers['xlasfiletoken'];
-        localStorage.setItem('xlasCorrectorFileToken', this.fileToken);
       }
     },
 

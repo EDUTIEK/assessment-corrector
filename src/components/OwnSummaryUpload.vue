@@ -91,7 +91,7 @@ function deleteFile() {
 
 async function downloadFile()
 {
-  const response = await fetch(stores.api().getSummaryPdfUrl(props.summary));
+  const response = await stores.api().loadSummaryPdfUrl(props.summary);
   const blob = await response.blob();
   const title = stores.api().getDownloadTitle(
       t('ownSummaryExportFile')

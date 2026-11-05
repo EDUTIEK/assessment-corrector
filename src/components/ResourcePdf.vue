@@ -18,8 +18,8 @@ const ResourceNode = ref();
 
 let pdfjs;
 
-onMounted(() => {
-  pdfjs = createPDFJsApi(ResourceNode.value, './annotate-pdf/pdfjs-dist/web/viewer.html', resource.url, {viewOnly: true});
+onMounted(async () => {
+  pdfjs = createPDFJsApi(ResourceNode.value, './annotate-pdf/pdfjs-dist/web/viewer.html', resource.url, {viewOnly: true, headers: stores.api().getRequestConfig().headers});
   handleFocusChange();
 });
 

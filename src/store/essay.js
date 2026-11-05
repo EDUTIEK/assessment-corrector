@@ -11,6 +11,17 @@ import PdfAnnotator from '@/lib/PdfAnnotator';
 const storage = getStorage('essay');
 const annotator = new PdfAnnotator();
 
+const promiseWithResolvers = () => {
+  const obj = {};
+  obj.promise = new Promise((ok, err) => {
+    obj.resolve = ok;
+    obj.reject = err;
+  });
+  return obj;
+};
+
+const urlSync = promiseWithResolvers();
+
 export const useEssayStore = defineStore('essay', {
   state: () => {
     return {
@@ -32,6 +43,12 @@ export const useEssayStore = defineStore('essay', {
   },
 
   actions: {
+    waitForUrl() {
+      if (this.url) {
+        return Promise.resolve(this.url);
+      }
+      return urlSync.promise;
+    },
     async clearStorage() {
       try {
         await storage.clear();
@@ -68,17 +85,22 @@ export const useEssayStore = defineStore('essay', {
     async handleFile(data) {
       if (data['pdf_version'] && stores.settings().markingInPdf) {
         data['url'] = stores.api().getEssayUrl(data['id']);
-        if (await this.fetchFile(data['url'])) {
-          annotator.load(data['url']);
+        if (urlSync.resolve) {
+          urlSync.resolve(data['url']);
+          delete urlSync.resolve;
+        }
+        if (await stores.api().request('get', data['url'])) {
+          annotator.load(data['url'], {headers: stores.api().getRequestConfig().headers});
         }
       } else {
         annotator.unload();
       }
     },
 
-    async fetchFile(url) {
+    /*async fetchFile(url) {
       try {
         console.log('preload essay pdf ...');
+        const ret = stores.api().loadEssayUrl();
         await axios(url, {responseType: 'blob', timeout: 60000});
         // resource.objectUrl = URL.createObjectURL(response.data)
         console.log('finished. ');
@@ -87,7 +109,7 @@ export const useEssayStore = defineStore('essay', {
         console.error(error);
         return false;
       }
-    },
+    },*/
 
     /**
      * Apply the marks and comments to the essay pdf

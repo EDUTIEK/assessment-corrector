@@ -6,11 +6,11 @@ export default class PdfAnnotator {
 
   element = null;
 
-  async load(url) {
+  async load(url, options = {}) {
     await this.unload();
     this.element = document.createElement('div');
     document.body.appendChild(this.element);
-    this.pdf = createPDFJsApi(this.element, './annotate-pdf/pdfjs-dist/web/viewer.html', url);
+    this.pdf = createPDFJsApi(this.element, './annotate-pdf/pdfjs-dist/web/viewer.html', url, options);
   }
 
   async unload() {
