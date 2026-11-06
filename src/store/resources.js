@@ -165,7 +165,8 @@ export const useResourcesStore = defineStore('resources', {
         if (resource.hasFileToLoad()) {
           try {
             console.log('preload ' + resource.title + '...');
-            response = await stores.api().request('get', resource.url, { responseType: 'blob', timeout: 60000 });
+            response = await stores.api().request('get', resource.url,
+              { responseType: 'blob', timeout: 60000 });
             // resource.objectUrl = URL.createObjectURL(response.data)
             console.log('finished. ');
           }

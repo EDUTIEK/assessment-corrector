@@ -26,8 +26,7 @@ export const useApiStore = defineStore('api', {
       contextId: '',                      // identifying id of the context for permission checks
       asAdmin: '',                        // app is opened for administrator (permission will be checked in the backend)
       itemKey: '',                        // identifying key of the correction item
-      loginToken: '',                     // authentication token for login
-      dataToken: '',                      // authentication token for transmission if data
+      userToken: '',                      // authentication token
       timeOffset: 0,                      // difference between server time and client time (ms)
 
       // not saved
@@ -47,31 +46,6 @@ export const useApiStore = defineStore('api', {
 
     storedItemKey: state => localStorage.getItem('xlasCorrectorItemKey'),
 
-    getStartRequestConfig(state) {
-
-      let baseURL = stores.config().backendUrl;
-      let params = new URLSearchParams();
-
-      // cut query string and set it as params
-      // a REST path is added as url to the baseURL by axios calls
-      let position = baseURL.search(/\?+/);
-      if (position != -1) {
-        params = new URLSearchParams(baseURL.substr(position))
-        baseURL = baseURL.substr(0, position);
-      }
-
-      return {
-        baseURL: baseURL,
-        params: params,
-        timeout: 30000,             // milliseconds
-        responseType: 'json',       // default
-        responseEncoding: 'utf8',   // default
-        headers: {
-          'Authorization': 'Bearer ' + state.loginToken
-        }
-      }
-    },
-
     getRequestConfig(state) {
 
       /**
@@ -81,7 +55,7 @@ export const useApiStore = defineStore('api', {
        * @returns {{baseURL: (string|*), responseType: string, responseEncoding: string, params: URLSearchParams, timeout: number}}
        */
       const fn = () => {
-        let baseURL = state.backendUrl;
+        let baseURL = stores.config().backendUrl;
         let params = new URLSearchParams();
 
         // cut query string and set it as params
@@ -92,18 +66,27 @@ export const useApiStore = defineStore('api', {
           baseURL = baseURL.substr(0, position);
         }
 
-        // add authentication info as url parameters
-        // use signature instead of token because it is visible
-        params.append('context_id', state.contextId);
-        params.append('as_admin', state.asAdmin);
+        // add parameters
+        // the userId is not sent directly, but determined from the token
+        if (state.assId) {
+          params.append('ass_id', state.assId);
+        }
+        if (state.contextId) {
+          params.append('context_id', state.contextId);
+        }
+        if (state.asAdmin) {
+          params.append('as_admin', state.asAdmin);
+        }
 
         return {
           baseURL: baseURL,
           params: params,
           timeout: 30000,             // milliseconds
           responseType: 'json',       // default
-          responseEncoding: 'utf8',   // default,
-          headers: {Authorization: 'Bearer ' + state.dataToken},
+          responseEncoding: 'utf8',   // default
+          headers: {
+            'Authorization': 'Bearer ' + state.userToken
+          }
         }
       }
       return fn;
@@ -240,21 +223,50 @@ export const useApiStore = defineStore('api', {
   },
 
   actions: {
+
+    /**
+     * Send a request to the backend
+     * @returns {Promise<axios.AxiosResponse<any>>}
+     */
     request(method, url, config = {}) {
+
       return axios.request(Object.assign({
-        method: method.toUpperCase(),
-        url,
-      }, this.getRequestConfig(), config)).then(r => {
-        if (r.headers['x-edutiek-token']) {
-          console.log('new token', r.headers['x-edutiek-token']);
-          this.dataToken = r.headers['x-edutiek-token'];
+          method: method.toUpperCase(),
+          url: url,
+        }, this.getRequestConfig(), config)
+      ).then(response => {
+
+        // Refresh the auth token with the value from the REST response
+        // Each REST call will generate a new auth token
+        // A token has only a certain valid time (e.g. one our)
+        // Within this time a new REST call must be made to get a new valid token
+        const token = response.headers['x-access-token'];
+        if (token) {
+          console.log('new token', token);
+          this.userToken = token;
+          localStorage.setItem('xlasCorrectorUserToken', token);
         }
-        return r;
+
+        // Set the offset between server time and client time
+        // The offset is used to calculate the correct remaining time of the task
+        // The offset should be set from the response of a REST call
+        // when the response data transfer is short (JSON)
+        const time = response.headers['x-server-time'];
+        if (time) {
+          console.log('new time', time);
+          const serverTimeMs = time * 1000;
+          const clientTimeMs = Date.now();
+          this.timeOffset = clientTimeMs - serverTimeMs;
+          localStorage.setItem('xlasCorrectorTimeOffset', this.timeOffset);
+        }
+        return response;
       });
     },
 
     loadEssayUrl(essay_id) {
-      return this.request('get', '/corrector/file/essaytask/essay/' + essay_id + '/inline', {responseType: 'blob'}).then(r => r.status === 200 ? r.data : null);
+      return this.request('get', '/corrector/file/essaytask/essay/' + essay_id + '/inline',
+        {responseType: 'blob'})
+        .then(r => r.status === 200 ? r.data : null);
     },
 
     /**
@@ -284,8 +296,7 @@ export const useApiStore = defineStore('api', {
       this.contextId = localStorage.getItem('xlasCorrectorContextId') ?? '';
       this.asAdmin = localStorage.getItem('xlasCorrectorAsAdmin') ?? '';
       this.itemKey = localStorage.getItem('xlasCorrectorItemKey') ?? '';
-      this.loginToken = localStorage.getItem('xlasCorrectorLoginToken') ?? '';
-      this.dataToken = localStorage.getItem('xlasCorrectorDataToken') ?? '';
+      this.userToken = localStorage.getItem('xlasCorrectorUserToken') ?? '';
       this.timeOffset = Math.floor(localStorage.getItem('xlasCorrectorTimeOffset') ?? 0);
 
       // check if context given by cookies differs and force a reload if neccessary
@@ -327,8 +338,8 @@ export const useApiStore = defineStore('api', {
       if (Cookies.get('xlasReturnUrl') != undefined && Cookies.get('xlasReturnUrl') != configStore.returnUrl) {
         configStore.returnUrl = Cookies.get('xlasReturnUrl');
       }
-      if (Cookies.get('xlasDataToken') != undefined && Cookies.get('xlasDataToken') != this.dataToken) {
-        this.dataToken = Cookies.get('xlasDataToken');
+      if (Cookies.get('xlasUserToken') != undefined && Cookies.get('xlasUserToken') != this.userToken) {
+        this.userToken = Cookies.get('xlasUserToken');
       }
 
       // remove the cookies
@@ -341,7 +352,7 @@ export const useApiStore = defineStore('api', {
       Cookies.remove('xlasAsAdmin');
       Cookies.remove('xlasTaskId');
       Cookies.remove('xlasWriterId');
-      Cookies.remove('xlasDataToken');
+      Cookies.remove('xlasUserToken');
 
       // save the state
       configStore.saveToStorage();
@@ -350,15 +361,14 @@ export const useApiStore = defineStore('api', {
       localStorage.setItem('xlasCorrectorContextId', this.contextId);
       localStorage.setItem('xlasCorrectorAsAdmin', this.asAdmin);
       localStorage.setItem('xlasCorrectorItemKey', this.itemKey);
-      localStorage.setItem('xlasCorrectorDataToken', this.dataToken);
+      localStorage.setItem('xlasCorrectorUserToken', this.userToken);
 
       if (!configStore.backendUrl) {
         stores.layout().initFailure = t('apiMissingBackendUrl');
         return;
       }
 
-      if (!this.userId || !this.assId || !this.contextId
-        || !this.dataToken) {
+      if (!this.userId || !this.assId || !this.contextId || !this.userToken) {
         await stores.user().loadFromStorage();
         return;
       }
@@ -504,8 +514,6 @@ export const useApiStore = defineStore('api', {
       let response = {};
       try {
         response = await this.request('get', '/corrector/data');
-        this.setTimeOffset(response);
-        this.refreshToken(response);
       }
       catch (error) {
         console.error(error);
@@ -553,8 +561,6 @@ export const useApiStore = defineStore('api', {
       const writer_id = Item.extractWriterId(itemKey);
       try {
         response = await this.request('get', '/corrector/item/' + task_id + '/' + writer_id);
-        this.setTimeOffset(response);
-        this.refreshToken(response);
       }
       catch (error) {
         console.error(error);
@@ -596,7 +602,7 @@ export const useApiStore = defineStore('api', {
      * Periodically send changes to the backend
      * Timer is set in initialisation
      *
-     * @param bool wait    wait some seconds for a running sending to finish (if not called by timer)
+     * @param bool wait some seconds for a running sending to finish (if not called by timer)
      * @return bool
      */
     async saveChangesToBackend(wait = false) {
@@ -616,8 +622,6 @@ export const useApiStore = defineStore('api', {
             data['Task'][Change.TYPE_SUMMARY] = await stores.summaries().getChangedData(this.lastSendingTry);
 
             const response = await this.request('put', '/corrector/changes', {data});
-            this.setTimeOffset(response);
-            this.refreshToken(response);
 
             for (const component in response.data ?? []) {
               const changes = response.data[component];
@@ -647,24 +651,17 @@ export const useApiStore = defineStore('api', {
         formData.append('login', login);
         formData.append('password', password);
 
-        stores.layout().loginMessage = '';
         this.setSending(true);
-        const response = await axios.post(
-          '/corrector/start/login',
-          formData,
-          this.getStartRequestConfig
-        );
-
+        const response = await this.request('post', '/corrector/start/login', {data: formData});
         this.setSending(false);
 
-        this.loginToken = response.data.token;
         this.userId = response.data.user_id;
         localStorage.setItem('xlasCorrectorUserId', this.userId);
-        localStorage.setItem('xlasCorrectorLoginToken', this.loginToken);
         await stores.user().loadFromBackend(response.data);
         return new ApiResult(true);
 
       } catch (error) {
+        console.log(error);
         this.setSending(false);
         if (error.response?.status === 401) {
           return new ApiResult(false, 401, error.response.data?.failed_message);
@@ -680,18 +677,13 @@ export const useApiStore = defineStore('api', {
     async sendLogout() {
       try {
         this.setSending(true);
-        const response = await axios.put(
-          '/corrector/start/logout',
-          null,
-          this.getStartRequestConfig
-        );
-
+        const response = await this.request('put', '/corrector/start/logout');
         this.setSending(false);
 
         this.userId = '';
-        this.loginToken = '';
+        this.userToken = '';
         localStorage.setItem('xlasCorrectorUserId', '');
-        localStorage.setItem('xlasCorrectorLoginToken', '');
+        localStorage.setItem('xlasCorrectorUserToken', '');
         await stores.user().clearStorage();
         stores.layout().initialized = false;
         return new ApiResult(true);
@@ -708,14 +700,8 @@ export const useApiStore = defineStore('api', {
     async sendAgreement() {
       try {
         this.setSending(true);
-        const response = await axios.put(
-          '/corrector/start/agreement',
-          null,
-          this.getStartRequestConfig
-        );
-
+        const response = await this.request('put', '/corrector/start/agreement');
         this.setSending(false);
-        stores.layout().showAgreement = false;
         await stores.user().setAccepted();
         return new ApiResult(true);
 
@@ -849,39 +835,6 @@ export const useApiStore = defineStore('api', {
       }
     },
 
-    /**
-     * Set the offset between server time and client time
-     * The offset is used to calculate the correct remaining time of the task
-     * The offset should be set from the response of a REST call
-     * when the response data transfer is short (no files)
-     */
-    setTimeOffset(response) {
-      if (response.headers['xlastime']) {
-        const serverTimeMs = response.headers['xlastime'] * 1000;
-        const clientTimeMs = Date.now();
-
-        this.timeOffset = clientTimeMs - serverTimeMs;
-        localStorage.setItem('xlasCorrectorTimeOffset', this.timeOffset);
-      }
-    },
-
-    /**
-     * Refresh the auth token with the value from the REST response
-     * Each REST call will generate a new auth token
-     * A token has only a certain valid time (e.g. one our)
-     * Within this time a new REST call must be made to get a new valid token
-     */
-    refreshToken(response) {
-      if (response.headers['xlaslogintoken']) {
-        this.loginToken = response.headers['xlaslogintoken'];
-        localStorage.setItem('xlasCorrectorLoginToken', this.loginToken);
-      }
-
-      if (response.headers['xlasdatatoken']) {
-        this.dataToken = response.headers['xlasdatatoken'];
-        localStorage.setItem('xlasCorrectorDataToken', this.dataToken);
-      }
-    },
 
     /**
      * Check if a sending of changes is still running
