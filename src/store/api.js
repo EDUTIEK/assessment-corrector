@@ -263,6 +263,9 @@ export const useApiStore = defineStore('api', {
       });
     },
 
+    /**
+     * @returns {Promise<* | null>}
+     */
     loadEssayUrl(essay_id) {
       return this.request('get', '/corrector/file/essaytask/essay/' + essay_id + '/inline',
         {responseType: 'blob'})
