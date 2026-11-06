@@ -4,7 +4,7 @@
  */
 import {clearAllStores, stores} from "@/store";
 import {defineStore} from 'pinia';
-import axios from 'axios'
+import axios from 'axios';
 import Cookies from 'js-cookie';
 import i18n from "@/plugins/i18n";
 import md5 from 'md5';
@@ -92,20 +92,6 @@ export const useApiStore = defineStore('api', {
       return fn;
     },
 
-    getResourceUrl(state) {
-
-      /**
-       * Get the Url for loading a file ressource
-       *
-       * @param {Resource} resource
-       * @returns {string}
-       */
-      const fn = function (resource) {
-        return '/corrector/file/task/resource/' + resource.id + '/inline';
-      }
-      return fn;
-    },
-
     /**
      * Get the Url for loading an essay as pdf file
      */
@@ -123,37 +109,6 @@ export const useApiStore = defineStore('api', {
       return fn;
     },
 
-    /**
-     * Get the Url for loading a page image
-     */
-    getImageUrl(state) {
-
-      /**
-       * Get the Url for loading a page image
-       * @param {Page} page
-       * @returns {string}
-       */
-      const fn = function (page) {
-        const config = this.getRequestConfig();
-        return config.baseURL + '/corrector/file/essaytask/image/' + page.id + '/inline?' + config.params.toString();
-      }
-      return fn;
-    },
-
-    getThumbUrl(state) {
-
-      /**
-       * Get the Url for loading a page thumbnail
-       * @param {Page} page
-       * @returns {string}
-       */
-      const fn = function (page) {
-        const config = this.getRequestConfig();
-        return config.baseURL + '/corrector/file/essaytask/thumb/' + page.id + '/inline?' + config.params.toString();
-      }
-      return fn;
-    },
-
     getSummaryPdfUrl(state) {
 
       /**
@@ -164,20 +119,6 @@ export const useApiStore = defineStore('api', {
       const fn = function (summary) {
         const config = this.getRequestConfig();
         return config.baseURL + '/corrector/file/task/summary/' + summary.id + '/inline?' + config.params.toString();
-      }
-      return fn;
-    },
-
-    getSnippetsUrl(state) {
-
-      /**
-       * Get the Url for loading a page thumbnail
-       * @param {string} purpose
-       * @returns {string}
-       */
-      const fn = function (purpose) {
-        const config = this.getRequestConfig();
-        return config.baseURL + '/corrector/file/task/snippets_' + purpose + '/0/attachment?' + config.params.toString();
       }
       return fn;
     },
@@ -229,12 +170,13 @@ export const useApiStore = defineStore('api', {
      * @returns {Promise<axios.AxiosResponse<any>>}
      */
     request(method, url, config = {}) {
-
+      const defaultConf = this.getRequestConfig();
       return axios.request(Object.assign({
-          method: method.toUpperCase(),
-          url: url,
-        }, this.getRequestConfig(), config)
-      ).then(response => {
+        method: method.toUpperCase(),
+        url: url,
+      }, defaultConf, config, {
+        headers: Object.assign(defaultConf.headers, config),
+      })).then(response => {
 
         // Refresh the auth token with the value from the REST response
         // Each REST call will generate a new auth token
@@ -264,12 +206,13 @@ export const useApiStore = defineStore('api', {
     },
 
     /**
-     * @returns {Promise<* | null>}
+     * @returns {Promise<Blob | null>}
      */
-    loadEssayUrl(essay_id) {
-      return this.request('get', '/corrector/file/essaytask/essay/' + essay_id + '/inline',
-        {responseType: 'blob'})
-        .then(r => r.status === 200 ? r.data : null);
+    loadBlob(url, config = {}) {
+      return this.request('get', url, Object.assign({
+        responseType: 'blob',
+        timeout: 60000,
+      }, config)).then(r => r.status === 200 ? r.data : null);
     },
 
     /**
@@ -743,12 +686,12 @@ export const useApiStore = defineStore('api', {
       }
     },
 
-    loadSummaryPdfUrl(summary) {
-        return this.request('get', this.getSummaryPdfUrl(summary)).then(r => r.data);
+    loadSummaryPdf(summary) {
+        return this.loadBlob(this.getSummaryPdfUrl(summary));
     },
 
-    loadSnippetsUrl(purpose) {
-      return this.request('get', this.getSnippetsUrl(purpose));
+    loadSnippets(purpose) {
+      return this.loadBlob('/corrector/file/task/snippets_' + purpose + '/0/attachment');
     },
 
     /**

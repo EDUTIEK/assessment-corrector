@@ -5,7 +5,6 @@
 import {getStorage} from "@/lib/Storage";
 import {defineStore} from 'pinia';
 import {stores} from "@/store";
-import axios from 'axios';
 import Resource from "@/data/Resource";
 
 const storage = getStorage('resources');
@@ -114,18 +113,18 @@ export const useResourcesStore = defineStore('resources', {
         for (const item of data) {
           const resource = new Resource(item);
           if (resource.hasFileToLoad()) {
-            resource.url = apiStore.getResourceUrl(resource);
+            resource.rawPath = '/corrector/file/task/resource/' + resource.id + '/inline';
+            const blob = await apiStore.loadBlob(resource.rawPath);
+            resource.url = URL.createObjectURL(blob);
           }
           if (resource.type == Resource.TYPE_URL) {
-            resource.url = resource.source
+            resource.url = resource.source;
           }
           this.resources[resource.getKey()] = resource;
           await storage.setItem(resource.getKey(), resource.getData());
         }
         await storage.setItem('keys', Object.keys(this.resources));
 
-        // proload files in the background (don't wait)
-        this.loadFiles();
         this.selectFirstEmbeddedResource();
       }
       catch (err) {
@@ -165,8 +164,7 @@ export const useResourcesStore = defineStore('resources', {
         if (resource.hasFileToLoad()) {
           try {
             console.log('preload ' + resource.title + '...');
-            response = await stores.api().request('get', resource.url,
-              { responseType: 'blob', timeout: 60000 });
+            response = await stores.api().loadBlob(resource.rawPath);
             // resource.objectUrl = URL.createObjectURL(response.data)
             console.log('finished. ');
           }

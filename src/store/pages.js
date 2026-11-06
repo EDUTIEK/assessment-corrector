@@ -4,7 +4,6 @@
 import {getStorage} from "@/lib/Storage";
 import {defineStore} from 'pinia';
 import {stores} from "@/store/index";
-import axios from 'axios';
 import Page from '@/data/Page';
 
 const storage = getStorage('pages');
@@ -185,8 +184,6 @@ export const usePagesStore = defineStore('pages', {
 
         for (const page_data of data) {
           const page = new Page(page_data);
-          page.url = apiStore.getImageUrl(page);
-          page.thumb_url = apiStore.getThumbUrl(page);
           if (page.item_key == apiStore.itemKey) {
             await storage.setItem(page.getKey(), page.getData());
             this.pages[page.key] = page;
@@ -196,7 +193,7 @@ export const usePagesStore = defineStore('pages', {
 
         this.calculateMinMaxPage();
         this.selectByPageNo(this.minPage);
-        this.loadFiles();
+        await this.loadFiles();
       }
       catch (err) {
         console.log(err);
@@ -214,15 +211,15 @@ export const usePagesStore = defineStore('pages', {
       try {
         for (const key in this.pages) {
           const page = this.pages[key];
-          let response;
 
           if (page) {
-            response = await axios(page.url, { responseType: 'blob', timeout: 60000 });
-            // page.objectUrl = URL.createObjectURL(response.data);
+            const [img, thumb] = await Promise.all([
+              stores.api().loadBlob('/corrector/file/essaytask/image/' + page.id + '/inline'),
+              stores.api().loadBlob('/corrector/file/essaytask/thumb/' + page.id + '/inline'),
+            ]);
+            page.url = URL.createObjectURL(img);
             this.loadedImages++;
-
-            response = await axios(page.thumb_url, { responseType: 'blob', timeout: 60000 });
-            // page.thumbObjectUrl = URL.createObjectURL(response.data);
+            page.thumbUrl = URL.createObjectURL(thumb);
             this.loadedThumbs++;
           }
         }

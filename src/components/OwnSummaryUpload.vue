@@ -91,18 +91,17 @@ function deleteFile() {
 
 async function downloadFile()
 {
-  const response = await stores.api().loadSummaryPdfUrl(props.summary);
-  const blob = await response.blob();
+  const response = await stores.api().loadSummaryPdf(props.summary);
   const title = stores.api().getDownloadTitle(
       t('ownSummaryExportFile')
       + ' ' + Item.buildPositionText(stores.corrections().getCorrection(props.summary.correction_key)?.position)
       + (stores.items().isFinal ? '' : ' - ' + t('ownSummaryExportDraft'))
   );
 
-  const url = URL.createObjectURL(blob);
+  const url = URL.createObjectURL(response);
   const a = document.createElement('a');
   a.href = url;
-  a.download = title
+  a.download = title;
 
   document.body.appendChild(a); // required in Firefox
   a.click();

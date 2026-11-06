@@ -116,11 +116,10 @@ function rowFocusout(event) {
 
 async function download()
 {
-  const response = await stores.api().loadSnippetsUrl(snippetsStore.list_purpose);
-  const blob = await response.blob();
+  const response = await stores.api().loadSnippets(snippetsStore.list_purpose);
   const title = stores.api().getDownloadTitle(t('snippetsExportFile'), false);
 
-  const url = URL.createObjectURL(blob);
+  const url = URL.createObjectURL(response);
   const a = document.createElement('a');
   a.href = url;
   a.download = title

@@ -8,7 +8,6 @@ import createPDFJsApi from 'annotate-pdf/pdfjs-api';
 import {nextTick, onMounted, ref, watch} from 'vue';
 import Comment from "@/data/Comment";
 import Mark from "@/data/Mark";
-import axios from 'axios';
 import i18n from "@/plugins/i18n";
 
 const essayStore = stores.essay();
@@ -36,7 +35,7 @@ onMounted(async () => {
   showLabels.value = preferencesStore.display_labels;
   selectWords.value = preferencesStore.select_words;
 
-  pdfjs = createPDFJsApi(EssayNode.value, './annotate-pdf/pdfjs-dist/web/viewer.html', await essayStore.waitForUrl(), {headers: stores.api().getRequestConfig().headers});
+  pdfjs = createPDFJsApi(EssayNode.value, './annotate-pdf/pdfjs-dist/web/viewer.html', await essayStore.url, {headers: stores.api().getRequestConfig().headers});
   pdfjs.setDefaultColor(stores.config().getDefaultCommentColor(true));
   pdfjs.enableWordSelection(!!selectWords.value);
   pdfjs.enableTokenButtons(true);
@@ -349,15 +348,14 @@ async function download(marked)
     }
 
   } else {
-    const response = await fetch(essayStore.url);
-    blob = await response.blob();
+    blob = await stores.api().loadBlob(essayStore.url);
     title = stores.api().getDownloadTitle(t('essayPdfPureWritingFile'));
   }
 
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = title
+  a.download = title;
 
   document.body.appendChild(a); // required in Firefox
   a.click();

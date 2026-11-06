@@ -22,7 +22,7 @@ onMounted(() => {
 async function showPdf(summary) {
   if (summary && summary.pdf) {
     const url = stores.api().getSummaryPdfUrl(summary);
-    pdfjs = createPDFJsApi(PdfNode.value, './annotate-pdf/pdfjs-dist/web/viewer.html', url, {viewOnly: true, headers: store.api().getRequestConfig().headers});
+    pdfjs = createPDFJsApi(PdfNode.value, './annotate-pdf/pdfjs-dist/web/viewer.html', url, {viewOnly: true, headers: stores.api().getRequestConfig().headers});
   }
 }
 </script>
