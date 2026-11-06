@@ -180,7 +180,7 @@ async function download()
             <td class="col-right">
               <v-btn class="trashButton" density="compact" size="small" variant="text" prepend-icon="mdi-delete-outline"
                      tabindex="0"
-                     @click="snippetsStore.deleteSnippet(snippet.key);"
+                     @click.stop="snippetsStore.deleteSnippet(snippet.key);"
               >
                 <span class="sr-only">{{ $t('snippetsDelete') }}</span>
               </v-btn>
