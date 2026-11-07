@@ -98,11 +98,11 @@ export default class Assessment {
         if (data.finished_gradings !== undefined && data.finished_gradings !== null) {
             this.finished_gradings = parseInt(data.finished_gradings);
         }
-        this.key = Task.buildKey(this.task_id);
+        this.key = Assessment.buildKey(this.ass_id, this.context_id);
     }
 
     /**
-     * Get a string key of the task
+     * Get a string key of the assessment
      * @return {string}
      */
     getKey() {

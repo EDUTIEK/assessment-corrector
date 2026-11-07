@@ -26,8 +26,10 @@ async function sendLogin() {
   const result = await stores.api().sendLogin(login.value, password.value);
   if (result.ok) {
     showLogin(false);
+
     if (stores.user().hasToAccept) {
       showAgreement(true);
+    } else {
       stores.api().loadAssessmentsFromBackend();
     }
   } else {
