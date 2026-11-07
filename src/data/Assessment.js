@@ -6,8 +6,8 @@
 export default class Assessment {
 
     static order(ass1, ass2) {
-        return ass1.title < ass2.title ? -1
-            : ass1.parent_title > ass2.parent_title ? 1
+        return ass1.parent_title < ass2.parent_title ? -1
+            : ass1.title > ass2.title ? 1
                 : 0
     }
 
