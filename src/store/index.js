@@ -18,15 +18,22 @@ import { useSummariesStore } from "@/store/summaries";
 import { useTasksStore } from "@/store/tasks";
 import { useTemplateStore } from "@/store/templates";
 import { useUserStore } from "@/store/user";
+import { useAssessmentsStore } from '@/store/assessments';
 
 /**
  * Service locator for pinia stores
  */
-export const stores = {
+
+const startStores = {
     api: () => useApiStore(),
+    assessments: () => useAssessmentsStore(),
+    config: () => useConfigStore(),
+    user: () => useUserStore()
+}
+
+const assessmentStores = {
     changes: () => useChangesStore(),
     comments: () => useCommentsStore(),
-    config: () => useConfigStore(),
     corrections: () => useCorrectionsStore(),
     criteria: () => useCriteriaStore(),
     essay: () => useEssayStore(),
@@ -42,15 +49,28 @@ export const stores = {
     summaries: () => useSummariesStore(),
     tasks: () => useTasksStore(),
     templates: () => useTemplateStore(),
-    user: () => useUserStore()
 }
 
-/**
- * Clear all data of the stores
- */
-export async function clearAllStores() {
+export const stores = Object.assign({}, startStores, assessmentStores);
+
+async function clearStores(stores) {
     for (const key of Object.values(stores)) {
         const store = key();
         await store.clearStorage();
     }
+}
+
+/**
+ * Clear all data of the assessments related stores
+ */
+export async function clearAssessmentStores() {
+    await clearStores(assessmentStores);
+}
+
+/**
+ * Clear all data of all stores
+ */
+export async function clearAllStores() {
+    await clearStores(startStores);
+    await clearStores(assessmentStores);
 }

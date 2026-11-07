@@ -5,7 +5,7 @@
 import Help from "@/components/Help.vue";
 import Items from "@/components/Items.vue";
 import Tasks from "@/components/Tasks.vue";
-import {stores} from "@/store";
+import { clearAllStores, stores } from "@/store";
 import { nextTick, watch } from 'vue';
 
 async function handleFocusChange() {
@@ -26,6 +26,7 @@ watch(() => stores.layout().focusChange, handleFocusChange);
 async function returnToBackend() {
   if (stores.changes().countChanges == 0 || await stores.api().saveChangesToBackend(true)) {
     if (stores.config().returnUrl) {
+      await clearAllStores();
       window.location = stores.config().returnUrl;
     } else {
       stores.api().sendLogout();

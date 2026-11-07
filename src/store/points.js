@@ -292,12 +292,12 @@ export const usePointsStore = defineStore('points', {
      */
     async clearStorage() {
       try {
+        this.$reset();
         await storage.clear();
       }
       catch (err) {
         console.log(err);
       }
-      this.$reset();
     },
 
     /**

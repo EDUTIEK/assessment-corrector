@@ -28,6 +28,7 @@ async function sendLogin() {
     showLogin(false);
     if (stores.user().hasToAccept) {
       showAgreement(true);
+      stores.api().loadAssessmentsFromBackend();
     }
   } else {
     loginMessage.value = result.message;
@@ -41,6 +42,7 @@ async function sendAgreement() {
     agreementSending.value = false;
     if (result.ok) {
       showAgreement(false);
+      stores.api().loadAssessmentsFromBackend();
     }
   }
 }

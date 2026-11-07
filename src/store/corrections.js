@@ -120,8 +120,8 @@ export const useCorrectionsStore = defineStore('corrections', {
 
     async clearStorage() {
       try {
-        await storage.clear();
         this.$reset();
+        await storage.clear();
       }
       catch (err) {
         console.log(err);

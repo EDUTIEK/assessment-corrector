@@ -131,13 +131,13 @@ export const usePagesStore = defineStore('pages', {
      */
     async clearStorage() {
       try {
+        this.purgeFiles();
+        this.$reset();
         await storage.clear();
       }
       catch (err) {
         console.log(err);
       }
-      this.purgeFiles();
-      this.$reset();
     },
 
     /**

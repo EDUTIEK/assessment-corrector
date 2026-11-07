@@ -135,14 +135,22 @@ export const useConfigStore = defineStore('config', {
   actions: {
 
     async clearStorage() {
-      // Don't clear the config store because these values need to be kept for a page reload
+      try {
+        this.$reset();
+        await storage.clear();
+      }
+      catch (err) {
+        console.log(err);
+      }
     },
 
     async loadFromConfig() {
       try {
+        this.$reset();
         const response = await fetch(`${import.meta.env.BASE_URL}config.json`, { cache: 'no-store' });
         if (response.ok) {
           this.applyData(await response.json());
+          this.saveToStorage();
         }
       } catch (err) {
         console.log(err);
@@ -151,7 +159,7 @@ export const useConfigStore = defineStore('config', {
 
     async loadFromStorage() {
       try {
-        //this.applyData(await storage.getItem('config'));
+        this.applyData(await storage.getItem('config'));
       }
       catch (err) {
         console.log(err);

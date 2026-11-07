@@ -113,12 +113,12 @@ export const useSnippetsStore = defineStore('snippets', {
 
     async clearStorage() {
       try {
+        this.$reset();
         await storage.clear();
       }
       catch (err) {
         console.log(err);
       }
-      this.$reset();
     },
 
     async loadFromStorage() {

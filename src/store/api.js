@@ -2,7 +2,7 @@
  * API Store
  * Handles the communication with the backend
  */
-import {clearAllStores, stores} from "@/store";
+import {clearAllStores, clearAssessmentStores, stores} from "@/store";
 import {defineStore} from 'pinia';
 import axios from 'axios';
 import Cookies from 'js-cookie';
@@ -219,13 +219,25 @@ export const useApiStore = defineStore('api', {
      * Clear the store
      */
     async clearStorage() {
-      // Don't clear the api store because these values need to be kept for a page reload
+      try {
+        this.$reset();
+        localStorage.removeItem('xlasCorrectorUserId');
+        localStorage.removeItem('xlasCorrectorAssId');
+        localStorage.removeItem('xlasCorrectorContextId');
+        localStorage.removeItem('xlasCorrectorAsAdmin');
+        localStorage.removeItem('xlasCorrectorItemKey');
+        localStorage.removeItem('xlasCorrectorUserToken');
+        localStorage.removeItem('xlasCorrectorTimeOffset');
+      }
+      catch (err) {
+        console.log(err);
+      }
     },
 
     /**
      * Init the state
-     * Take the state from the cookies or local store
-     * Trigger a reload of all data if cookie values differ from local store
+     * Take the state from the cookies or from the local store
+     * Trigger a reload of all data if cookie values differ from the local store
      */
     async init() {
 
@@ -248,6 +260,7 @@ export const useApiStore = defineStore('api', {
       // check if context given by cookies differs and force a reload if neccessary
       if (Cookies.get('xlasUserId') != undefined && Cookies.get('xlasUserId') != this.userId) {
         this.userId = Cookies.get('xlasUserId');
+        this.userToken = '';
         newContext = true;
       }
       if (!!Cookies.get('xlasAssId') && Cookies.get('xlasAssId') != this.assId) {
@@ -301,21 +314,23 @@ export const useApiStore = defineStore('api', {
       Cookies.remove('xlasUserToken');
 
       // save the state
-      configStore.saveToStorage();
       localStorage.setItem('xlasCorrectorUserId', this.userId);
       localStorage.setItem('xlasCorrectorAssId', this.assId);
       localStorage.setItem('xlasCorrectorContextId', this.contextId);
       localStorage.setItem('xlasCorrectorAsAdmin', this.asAdmin);
       localStorage.setItem('xlasCorrectorItemKey', this.itemKey);
       localStorage.setItem('xlasCorrectorUserToken', this.userToken);
+      localStorage.setItem('xlasCorrectorTimeOffset', this.timeOffset);
 
+      configStore.saveToStorage();
       if (!configStore.backendUrl) {
+        await clearAllStores();
         stores.layout().initFailure = t('apiMissingBackendUrl');
         return;
       }
 
-      if (!this.userId || !this.assId || !this.contextId || !this.userToken) {
-        await stores.user().loadFromStorage();
+      if (!this.userToken || !this.userId || !this.assId || !this.contextId) {
+        await clearAllStores();
         return;
       }
 
@@ -347,7 +362,7 @@ export const useApiStore = defineStore('api', {
      */
     async initAfterReplaceDataConfirmed() {
       console.log('initAfterReplaceDataConfirmed');
-      await clearAllStores();
+      await clearAssessmentStores();
       stores.layout().showDataReplaceConfirmation = false;
       stores.layout().showItemReplaceConfirmation = false;
 
@@ -397,6 +412,8 @@ export const useApiStore = defineStore('api', {
       this.clearAllIntervals();
 
       await stores.config().loadFromStorage();
+      await stores.user().loadFromStorage();
+      await stores.assessments().loadFromStorage();
       await stores.criteria().loadFromStorage();
       await stores.items().loadFromStorage();
       await stores.layout().loadFromStorage();
@@ -447,6 +464,31 @@ export const useApiStore = defineStore('api', {
       return true;
     },
 
+    /**
+     * Load assessments from the backend
+     */
+    async loadAssessmentsFromBackend() {
+      console.log("loadAssessmentsFromBackend...");
+
+      this.setLoading(true);
+      this.clearAllIntervals();
+
+      let response = {};
+      try {
+        response = await this.request('get', '/corrector/start/assessments');
+      }
+      catch (error) {
+        console.error(error);
+        stores.layout().initFailure = t('apiLoadingDataFailed');
+        this.setLoading(false);
+        return false;
+      }
+
+      await stores.assessments().loadFromBackend(response.data);
+
+      this.setLoading(false);
+      return true;
+    },
 
     /**
      * Load common data from the backend
@@ -626,12 +668,7 @@ export const useApiStore = defineStore('api', {
         const response = await this.request('put', '/corrector/start/logout');
         this.setSending(false);
 
-        this.userId = '';
-        this.userToken = '';
-        localStorage.setItem('xlasCorrectorUserId', '');
-        localStorage.setItem('xlasCorrectorUserToken', '');
-        await stores.user().clearStorage();
-        stores.layout().initialized = false;
+        clearAllStores();
         return new ApiResult(true);
 
       } catch (error) {

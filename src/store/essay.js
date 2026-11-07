@@ -33,8 +33,8 @@ export const useEssayStore = defineStore('essay', {
   actions: {
     async clearStorage() {
       try {
-        await storage.clear();
         this.$reset();
+        await storage.clear();
       }
       catch (err) {
         console.log(err);

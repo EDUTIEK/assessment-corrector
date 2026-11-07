@@ -100,8 +100,8 @@ export const useSettingsStore = defineStore('settings', {
 
   actions: {
     async clearStorage() {
-      this.$reset();
       try {
+        this.$reset();
         await storage.clear();
       }
       catch (err) {
