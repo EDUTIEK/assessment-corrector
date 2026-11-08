@@ -329,8 +329,16 @@ export const useApiStore = defineStore('api', {
         return;
       }
 
-      if (!this.userToken || !this.userId || !this.assId || !this.contextId) {
+      if (!this.userToken || !this.userId) {
         await clearAllStores();
+        return;
+      }
+
+      await stores.user().loadFromStorage();
+      await stores.assessments().loadFromStorage();
+
+      if (!this.assId || !this.contextId) {
+        await clearAssessmentStores();
         return;
       }
 

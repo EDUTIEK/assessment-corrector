@@ -25,29 +25,6 @@ const headers = computed(() => [
   { title: t("assessmentListGradings"), key: "gradings", sortable: false, align: "end" },
 ]);
 
-function timestamp(value) {
-  if (value == null || value === "") {
-    return null;
-  }
-  const text = String(value).trim();
-  if (/^\d+$/.test(text)) {
-    const numeric = Number(text);
-    const ms = text.length <= 10 ? numeric * 1000 : numeric;
-    return Number.isFinite(ms) ? ms : null;
-  }
-  const dateOnly = text.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (dateOnly) {
-    return new Date(Number(dateOnly[1]), Number(dateOnly[2]) - 1, Number(dateOnly[3])).getTime();
-  }
-  const normalized = text.includes("T") ? text : text.replace(" ", "T");
-  const time = Date.parse(normalized);
-  return Number.isNaN(time) ? null : time;
-}
-
-function isDateOnly(value) {
-  return /^\d{4}-\d{2}-\d{2}$/.test(String(value ?? "").trim());
-}
-
 function compareTimestamps(left, right) {
   if (left == null && right == null) {
     return 0;
@@ -59,37 +36,6 @@ function compareTimestamps(left, right) {
     return 1;
   }
   return left - right;
-}
-
-function formatDate(value) {
-  const time = timestamp(value);
-  if (time == null) {
-    return value == null ? "" : String(value);
-  }
-  const date = new Date(time);
-  if (isDateOnly(value)) {
-    return date.toLocaleDateString("de-DE", { year: "numeric", month: "2-digit", day: "2-digit" });
-  }
-  return date.toLocaleString("de-DE", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
-function dateTimeAttr(value) {
-  const time = timestamp(value);
-  if (time == null) {
-    return null;
-  }
-  if (isDateOnly(value)) {
-    return String(value).trim();
-  }
-  const date = new Date(time);
-  const pad = (part) => String(part).padStart(2, "0");
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
 function isCurrent(item) {
@@ -305,14 +251,12 @@ async function selectAssessment(assessment) {
         <span v-if="isCurrent(item)" class="sr-only">, {{ $t("assessmentListCurrent") }}</span>
       </template>
 
-      <template #item.correction_start="{ value }">
-        <time v-if="dateTimeAttr(value)" :datetime="dateTimeAttr(value)">{{ formatDate(value) }}</time>
-        <template v-else>{{ formatDate(value) }}</template>
+      <template #item.correction_start="{ item }">
+        {{ item.correction_start }}
       </template>
 
-      <template #item.correction_end="{ value }">
-        <time v-if="dateTimeAttr(value)" :datetime="dateTimeAttr(value)">{{ formatDate(value) }}</time>
-        <template v-else>{{ formatDate(value) }}</template>
+      <template #item.correction_end="{ item }">
+        {{ item.correction_end }}
       </template>
 
       <template #item.gradings="{ item }">
