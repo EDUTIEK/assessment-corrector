@@ -2,6 +2,7 @@
 import {ref, computed} from "vue";
 import {stores} from "@/store";
 import Welcome from "@/components/Welcome.vue";
+import AssessmentList from "@/components/AssessmentList.vue";
 
 const login = ref('');
 const password = ref('');
@@ -57,6 +58,20 @@ async function sendLogout() {
 const showWelcome = computed(() => !stores.config().returnUrl && (!stores.api().userId || stores.user().hasToAccept));
 const showReturnButton = computed(() => !!stores.config().returnUrl);
 const showLogoutButton = computed(() => !stores.config().returnUrl && stores.api().userId);
+const showAssessmentList = computed(() =>
+  !stores.layout().initialized
+  && !!stores.api().userId
+  && !stores.user().hasToAccept
+  && !stores.layout().hasInitFailure
+  && (
+    stores.assessments().hasAssessments
+    || (
+      !stores.api().isLoading
+      && stores.api().assId === ''
+      && stores.api().contextId === ''
+    )
+  )
+);
 
 </script>
 
@@ -77,6 +92,7 @@ const showLogoutButton = computed(() => !stores.config().returnUrl && stores.api
     </v-app-bar>
 
     <welcome v-if = "showWelcome" @login="showLogin(true)"/>
+    <assessment-list v-if="showAssessmentList"/>
 
     <!--
       Login

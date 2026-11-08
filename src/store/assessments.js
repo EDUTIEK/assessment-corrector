@@ -26,7 +26,7 @@ export const useAssessmentsStore = defineStore('assessments', {
     },
     currentKey(state) {
       return stores.api().assId !== '' && stores.api().contextId !== ''
-        ? Assessment.buildKey(stores.api().assId, stores.api.contextId)
+        ? Assessment.buildKey(stores.api().assId, stores.api().contextId)
         : null;
     },
     currentAssessment(state) {

@@ -40,6 +40,18 @@ export default class Assessment {
     title = null;
 
     /**
+     * Start date of the correction (timestamp)
+     * @type {integer}
+     */
+    correction_start_ts = null;
+
+    /**
+     * End date of the correction (timestamp)
+     * @type {integer}
+     */
+    correction_end_ts = null;
+
+    /**
      * Start date of the correction
      * @type {string}
      */
@@ -59,7 +71,7 @@ export default class Assessment {
 
     /**
      * Finished gradings
-     * @type {string}
+     * @type {integer}
      */
     finished_gradings = null;
 
@@ -85,6 +97,12 @@ export default class Assessment {
         }
         if (data.title !== undefined && data.title !== null) {
             this.title = data.title.toString();
+        }
+        if (data.correction_start_ts !== undefined && data.correction_start_ts !== null) {
+            this.correction_start_ts = parseInt(data.correction_start_ts);
+        }
+        if (data.correction_end_ts !== undefined && data.correction_end_ts !== null) {
+            this.correction_end_ts = parseInt(data.correction_end_ts);
         }
         if (data.correction_start !== undefined && data.correction_start !== null) {
             this.correction_start = data.correction_start.toString();
