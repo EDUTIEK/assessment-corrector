@@ -179,8 +179,6 @@ async function selectAssessment(assessment) {
       class="assessment-list"
       :aria-busy="apiStore.isLoading ? 'true' : undefined"
   >
-    <p class="assessment-list__hint">{{ $t("assessmentListHint") }}</p>
-
     <v-data-table
         class="assessment-list__table"
         :headers="headers"
@@ -229,7 +227,7 @@ async function selectAssessment(assessment) {
                   aria-hidden="true"
               />
             </v-btn>
-            <span v-else>{{ column.title }}</span>
+            <span class="assessment-list__nosort" v-else>{{ column.title }}</span>
           </th>
         </tr>
       </template>
@@ -277,11 +275,6 @@ async function selectAssessment(assessment) {
   overflow: hidden;
 }
 
-.assessment-list h1,
-.assessment-list__hint {
-  margin: 0;
-}
-
 .assessment-list__table {
   flex: 1 1 auto;
   min-height: 0;
@@ -294,6 +287,11 @@ async function selectAssessment(assessment) {
   font-weight: 600;
   letter-spacing: normal;
   text-transform: none;
+}
+
+:deep(.assessment-list__nosort) {
+  font-weight: 600;
+  font-size: small;
 }
 
 :deep(thead th) {

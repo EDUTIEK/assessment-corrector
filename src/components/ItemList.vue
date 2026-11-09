@@ -237,8 +237,6 @@ async function selectItem(item) {
       class="item-list"
       :aria-busy="apiStore.isLoading ? 'true' : undefined"
   >
-    <p id="item-list-hint" class="item-list__hint">{{ $t("itemListHint") }}</p>
-
     <v-menu
         v-model="columnsOpen"
         :close-on-content-click="false"
@@ -327,7 +325,7 @@ async function selectItem(item) {
                   aria-hidden="true"
               />
             </v-btn>
-            <span v-else>{{ column.title }}</span>
+            <span class="item-list__nosort" v-else>{{ column.title }}</span>
           </th>
         </tr>
       </template>
@@ -364,11 +362,6 @@ async function selectItem(item) {
   overflow: hidden;
 }
 
-.item-list h1,
-.item-list__hint {
-  margin: 0;
-}
-
 .item-list__columns-btn {
   align-self: flex-start;
 }
@@ -402,6 +395,11 @@ async function selectItem(item) {
   font-weight: 600;
   letter-spacing: normal;
   text-transform: none;
+}
+
+:deep(.item-list__nosort) {
+  font-weight: 600;
+  font-size: small;
 }
 
 :deep(thead th) {
