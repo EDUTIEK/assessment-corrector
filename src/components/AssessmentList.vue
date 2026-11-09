@@ -177,10 +177,8 @@ async function selectAssessment(assessment) {
 <template>
   <section
       class="assessment-list"
-      aria-labelledby="assessment-list-heading"
       :aria-busy="apiStore.isLoading ? 'true' : undefined"
   >
-    <h1 id="assessment-list-heading" class="text-h6">{{ $t("assessmentListHeading") }}</h1>
     <p class="assessment-list__hint">{{ $t("assessmentListHint") }}</p>
 
     <v-data-table

@@ -234,10 +234,8 @@ async function selectItem(item) {
 <template>
   <section
       class="item-list"
-      aria-labelledby="item-list-heading"
       :aria-busy="apiStore.isLoading ? 'true' : undefined"
   >
-    <h1 id="item-list-heading" class="text-h6">{{ $t("itemListHeading") }}</h1>
     <p id="item-list-hint" class="item-list__hint">{{ $t("itemListHint") }}</p>
 
     <v-menu

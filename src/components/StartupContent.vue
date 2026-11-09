@@ -67,7 +67,11 @@ async function sendLogout() {
   <v-main fill-height>
 
     <v-app-bar v-if="showAppBar" elevation="1" color="white" density="compact">
-      <v-app-bar-title v-show="stores.api().isLoading">{{ $t('startupContentLoadData') }}</v-app-bar-title>
+      <v-app-bar-title>{{
+          stores.api().isLoading ? $t('startupContentLoadData')
+              : stores.layout().showAssessmentList ? $t('assessmentListHeading')
+                : stores.layout().showItemList ? $t('itemListHeading') : ''
+        }}</v-app-bar-title>
       <v-spacer></v-spacer>
       <v-btn v-if="showReturnButton" :href="stores.config().returnUrl">
         <v-icon left icon="mdi-logout-variant"></v-icon>
