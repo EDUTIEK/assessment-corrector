@@ -216,7 +216,7 @@ export const useApiStore = defineStore('api', {
     },
 
     /**
-     * Clear the store
+     * Clear the state and store
      */
     async clearStorage() {
       try {
@@ -228,6 +228,24 @@ export const useApiStore = defineStore('api', {
         localStorage.removeItem('xlasCorrectorItemKey');
         localStorage.removeItem('xlasCorrectorUserToken');
         localStorage.removeItem('xlasCorrectorTimeOffset');
+      }
+      catch (err) {
+        console.log(err);
+      }
+    },
+
+    /**
+     * Save the state to the store
+     */
+    async saveToStorage() {
+      try {
+        localStorage.setItem('xlasCorrectorUserId', this.userId);
+        localStorage.setItem('xlasCorrectorAssId', this.assId);
+        localStorage.setItem('xlasCorrectorContextId', this.contextId);
+        localStorage.setItem('xlasCorrectorAsAdmin', this.asAdmin);
+        localStorage.setItem('xlasCorrectorItemKey', this.itemKey);
+        localStorage.setItem('xlasCorrectorUserToken', this.userToken);
+        localStorage.setItem('xlasCorrectorTimeOffset', this.timeOffset);
       }
       catch (err) {
         console.log(err);
@@ -314,15 +332,8 @@ export const useApiStore = defineStore('api', {
       Cookies.remove('xlasUserToken');
 
       // save the state
-      localStorage.setItem('xlasCorrectorUserId', this.userId);
-      localStorage.setItem('xlasCorrectorAssId', this.assId);
-      localStorage.setItem('xlasCorrectorContextId', this.contextId);
-      localStorage.setItem('xlasCorrectorAsAdmin', this.asAdmin);
-      localStorage.setItem('xlasCorrectorItemKey', this.itemKey);
-      localStorage.setItem('xlasCorrectorUserToken', this.userToken);
-      localStorage.setItem('xlasCorrectorTimeOffset', this.timeOffset);
-
-      configStore.saveToStorage();
+      await this.saveToStorage();
+      await configStore.saveToStorage();
       if (!configStore.backendUrl) {
         await clearAllStores();
         stores.layout().initFailure = t('apiMissingBackendUrl');
@@ -381,6 +392,7 @@ export const useApiStore = defineStore('api', {
     async initAfterReplaceDataConfirmed() {
       console.log('initAfterReplaceDataConfirmed');
       await clearAssessmentStores();
+      await this.saveToStorage();
       stores.layout().showDataReplaceConfirmation = false;
       stores.layout().showItemReplaceConfirmation = false;
 
@@ -649,16 +661,20 @@ export const useApiStore = defineStore('api', {
 
     async selectAssessment(assId, contextId) {
       const changed = assId !== this.assId || contextId !== this.contextId;
-      this.assId = assId;
-      this.contextId = contextId;
-      this.itemKey = '';
-      await this.initAfterDetermination(changed, changed);
+      if (changed) {
+        this.assId = assId;
+        this.contextId = contextId;
+        this.itemKey = '';
+        await this.initAfterDetermination(changed, changed);
+      }
     },
 
     async selectItem(newKey) {
       const changed = newKey !== this.itemKey;
-      this.itemKey = newKey;
-      await this.initAfterDetermination(false, changed);
+      if (changed) {
+        this.itemKey = newKey;
+        await this.initAfterDetermination(false, changed);
+      }
     },
 
     /**
