@@ -149,10 +149,23 @@ export default class Item {
   position = null;
 
   /**
+   * Textual representation of the current correction in the correction process for this item
+   * @type {string}
+   * @see Correction
+   */
+  position_text = null;
+
+  /**
    * Writer's pseudonym
    * @type {string}
    */
   pseudonym = '';
+
+  /**
+   * Title of the task
+   * @type {string}
+   */
+  task_title = null;
 
   /**
    * Title of the item (is build from other data)
@@ -164,7 +177,13 @@ export default class Item {
    * Whole correction status of the writer (over all tasks)
    * @type {string}
    */
-  correction_status = '';
+  correction_status = null;
+
+  /**
+   * Textual representation of the whole correction status of the writer (over all tasks)
+   * @type {string}
+   */
+  correction_status_text = null;
 
   /**
    * Own grading status of this item
@@ -172,6 +191,59 @@ export default class Item {
    * @see Summary
    */
   grading_status = '';
+
+  /**
+   * Textual representation of the own grading status of this item
+   * @type {string}
+   * @see Summary
+   */
+  grading_status_text = null;
+
+  /**
+   * Points given in the own grading
+   * @type {float}
+   * @see Summary
+   */
+  grading_points = null;
+
+  /**
+   * Textual grade resulting from the points given in the own grading
+   * @type {float}
+   * @see Summary
+   */
+  grading_grade = null;
+
+  /**
+   * Textual representation of the other corrector's grading status
+   * @type {string}
+   * @see Summary
+   */
+  other_status_text = '';
+
+  /**
+   * Textual representation of the other corrector's grading
+   * @type {string}
+   * @see Summary
+   */
+  other_correction_text = '';
+
+  /**
+   * Textual representation of the final result of the writer
+   * @type {string}
+   */
+  final_result_text = '';
+
+  /**
+   * Points given in the final result
+   * @type {float}
+   */
+  final_points = '';
+
+  /**
+   * Textual grade in the final result
+   * @type {float}
+   */
+ final_grade = null;
 
   /**
    * Is a correction allowed for the item
@@ -208,14 +280,47 @@ export default class Item {
     if (data.position !== undefined && data.position !== null) {
       this.position = parseInt(data.position);
     }
+    if (data.position_text !== undefined && data.position_text !== null) {
+      this.position_text = data.position_text.toString();
+    }
     if (data.pseudonym !== undefined && data.pseudonym !== null) {
       this.pseudonym = data.pseudonym.toString();
+    }
+    if (data.task_title !== undefined && data.task_title !== null) {
+      this.task_title = data.task_title.toString();
     }
     if (data.correction_status !== undefined && data.correction_status !== null) {
       this.correction_status = data.correction_status.toString();
     }
+    if (data.correction_status_text !== undefined && data.correction_status_text !== null) {
+      this.correction_status_text = data.correction_status_text.toString();
+    }
     if (data.grading_status !== undefined && data.grading_status !== null) {
       this.grading_status = data.grading_status.toString();
+    }
+    if (data.grading_status_text !== undefined && data.grading_status_text !== null) {
+      this.grading_status_text = data.grading_status_text.toString();
+    }
+    if (data.grading_points !== undefined && data.grading_points !== null) {
+      this.grading_points = parseFloat(data.grading_points);
+    }
+    if (data.grading_grade !== undefined && data.grading_grade !== null) {
+      this.grading_grade = data.grading_grade.toString();
+    }
+    if (data.other_status_text !== undefined && data.other_status_text !== null) {
+      this.other_status_text = data.other_status_text.toString();
+    }
+    if (data.other_correction_text !== undefined && data.other_correction_text !== null) {
+      this.other_correction_text = data.other_correction_text.toString();
+    }
+    if (data.final_result_text !== undefined && data.final_result_text !== null) {
+      this.final_result_text = data.final_result_text.toString();
+    }
+    if (data.final_points !== undefined && data.final_points !== null) {
+      this.final_points = parseFloat(data.final_points);
+    }
+    if (data.final_grade !== undefined && data.final_grade !== null) {
+      this.final_grade = data.final_grade.toString();
     }
     if (data.can_correct !== undefined && data.can_correct !== null) {
       this.can_correct = !!data.can_correct;
