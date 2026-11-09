@@ -73,14 +73,7 @@ async function sendLogout() {
                 : stores.layout().showItemList ? $t('itemListHeading') : ''
         }}</v-app-bar-title>
       <v-spacer></v-spacer>
-      <v-btn v-if="showReturnButton" :href="stores.config().returnUrl">
-        <v-icon left icon="mdi-logout-variant"></v-icon>
-        <span>{{ $t('startupContentMyCorrections') }}</span>
-      </v-btn>
-      <v-btn v-if="showLogoutButton" @click="sendLogout" :loading="stores.api().isSending">
-        <v-icon left icon="mdi-logout-variant"></v-icon>
-        <span>{{ $t('startupContentLogout') }}</span>
-      </v-btn>
+      <app-menu></app-menu>
     </v-app-bar>
 
     <welcome v-if="stores.layout().showWelcome" @login="showLogin(true)"/>

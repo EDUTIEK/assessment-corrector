@@ -45,10 +45,7 @@ async function returnToBackend() {
     <items/>
     <v-spacer></v-spacer>
     <help></help>
-    <v-btn class="app-header-item" @click="returnToBackend()">
-      <v-icon left icon="mdi-logout-variant"></v-icon>
-      <span>{{ $t('appBarReturn') }}</span>
-    </v-btn>
+    <app-menu></app-menu>
   </v-app-bar>
 
 </template>
