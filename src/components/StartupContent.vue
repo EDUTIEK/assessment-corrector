@@ -14,6 +14,10 @@ const loginMessage = ref('');
 const agreementDialog = ref(false);
 const agreementSending = ref(false);
 
+const showAppBar = computed(() => !stores.layout().showWelcome);
+const showReturnButton = computed(() => !!stores.config().returnUrl);
+const showLogoutButton = computed(() => !stores.config().returnUrl && stores.api().userId);
+
 function showLogin(show) {
   loginDialog.value = show;
   loginMessage.value = '';
@@ -32,6 +36,7 @@ async function sendLogin() {
       showAgreement(true);
     } else {
       stores.api().loadAssessmentsFromBackend();
+      stores.layout().setShowAssessmentList();
     }
   } else {
     loginMessage.value = result.message;
@@ -46,39 +51,22 @@ async function sendAgreement() {
     if (result.ok) {
       showAgreement(false);
       stores.api().loadAssessmentsFromBackend();
+      stores.layout().setShowAssessmentList();
     }
   }
 }
 
 async function sendLogout() {
   await stores.api().sendLogout();
-  showAgreement(false);
+  stores.layout().setShowWelcome();
 }
-
-const showWelcome = computed(() => !stores.config().returnUrl && (!stores.api().userId || stores.user().hasToAccept));
-const showReturnButton = computed(() => !!stores.config().returnUrl);
-const showLogoutButton = computed(() => !stores.config().returnUrl && stores.api().userId);
-const showAssessmentList = computed(() =>
-  !stores.layout().initialized
-  && !!stores.api().userId
-  && !stores.user().hasToAccept
-  && !stores.layout().hasInitFailure
-  && (
-    stores.assessments().hasAssessments
-    || (
-      !stores.api().isLoading
-      && stores.api().assId === ''
-      && stores.api().contextId === ''
-    )
-  )
-);
 
 </script>
 
 <template>
   <v-main fill-height>
 
-    <v-app-bar v-if="!showWelcome" elevation="1" color="white" density="compact">
+    <v-app-bar v-if="showAppBar" elevation="1" color="white" density="compact">
       <v-app-bar-title v-show="stores.api().isLoading">{{ $t('startupContentLoadData') }}</v-app-bar-title>
       <v-spacer></v-spacer>
       <v-btn v-if="showReturnButton" :href="stores.config().returnUrl">
@@ -91,8 +79,9 @@ const showAssessmentList = computed(() =>
       </v-btn>
     </v-app-bar>
 
-    <welcome v-if = "showWelcome" @login="showLogin(true)"/>
-    <assessment-list v-if="showAssessmentList"/>
+    <welcome v-if="stores.layout().showWelcome" @login="showLogin(true)"/>
+    <assessment-list v-if="stores.layout().showAssessmentList"/>
+    <item-list v-if="stores.layout().showItemList" />
 
     <!--
       Login
@@ -257,6 +246,10 @@ const showAssessmentList = computed(() =>
 
 
 <style scoped>
+
+  v-main {
+    background-color: #eef1f4;
+  }
 
   .agreement {
     padding: 1em;

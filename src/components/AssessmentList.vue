@@ -165,21 +165,11 @@ async function selectAssessment(assessment) {
     return;
   }
 
-  selecting.value = true;
-  apiStore.assId = String(assessment.ass_id);
-  apiStore.contextId = String(assessment.context_id);
-  // init() restores both ids from localStorage and treats different
-  // xlasAssId / xlasContextId cookies as a new assessment context.
-  // Drop the previous item so the new assessment opens its first submission.
-  Cookies.set("xlasAssId", apiStore.assId);
-  Cookies.set("xlasContextId", apiStore.contextId);
-  apiStore.itemKey = "";
-  localStorage.removeItem("xlasCorrectorItemKey");
-
   try {
-    await apiStore.init();
+    await apiStore.selectAssessment(assessment.ass_id, assessment.context_id);
   } finally {
     selecting.value = false;
+    stores.layout().setShowItemList();
   }
 }
 </script>

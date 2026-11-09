@@ -18,6 +18,7 @@ declare module 'vue' {
     GrowingTextarea: typeof import('./src/components/GrowingTextarea.vue')['default']
     Help: typeof import('./src/components/Help.vue')['default']
     Instructions: typeof import('./src/components/Instructions.vue')['default']
+    ItemList: typeof import('./src/components/ItemList.vue')['default']
     Items: typeof import('./src/components/Items.vue')['default']
     MainContent: typeof import('./src/components/MainContent.vue')['default']
     Marking: typeof import('./src/components/Marking.vue')['default']

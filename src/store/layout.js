@@ -43,6 +43,10 @@ export const useLayoutStore = defineStore('layout', {
       initFailure: '',                    // failure from app initialisation
 
       initialized: false,                 // used to switch from startup screen to the editing view
+      showWelcome: false,                 // show the welcome screen
+      showAssessmentList: false,          // show the list of assessments
+      showItemList: false,                // show the list of items
+
       showItemLoadFailure: false,         // show a message that the loading if an item failed
       showSendFailure: false,             // show a message about a sending failure
       showDataReplaceConfirmation: false, // show a confirmation that the stored data should be replaced by another task or user
@@ -451,6 +455,35 @@ export const useLayoutStore = defineStore('layout', {
         this.showLeftCorrection();
       }
     },
+
+    setInitialized() {
+      this.initialized = true;
+      this.showAssessmentList = false;
+      this.showItemList = false;
+    },
+
+    setShowWelcome() {
+      this.initialized = false;
+      this.showWelcome = true;
+      this.showAssessmentList = false;
+      this.showItemList = false;
+    },
+
+    setShowAssessmentList() {
+      this.initialized = false;
+      this.showWelcome = false;
+      this.showAssessmentList = true;
+      this.showItemList = false;
+    },
+
+    setShowItemList() {
+      this.initialized = false;
+      this.showWelcome = false;
+      this.showAssessmentList = false;
+      this.showItemList = true;
+    },
+
+
 
     setFocusChange(target) {
       this.focusTarget = target;

@@ -331,6 +331,7 @@ export const useApiStore = defineStore('api', {
 
       if (!this.userToken || !this.userId) {
         await clearAllStores();
+        stores.layout().setShowWelcome();
         return;
       }
 
@@ -339,8 +340,14 @@ export const useApiStore = defineStore('api', {
 
       if (!this.assId || !this.contextId) {
         await clearAssessmentStores();
+        stores.layout().setShowAssessmentList();
         return;
       }
+
+      await this.initAfterDetermination(newContext, newItem);
+    },
+
+    async initAfterDetermination(newContext, newItem) {
 
       const changesStore = stores.changes();
       await changesStore.loadFromStorage();
@@ -349,21 +356,24 @@ export const useApiStore = defineStore('api', {
         if (newContext) {
           console.log('init: open saving, new context');
           await this.loadDataFromStorage();
+          stores.layout().initialized = false;
           stores.layout().showDataReplaceConfirmation = true;
         } else if (newItem) {
           console.log('init: open saving, same context, new item');
           await this.loadDataFromStorage();
+          stores.layout().initialized = false;
           stores.layout().showItemReplaceConfirmation = true;
         } else {
           console.log('init: open saving, same context, same item');
           await this.loadDataFromStorage();
-          this.initAfterKeepDataConfirmed();
+          await this.initAfterKeepDataConfirmed();
         }
       } else {
         console.log('init: no open saving');
-        this.initAfterReplaceDataConfirmed();
+        await this.initAfterReplaceDataConfirmed();
       }
     },
+
 
     /**
      * init after the replacement of all data is confirmed
@@ -376,7 +386,7 @@ export const useApiStore = defineStore('api', {
 
       if (await this.loadDataFromBackend()) {
         await this.loadItemFromBackend(this.itemKey);
-        this.finishInitialisation();
+        await this.finishInitialisation();
       }
     },
 
@@ -395,7 +405,7 @@ export const useApiStore = defineStore('api', {
       if (await this.loadDataFromBackend()) {
         await stores.items().saveItem(item);
         await this.loadItemFromStorage(this.itemKey);
-        this.finishInitialisation();
+        await this.finishInitialisation();
       }
     },
 
@@ -408,7 +418,7 @@ export const useApiStore = defineStore('api', {
       if (stores.summaries().isOneAuthorized) {
         stores.comments().setShowOtherCorrections(true);
       }
-      stores.layout().initialized = true;
+      stores.layout().setInitialized();
     },
 
     /**
@@ -637,6 +647,20 @@ export const useApiStore = defineStore('api', {
       return changesStore.countChanges == 0;
     },
 
+    async selectAssessment(assId, contextId) {
+      const changed = assId !== this.assId || contextId !== this.contextId;
+      this.assId = assId;
+      this.contextId = contextId;
+      this.itemKey = '';
+      await this.initAfterDetermination(changed, changed);
+    },
+
+    async selectItem(newKey) {
+      const changed = newKey !== this.itemKey;
+      this.itemKey = newKey;
+      await this.initAfterDetermination(false, changed);
+    },
+
     /**
      * Post a login request
      * @return {ApiResult}
@@ -676,11 +700,11 @@ export const useApiStore = defineStore('api', {
         const response = await this.request('put', '/corrector/start/logout');
         this.setSending(false);
 
-        clearAllStores();
+        await clearAllStores();
         return new ApiResult(true);
 
       } catch (error) {
-        stores.layout().initialized = false;
+        console.log(error);
         return new ApiResult(false, error.response?.status, error.response.data);
       }
     },

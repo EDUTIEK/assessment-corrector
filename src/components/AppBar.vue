@@ -29,7 +29,7 @@ async function returnToBackend() {
       await clearAllStores();
       window.location = stores.config().returnUrl;
     } else {
-      stores.layout().initialized = false;
+      stores.layout().setShowAssessmentList();
     }
 
   } else {
