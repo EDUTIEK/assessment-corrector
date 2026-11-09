@@ -22,6 +22,9 @@ export const usePreferencesStore = defineStore('preferences', {
       default_shape: Mark.SHAPE_TEXT_MARKER,              // default shape for new pdf annotations
       display_labels: false,                              // show marking labels in the essay
       select_words: true,                                 // do pdf text selection by words
+      filter_grading_status: null,                        // filter by own grading status
+      filter_correction_status: null,                     // filter by whole correction status
+      filter_assigned_position: null,                     // filter by assigned grading position
 
       // not saved
       locale: 'de-DE'                                     // currently fixed
