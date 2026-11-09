@@ -20,6 +20,14 @@ export default class Item {
   static STATUS_STITCH = 'stitch';
   static STATUS_FINALIZED = 'finalized';
 
+  static ALLOWED_CORRECTION_STATUS = [
+    Item.STATUS_OPEN,
+    Item.STATUS_APPROXIMATION,
+    Item.STATUS_CONSULTING,
+    Item.STATUS_STITCH,
+    Item.STATUS_FINALIZED,
+  ];
+
   static order(item1, item2) {
     return item1.position < item2.position ? -1
         : item1.position > item2.position ? 1

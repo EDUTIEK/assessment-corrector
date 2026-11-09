@@ -8,6 +8,27 @@ import Item from '@/data/Item';
 
 const storage = getStorage('items');
 
+/**
+ * null or '' keeps every item. An array matches any selected value.
+ * A scalar or comma-separated string is treated as a selection list.
+ *
+ * @param {number|string|null} value
+ * @param {Array|string|number|null} filter
+ * @return {boolean}
+ */
+function matchesItemFilter(value, filter) {
+  if (filter == null || filter === '') {
+    return true;
+  }
+
+  const selected = Array.isArray(filter) ? filter : String(filter).split(',');
+  if (selected.length === 0) {
+    return false;
+  }
+
+  return selected.some((entry) => String(entry).trim() == String(value ?? ''));
+}
+
 export const useItemsStore = defineStore('items', {
   state: () => {
     return {
@@ -49,6 +70,13 @@ export const useItemsStore = defineStore('items', {
         const task_id = Item.extractTaskId(stores.api().itemKey)
         items = items.filter(item => item.task_id == task_id)
       }
+
+      const preferences = stores.preferences();
+      items = items.filter((item) =>
+        matchesItemFilter(item.position, preferences.filter_assigned_position)
+        && matchesItemFilter(item.grading_status, preferences.filter_grading_status)
+        && matchesItemFilter(item.correction_status, preferences.filter_correction_status)
+      );
 
       if (stores.settings().Assessment.fixed_items_order) {
         return items;

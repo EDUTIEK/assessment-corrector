@@ -3,15 +3,21 @@
  * Sortable list of correction items.
  * Choosing a row calls itemsStore.changeItem with the item key.
  * Visible columns can be chosen; pseudonym stays visible.
+ * Position, grading status and correction status can be filtered.
+ * Those filters are stored in the preferences store and also limit the writer menu.
  */
 import { computed, nextTick, ref } from "vue";
 import i18n from "@/plugins/i18n";
 import { stores } from "@/store";
+import Correction from "@/data/Correction";
+import Item from "@/data/Item";
+import Summary from "@/data/Summary";
 
 const { t } = i18n.global;
 
 const apiStore = stores.api();
 const itemsStore = stores.items();
+const preferencesStore = stores.preferences();
 
 const ALWAYS_VISIBLE = "pseudonym";
 
@@ -38,8 +44,63 @@ const DEFAULT_VISIBLE = [
   "final_result_text",
 ];
 
+const POSITION_LABELS = {
+  [Correction.POSITION_FIRST]: "itemListFilterPositionFirst",
+  [Correction.POSITION_SECOND]: "itemListFilterPositionSecond",
+  [Correction.POSITION_STITCH]: "itemListFilterPositionStitch",
+};
+
+const GRADING_LABELS = {
+  [Summary.STATUS_NOT_STARTED]: "itemListFilterGradingNotStarted",
+  [Summary.STATUS_OPEN]: "itemListFilterGradingOpen",
+  [Summary.STATUS_PRE_GRADED]: "itemListFilterGradingPregraded",
+  [Summary.STATUS_AUTHORIZED]: "itemListFilterGradingAuthorized",
+  [Summary.STATUS_REVISED]: "itemListFilterGradingRevised",
+};
+
+const CORRECTION_LABELS = {
+  [Item.STATUS_OPEN]: "itemListFilterCorrectionOpen",
+  [Item.STATUS_APPROXIMATION]: "itemListFilterCorrectionApproximation",
+  [Item.STATUS_CONSULTING]: "itemListFilterCorrectionConsulting",
+  [Item.STATUS_STITCH]: "itemListFilterCorrectionStitch",
+  [Item.STATUS_FINALIZED]: "itemListFilterCorrectionFinalized",
+};
+
+function filterOptions(allowed, labels) {
+  return allowed.map((value) => ({
+    value,
+    titleKey: labels[value],
+  }));
+}
+
+const FILTER_DEFS = [
+  {
+    key: "position",
+    pref: "filter_assigned_position",
+    titleKey: "itemListPosition",
+    options: filterOptions(Correction.ALLOWED_POSITIONS, POSITION_LABELS),
+  },
+  {
+    key: "grading_status",
+    pref: "filter_grading_status",
+    titleKey: "itemListGradingStatus",
+    options: filterOptions(Summary.ALLOWED_STATUS, GRADING_LABELS),
+  },
+  {
+    key: "correction_status",
+    pref: "filter_correction_status",
+    titleKey: "itemListFilterCorrectionStatus",
+    options: filterOptions(Item.ALLOWED_CORRECTION_STATUS, CORRECTION_LABELS),
+  },
+];
+
 const visibleKeys = ref([...DEFAULT_VISIBLE]);
 const columnsOpen = ref(false);
+const filterOpen = ref({
+  position: false,
+  grading_status: false,
+  correction_status: false,
+});
 const focusedKey = ref(null);
 const currentItems = ref([]);
 const selecting = ref(false);
@@ -96,6 +157,46 @@ function compareValues(left, right, numeric) {
     }
   }
   return String(left).localeCompare(String(right), "de", { numeric: true, sensitivity: "base" });
+}
+
+function checkedFilterValues(stored, allowed) {
+  if (stored == null || stored === "") {
+    return allowed;
+  }
+  const list = Array.isArray(stored) ? stored : String(stored).split(",");
+  return allowed.filter((value) => list.some((entry) => String(entry).trim() == String(value)));
+}
+
+const filters = computed(() =>
+  FILTER_DEFS.map((filter) => {
+    const allowed = filter.options.map((option) => option.value);
+    const stored = preferencesStore[filter.pref];
+    const selected = checkedFilterValues(stored, allowed);
+    return {
+      ...filter,
+      title: t(filter.titleKey),
+      active: stored != null && stored !== "",
+      options: filter.options.map((option) => ({
+        ...option,
+        title: t(option.titleKey),
+        selected: selected.some((entry) => entry == option.value),
+      })),
+    };
+  }),
+);
+
+const filtersActive = computed(() => filters.value.some((filter) => filter.active));
+
+async function setFilterValue(pref, options, value, selected) {
+  const allowed = options.map((option) => option.value);
+  const next = new Set(checkedFilterValues(preferencesStore[pref], allowed).map((entry) => String(entry)));
+  if (selected) {
+    next.add(String(value));
+  } else {
+    next.delete(String(value));
+  }
+  const values = allowed.filter((entry) => next.has(String(entry)));
+  await preferencesStore.setItemListFilter(pref, values);
 }
 
 function isColumnVisible(key) {
@@ -237,6 +338,48 @@ async function selectItem(item) {
       class="item-list"
       :aria-busy="apiStore.isLoading ? 'true' : undefined"
   >
+    <div class="item-list__toolbar">
+    <v-menu
+        v-for="filter in filters"
+        :key="filter.key"
+        v-model="filterOpen[filter.key]"
+        :close-on-content-click="false"
+        location="bottom start"
+    >
+      <template #activator="{ props }">
+        <v-btn
+            v-bind="props"
+            class="item-list__columns-btn"
+            variant="outlined"
+            size="small"
+            append-icon="mdi-menu-down"
+            :color="filter.active ? 'primary' : undefined"
+            :aria-controls="`item-list-filter-${filter.key}`"
+        >
+          {{ filter.title }}
+          <span v-if="filter.active" class="sr-only">, {{ $t("itemListFilterActive") }}</span>
+        </v-btn>
+      </template>
+      <v-card :id="`item-list-filter-${filter.key}`">
+        <fieldset class="item-list__columns">
+          <legend class="sr-only">{{ filter.title }}</legend>
+          <v-checkbox
+              v-for="option in filter.options"
+              :key="`${filter.key}-${option.value}`"
+              class="item-list__column"
+              :model-value="option.selected"
+              hide-details
+              density="compact"
+              @update:model-value="setFilterValue(filter.pref, filter.options, option.value, $event)"
+          >
+            <template #label>
+              {{ option.title }}
+            </template>
+          </v-checkbox>
+        </fieldset>
+      </v-card>
+    </v-menu>
+
     <v-menu
         v-model="columnsOpen"
         :close-on-content-click="false"
@@ -275,6 +418,7 @@ async function selectItem(item) {
         </fieldset>
       </v-card>
     </v-menu>
+    </div>
 
     <v-data-table
         v-model:sort-by="sortBy"
@@ -291,7 +435,7 @@ async function selectItem(item) {
         :mobile-breakpoint="0"
         :loading="apiStore.isLoading || selecting"
         :loading-text="$t('allLoadData')"
-        :no-data-text="$t('itemListEmpty')"
+        :no-data-text="filtersActive ? $t('itemListEmptyFiltered') : $t('itemListEmpty')"
         :row-props="rowProps"
         @click:row="onRowClick"
         @update:current-items="currentItems = $event"
@@ -360,6 +504,12 @@ async function selectItem(item) {
   padding: 16px 16px 8px;
   background: rgb(var(--v-theme-surface));
   overflow: hidden;
+}
+
+.item-list__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .item-list__columns-btn {
