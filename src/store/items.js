@@ -5,18 +5,54 @@ import {getStorage} from "@/lib/Storage";
 import {defineStore} from 'pinia';
 import {stores} from "@/store/index";
 import Item from '@/data/Item';
+import Procedure from '@/data/Procedure';
+import Summary from '@/data/Summary';
 
 const storage = getStorage('items');
 
 /**
+ * Own grading status used by the item filters.
+ * Without a procedure, a revision left over from an earlier setting counts as authorized.
+ *
+ * @param {string|number|null} status
+ * @param {string} procedure
+ * @return {string|number|null}
+ */
+export function gradingStatusForFilter(status, procedure) {
+  if (procedure === Procedure.NONE && status === Summary.STATUS_REVISED) {
+    return Summary.STATUS_AUTHORIZED;
+  }
+  return status;
+}
+
+/**
+ * Overall correction status used by the item filters.
+ * Without a procedure, approximation and consulting count as open.
+ *
+ * @param {string|number|null} status
+ * @param {string} procedure
+ * @return {string|number|null}
+ */
+export function correctionStatusForFilter(status, procedure) {
+  if (procedure === Procedure.NONE
+      && (status === Item.STATUS_APPROXIMATION || status === Item.STATUS_CONSULTING)) {
+    return Item.STATUS_OPEN;
+  }
+  return status;
+}
+
+/**
  * null or '' keeps every item. An array matches any selected value.
  * A scalar or comma-separated string is treated as a selection list.
+ * normalize maps item values and stored selections to the same filter value.
  *
  * @param {number|string|null} value
  * @param {Array|string|number|null} filter
+ * @param {string|null} procedure
+ * @param {function} normalize
  * @return {boolean}
  */
-function matchesItemFilter(value, filter) {
+function matchesItemFilter(value, filter, procedure = null, normalize = (status) => status) {
   if (filter == null || filter === '') {
     return true;
   }
@@ -26,7 +62,8 @@ function matchesItemFilter(value, filter) {
     return false;
   }
 
-  return selected.some((entry) => String(entry).trim() == String(value ?? ''));
+  const current = String(normalize(value, procedure) ?? '');
+  return selected.some((entry) => String(normalize(String(entry).trim(), procedure)) == current);
 }
 
 export const useItemsStore = defineStore('items', {
@@ -72,10 +109,11 @@ export const useItemsStore = defineStore('items', {
       }
 
       const preferences = stores.preferences();
+      const procedure = stores.settings().Assessment.procedure;
       items = items.filter((item) =>
         matchesItemFilter(item.position, preferences.filter_assigned_position)
-        && matchesItemFilter(item.grading_status, preferences.filter_grading_status)
-        && matchesItemFilter(item.correction_status, preferences.filter_correction_status)
+        && matchesItemFilter(item.grading_status, preferences.filter_grading_status, procedure, gradingStatusForFilter)
+        && matchesItemFilter(item.correction_status, preferences.filter_correction_status, procedure, correctionStatusForFilter)
       );
 
       if (stores.settings().Assessment.fixed_items_order) {

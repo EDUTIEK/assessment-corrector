@@ -5,12 +5,15 @@
  * Visible columns can be chosen; pseudonym stays visible.
  * Position, grading status and correction status can be filtered.
  * Those filters are stored in the preferences store and also limit the writer menu.
+ * The procedure setting renames or hides the revision options.
  */
 import { computed, nextTick, ref } from "vue";
 import i18n from "@/plugins/i18n";
 import { stores } from "@/store";
+import { correctionStatusForFilter, gradingStatusForFilter } from "@/store/items";
 import Correction from "@/data/Correction";
 import Item from "@/data/Item";
+import Procedure from "@/data/Procedure";
 import Summary from "@/data/Summary";
 
 const { t } = i18n.global;
@@ -18,6 +21,7 @@ const { t } = i18n.global;
 const apiStore = stores.api();
 const itemsStore = stores.items();
 const preferencesStore = stores.preferences();
+const settingsStore = stores.settings();
 
 const ALWAYS_VISIBLE = "pseudonym";
 
@@ -29,6 +33,7 @@ const COLUMN_DEFS = [
   { key: "grading_grade", titleKey: "itemListGradingGrade", sortable: true },
   { key: "other_status_text", titleKey: "itemListOtherStatus", sortable: true },
   { key: "other_correction_text", titleKey: "itemListOtherCorrection", sortable: false, wrap: true },
+  { key: "correction_status_text", titleKey: "itemListFilterCorrectionStatus", sortable: true },
   { key: "final_result_text", titleKey: "itemListFinalResult", sortable: false, wrap: true },
   { key: "final_points", titleKey: "itemListFinalPoints", sortable: true, align: "end", numeric: true },
   { key: "final_grade", titleKey: "itemListFinalGrade", sortable: true },
@@ -41,6 +46,7 @@ const DEFAULT_VISIBLE = [
   "grading_points",
   "grading_grade",
   "other_status_text",
+  "correction_status_text",
   "final_result_text",
 ];
 
@@ -73,24 +79,57 @@ function filterOptions(allowed, labels) {
   }));
 }
 
+function gradingFilterOptions() {
+  const procedure = settingsStore.Assessment.procedure;
+  let revisedLabel = null;
+  if (procedure === Procedure.APPROXIMATION) {
+    revisedLabel = "itemListFilterGradingApproximated";
+  } else if (procedure === Procedure.CONSULTING) {
+    revisedLabel = "itemListFilterGradingConsulted";
+  }
+
+  const labels = { ...GRADING_LABELS };
+  if (revisedLabel) {
+    labels[Summary.STATUS_REVISED] = revisedLabel;
+  }
+  const allowed = Summary.ALLOWED_STATUS.filter((status) => status !== Summary.STATUS_REVISED || revisedLabel);
+  return filterOptions(allowed, labels);
+}
+
+function correctionFilterOptions() {
+  const procedure = settingsStore.Assessment.procedure;
+  const allowed = Item.ALLOWED_CORRECTION_STATUS.filter((status) => {
+    if (status === Item.STATUS_APPROXIMATION) {
+      return procedure === Procedure.APPROXIMATION;
+    }
+    if (status === Item.STATUS_CONSULTING) {
+      return procedure === Procedure.CONSULTING;
+    }
+    return true;
+  });
+  return filterOptions(allowed, CORRECTION_LABELS);
+}
+
 const FILTER_DEFS = [
   {
     key: "position",
     pref: "filter_assigned_position",
     titleKey: "itemListPosition",
-    options: filterOptions(Correction.ALLOWED_POSITIONS, POSITION_LABELS),
+    options: () => filterOptions(Correction.ALLOWED_POSITIONS, POSITION_LABELS),
   },
   {
     key: "grading_status",
     pref: "filter_grading_status",
     titleKey: "itemListGradingStatus",
-    options: filterOptions(Summary.ALLOWED_STATUS, GRADING_LABELS),
+    options: gradingFilterOptions,
+    normalize: gradingStatusForFilter,
   },
   {
     key: "correction_status",
     pref: "filter_correction_status",
     titleKey: "itemListFilterCorrectionStatus",
-    options: filterOptions(Item.ALLOWED_CORRECTION_STATUS, CORRECTION_LABELS),
+    options: correctionFilterOptions,
+    normalize: correctionStatusForFilter,
   },
 ];
 
@@ -159,24 +198,30 @@ function compareValues(left, right, numeric) {
   return String(left).localeCompare(String(right), "de", { numeric: true, sensitivity: "base" });
 }
 
-function checkedFilterValues(stored, allowed) {
+function checkedFilterValues(stored, allowed, normalize = (status) => status) {
   if (stored == null || stored === "") {
     return allowed;
   }
+  const procedure = settingsStore.Assessment.procedure;
   const list = Array.isArray(stored) ? stored : String(stored).split(",");
-  return allowed.filter((value) => list.some((entry) => String(entry).trim() == String(value)));
+  return allowed.filter((value) => list.some((entry) =>
+    String(normalize(String(entry).trim(), procedure)) == String(normalize(value, procedure))
+  ));
 }
 
 const filters = computed(() =>
   FILTER_DEFS.map((filter) => {
-    const allowed = filter.options.map((option) => option.value);
+    const options = filter.options();
+    const allowed = options.map((option) => option.value);
     const stored = preferencesStore[filter.pref];
-    const selected = checkedFilterValues(stored, allowed);
+    const normalize = filter.normalize ?? ((status) => status);
+    const selected = checkedFilterValues(stored, allowed, normalize);
     return {
       ...filter,
       title: t(filter.titleKey),
       active: stored != null && stored !== "",
-      options: filter.options.map((option) => ({
+      normalize,
+      options: options.map((option) => ({
         ...option,
         title: t(option.titleKey),
         selected: selected.some((entry) => entry == option.value),
@@ -187,16 +232,16 @@ const filters = computed(() =>
 
 const filtersActive = computed(() => filters.value.some((filter) => filter.active));
 
-async function setFilterValue(pref, options, value, selected) {
+async function setFilterValue(pref, options, value, selected, normalize = (status) => status) {
   const allowed = options.map((option) => option.value);
-  const next = new Set(checkedFilterValues(preferencesStore[pref], allowed).map((entry) => String(entry)));
+  const next = new Set(checkedFilterValues(preferencesStore[pref], allowed, normalize).map((entry) => String(entry)));
   if (selected) {
     next.add(String(value));
   } else {
     next.delete(String(value));
   }
   const values = allowed.filter((entry) => next.has(String(entry)));
-  await preferencesStore.setItemListFilter(pref, values);
+  await preferencesStore.setItemListFilter(pref, values.length === allowed.length ? null : values);
 }
 
 function isColumnVisible(key) {
@@ -373,7 +418,7 @@ async function selectItem(item) {
                     :model-value="option.selected"
                     hide-details
                     density="compact"
-                    @update:model-value="setFilterValue(filter.pref, filter.options, option.value, $event)"
+                    @update:model-value="setFilterValue(filter.pref, filter.options, option.value, $event, filter.normalize)"
                 >
                   <template #label>
                     {{ option.title }}
