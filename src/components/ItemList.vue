@@ -339,85 +339,95 @@ async function selectItem(item) {
       :aria-busy="apiStore.isLoading ? 'true' : undefined"
   >
     <div class="item-list__toolbar">
-    <v-menu
-        v-for="filter in filters"
-        :key="filter.key"
-        v-model="filterOpen[filter.key]"
-        :close-on-content-click="false"
-        location="bottom start"
-    >
-      <template #activator="{ props }">
-        <v-btn
-            v-bind="props"
-            class="item-list__columns-btn"
-            variant="outlined"
-            size="small"
-            append-icon="mdi-menu-down"
-            :color="filter.active ? 'primary' : undefined"
-            :aria-controls="`item-list-filter-${filter.key}`"
-        >
-          {{ filter.title }}
-          <span v-if="filter.active" class="sr-only">, {{ $t("itemListFilterActive") }}</span>
-        </v-btn>
-      </template>
-      <v-card :id="`item-list-filter-${filter.key}`">
-        <fieldset class="item-list__columns">
-          <legend class="sr-only">{{ filter.title }}</legend>
-          <v-checkbox
-              v-for="option in filter.options"
-              :key="`${filter.key}-${option.value}`"
-              class="item-list__column"
-              :model-value="option.selected"
-              hide-details
-              density="compact"
-              @update:model-value="setFilterValue(filter.pref, filter.options, option.value, $event)"
+      <fieldset class="item-list__group">
+        <legend class="item-list__group-label">{{ $t("itemListFilters") }}</legend>
+        <div class="item-list__group-controls">
+          <v-menu
+              v-for="filter in filters"
+              :key="filter.key"
+              v-model="filterOpen[filter.key]"
+              :close-on-content-click="false"
+              location="bottom start"
           >
-            <template #label>
-              {{ option.title }}
+            <template #activator="{ props }">
+              <v-btn
+                  v-bind="props"
+                  class="item-list__columns-btn"
+                  variant="outlined"
+                  size="small"
+                  append-icon="mdi-menu-down"
+                  :color="filter.active ? 'primary' : undefined"
+                  :aria-controls="`item-list-filter-${filter.key}`"
+              >
+                {{ filter.title }}
+                <span v-if="filter.active" class="sr-only">, {{ $t("itemListFilterActive") }}</span>
+              </v-btn>
             </template>
-          </v-checkbox>
-        </fieldset>
-      </v-card>
-    </v-menu>
+            <v-card :id="`item-list-filter-${filter.key}`">
+              <fieldset class="item-list__columns">
+                <legend class="sr-only">{{ filter.title }}</legend>
+                <v-checkbox
+                    v-for="option in filter.options"
+                    :key="`${filter.key}-${option.value}`"
+                    class="item-list__column"
+                    :model-value="option.selected"
+                    hide-details
+                    density="compact"
+                    @update:model-value="setFilterValue(filter.pref, filter.options, option.value, $event)"
+                >
+                  <template #label>
+                    {{ option.title }}
+                  </template>
+                </v-checkbox>
+              </fieldset>
+            </v-card>
+          </v-menu>
+        </div>
+      </fieldset>
 
-    <v-menu
-        v-model="columnsOpen"
-        :close-on-content-click="false"
-        location="bottom start"
-    >
-      <template #activator="{ props }">
-        <v-btn
-            v-bind="props"
-            class="item-list__columns-btn"
-            variant="outlined"
-            size="small"
-            append-icon="mdi-menu-down"
-            aria-controls="item-list-columns"
-        >
-          {{ $t("itemListColumns") }}
-        </v-btn>
-      </template>
-      <v-card id="item-list-columns">
-        <fieldset class="item-list__columns">
-          <legend class="sr-only">{{ $t("itemListColumns") }}</legend>
-          <v-checkbox
-              v-for="column in columnOptions"
-              :key="column.key"
-              class="item-list__column"
-              :model-value="isColumnVisible(column.key)"
-              :disabled="column.locked"
-              hide-details
-              density="compact"
-              @update:model-value="setColumnVisible(column.key, $event)"
+      <fieldset class="item-list__group">
+        <legend class="item-list__group-label">{{ $t("itemListOptions") }}</legend>
+        <div class="item-list__group-controls">
+          <v-menu
+              v-model="columnsOpen"
+              :close-on-content-click="false"
+              location="bottom start"
           >
-            <template #label>
-              {{ column.title }}
-              <span v-if="column.locked" class="sr-only">, {{ $t("itemListPseudonymLocked") }}</span>
+            <template #activator="{ props }">
+              <v-btn
+                  v-bind="props"
+                  class="item-list__columns-btn"
+                  variant="outlined"
+                  size="small"
+                  append-icon="mdi-menu-down"
+                  aria-controls="item-list-columns"
+              >
+                {{ $t("itemListColumns") }}
+              </v-btn>
             </template>
-          </v-checkbox>
-        </fieldset>
-      </v-card>
-    </v-menu>
+            <v-card id="item-list-columns">
+              <fieldset class="item-list__columns">
+                <legend class="sr-only">{{ $t("itemListColumns") }}</legend>
+                <v-checkbox
+                    v-for="column in columnOptions"
+                    :key="column.key"
+                    class="item-list__column"
+                    :model-value="isColumnVisible(column.key)"
+                    :disabled="column.locked"
+                    hide-details
+                    density="compact"
+                    @update:model-value="setColumnVisible(column.key, $event)"
+                >
+                  <template #label>
+                    {{ column.title }}
+                    <span v-if="column.locked" class="sr-only">, {{ $t("itemListPseudonymLocked") }}</span>
+                  </template>
+                </v-checkbox>
+              </fieldset>
+            </v-card>
+          </v-menu>
+        </div>
+      </fieldset>
     </div>
 
     <v-data-table
@@ -507,6 +517,28 @@ async function selectItem(item) {
 }
 
 .item-list__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 12px;
+}
+
+.item-list__group {
+  margin: 0;
+  padding: 4px 10px 10px;
+  border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  border-radius: 4px;
+  min-inline-size: 0;
+}
+
+.item-list__group-label {
+  padding: 0 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.item-list__group-controls {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
