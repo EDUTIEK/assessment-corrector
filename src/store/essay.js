@@ -65,7 +65,7 @@ export const useEssayStore = defineStore('essay', {
     },
 
     async handleFile(data) {
-      if (data['pdf_version'] && stores.settings().markingInPdf) {
+      if (data && data['pdf_version'] && stores.settings().markingInPdf) {
         data.url = stores.api().getEssayUrl(data.id);
         if (await stores.api().loadBlob(data.url)) {
           annotator.load(data.url, {headers: stores.api().getRequestConfig().headers});

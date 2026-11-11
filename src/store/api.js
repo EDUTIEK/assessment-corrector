@@ -166,7 +166,9 @@ export const useApiStore = defineStore('api', {
   actions: {
 
     /**
-     * Send a request to the backend
+     * Send a request to the backend.
+     * HTTP errors reject with an error that still carries the Axios response
+     * (status, data, headers) when the server sent one.
      * @returns {Promise<axios.AxiosResponse<any>>}
      */
     request(method, url, config = {}) {
@@ -175,7 +177,7 @@ export const useApiStore = defineStore('api', {
         method: method.toUpperCase(),
         url: url,
       }, defaultConf, config, {
-        headers: Object.assign(defaultConf.headers, config),
+        headers: Object.assign({}, defaultConf.headers, config.headers),
       })).then(response => {
 
         // Refresh the auth token with the value from the REST response
@@ -184,7 +186,6 @@ export const useApiStore = defineStore('api', {
         // Within this time a new REST call must be made to get a new valid token
         const token = response.headers['x-access-token'];
         if (token) {
-          console.log('new token', token);
           this.userToken = token;
           localStorage.setItem('xlasCorrectorUserToken', token);
         }
@@ -195,13 +196,18 @@ export const useApiStore = defineStore('api', {
         // when the response data transfer is short (JSON)
         const time = response.headers['x-server-time'];
         if (time) {
-          console.log('new time', time);
           const serverTimeMs = time * 1000;
           const clientTimeMs = Date.now();
           this.timeOffset = clientTimeMs - serverTimeMs;
           localStorage.setItem('xlasCorrectorTimeOffset', this.timeOffset);
         }
         return response;
+      }).catch(error => {
+        const response = error.response ?? error.cause?.response;
+        if (response) {
+          error.response = response;
+        }
+        throw error;
       });
     },
 
@@ -697,12 +703,12 @@ export const useApiStore = defineStore('api', {
         return new ApiResult(true);
 
       } catch (error) {
-        console.log(error);
         this.setSending(false);
-        if (error.response?.status === 401) {
-          return new ApiResult(false, 401, error.response.data?.failed_message);
+        if (error.response?.status === 401 && error.response.data?.failed_message) {
+          return new ApiResult(false, 401, error.response.data.failed_message);
         } else {
-          return new ApiResult(false, error.response?.status, error.response.data);
+          console.log(error);
+          return new ApiResult(false, error.response?.status, t('apiLoginFailed'));
         }
       }
     },
@@ -721,7 +727,7 @@ export const useApiStore = defineStore('api', {
 
       } catch (error) {
         console.log(error);
-        return new ApiResult(false, error.response?.status, error.response.data);
+        return new ApiResult(false, error.response?.status, error.response?.data);
       }
     },
 
@@ -737,7 +743,8 @@ export const useApiStore = defineStore('api', {
         return new ApiResult(true);
 
       } catch (error) {
-        return new ApiResult(false, error.response?.status, error.response.data);
+        console.log(error);
+        return new ApiResult(false, error.response?.status, error.response?.data);
       }
     },
 

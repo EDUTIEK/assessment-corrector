@@ -42,7 +42,7 @@ async function selectItem() {
         {{ $t('allLoadData') }}
       </span>
     <span v-show="!apiStore.isLoading && itemsStore.currentItem !== undefined">
-        {{ itemsStore.currentItem.title }}
+        {{ itemsStore.currentItem?.title }}
       </span>
   </v-btn>
 

@@ -90,15 +90,15 @@ async function sendLogout() {
             {{ $t('startupContentLoginTitle') }}
           </v-card-title>
           <v-card-text>
-            <v-alert v-if="stores.layout().loginMessage" type="warning" variant="text" color="#0000A0">
-              {{ stores.layout().loginMessage }}
+            <v-alert v-if="loginMessage" type="warning" variant="text" color="#0000A0">
+              {{ loginMessage }}
             </v-alert>
             <v-text-field
                 v-model="login"
                 :label="$t('startupContentUserName')"
                 name="login"
                 autocomplete="username"
-                @change="stores.layout().loginMessage = ''"
+                @change="loginMessage = ''"
             ></v-text-field>
             <v-text-field
                 v-model="password"
@@ -106,7 +106,7 @@ async function sendLogout() {
                 type="password"
                 name="password"
                 autocomplete="current-password"
-                @change="stores.layout().loginMessage = ''"
+                @change="loginMessage = ''"
             ></v-text-field>
 
           </v-card-text>
