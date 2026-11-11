@@ -24,6 +24,30 @@ const startState = {
   corrector3_color: null          // marking color of corrector 3
 }
 
+/**
+ * Resolve a URL against the app document.
+ * An absolute URL is returned unchanged. A relative URL is resolved here
+ * because annotate-pdf runs in a subdirectory and would resolve it
+ * against the viewer document instead of the app.
+ *
+ * @param {string|null|undefined} url
+ * @returns {string|null|undefined}
+ */
+function toAbsoluteUrl(url) {
+  if (typeof url !== 'string' || url.length === 0) {
+    return url;
+  }
+  if (/^[a-z][a-z\d+\-.]*:/i.test(url)) {
+    return url;
+  }
+  try {
+    return new URL(url, window.location.href).href;
+  }
+  catch {
+    return url;
+  }
+}
+
 function hexToRgba(hex, alpha) {
   hex = hex.replace(/^#/, '');
 
@@ -147,7 +171,13 @@ export const useConfigStore = defineStore('config', {
     async loadFromConfig() {
       try {
         this.$reset();
-        const response = await fetch(`${import.meta.env.BASE_URL}config.json`, { cache: 'no-store' });
+        // cache: 'no-store' only bypasses the browser cache. A reverse proxy
+        // can still answer the same URL from its own cache, so the query
+        // makes each request a distinct URL.
+        const response = await fetch(
+          `${import.meta.env.BASE_URL}config.json?t=${Date.now()}`,
+          { cache: 'no-store' }
+        );
         if (response.ok) {
           this.applyData(await response.json());
           this.saveToStorage();
@@ -184,7 +214,7 @@ export const useConfigStore = defineStore('config', {
       const patch = {};
       for (const key of Object.keys(this.$state)) {
         if (data[key] !== undefined && data[key] !== null) {
-          patch[key] = data[key];
+          patch[key] = key === 'backendUrl' ? toAbsoluteUrl(data[key]) : data[key];
         }
       }
       this.$patch(patch);

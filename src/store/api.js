@@ -316,7 +316,7 @@ export const useApiStore = defineStore('api', {
 
       // these values can be changed without forcing a whole reload
       if (Cookies.get('xlasBackendUrl') != undefined && Cookies.get('xlasBackendUrl') != configStore.backendUrl) {
-        configStore.backendUrl = Cookies.get('xlasBackendUrl');
+        configStore.applyData({ backendUrl: Cookies.get('xlasBackendUrl') });
       }
       if (Cookies.get('xlasReturnUrl') != undefined && Cookies.get('xlasReturnUrl') != configStore.returnUrl) {
         configStore.returnUrl = Cookies.get('xlasReturnUrl');
