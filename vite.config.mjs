@@ -9,7 +9,7 @@ import path from 'path'
 import fs from 'node:fs'
 
 // Utilities
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import { fileURLToPath, URL } from 'node:url'
 import { resolve, dirname } from 'node:path'
 
@@ -22,7 +22,8 @@ function preferDevConfig() {
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
         const url = req.url?.split('?')[0]
-        if (url !== '/config.json' || !fs.existsSync(devConfigPath)) {
+        const configUrl = path.posix.join(server.config.base || '/', 'config.json')
+        if (url !== configUrl || !fs.existsSync(devConfigPath)) {
           next()
           return
         }
@@ -35,10 +36,18 @@ function preferDevConfig() {
 }
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ command, mode }) => {
+  const env = loadEnv(mode, process.cwd(), '')
+  // Production keeps a relative base so the build can sit at any URL.
+  // Dev ignores './' and serves root-absolute URLs (/src/main.js).
+  // Set VITE_DEV_BASE=/vite/ in .env.development.local
+  // if vite is called with a reverse proxy on that path
+  const devBase = env.VITE_DEV_BASE || '/'
+
+  return {
   // edu: use a relative path
   // https://vitejs.dev/guide/build.html#public-base-path
-  base: './',
+  base: command === 'serve' ? devBase : './',
   // edu.
   plugins: [
     preferDevConfig(),
@@ -79,9 +88,11 @@ export default defineConfig({
     port: 3000,
     // edu: needed for hot reload
     strictPort: true,
-    hmr: {
-      clientPort: 3000
-    }
+    // Direct dev (base /) talks to the Vite port. Behind the TLS vhost the
+    // socket has to use the same host and port as the page.
+    hmr: devBase === '/'
+      ? { clientPort: 3000 }
+      : { protocol: 'wss', clientPort: 443 }
     // edu.
   },
   // edu: needed for tinymce
@@ -95,4 +106,5 @@ export default defineConfig({
   // }
   // edu.
 
+  }
 })
