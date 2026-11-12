@@ -2,12 +2,13 @@
 /**
  * Sortable list of correction items.
  * Choosing a row calls itemsStore.changeItem with the item key.
+ * Checkboxes select rows. The action menu calls a handler with those item keys.
  * Visible columns can be chosen; pseudonym stays visible.
  * Position, grading status and correction status can be filtered.
  * Those filters are stored in the preferences store and also limit the writer menu.
  * The procedure setting renames or hides the revision options.
  */
-import { computed, nextTick, ref } from "vue";
+import { computed, nextTick, ref, watch } from "vue";
 import i18n from "@/plugins/i18n";
 import { stores } from "@/store";
 import { correctionStatusForFilter, gradingStatusForFilter } from "@/store/items";
@@ -144,6 +145,15 @@ const focusedKey = ref(null);
 const currentItems = ref([]);
 const selecting = ref(false);
 const sortBy = ref([]);
+const selectedKeys = ref([]);
+const actionsOpen = ref(false);
+
+watch(() => itemsStore.sortedItems, (items) => {
+  const visible = new Set(items.map((item) => item.key));
+  if (selectedKeys.value.some((key) => !visible.has(key))) {
+    selectedKeys.value = selectedKeys.value.filter((key) => visible.has(key));
+  }
+});
 
 const columnOptions = computed(() =>
   COLUMN_DEFS.map((column) => ({
@@ -324,6 +334,9 @@ function rowProps({ item }) {
 }
 
 function onRowKeydown(event, item) {
+  if (event.target !== event.currentTarget) {
+    return;
+  }
   if (event.key === "Enter" || event.key === " ") {
     event.preventDefault();
     selectItem(item);
@@ -360,8 +373,20 @@ function onRowKeydown(event, item) {
   });
 }
 
-function onRowClick(_event, row) {
+function onRowClick(event, row) {
+  if (event?.target?.closest?.("td.v-data-table__td--select-row")) {
+    return;
+  }
   selectItem(row.item);
+}
+
+function releasePregradedCorrection(keys) {
+}
+
+function downloadSubmissionFile(keys) {
+}
+
+function withdrawOwnRelease(keys) {
 }
 
 async function selectItem(item) {
@@ -431,7 +456,7 @@ async function selectItem(item) {
       </fieldset>
 
       <fieldset class="item-list__group">
-        <legend class="item-list__group-label">{{ $t("itemListOptions") }}</legend>
+        <legend class="item-list__group-label">{{ $t("itemListFunctions") }}</legend>
         <div class="item-list__group-controls">
           <v-menu
               v-model="columnsOpen"
@@ -471,16 +496,53 @@ async function selectItem(item) {
               </fieldset>
             </v-card>
           </v-menu>
+
+          <v-menu
+              v-model="actionsOpen"
+              location="bottom start"
+              :disabled="!selectedKeys.length"
+          >
+            <template #activator="{ props }">
+              <v-btn
+                  v-bind="props"
+                  class="item-list__columns-btn"
+                  variant="outlined"
+                  size="small"
+                  append-icon="mdi-menu-down"
+                  :disabled="!selectedKeys.length"
+                  :color="selectedKeys.length ? 'primary' : undefined"
+                  aria-controls="item-list-actions"
+              >
+                {{ $t("itemListActionSelect") }}
+              </v-btn>
+            </template>
+            <v-list id="item-list-actions" density="compact">
+              <v-list-item
+                  :title="$t('itemListActionReleasePregraded')"
+                  @click="releasePregradedCorrection([...selectedKeys])"
+              />
+              <v-list-item
+                  :title="$t('itemListActionDownloadSubmission')"
+                  @click="downloadSubmissionFile([...selectedKeys])"
+              />
+              <v-list-item
+                  :title="$t('itemListActionWithdrawRelease')"
+                  @click="withdrawOwnRelease([...selectedKeys])"
+              />
+            </v-list>
+          </v-menu>
         </div>
       </fieldset>
     </div>
 
     <v-data-table
+        v-model="selectedKeys"
         v-model:sort-by="sortBy"
         class="item-list__table"
         :headers="headers"
         :items="itemsStore.sortedItems"
         item-value="key"
+        show-select
         :items-per-page="-1"
         hide-default-footer
         fixed-header
@@ -499,18 +561,30 @@ async function selectItem(item) {
         <caption class="sr-only">{{ $t("itemListCaption") }}</caption>
       </template>
 
-      <template #headers="{ columns, toggleSort, isSorted, getSortIcon, sortBy: headerSortBy }">
+      <template #headers="{ columns, toggleSort, isSorted, getSortIcon, sortBy: headerSortBy, allSelected, someSelected, selectAll }">
         <tr>
           <th
               v-for="column in columns"
               :key="column.key"
               scope="col"
               class="v-data-table__th"
-              :class="{ 'text-end': column.align === 'end' }"
+              :class="{
+                'text-end': column.align === 'end',
+                'item-list__select': column.key === 'data-table-select',
+              }"
+              :style="column.width != null ? { width: typeof column.width === 'number' ? `${column.width}px` : column.width } : undefined"
               :aria-sort="ariaSort(headerSortBy, column)"
           >
+            <v-checkbox-btn
+                v-if="column.key === 'data-table-select'"
+                density="compact"
+                :model-value="allSelected"
+                :indeterminate="someSelected && !allSelected"
+                :aria-label="$t('itemListSelectAll')"
+                @update:model-value="selectAll"
+            />
             <v-btn
-                v-if="column.sortable"
+                v-else-if="column.sortable"
                 variant="text"
                 size="small"
                 class="item-list__sort"
@@ -527,6 +601,15 @@ async function selectItem(item) {
             <span class="item-list__nosort" v-else>{{ column.title }}</span>
           </th>
         </tr>
+      </template>
+
+      <template #item.data-table-select="{ item, internalItem, isSelected, toggleSelect }">
+        <v-checkbox-btn
+            density="compact"
+            :model-value="isSelected([internalItem])"
+            :aria-label="$t('itemListSelectRow', { pseudonym: item.pseudonym })"
+            @click.stop="toggleSelect(internalItem, undefined, $event)"
+        />
       </template>
 
       <template #item.pseudonym="{ item }">
@@ -605,6 +688,8 @@ async function selectItem(item) {
 .item-list__table {
   flex: 1 1 auto;
   min-height: 0;
+  margin-top: 30px;
+  border: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
 }
 
 :deep(.item-list__column) {
@@ -632,6 +717,24 @@ async function selectItem(item) {
 :deep(thead th) {
   white-space: nowrap;
   vertical-align: middle;
+}
+
+:deep(.v-data-table__th + .v-data-table__th),
+:deep(.v-data-table__td + .v-data-table__td) {
+  border-inline-start: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
+}
+
+:deep(th.item-list__select),
+:deep(td.v-data-table__td--select-row) {
+  width: 48px;
+  padding-inline: 0;
+  text-align: center;
+}
+
+:deep(th.item-list__select .v-selection-control),
+:deep(td.v-data-table__td--select-row .v-selection-control) {
+  justify-content: center;
+  min-height: 32px;
 }
 
 :deep(.item-list__wrap) {
