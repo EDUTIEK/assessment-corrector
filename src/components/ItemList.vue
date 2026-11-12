@@ -30,13 +30,13 @@ const COLUMN_DEFS = [
   { key: "pseudonym", titleKey: "itemListPseudonym", sortable: true },
   { key: "position_text", titleKey: "itemListPosition", sortable: true },
   { key: "grading_status_text", titleKey: "itemListGradingStatus", sortable: true },
-  { key: "grading_points", titleKey: "itemListGradingPoints", sortable: true, align: "end", numeric: true },
+  { key: "grading_points", titleKey: "itemListGradingPoints", sortable: true, numeric: true },
   { key: "grading_grade", titleKey: "itemListGradingGrade", sortable: true },
   { key: "other_status_text", titleKey: "itemListOtherStatus", sortable: true },
   { key: "other_correction_text", titleKey: "itemListOtherCorrection", sortable: false, wrap: true },
   { key: "correction_status_text", titleKey: "itemListFilterCorrectionStatus", sortable: true },
   { key: "final_result_text", titleKey: "itemListFinalResult", sortable: false, wrap: true },
-  { key: "final_points", titleKey: "itemListFinalPoints", sortable: true, align: "end", numeric: true },
+  { key: "final_points", titleKey: "itemListFinalPoints", sortable: true, numeric: true },
   { key: "final_grade", titleKey: "itemListFinalGrade", sortable: true },
 ];
 
@@ -172,9 +172,6 @@ const headers = computed(() =>
         key: column.key,
         sortable: column.sortable,
       };
-      if (column.align) {
-        header.align = column.align;
-      }
       if (column.wrap) {
         header.minWidth = "12rem";
         header.cellProps = { class: "item-list__wrap" };
@@ -569,7 +566,6 @@ async function selectItem(item) {
               scope="col"
               class="v-data-table__th"
               :class="{
-                'text-end': column.align === 'end',
                 'item-list__select': column.key === 'data-table-select',
               }"
               :style="column.width != null ? { width: typeof column.width === 'number' ? `${column.width}px` : column.width } : undefined"
