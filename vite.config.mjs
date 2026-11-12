@@ -35,6 +35,8 @@ function preferDevConfig() {
   }
 }
 
+const annotatePdfFolder = 'annotate-pdf-' + new Date().getTime();
+
 // https://vitejs.dev/config/
 export default defineConfig(({ command, mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
@@ -60,7 +62,7 @@ export default defineConfig(({ command, mode }) => {
     ViteFonts({
     }),
     viteStaticCopy({targets: [
-        {dest: 'annotate-pdf', src: path.resolve(__dirname, 'node_modules/annotate-pdf') + '/*'},
+        {dest: annotatePdfFolder, src: path.resolve(__dirname, 'node_modules/annotate-pdf') + '/*'},
       ]}),
     VueI18nPlugin({
       /* options */
@@ -69,7 +71,10 @@ export default defineConfig(({ command, mode }) => {
       include: resolve(dirname(fileURLToPath(import.meta.url)), './src/locales/**'),
     }),
   ],
-  define: { 'process.env': {} },
+  define: {
+    'process.env': {},
+    __ANNOTATE_PDF_VIEWER__: JSON.stringify('./' + annotatePdfFolder + '/pdfjs-dist/web/viewer.html'),
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))

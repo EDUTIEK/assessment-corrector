@@ -35,7 +35,7 @@ onMounted(async () => {
   showLabels.value = preferencesStore.display_labels;
   selectWords.value = preferencesStore.select_words;
 
-  pdfjs = createPDFJsApi(EssayNode.value, './annotate-pdf/pdfjs-dist/web/viewer.html', await essayStore.url, {headers: stores.api().getRequestConfig().headers});
+  pdfjs = createPDFJsApi(EssayNode.value, __ANNOTATE_PDF_VIEWER__, await essayStore.url, {headers: stores.api().getRequestConfig().headers});
   pdfjs.setDefaultColor(stores.config().getDefaultCommentColor(true));
   pdfjs.enableWordSelection(!!selectWords.value);
   pdfjs.enableTokenButtons(true);
