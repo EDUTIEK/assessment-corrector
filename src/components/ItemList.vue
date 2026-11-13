@@ -2,7 +2,7 @@
 /**
  * Sortable list of correction items.
  * Choosing a row calls itemsStore.changeItem with the item key.
- * Checkboxes select rows. The action menu calls a handler with those item keys.
+ * Checkboxes select rows. The action menu triggers BulkAuthorization with those item keys.
  * Visible columns can be chosen; pseudonym stays visible.
  * Position, grading status and correction status can be filtered.
  * Those filters are stored in the preferences store and also limit the writer menu.
@@ -11,6 +11,7 @@
 import { computed, nextTick, ref, watch } from "vue";
 import i18n from "@/plugins/i18n";
 import { stores } from "@/store";
+import BulkAuthorization from "@/components/BulkAuthorization.vue";
 import { correctionStatusForFilter, gradingStatusForFilter } from "@/store/items";
 import Correction from "@/data/Correction";
 import Item from "@/data/Item";
@@ -148,10 +149,7 @@ const selecting = ref(false);
 const sortBy = ref([]);
 const selectedKeys = ref([]);
 const actionsOpen = ref(false);
-const releaseOpen = ref(false);
-const releaseItems = ref([]);
-const releaseFailure = ref('');
-const releasing = ref(false);
+const bulkAuthorization = ref(null);
 
 watch(() => itemsStore.sortedItems, (items) => {
   const visible = new Set(items.map((item) => item.key));
@@ -382,47 +380,6 @@ function onRowClick(event, row) {
   selectItem(row.item);
 }
 
-function bulkAuthorizeCorrection(keys) {
-  releaseItems.value = keys
-    .map((key) => itemsStore.getItem(key))
-    .filter((item) => item?.can_authorize && item.grading_status === Summary.STATUS_PRE_GRADED);
-  if (stores.changes().countChanges) {
-    releaseFailure.value = t('ItemListActionFailedOpenChanges');
-  } else {
-    releaseFailure.value = ''
-  }
-  releaseOpen.value = true;
-}
-
-function bulkAuthorizeInfo(item) {
-  const warning = itemsStore.getAuthorizationWarningText(item);
-  if (warning) {
-    return item.pseudonym + ' - ' + warning;
-  }
-  return item.pseudonym;
-}
-
-async function confirmBulkAuthorize() {
-  if (!releaseItems.value.length || releasing.value) {
-    return;
-  }
-
-  if (stores.changes().countChanges) {
-   releaseFailure.value = t('ItemListActionFailedOpenChanges');
-   return;
-  }
-
-  releasing.value = true;
-  try {
-    await apiStore.sendBulkAuthorize(releaseItems.value);
-    await stores.api().loadDataFromBackend();
-    stores.layout().setShowItemList();
-    releaseOpen.value = false;
-  } finally {
-    releasing.value = false;
-  }
-}
-
 function downloadSubmissionFile(keys) {
 }
 
@@ -559,7 +516,7 @@ async function selectItem(item) {
             <v-list id="item-list-actions" density="compact">
               <v-list-item
                   :title="$t('itemListActionBulkAuthorize')"
-                  @click="bulkAuthorizeCorrection(selectedKeys)"
+                  @click="bulkAuthorization.bulkAuthorizeCorrection()"
               />
               <!--
               <v-list-item
@@ -667,44 +624,10 @@ async function selectItem(item) {
       </template>
     </v-data-table>
 
-    <v-dialog
-        v-model="releaseOpen"
-        max-width="60em"
-        persistent
-    >
-      <v-card>
-        <v-card-title>{{ $t("itemListActionBulkAuthorize") }}</v-card-title>
-        <v-card-text>
-          <v-alert v-if="releaseFailure" type="warning" variant="text" color="#0000A0">
-            {{ releaseFailure }}
-          </v-alert>
-          <template v-else-if="releaseItems.length">
-            <p>{{ $t("itemListBulkAuthorizeInfo") }}</p>
-            <ul class="item-list__release">
-              <li v-for="item in releaseItems" :key="item.key">
-                {{ bulkAuthorizeInfo(item) }}
-              </li>
-            </ul>
-            <p>{{ $t("itemListBulkAuthorizeWarn") }}</p>
-          </template>
-          <p v-else>{{ $t("itemListBulkAuthorizeEmpty") }}</p>
-        </v-card-text>
-        <v-card-actions>
-          <v-btn
-              v-if="releaseItems.length && !releaseFailure"
-              :disabled="releasing || apiStore.isSending"
-              @click="confirmBulkAuthorize"
-          >
-            <v-icon left icon="mdi-check"></v-icon>
-            <span>{{ $t("itemListBulkAuthorizeConfirm") }}</span>
-          </v-btn>
-          <v-btn :disabled="releasing" @click="releaseOpen = false">
-            <v-icon left icon="mdi-close"></v-icon>
-            <span>{{ releaseItems.length || releaseFailure ? $t("allCancel") : $t("allClose") }}</span>
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <BulkAuthorization
+        ref="bulkAuthorization"
+        :item-keys="selectedKeys"
+    />
   </section>
 </template>
 
@@ -754,11 +677,6 @@ async function selectItem(item) {
 
 .item-list__columns-btn {
   align-self: flex-start;
-}
-
-.item-list__release {
-  margin: 8px 0 12px;
-  padding-inline-start: 1.25rem;
 }
 
 .item-list__columns {

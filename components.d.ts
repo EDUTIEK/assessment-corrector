@@ -12,6 +12,7 @@ declare module 'vue' {
     AssessmentList: typeof import('./src/components/AssessmentList.vue')['default']
     Authorization: typeof import('./src/components/Authorization.vue')['default']
     AuthorizationInfos: typeof import('./src/components/AuthorizationInfos.vue')['default']
+    BulkAuthorization: typeof import('./src/components/BulkAuthorization.vue')['default']
     ConfirmRevision: typeof import('./src/components/ConfirmRevision.vue')['default']
     Essay: typeof import('./src/components/Essay.vue')['default']
     EssayImage: typeof import('./src/components/EssayImage.vue')['default']
