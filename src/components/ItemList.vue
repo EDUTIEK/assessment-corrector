@@ -147,6 +147,9 @@ const selecting = ref(false);
 const sortBy = ref([]);
 const selectedKeys = ref([]);
 const actionsOpen = ref(false);
+const releaseOpen = ref(false);
+const releaseItems = ref([]);
+const releasing = ref(false);
 
 watch(() => itemsStore.sortedItems, (items) => {
   const visible = new Set(items.map((item) => item.key));
@@ -378,6 +381,23 @@ function onRowClick(event, row) {
 }
 
 function releasePregradedCorrection(keys) {
+  releaseItems.value = keys
+    .map((key) => itemsStore.getItem(key))
+    .filter((item) => item?.can_authorize && item.grading_status === Summary.STATUS_PRE_GRADED);
+  releaseOpen.value = true;
+}
+
+async function confirmReleasePregraded() {
+  if (!releaseItems.value.length || releasing.value) {
+    return;
+  }
+  releasing.value = true;
+  try {
+    await apiStore.sendBulkAuthorize(releaseItems.value.map((item) => item.key));
+    releaseOpen.value = false;
+  } finally {
+    releasing.value = false;
+  }
 }
 
 function downloadSubmissionFile(keys) {
@@ -621,6 +641,40 @@ async function selectItem(item) {
         {{ formatPoints(item.final_points) }}
       </template>
     </v-data-table>
+
+    <v-dialog
+        v-model="releaseOpen"
+        max-width="60em"
+        persistent
+    >
+      <v-card>
+        <v-card-title>{{ $t("itemListActionReleasePregraded") }}</v-card-title>
+        <v-card-text>
+          <template v-if="releaseItems.length">
+            <p>{{ $t("itemListReleasePregradedInfo") }}</p>
+            <ul class="item-list__release">
+              <li v-for="item in releaseItems" :key="item.key">{{ item.pseudonym }}</li>
+            </ul>
+            <p>{{ $t("itemListReleasePregradedWarn") }}</p>
+          </template>
+          <p v-else>{{ $t("itemListReleasePregradedEmpty") }}</p>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn
+              v-if="releaseItems.length"
+              :disabled="releasing || apiStore.isSending"
+              @click="confirmReleasePregraded"
+          >
+            <v-icon left icon="mdi-check"></v-icon>
+            <span>{{ $t("itemListReleasePregradedConfirm") }}</span>
+          </v-btn>
+          <v-btn :disabled="releasing" @click="releaseOpen = false">
+            <v-icon left icon="mdi-close"></v-icon>
+            <span>{{ releaseItems.length ? $t("allCancel") : $t("allClose") }}</span>
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </section>
 </template>
 
@@ -670,6 +724,11 @@ async function selectItem(item) {
 
 .item-list__columns-btn {
   align-self: flex-start;
+}
+
+.item-list__release {
+  margin: 8px 0 12px;
+  padding-inline-start: 1.25rem;
 }
 
 .item-list__columns {
