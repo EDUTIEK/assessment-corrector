@@ -149,7 +149,9 @@ export const usePreferencesStore = defineStore('preferences', {
 
     async saveToStorage() {
       try {
-        await storage.setItem('preferences', Object.assign({}, this.$state));
+        // IndexedDB clones with structured clone and rejects Vue proxies.
+        // A shallow Object.assign keeps the filter arrays as proxies.
+        await storage.setItem('preferences', JSON.parse(JSON.stringify(this.$state)));
       }
       catch (err) {
         console.log(err);
@@ -210,7 +212,7 @@ export const usePreferencesStore = defineStore('preferences', {
       const changes = [];
       for (const change of changesStore.getChangesFor(Change.TYPE_PREFERENCES, sendingTime)) {
         // preferences exist only once, will be the same for all changes
-        const payload = Object.assign({}, this.$state);
+        const payload = JSON.parse(JSON.stringify(this.$state));
         payload.filter_assigned_position = encodeFilterSelection(payload.filter_assigned_position, true);
         payload.filter_grading_status = encodeFilterSelection(payload.filter_grading_status, false);
         payload.filter_correction_status = encodeFilterSelection(payload.filter_correction_status, false);
