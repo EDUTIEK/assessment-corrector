@@ -629,7 +629,7 @@ export const useApiStore = defineStore('api', {
      * @param bool wait some seconds for a running sending to finish (if not called by timer)
      * @return bool
      */
-    async saveChangesToBackend(wait = false) {
+    async saveChangesToBackend() {
       const changesStore = stores.changes();
 
       if (changesStore.countChanges > 0) {
@@ -830,8 +830,42 @@ export const useApiStore = defineStore('api', {
       }
     },
 
+
     /**
-     * Send a marked pdf file
+     * Send a list of items keys that should be set from pre-graded to authorized
+     * @return {ApiResult}
+     */
+    async sendBulkAuthorize(itemKeys) {
+
+      const changes = [];
+      for (const key of itemKeys) {
+        changes.push(new Change({
+          type: Change.TYPE_BULK_AUTHORIZE,
+          action: Change.ACTION_SAVE,
+          key: key,
+          item_key: key
+        }));
+      }
+
+      const data = {'Task': {}};
+      data['Task'][Change.TYPE_BULK_AUTHORIZE] = changes;
+
+      if (!(await this.checkSending(true))) {
+        try {
+          this.setSending(true);
+          const response = await this.request('put', '/corrector/changes', {data});
+          this.setSending(false);
+          return new ApiResult(true);
+        } catch (error) {
+          this.setSending(false);
+          console.log(error);
+          return new ApiResult(false, error.response?.status, error.response?.data);
+        }
+      }
+    },
+
+    /**
+     * Send a snippes excel file to the backend
      * @param {Blob} file
      * @param {string} purpose
      * @return {bool} import is successful

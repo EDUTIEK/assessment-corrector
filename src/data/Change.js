@@ -13,8 +13,10 @@ export default class Change {
   static TYPE_SUMMARY = 'summary';
   static TYPE_PREFERENCES = 'preferences';
   static TYPE_SNIPPETS = 'snippets';
+  static TYPE_BULK_AUTHORIZE = 'bulk_authorize'
 
-  static ALLOWED_TYPES = [Change.TYPE_COMMENT, Change.TYPE_POINTS, Change.TYPE_SUMMARY, Change.TYPE_PREFERENCES, Change.TYPE_SNIPPETS];
+  static ALLOWED_TYPES = [Change.TYPE_COMMENT, Change.TYPE_POINTS, Change.TYPE_SUMMARY, Change.TYPE_PREFERENCES, Change.TYPE_SNIPPETS,
+                            Change.TYPE_BULK_AUTHORIZE];
   static STORED_TYPES = [Change.TYPE_COMMENT, Change.TYPE_POINTS, Change.TYPE_SUMMARY, Change.TYPE_PREFERENCES, Change.TYPE_SNIPPETS];
 
   static buildChangeKey(type, key) {
