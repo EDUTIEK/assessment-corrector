@@ -93,9 +93,6 @@ export const useApiStore = defineStore('api', {
       return fn;
     },
 
-    /**
-     * Get the Url for loading an essay as pdf file
-     */
     getEssayUrl(state) {
 
       /**
@@ -120,6 +117,20 @@ export const useApiStore = defineStore('api', {
       const fn = function (summary) {
         const config = this.getRequestConfig();
         return config.baseURL + '/corrector/file/task/summary/' + summary.id + '/inline?' + config.params.toString();
+      }
+      return fn;
+    },
+
+    getSnippetsUrl(state) {
+
+      /**
+       * Get the Url for loading a snippet Excel file
+       * @param {string} summary
+       * @returns {string}
+       */
+      const fn = function (purpose) {
+        const config = this.getRequestConfig();
+        return config.baseURL + '/corrector/file/task/snippets_' + purpose + '/0/attachment?' + config.params.toString();
       }
       return fn;
     },
@@ -213,6 +224,9 @@ export const useApiStore = defineStore('api', {
     },
 
     /**
+     * Load a file as BLOB from the backend
+     *  - GET, PUT can be set as 'method' in the config
+     *  - for PUT additional data can be set as 'data' in the config
      * @returns {Promise<Blob | null>}
      */
     loadBlob(url, config = {}) {
@@ -220,6 +234,26 @@ export const useApiStore = defineStore('api', {
         responseType: 'blob',
         timeout: 60000,
       }, config)).then(r => r.status === 200 ? r.data : null);
+    },
+
+    /**
+     * Load a file from the backend
+     *  - GET, PUT can be set as 'method' in the config
+     *  - for PUT additional data can be set as 'data' in the config
+     */
+    async downloadFile(title, url, config = {})
+    {
+      const response = await this.loadBlob(url, config);
+      const objectUrl = URL.createObjectURL(response);
+
+      const a = document.createElement('a');
+      a.href = objectUrl;
+      a.download = title
+      document.body.appendChild(a); // required in Firefox
+      a.click();
+      document.body.removeChild(a);
+
+      URL.revokeObjectURL(objectUrl); // free memory
     },
 
     /**
@@ -777,13 +811,6 @@ export const useApiStore = defineStore('api', {
       }
     },
 
-    loadSummaryPdf(summary) {
-        return this.loadBlob(this.getSummaryPdfUrl(summary));
-    },
-
-    loadSnippets(purpose) {
-      return this.loadBlob('/corrector/file/task/snippets_' + purpose + '/0/attachment');
-    },
 
     /**
      * Send a marked pdf file

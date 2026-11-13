@@ -89,25 +89,16 @@ function deleteFile() {
   showDelete.value = false;
 }
 
-async function downloadFile()
+function downloadFile()
 {
-  const response = await stores.api().loadSummaryPdf(props.summary);
-  const title = stores.api().getDownloadTitle(
+  stores.api().downloadFile(
+      stores.api().getDownloadTitle(
       t('ownSummaryExportFile')
-      + ' ' + Item.buildPositionText(stores.corrections().getCorrection(props.summary.correction_key)?.position)
-      + (stores.items().isFinal ? '' : ' - ' + t('ownSummaryExportDraft'))
+        + ' ' + Item.buildPositionText(stores.corrections().getCorrection(props.summary.correction_key)?.position)
+        + (stores.items().isFinal ? '' : ' - ' + t('ownSummaryExportDraft'))
+      ),
+      stores.api().getSummaryPdfUrl(props.summary)
   );
-
-  const url = URL.createObjectURL(response);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = title;
-
-  document.body.appendChild(a); // required in Firefox
-  a.click();
-  document.body.removeChild(a);
-
-  URL.revokeObjectURL(url); // free memory
 }
 
 </script>

@@ -7,6 +7,7 @@ import Snippet from '@/data/Snippet';
 import OwnSummaryTemplate from '@/components/OwnSummaryTemplate.vue';
 import OwnSummaryUpload from '@/components/OwnSummaryUpload.vue';
 import SnippetsImport from '@/components/SnippetsImport.vue';
+import Item from '@/data/Item';
 
 const { t } = i18n.global;
 
@@ -116,19 +117,10 @@ function rowFocusout(event) {
 
 async function download()
 {
-  const response = await stores.api().loadSnippets(snippetsStore.list_purpose);
-  const title = stores.api().getDownloadTitle(t('snippetsExportFile'), false);
-
-  const url = URL.createObjectURL(response);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = title
-
-  document.body.appendChild(a); // required in Firefox
-  a.click();
-  document.body.removeChild(a);
-
-  URL.revokeObjectURL(url); // free memory
+  stores.api().downloadFile(
+      stores.api().getDownloadTitle(t('snippetsExportFile'), false),
+      stores.api().getSnippetsUrl(snippetsStore.list_purpose)
+  );
 }
 
 
