@@ -37,8 +37,7 @@ async function set() {
     }
 
     if (await apiStore.saveChangesToBackend(true)) {
-      await apiStore.loadItemFromStorage(itemsStore.currentKey);
-      await itemsStore.setCurrentGradingStatus(summariesStore.editSummary.status);
+      await apiStore.loadItemFromBackend(itemsStore.currentKey);
     }
   }
 
@@ -52,8 +51,7 @@ async function unset() {
   }
 
   if (await apiStore.saveChangesToBackend(true)) {
-    await apiStore.loadItemFromStorage(itemsStore.currentKey);
-    await itemsStore.setCurrentGradingStatus(summariesStore.editSummary.status);
+    await apiStore.loadItemFromBackend(itemsStore.currentKey);
   }
 
   pregraded.value = summariesStore.isOwnPregraded;
