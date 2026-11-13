@@ -229,6 +229,13 @@ export default class Item {
   other_status_text = '';
 
   /**
+   * Points given in the other corrector's grading
+   * @type {float}
+   * @see Summary
+   */
+  other_points = null;
+
+  /**
    * Textual representation of the other corrector's grading
    * @type {string}
    * @see Summary
@@ -317,6 +324,9 @@ export default class Item {
     }
     if (data.other_status_text !== undefined && data.other_status_text !== null) {
       this.other_status_text = data.other_status_text.toString();
+    }
+    if (data.other_points !== undefined && data.other_points !== null) {
+      this.other_points = parseFloat(data.other_points);
     }
     if (data.other_correction_text !== undefined && data.other_correction_text !== null) {
       this.other_correction_text = data.other_correction_text.toString();

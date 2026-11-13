@@ -7,8 +7,12 @@ import {stores} from "@/store/index";
 import Item from '@/data/Item';
 import Procedure from '@/data/Procedure';
 import Summary from '@/data/Summary';
+import Correction from '@/data/Correction';
+import i18n from '@/plugins/i18n';
 
 const storage = getStorage('items');
+
+const { t } = i18n.global;
 
 /**
  * Own grading status used by the item filters.
@@ -192,7 +196,50 @@ export const useItemsStore = defineStore('items', {
             .find(item => item.getTaskKey() == taskKey);
       }
       return fn;
-    }
+    },
+
+
+    /**
+     * Text if a procedure or stitch decision is needed for the current item
+     * @returns {string}
+     */
+    getAuthorizationWarningText(state) {
+      const settings = stores.settings().Assessment;
+
+      /**
+       * Get the first item of a task
+       *
+       * @param {Item} item
+       * @return {string}
+       */
+      const fn = function (item) {
+        if (item.position !== Correction.POSITION_SECOND) {
+          return '';
+        }
+          // get a procedure message if needed
+          if (settings.procedure_when_distance
+            && Math.abs(item.grading_points - item.other_points) > settings.max_no_procedure_distance
+          ) {
+            switch (settings.procedure) {
+              case Procedure.APPROXIMATION:
+                return t('summariesProcedureApproximationNeeded') + t('summariesPointsDifferText', settings.max_no_procedure_distance);
+              case Procedure.CONSULTING:
+                return t('summariesProcedureConsultingNeeded') + t('summariesPointsDifferText', settings.max_no_procedure_distance);
+            }
+          }
+
+          // get a stitch message if needed
+          if ( settings.stitch_when_distance
+            && Math.abs(item.grading_points - item.other_points) > settings.max_no_stitch_distance
+          ) {
+            return t('summariesProcedureStitchNeeded') + t('summariesPointsDifferText', settings.max_no_stitch_distance);
+          }
+
+          return '';
+        };
+
+        return fn;
+      }
   },
 
   actions: {
@@ -273,9 +320,8 @@ export const useItemsStore = defineStore('items', {
      * Set the correction status of the current item
      * @param status
      */
-    async setCurrentGradingStatus(status) {
-      this.currentItem.grading_status = status;
-      this.currentItem.title = Item.buildTitle(this.currentItem);
+    async setCurrentGradingPoints(points) {
+      this.currentItem.grading_points = points;
       await storage.setItem(this.currentItem.getKey(), JSON.stringify(this.currentItem.getData()));
     },
 

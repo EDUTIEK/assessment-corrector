@@ -16,6 +16,7 @@ import Correction from "@/data/Correction";
 import Item from "@/data/Item";
 import Procedure from "@/data/Procedure";
 import Summary from "@/data/Summary";
+import ApiResult from '@/data/ApiResult';
 
 const { t } = i18n.global;
 
@@ -149,6 +150,7 @@ const selectedKeys = ref([]);
 const actionsOpen = ref(false);
 const releaseOpen = ref(false);
 const releaseItems = ref([]);
+const releaseFailure = ref('');
 const releasing = ref(false);
 
 watch(() => itemsStore.sortedItems, (items) => {
@@ -380,20 +382,41 @@ function onRowClick(event, row) {
   selectItem(row.item);
 }
 
-function releasePregradedCorrection(keys) {
+function bulkAuthorizeCorrection(keys) {
   releaseItems.value = keys
     .map((key) => itemsStore.getItem(key))
     .filter((item) => item?.can_authorize && item.grading_status === Summary.STATUS_PRE_GRADED);
+  if (stores.changes().countChanges) {
+    releaseFailure.value = t('ItemListActionFailedOpenChanges');
+  } else {
+    releaseFailure.value = ''
+  }
   releaseOpen.value = true;
 }
 
-async function confirmReleasePregraded() {
+function bulkAuthorizeInfo(item) {
+  const warning = itemsStore.getAuthorizationWarningText(item);
+  if (warning) {
+    return item.pseudonym + ' - ' + warning;
+  }
+  return item.pseudonym;
+}
+
+async function confirmBulkAuthorize() {
   if (!releaseItems.value.length || releasing.value) {
     return;
   }
+
+  if (stores.changes().countChanges) {
+   releaseFailure.value = t('ItemListActionFailedOpenChanges');
+   return;
+  }
+
   releasing.value = true;
   try {
-    await apiStore.sendBulkAuthorize(releaseItems.value.map((item) => item.key));
+    await apiStore.sendBulkAuthorize(releaseItems.value);
+    await stores.api().loadDataFromBackend();
+    stores.layout().setShowItemList();
     releaseOpen.value = false;
   } finally {
     releasing.value = false;
@@ -535,17 +558,19 @@ async function selectItem(item) {
             </template>
             <v-list id="item-list-actions" density="compact">
               <v-list-item
-                  :title="$t('itemListActionReleasePregraded')"
-                  @click="releasePregradedCorrection([...selectedKeys])"
+                  :title="$t('itemListActionBulkAuthorize')"
+                  @click="bulkAuthorizeCorrection(selectedKeys)"
               />
+              <!--
               <v-list-item
                   :title="$t('itemListActionDownloadSubmission')"
-                  @click="downloadSubmissionFile([...selectedKeys])"
+                  @click="downloadSubmissionFile(selectedKeys)"
               />
               <v-list-item
                   :title="$t('itemListActionWithdrawRelease')"
-                  @click="withdrawOwnRelease([...selectedKeys])"
+                  @click="withdrawOwnRelease(selectedKeys)"
               />
+              -->
             </v-list>
           </v-menu>
         </div>
@@ -648,29 +673,34 @@ async function selectItem(item) {
         persistent
     >
       <v-card>
-        <v-card-title>{{ $t("itemListActionReleasePregraded") }}</v-card-title>
+        <v-card-title>{{ $t("itemListActionBulkAuthorize") }}</v-card-title>
         <v-card-text>
-          <template v-if="releaseItems.length">
-            <p>{{ $t("itemListReleasePregradedInfo") }}</p>
+          <v-alert v-if="releaseFailure" type="warning" variant="text" color="#0000A0">
+            {{ releaseFailure }}
+          </v-alert>
+          <template v-else-if="releaseItems.length">
+            <p>{{ $t("itemListBulkAuthorizeInfo") }}</p>
             <ul class="item-list__release">
-              <li v-for="item in releaseItems" :key="item.key">{{ item.pseudonym }}</li>
+              <li v-for="item in releaseItems" :key="item.key">
+                {{ bulkAuthorizeInfo(item) }}
+              </li>
             </ul>
-            <p>{{ $t("itemListReleasePregradedWarn") }}</p>
+            <p>{{ $t("itemListBulkAuthorizeWarn") }}</p>
           </template>
-          <p v-else>{{ $t("itemListReleasePregradedEmpty") }}</p>
+          <p v-else>{{ $t("itemListBulkAuthorizeEmpty") }}</p>
         </v-card-text>
         <v-card-actions>
           <v-btn
-              v-if="releaseItems.length"
+              v-if="releaseItems.length && !releaseFailure"
               :disabled="releasing || apiStore.isSending"
-              @click="confirmReleasePregraded"
+              @click="confirmBulkAuthorize"
           >
             <v-icon left icon="mdi-check"></v-icon>
-            <span>{{ $t("itemListReleasePregradedConfirm") }}</span>
+            <span>{{ $t("itemListBulkAuthorizeConfirm") }}</span>
           </v-btn>
           <v-btn :disabled="releasing" @click="releaseOpen = false">
             <v-icon left icon="mdi-close"></v-icon>
-            <span>{{ releaseItems.length ? $t("allCancel") : $t("allClose") }}</span>
+            <span>{{ releaseItems.length || releaseFailure ? $t("allCancel") : $t("allClose") }}</span>
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -744,7 +774,6 @@ async function selectItem(item) {
   flex: 1 1 auto;
   min-height: 0;
   margin-top: 30px;
-  border: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
 }
 
 :deep(.item-list__column) {
@@ -774,9 +803,27 @@ async function selectItem(item) {
   vertical-align: middle;
 }
 
+:deep(.v-table__wrapper > table > thead > tr:not(.v-data-table-progress) > th),
+:deep(.v-table__wrapper > table > tbody > tr > td) {
+  border-bottom: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
+}
+
+:deep(.v-table--fixed-header > .v-table__wrapper > table > thead > tr:not(.v-data-table-progress) > th) {
+  box-shadow: none;
+  border-top: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
+  border-bottom: thin solid rgba(var(--v-border-color), var(--v-border-opacity)) !important;
+}
+
+:deep(.v-table__wrapper > table > thead > tr:not(.v-data-table-progress) > th:first-child),
+:deep(.v-table__wrapper > table > tbody > tr > td:first-child),
 :deep(.v-data-table__th + .v-data-table__th),
 :deep(.v-data-table__td + .v-data-table__td) {
   border-inline-start: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
+}
+
+:deep(.v-table__wrapper > table > thead > tr:not(.v-data-table-progress) > th:last-child),
+:deep(.v-table__wrapper > table > tbody > tr > td:last-child) {
+  border-inline-end: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
 }
 
 :deep(th.item-list__select),

@@ -512,13 +512,15 @@ export const useSummariesStore = defineStore('summaries', {
     updatePoints(points) {
       points =  this.adjustPoints(points);
       this.editSummary.points = points;
-      this.editSummary.grade_key = stores.levels().getLevelForPoints(points)?.key ?? ''
+      this.editSummary.grade_key = stores.levels().getLevelForPoints(points)?.key ?? '';
+      stores.items().setCurrentGradingPoints(points);
     },
 
     updateRevisionPoints(points) {
       points = this.adjustPoints(points);
       this.editSummary.revision_points = points;
-      this.editSummary.revision_grade_key = stores.levels().getLevelForPoints(points)?.key ?? ''
+      this.editSummary.revision_grade_key = stores.levels().getLevelForPoints(points)?.key ?? '';
+      stores.items().setCurrentGradingPoints(points);
     },
 
     /**

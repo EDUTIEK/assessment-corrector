@@ -37,17 +37,17 @@ async function logout() {
     <span>{{ $t('appMenuReturn') }}</span>
   </v-btn>
 
-  <v-btn v-if="!configStore.returnUrl" :disabled="apiStore.isLoading || apiStore.isSending" id="app-menu-activator">
+  <v-btn v-if="!configStore.returnUrl" id="app-menu-activator">
     <v-icon left icon="mdi-dots-vertical"></v-icon>
     {{ $t('appMenuMenu')}}
   </v-btn>
 
-  <v-menu :disabled="apiStore.isLoading || apiStore.isSending" activator="#app-menu-activator">
+  <v-menu activator="#app-menu-activator">
     <v-list>
       <v-list-item :disabled="!apiStore.userId" prepend-icon="mdi-menu" :title="$t('appMenuAssessments')" @click="assessments"></v-list-item>
       <v-list-item :disabled="!apiStore.assId" prepend-icon="mdi-text-account" :title="$t('appMenuItems')" @click="items"></v-list-item>
       <v-divider></v-divider>
-      <v-list-item prepend-icon="mdi-logout-variant" :title="$t('appMenuLogout')" @click="logout"></v-list-item>
+      <v-list-item :disabled="apiStore.isLoading || apiStore.isSending" prepend-icon="mdi-logout-variant" :title="$t('appMenuLogout')" @click="logout"></v-list-item>
     </v-list>
   </v-menu>
 

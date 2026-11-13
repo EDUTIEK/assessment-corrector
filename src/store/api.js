@@ -9,6 +9,7 @@ import Cookies from 'js-cookie';
 import i18n from "@/plugins/i18n";
 import md5 from 'md5';
 import Change from '@/data/Change';
+import Correction from '@/data/Correction';
 import Item from '@/data/Item';
 import Snippet from '@/data/Snippet';
 import ApiResult from '@/data/ApiResult';
@@ -666,20 +667,18 @@ export const useApiStore = defineStore('api', {
     },
 
     async selectAssessment(assId, contextId) {
-      const changed = assId !== this.assId || contextId !== this.contextId;
-      if (changed) {
+      if (assId !== this.assId || contextId !== this.contextId) {
         this.assId = assId;
         this.contextId = contextId;
         this.itemKey = '';
-        await this.initAfterDetermination(changed, changed);
+        await this.initAfterDetermination(true, true);
       }
     },
 
     async selectItem(newKey) {
-      const changed = newKey !== this.itemKey;
-      if (changed) {
+      if (newKey !== this.itemKey) {
         this.itemKey = newKey;
-        await this.initAfterDetermination(false, changed);
+        await this.initAfterDetermination(false, true);
       }
     },
 
@@ -835,15 +834,20 @@ export const useApiStore = defineStore('api', {
      * Send a list of items keys that should be set from pre-graded to authorized
      * @return {ApiResult}
      */
-    async sendBulkAuthorize(itemKeys) {
+    async sendBulkAuthorize(items) {
 
       const changes = [];
-      for (const key of itemKeys) {
+      for (const item of items) {
         changes.push(new Change({
           type: Change.TYPE_BULK_AUTHORIZE,
           action: Change.ACTION_SAVE,
-          key: key,
-          item_key: key
+          key: item.key,
+          item_key: item.key,
+          payload: {
+            task_id: item.task_id,
+            writer_id: item.writer_id,
+            corrector_id: Correction.extractCorrectorId(stores.corrections().ownKey)
+          }
         }));
       }
 
