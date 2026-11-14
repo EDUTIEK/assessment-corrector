@@ -856,6 +856,35 @@ export const useApiStore = defineStore('api', {
       }
     },
 
+    /**
+     * Download the essay file(s) for the given item(s)
+     */
+    async downloadEssays(itemKeys) {
+      const config = {
+        method: 'put',
+        data: []
+      }
+
+      for (const key of itemKeys) {
+        config.data.push({
+          task_id: Item.extractTaskId(key),
+          writer_id: Item.extractWriterId(key),
+        })
+      }
+
+      try {
+        this.setLoading(true);
+        await this.downloadFile(
+          this.getDownloadTitle(t(itemKeys.length == 1 ? 'apiEssayFile' : 'apiEssaysFile'), true),
+          '/corrector/file/assessment/writings/0/attachment',
+          config
+        );
+        this.setLoading(false);
+      } catch(error) {
+        console.log(error);
+        this.setLoading(false);
+      }
+    },
 
     /**
      * Send a list of items keys that should be set from pre-graded to authorized

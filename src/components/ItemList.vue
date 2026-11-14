@@ -380,7 +380,7 @@ function onRowClick(event, row) {
   selectItem(row.item);
 }
 
-function downloadSubmissionFile(keys) {
+function downloadEssay(keys) {
 }
 
 function withdrawOwnRelease(keys) {
@@ -518,12 +518,12 @@ async function selectItem(item) {
                   :title="$t('itemListActionBulkAuthorize')"
                   @click="bulkAuthorization.bulkAuthorizeCorrection()"
               />
-              <!--
               <v-list-item
-                  :title="$t('itemListActionDownloadSubmission')"
-                  @click="downloadSubmissionFile(selectedKeys)"
+                  :title="$t('itemListActionDownloadEssay')"
+                  @click="stores.api().downloadEssays(selectedKeys)"
               />
-              <v-list-item
+              <!--
+              <><v-list-item
                   :title="$t('itemListActionWithdrawRelease')"
                   @click="withdrawOwnRelease(selectedKeys)"
               />
