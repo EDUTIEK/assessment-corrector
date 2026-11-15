@@ -261,22 +261,36 @@ export default class Item {
  final_grade = null;
 
   /**
-   * Is a correction allowed for the item
+   * Is a correction allowed for the item?
    * @type {boolean}
    */
   can_correct = false;
 
   /**
-   * Is an authorization allowed for the item
+   * Is an authorization allowed for the item?
    * @type {boolean}
    */
   can_authorize = false;
 
   /**
-   * Is an review allowed for the item
+   * Is a review allowed for the item?
    * @type {boolean}
    */
   can_revise = false;
+
+  /**
+   * Can the own authorization be removed for the item?
+   * @type {boolean}
+   */
+  can_remove_own_authorization = false;
+
+
+  /**
+   * Can the authorization of the first corrector be removed for the item?
+   * @type {boolean}
+   */
+  can_remove_first_authorization = false;
+
 
   /**
    * Constructor - gets properties from a data object
@@ -348,6 +362,12 @@ export default class Item {
     }
     if (data.can_revise !== undefined && data.can_revise !== null) {
       this.can_revise = !!data.can_revise;
+    }
+    if (data.can_remove_own_authorization !== undefined && data.can_remove_own_authorization !== null) {
+      this.can_remove_own_authorization = !!data.can_remove_own_authorization;
+    }
+    if (data.can_remove_first_authorization !== undefined && data.can_remove_first_authorization !== null) {
+      this.can_remove_first_authorization = !!data.can_remove_first_authorization;
     }
     if (this.key === null) {
       this.key = Item.buildKey(this.task_id, this.writer_id);

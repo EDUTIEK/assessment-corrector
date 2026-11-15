@@ -857,14 +857,10 @@ export const useApiStore = defineStore('api', {
     },
 
     /**
-     * Download the essay file(s) for the given item(s)
+     * Download the writing PDF file(s) for selected items
      */
-    async downloadEssays(itemKeys) {
-      const config = {
-        method: 'put',
-        data: []
-      }
-
+    async downloadWritings(itemKeys) {
+      const config = { method: 'put', data: [] };
       for (const key of itemKeys) {
         config.data.push({
           task_id: Item.extractTaskId(key),
@@ -872,30 +868,55 @@ export const useApiStore = defineStore('api', {
         })
       }
 
+      this.setLoading(true);
       try {
-        this.setLoading(true);
         await this.downloadFile(
-          this.getDownloadTitle(t(itemKeys.length == 1 ? 'apiEssayFile' : 'apiEssaysFile'), true),
+          this.getDownloadTitle(t(itemKeys.length == 1 ? 'apiWritingFile' : 'apiWritingFiles'), true),
           '/corrector/file/assessment/writings/0/attachment',
           config
         );
-        this.setLoading(false);
       } catch(error) {
         console.log(error);
-        this.setLoading(false);
       }
+      this.setLoading(false);
+    },
+
+
+    /**
+     * Download the correction PDF file(s) for selected items
+     */
+    async downloadCorrections(itemKeys) {
+      const config = { method: 'put', data: [] };
+      for (const key of itemKeys) {
+        config.data.push({
+          task_id: Item.extractTaskId(key),
+          writer_id: Item.extractWriterId(key),
+        })
+      }
+
+      this.setLoading(true);
+      try {
+        await this.downloadFile(
+          this.getDownloadTitle(t(itemKeys.length == 1 ? 'apiCorrectionFile' : 'apiCorrectionFiles'), true),
+          '/corrector/file/assessment/corrections/0/attachment',
+          config
+        );
+      } catch(error) {
+        console.log(error);
+      }
+      this.setLoading(false);
     },
 
     /**
-     * Send a list of items keys that should be set from pre-graded to authorized
+     * Send a request to change the authorization of items
      * @return {ApiResult}
      */
-    async sendBulkAuthorize(items) {
+    async sendChangeAuthorization(items, change_type) {
 
       const changes = [];
       for (const item of items) {
         changes.push(new Change({
-          type: Change.TYPE_BULK_AUTHORIZE,
+          type: change_type,
           action: Change.ACTION_SAVE,
           key: item.key,
           item_key: item.key,
@@ -908,7 +929,7 @@ export const useApiStore = defineStore('api', {
       }
 
       const data = {'Task': {}};
-      data['Task'][Change.TYPE_BULK_AUTHORIZE] = changes;
+      data['Task'][change_type] = changes;
 
       if (!(await this.checkSending(true))) {
         try {

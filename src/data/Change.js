@@ -13,11 +13,13 @@ export default class Change {
   static TYPE_SUMMARY = 'summary';
   static TYPE_PREFERENCES = 'preferences';
   static TYPE_SNIPPETS = 'snippets';
-  static TYPE_BULK_AUTHORIZE = 'bulk_authorize'
+  static TYPE_BULK_AUTHORIZE = 'bulk_authorize';
+  static TYPE_REMOVE_OWN_AUTHORIZATION = 'remove_own_authorization';
+  static TYPE_REMOVE_FIRST_AUTHORIZATION = 'remove_first_authorization';
 
-  static ALLOWED_TYPES = [Change.TYPE_COMMENT, Change.TYPE_POINTS, Change.TYPE_SUMMARY, Change.TYPE_PREFERENCES, Change.TYPE_SNIPPETS,
-                            Change.TYPE_BULK_AUTHORIZE];
+  static INSTANT_TYPES = [Change.TYPE_BULK_AUTHORIZE, Change.TYPE_REMOVE_OWN_AUTHORIZATION, Change.TYPE_REMOVE_FIRST_AUTHORIZATION];
   static STORED_TYPES = [Change.TYPE_COMMENT, Change.TYPE_POINTS, Change.TYPE_SUMMARY, Change.TYPE_PREFERENCES, Change.TYPE_SNIPPETS];
+  static ALLOWED_TYPES = [...Change.INSTANT_TYPES, ...Change.STORED_TYPES]
 
   static buildChangeKey(type, key) {
     return type + '_' + key;

@@ -18,6 +18,7 @@ import Item from "@/data/Item";
 import Procedure from "@/data/Procedure";
 import Summary from "@/data/Summary";
 import ApiResult from '@/data/ApiResult';
+import Change from '@/data/Change';
 
 const { t } = i18n.global;
 
@@ -380,12 +381,6 @@ function onRowClick(event, row) {
   selectItem(row.item);
 }
 
-function downloadEssay(keys) {
-}
-
-function withdrawOwnRelease(keys) {
-}
-
 async function selectItem(item) {
   if (selecting.value || apiStore.isLoading || !item?.key) {
     return;
@@ -514,20 +509,26 @@ async function selectItem(item) {
               </v-btn>
             </template>
             <v-list id="item-list-actions" density="compact">
-              <v-list-item
-                  :title="$t('itemListActionBulkAuthorize')"
-                  @click="bulkAuthorization.bulkAuthorizeCorrection()"
+              <v-list-item v-if="settingsStore.Assessment.download_writing"
+                  :title="$t('itemListActionDownloadWriting')"
+                  @click="apiStore.downloadWritings(selectedKeys)"
+              />
+              <v-list-item v-if="settingsStore.Assessment.download_correction"
+                  :title="$t('itemListActionDownloadCorrection')"
+                  @click="apiStore.downloadCorrections(selectedKeys)"
               />
               <v-list-item
-                  :title="$t('itemListActionDownloadEssay')"
-                  @click="stores.api().downloadEssays(selectedKeys)"
+                  :title="$t('bulkAuthorizeOwnAction')"
+                  @click="bulkAuthorization.bulkAction(Change.TYPE_BULK_AUTHORIZE)"
               />
-              <!--
-              <><v-list-item
-                  :title="$t('itemListActionWithdrawRelease')"
-                  @click="withdrawOwnRelease(selectedKeys)"
+              <v-list-item v-if="settingsStore.Assessment.undo_authorization"
+                  :title="$t('bulkAuthorizeRemoveOwnAction')"
+                  @click="bulkAuthorization.bulkAction(Change.TYPE_REMOVE_OWN_AUTHORIZATION)"
               />
-              -->
+              <v-list-item v-if="settingsStore.Assessment.undo_first_authorization"
+                  :title="$t('bulkAuthorizeRemoveFirstAction')"
+                  @click="bulkAuthorization.bulkAction(Change.TYPE_REMOVE_FIRST_AUTHORIZATION)"
+              />
             </v-list>
           </v-menu>
         </div>
