@@ -83,10 +83,16 @@ async function confirmedAction() {
 
   releasing.value = true;
   try {
-    await apiStore.sendChangeAuthorization(releaseItems.value, changeType.value);
+    const api_result = await apiStore.sendChangeAuthorization(releaseItems.value, changeType.value);
+    console.log(api_result);
     await stores.api().loadDataFromBackend();
     stores.layout().setShowItemList();
     releaseOpen.value = false;
+    if (api_result.ok) {
+      stores.layout().setShowFeedback('success', t(langPrefix.value + 'Success'), true);
+    } else {
+      stores.layout().setShowFeedback('warning', t(langPrefix.value + 'Failure') + "\n" + api_result.message, false);
+    }
   } finally {
     releasing.value = false;
   }

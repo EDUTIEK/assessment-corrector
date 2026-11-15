@@ -53,7 +53,12 @@ export const useLayoutStore = defineStore('layout', {
       showItemReplaceConfirmation: false, // show a confirmation that the stored item should be replaced by another item
 
       focusTarget: '',                    // target for setting the focus (header|navigation|left|right|ownSummary)
-      focusChange: 0                      // indicator to set the focus to the target
+      focusChange: 0,                     // indicator to set the focus to the target
+
+      showFeedback: false,                // short feedback
+      feedbackType: 'info',               // type of the short feedback
+      feedbackText: '',                   // text of the short feedback
+      feedbackAutoClose: false            // auto close the feedback after some seconds
     }
   },
 
@@ -484,6 +489,20 @@ export const useLayoutStore = defineStore('layout', {
     },
 
 
+    /**
+     * Show a small feedback message as overly
+     * @param {string} type success|info|warning|error
+     */
+    setShowFeedback(type, text, auto_close = true) {
+      this.feedbackType = type;
+      this.feedbackText = text;
+      this.feedbackAutoClose = auto_close;
+      this.showFeedback = true;
+    },
+
+    setHideFeedback() {
+      this.showFeedback = false;
+    },
 
     setFocusChange(target) {
       this.focusTarget = target;

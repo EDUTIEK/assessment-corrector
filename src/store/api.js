@@ -13,6 +13,7 @@ import Correction from '@/data/Correction';
 import Item from '@/data/Item';
 import Snippet from '@/data/Snippet';
 import ApiResult from '@/data/ApiResult';
+import ChangeResponse from '@/data/ChangeReponse';
 
 const { t } = i18n.global;
 const sendInterval = 1000;      // time (ms) to wait for sending open savings to the backend
@@ -936,7 +937,20 @@ export const useApiStore = defineStore('api', {
           this.setSending(true);
           const response = await this.request('put', '/corrector/changes', {data});
           this.setSending(false);
+
+          let failures = [];
+          for (const data of response['data']['Task'][change_type]) {
+            const change_response = new ChangeResponse(data);
+            if (!change_response.done) {
+              const item = items.find(item => item.key == change_response.key);
+              failures.push(item.pseudonym + ': ' + change_response.result);
+            }
+          }
+          if (failures.length) {
+            return new ApiResult(false, null, failures.join("\n"));
+          }
           return new ApiResult(true);
+
         } catch (error) {
           this.setSending(false);
           console.log(error);
