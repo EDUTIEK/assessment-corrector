@@ -32,7 +32,12 @@ export const useApiStore = defineStore('api', {
       timeOffset: 0,                      // difference between server time and client time (ms)
 
       // not saved
-      intervals: {},                       // list of all registered timer intervals, indexed by their name
+      intervals: {
+        api: {},                          // list of all registered timer intervals for the api
+        assessment: {},                   // list of all registered timer intervals for assessment data, indexed by their name
+        item: {}                          // list of all registered timer intervals for item data, indexed by their name
+      },
+      itemIntervals: {},
       lastSendingTry: 0,                  // timestamp of the last try to send changes (milliseconds)
       lastLoadingTry: 0,                  // timestamp of the last try to load data (milliseconds)
     }
@@ -481,7 +486,7 @@ export const useApiStore = defineStore('api', {
     async loadDataFromStorage() {
       console.log("loadDataFromStorage...");
       this.setLoading(true);
-      this.clearAllIntervals();
+      this.clearAllIntervals(['api', 'assessment']);
 
       await stores.config().loadFromStorage();
       await stores.user().loadFromStorage();
@@ -498,6 +503,7 @@ export const useApiStore = defineStore('api', {
       await stores.templates().loadFromStorage();
 
       this.setLoading(false);
+      this.setApiIntervals();
       return true;
     },
 
@@ -508,7 +514,7 @@ export const useApiStore = defineStore('api', {
     async loadItemFromStorage(itemKey) {
       console.log("loadItemFromStorage...");
       this.setLoading(true);
-      this.clearAllIntervals();
+      this.clearAllIntervals(['api', 'item']);
 
       const itemsStore = stores.items();
       if (itemKey == '' || stores.items().hasItems && itemsStore.getItem(itemKey) == undefined) {
@@ -531,8 +537,7 @@ export const useApiStore = defineStore('api', {
       stores.tasks().updateCurrentKeys();
       stores.layout().initForItem();
       this.setLoading(false);
-
-      this.setInterval('apiStore.saveChangesToBackend', this.saveChangesToBackend, sendInterval);
+      this.setApiIntervals();
       return true;
     },
 
@@ -543,7 +548,6 @@ export const useApiStore = defineStore('api', {
       console.log("loadAssessmentsFromBackend...");
 
       this.setLoading(true);
-      this.clearAllIntervals();
 
       let response = {};
       try {
@@ -569,7 +573,7 @@ export const useApiStore = defineStore('api', {
       console.log("loadDataFromBackend...");
 
       this.setLoading(true);
-      this.clearAllIntervals();
+      this.clearAllIntervals(['api', 'assessment']);
 
       let response = {};
       try {
@@ -599,6 +603,7 @@ export const useApiStore = defineStore('api', {
       await stores.settings().loadFromBackend('EssayTask', response.data['EssayTask']['Settings']);
 
       this.setLoading(false);
+      this.setApiIntervals();
       return true;
     },
 
@@ -609,7 +614,7 @@ export const useApiStore = defineStore('api', {
     async loadItemFromBackend(itemKey) {
       console.log("loadItemFromBackend...");
       this.setLoading(true);
-      this.clearAllIntervals();
+      this.clearAllIntervals(['api', 'item']);
 
       const itemsStore = stores.items();
       if (itemKey == '' && stores.items().hasItems && !stores.items().getItem(itemKey)) {
@@ -653,7 +658,7 @@ export const useApiStore = defineStore('api', {
       stores.tasks().updateCurrentKeys();
       stores.layout().initForItem();
       this.setLoading(false);
-      this.setInterval('apiStore.saveChangesToBackend', this.saveChangesToBackend, sendInterval);
+      this.setApiIntervals();
       return true;
     },
 
@@ -1044,33 +1049,44 @@ export const useApiStore = defineStore('api', {
       }
     },
 
+
+    setApiIntervals() {
+      this.setInterval('api', 'apiStore.saveChangesToBackend', this.saveChangesToBackend, sendInterval);
+    },
+
     /**
-     * Set a timer interval
+     * Set an timer interval
+     * @param {string} scope 'assessment' or 'item'
      * @param {string} name unique name of the interval to set
      * @param {function} handler function that is called
      * @param {integer} interval milliseconds between each call
      */
-    setInterval(name, handler, interval) {
-      if (name in this.intervals) {
-        clearInterval(this.intervals[name]);
+    setInterval(scope, name, handler, interval) {
+      if (name in this.intervals[scope]) {
+        clearInterval(this.intervals[scope][name]);
       }
-      this.intervals[name] = setInterval(handler, interval);
+      this.intervals[scope][name] = setInterval(handler, interval);
     },
 
     /**
-     * Clear a timer interval
+     * Clear an timer interval
+     * @param {string} scope 'assessment' or 'item'
+     * @param {string} name unique name of the interval to set
      */
-    clearInterval(name) {
-      clearInterval(this.intervals[name]);
+    clearInterval(scope, name) {
+      clearInterval(this.intervals[scope][name]);
     },
 
     /**
-     * Clear all timer intervals
+     * Clear all timer intervals in a scope
+     * @param {string[]} scopes 'api', 'assessment' or 'item'
      */
-    clearAllIntervals() {
-      for (const name in this.intervals) {
-        clearInterval(this.intervals[name]);
-        delete this.intervals[name];
+    clearAllIntervals(scopes) {
+      for(const scope of scopes) {
+        for (const name in this.intervals[scope]) {
+          clearInterval(this.intervals[scope][name]);
+          delete this.intervals[scope][name];
+        }
       }
     }
   }

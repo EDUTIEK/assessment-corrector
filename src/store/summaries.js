@@ -75,7 +75,7 @@ export const useSummariesStore = defineStore('summaries', {
     isOwnValidForRevision(state) {
       const own_correction = stores.corrections().ownCorrection;
 
-      return state.editSummary.hasRevisionText() == own_correction.can_enter_revision_text
+      return state.editSummary.hasRevisionText() == own_correction?.can_enter_revision_text
           && state.editSummary.hasRevisionPoints()
           && state.editSummary.points >= state.pointsCorridor.min
           && state.editSummary.points <= state.pointsCorridor.max
@@ -361,7 +361,7 @@ export const useSummariesStore = defineStore('summaries', {
       }
 
       lockUpdate = 0;
-      apiStore.setInterval('summariesStore.updateContent', this.updateContent, checkInterval);
+      apiStore.setInterval('item', 'summariesStore.updateContent', this.updateContent, checkInterval);
     },
 
     /**
@@ -400,7 +400,7 @@ export const useSummariesStore = defineStore('summaries', {
       }
 
       lockUpdate = 0;
-      apiStore.setInterval('summariesStore.updateContent', this.updateContent, checkInterval);
+      apiStore.setInterval('item', 'summariesStore.updateContent', this.updateContent, checkInterval);
     },
 
     /**

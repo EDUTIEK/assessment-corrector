@@ -480,6 +480,10 @@
     "tasksNextTask": "Nächste Teilaufgabe",
     "tasksPreviousTask": "Vorherige Teilaufgabe",
     "tasksTask": "Teilaufgabe",
+    "templateOtherBrowse": "Andere Vorlagen...",
+    "templateOtherTitle": "Andere Vorlage",
+    "templateOwnShare": "Teilen",
+    "templateOwnTitle": "Eigene Vorlage",
     "templateTextHiddenField": "Verborgenes Feld zur Gutachten-Vorlage",
     "tinyHelperIframeAriaText": "Gutachten-Editor"
 }

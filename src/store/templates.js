@@ -55,6 +55,8 @@ export const useTemplateStore = defineStore('templates', {
     },
 
     async loadFromStorage() {
+      const apiStore = stores.api();
+
       try {
         this.$reset();
 
@@ -69,10 +71,13 @@ export const useTemplateStore = defineStore('templates', {
       }
 
       lockUpdate = 0;
-      stores.api().setInterval('templatesStore.updateContent', this.updateContent, checkInterval);
+      console.log('set storage interval');
+      apiStore.setInterval('assessment', 'templatesStore.updateContent', this.updateContent, checkInterval);
     },
 
     async loadFromBackend(data = []) {
+      const apiStore = stores.api();
+
       try {
         await storage.clear();
         this.$reset();
@@ -90,7 +95,8 @@ export const useTemplateStore = defineStore('templates', {
       }
 
       lockUpdate = 0;
-      stores.api().setInterval('templatesStore.updateContent', this.updateContent, checkInterval);
+      console.log('set bachend interval');
+      apiStore.setInterval('assessment', 'templatesStore.updateContent', this.updateContent, checkInterval);
     },
 
     setEditTemplate(task_key = null) {
