@@ -8,6 +8,9 @@ import { nextTick, ref, watch } from 'vue';
 
 const templateStore = stores.templates();
 
+// initialize the template that should be edited
+templateStore.setEditTemplate();
+
 // editorId used for retrieving the editor instance using the tinymce.get('ID') method.
 const editorId = ref('summaryTemplate');
 const helper = new TinyHelper( editorId.value);

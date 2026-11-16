@@ -1,16 +1,26 @@
-import Task from "@/data/Task";
-
 /**
  * Template for the summary text
  */
 export default class Template {
 
+  /**
+   * @return {string}
+   */
+  static buildKey(task_id, corrector_id) {
+    return 'T' + task_id + '_' + corrector_id;
+  }
 
   /**
    * Task to which this template belongs
    * @type {integer}
    */
   task_id = null;
+
+  /**
+   * Corrector to which this template belongs
+   * @type {integer}
+   */
+  corrector_id = null;
 
   /**
    * Content of the template
@@ -33,6 +43,9 @@ export default class Template {
     if (data.task_id !== undefined && data.task_id !== null) {
       this.task_id = parseInt(data.task_id);
     }
+    if (data.corrector_id !== undefined && data.corrector_id !== null) {
+      this.corrector_id = parseInt(data.corrector_id);
+    }
     if (data.content !== undefined && data.content !== null) {
       this.content = data.content.toString();
     }
@@ -42,10 +55,10 @@ export default class Template {
   }
 
   /**
-   * @return {string}
+   * Get the key for storing the template
    */
   getKey() {
-    return Task.buildKey(this.task_id)
+    return Template.buildKey(this.task_id, this.corrector_id)
   }
 
   /**
@@ -70,6 +83,7 @@ export default class Template {
   /**
    * Check if this object is equal to another summary
    * @param other
+   * @returns {boolean}
    */
   isEqual(other) {
     for (const key in this) {
@@ -78,5 +92,13 @@ export default class Template {
       }
     }
     return true;
+  }
+
+  /**
+   * Check if the template has already set the secessary ids
+   * @returns {boolean}
+   */
+  hasValidKey() {
+    return this.task_id !== null && this.corrector_id !== null;
   }
 }

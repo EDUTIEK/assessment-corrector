@@ -8,7 +8,7 @@ import i18n from "@/plugins/i18n";
 import Template from "@/data/Template";
 import Summary from '@/data/Summary';
 import Change from '@/data/Change';
-import Task from '@/data/Task';
+import Correction from '@/data/Correction';
 
 const storage = getStorage('templates');
 const { t } = i18n.global;
@@ -36,10 +36,15 @@ export const useTemplateStore = defineStore('templates', {
    */
   getters: {
 
+    /**
+     * Template that can be used in the current correction item
+     */
     currentTemplate(state) {
-      return state.templates[stores.tasks().currentKey];
+      return state.templates[Template.buildKey(
+        Correction.extractTaskId(stores.corrections().ownKey),
+        Correction.extractCorrectorId(stores.corrections().ownKey)
+      )];
     },
-
   },
 
   actions: {
@@ -64,14 +69,12 @@ export const useTemplateStore = defineStore('templates', {
         for (const key of keys) {
           this.templates[key] = new Template(await storage.getItem(key));
         }
-        this.setEditTemplate();
       }
       catch (err) {
         console.log(err);
       }
 
       lockUpdate = 0;
-      console.log('set storage interval');
       apiStore.setInterval('assessment', 'templatesStore.updateContent', this.updateContent, checkInterval);
     },
 
@@ -88,24 +91,31 @@ export const useTemplateStore = defineStore('templates', {
           await storage.setItem(template.getKey(), template.getData());
         }
         await storage.setItem('keys', Object.keys(this.templates));
-        this.setEditTemplate();
       }
       catch (err) {
         console.log(err);
       }
 
       lockUpdate = 0;
-      console.log('set bachend interval');
       apiStore.setInterval('assessment', 'templatesStore.updateContent', this.updateContent, checkInterval);
     },
 
-    setEditTemplate(task_key = null) {
-      if (task_key === null) {
-        task_key = stores.tasks().sortedTasks[0]?.getKey();
+    /**
+     * Set the template that is currently edited
+     * @param {integer} task_id
+     */
+    setEditTemplate(task_id = null) {
+      const dummy = new Template( {
+        task_id: task_id ?? Correction.extractTaskId(stores.corrections().ownKey),
+        corrector_id: Correction.extractCorrectorId(stores.corrections().ownKey)
+      });
+
+      if (this.templates[dummy.getKey()]) {
+        this.editTemplate = this.templates[dummy.getKey()].getClone();
+        return;
       }
-      if (this.editTemplate.getKey() !== task_key && this.templates[task_key]) {
-        this.editTemplate = this.templates[task_key].getClone();
-      }
+
+      this.editTemplate = dummy;
     },
 
     /**
@@ -139,7 +149,10 @@ export const useTemplateStore = defineStore('templates', {
 
       // use a clone to avoid conflict with ongoing inputs
       const storedTemplate = this.templates[this.editTemplate.getKey()]
-        ?? new Template({task_id: Task.extractTaskId(this.editTemplate.getKey())});
+        ?? new Template({
+          task_id: this.editTemplate.task_id,
+          corrector_id: this.editTemplate.corrector_id
+        });
       const clonedTemplate = this.editTemplate.getClone();
       if (clonedTemplate.isEqual(storedTemplate)) {
         this.lastCheck = currentTime;
