@@ -31,7 +31,7 @@ export default class Template {
   constructor(data = {}) {
 
     if (data.task_id !== undefined && data.task_id !== null) {
-      this.task_id = parseInt(data.task_id);
+      this.task_id = parseInt(data.sk_id);
     }
     if (data.content !== undefined && data.content !== null) {
       this.content = data.content.toString();
