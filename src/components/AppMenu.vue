@@ -37,10 +37,11 @@ async function logout() {
 
   <v-menu activator="#app-menu-activator">
     <v-list>
-      <v-list-item :disabled="!apiStore.userId" prepend-icon="mdi-menu" :title="$t('appMenuAssessments')" @click="stores.layout().setShowAssessmentList();"></v-list-item>
       <v-list-item :disabled="!apiStore.assId" prepend-icon="mdi-text-account" :title="$t('appMenuItems')" @click="stores.layout().setShowItemList();"></v-list-item>
       <v-list-item :disabled="!apiStore.assId" prepend-icon="mdi-file-edit-outline" :title="$t('appMenuTemplate')" @click="stores.layout().setShowTemplate();"></v-list-item>
+<!--      <v-list-item :disabled="!apiStore.assId" prepend-icon="mdi-chart-bar" :title="$t('appMenuStatistics')" @click="stores.layout().setShowTemplate();"></v-list-item>-->
       <v-divider></v-divider>
+      <v-list-item :disabled="!apiStore.userId" prepend-icon="mdi-swap-horizontal" :title="$t('appMenuChangeAssessment')" @click="stores.layout().setShowAssessmentList();"></v-list-item>
       <v-list-item :disabled="apiStore.isLoading || apiStore.isSending" prepend-icon="mdi-logout-variant" :title="$t('appMenuLogout')" @click="logout"></v-list-item>
     </v-list>
   </v-menu>
