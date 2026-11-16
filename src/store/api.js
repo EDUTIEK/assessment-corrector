@@ -676,6 +676,7 @@ export const useApiStore = defineStore('api', {
           try {
             const data = {'Task': {}};
             data['Task'][Change.TYPE_SNIPPETS] = await stores.snippets().getChangedData(this.lastSendingTry);
+            data['Task'][Change.TYPE_TEMPLATE] = await stores.templates().getChangedData(this.lastSendingTry);
             data['Task'][Change.TYPE_PREFERENCES] = await stores.preferences().getChangedData(this.lastSendingTry);
             data['Task'][Change.TYPE_COMMENT] = await stores.comments().getChangedData(this.lastSendingTry);
             data['Task'][Change.TYPE_POINTS] = await stores.points().getChangedData(this.lastSendingTry);

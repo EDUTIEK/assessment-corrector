@@ -11,6 +11,7 @@ export default class Change {
   static TYPE_COMMENT = 'comment';
   static TYPE_POINTS = 'points';
   static TYPE_SUMMARY = 'summary';
+  static TYPE_TEMPLATE = 'template';
   static TYPE_PREFERENCES = 'preferences';
   static TYPE_SNIPPETS = 'snippets';
   static TYPE_BULK_AUTHORIZE = 'bulk_authorize';
@@ -18,7 +19,8 @@ export default class Change {
   static TYPE_REMOVE_FIRST_AUTHORIZATION = 'remove_first_authorization';
 
   static INSTANT_TYPES = [Change.TYPE_BULK_AUTHORIZE, Change.TYPE_REMOVE_OWN_AUTHORIZATION, Change.TYPE_REMOVE_FIRST_AUTHORIZATION];
-  static STORED_TYPES = [Change.TYPE_COMMENT, Change.TYPE_POINTS, Change.TYPE_SUMMARY, Change.TYPE_PREFERENCES, Change.TYPE_SNIPPETS];
+  static STORED_TYPES = [Change.TYPE_COMMENT, Change.TYPE_POINTS, Change.TYPE_SUMMARY,
+                          Change.TYPE_PREFERENCES, Change.TYPE_SNIPPETS, Change.TYPE_TEMPLATE];
   static ALLOWED_TYPES = [...Change.INSTANT_TYPES, ...Change.STORED_TYPES]
 
   static buildChangeKey(type, key) {
@@ -112,7 +114,7 @@ export default class Change {
       Change.ALLOWED_TYPES.includes(this.type)
       && Change.ALLOWED_ACTIONS.includes(this.action)
       && this.key != ''
-      && (this.item_key != '' || this.type == Change.TYPE_SNIPPETS)
+      && (this.item_key != '' || this.type == Change.TYPE_SNIPPETS || this.type == Change.TYPE_TEMPLATE)
     );
   }
 }

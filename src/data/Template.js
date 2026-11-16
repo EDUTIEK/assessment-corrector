@@ -19,6 +19,12 @@ export default class Template {
   content = '';
 
   /**
+   * Template is shared with others
+   * @type {boolean}
+   */
+  shared = false;
+
+  /**
    * Constructor - gets properties from a data object
    * @param {object} data
    */
@@ -29,6 +35,9 @@ export default class Template {
     }
     if (data.content !== undefined && data.content !== null) {
       this.content = data.content.toString();
+    }
+    if (data.shared !== undefined && data.shared !== null) {
+      this.shared = !!data.shared;
     }
   }
 
@@ -46,7 +55,28 @@ export default class Template {
     return Object.assign({}, this);
   }
 
+  /**
+   * Get a clone of the object
+   * @returns {Summary}
+   */
+  getClone() {
+    return new Template(this.getData());
+  }
+
   hasContent() {
     return this.content != '';
+  }
+
+  /**
+   * Check if this object is equal to another summary
+   * @param other
+   */
+  isEqual(other) {
+    for (const key in this) {
+      if (this[key] !== other[key]) {
+        return false;
+      }
+    }
+    return true;
   }
 }

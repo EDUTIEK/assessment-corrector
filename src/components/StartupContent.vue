@@ -3,6 +3,7 @@ import {ref, computed} from "vue";
 import {stores} from "@/store";
 import Welcome from "@/components/Welcome.vue";
 import AssessmentList from "@/components/AssessmentList.vue";
+import SummaryTemplate from '@/components/SummaryTemplate.vue';
 
 const login = ref('');
 const password = ref('');
@@ -14,7 +15,7 @@ const loginMessage = ref('');
 const agreementDialog = ref(false);
 const agreementSending = ref(false);
 
-const showAppBar = computed(() => !stores.layout().showWelcome);
+const showAppBar = computed(() => !stores.layout().isWelcomeShown);
 const showReturnButton = computed(() => !!stores.config().returnUrl);
 const showLogoutButton = computed(() => !stores.config().returnUrl && stores.api().userId);
 
@@ -69,16 +70,18 @@ async function sendLogout() {
     <v-app-bar v-if="showAppBar" elevation="1" color="white" density="compact">
       <v-app-bar-title>{{
           stores.api().isLoading ? $t('startupContentLoadData')
-              : stores.layout().showAssessmentList ? $t('assessmentListHeading')
-                : stores.layout().showItemList ? $t('itemListHeading') : ''
+              : stores.layout().isAssessmentListShown ? $t('appMenuAssessments')
+                : stores.layout().isItemListShown ? $t('appMenuItems')
+                      : stores.layout().isTemplateShown ? $t('appMenuTemplate') : ''
         }}</v-app-bar-title>
       <v-spacer></v-spacer>
       <app-menu></app-menu>
     </v-app-bar>
 
-    <welcome v-if="stores.layout().showWelcome" @login="showLogin(true)"/>
-    <assessment-list v-if="stores.layout().showAssessmentList"/>
-    <item-list v-if="stores.layout().showItemList" />
+    <welcome v-if="stores.layout().isWelcomeShown" @login="showLogin(true)"/>
+    <assessment-list v-if="stores.layout().isAssessmentListShown"/>
+    <item-list v-if="stores.layout().isItemListShown" />
+    <summary-template  v-if="stores.layout().isTemplateShown" />
 
     <!--
       Login
@@ -244,7 +247,7 @@ async function sendLogout() {
 
 <style scoped>
 
-  v-main {
+  main {
     background-color: #eef1f4;
   }
 

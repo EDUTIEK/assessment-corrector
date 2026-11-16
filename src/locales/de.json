@@ -59,6 +59,7 @@
     "appMenuAssessments": "Aufgabe auswählen",
     "appMenuMenu": "Meine Korrektur",
     "appMenuItems": "Teilnehmer auswählen",
+    "appMenuTemplate": "Gutachten-Vorlage bearbeiten",
     "appMenuLogout": "Abmelden",
     "appMenuReturn": "Schließen",
     "assessmentListCaption": "Verfügbare Aufgaben",
@@ -477,5 +478,6 @@
     "tasksNextTask": "Nächste Teilaufgabe",
     "tasksPreviousTask": "Vorherige Teilaufgabe",
     "tasksTask": "Teilaufgabe",
+    "templateTextHiddenField": "Verborgenes Feld zur Gutachten-Vorlage",
     "tinyHelperIframeAriaText": "Gutachten-Editor"
 }

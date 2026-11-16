@@ -20,6 +20,15 @@ export default class Task {
     }
 
     /**
+     * @param {string} key
+     * @returns {number|null}
+     */
+    static extractTaskId(key) {
+        const matches = key ? key.match(/T(\d+)/) : null;
+        return matches && matches[1] ? parseInt(matches[1]) : null;
+    }
+
+    /**
      * Id of the task
      * @type {integer}
      */

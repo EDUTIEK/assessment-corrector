@@ -41,11 +41,8 @@ export const useLayoutStore = defineStore('layout', {
       showIncludesPopup: false,            // show the popup to set the included elements
 
       initFailure: '',                    // failure from app initialisation
-
       initialized: false,                 // used to switch from startup screen to the editing view
-      showWelcome: false,                 // show the welcome screen
-      showAssessmentList: false,          // show the list of assessments
-      showItemList: false,                // show the list of items
+      initContent: '',                    // welcome|assessmentList|itemList/template
 
       showItemLoadFailure: false,         // show a message that the loading if an item failed
       showSendFailure: false,             // show a message about a sending failure
@@ -67,6 +64,11 @@ export const useLayoutStore = defineStore('layout', {
    */
   getters: {
     hasInitFailure: state => state.initFailure !== '',
+
+    isWelcomeShown: state => state.initContent == 'welcome',
+    isAssessmentListShown: state => state.initContent == 'assessmentList',
+    isItemListShown: state => state.initContent == 'itemList',
+    isTemplateShown: state => state.initContent == 'template',
 
     isLeftExpanded: state => state.expandedColumn == 'left',
     isRightExpanded: state => state.expandedColumn == 'right',
@@ -463,29 +465,26 @@ export const useLayoutStore = defineStore('layout', {
 
     setInitialized() {
       this.initialized = true;
-      this.showAssessmentList = false;
-      this.showItemList = false;
     },
 
     setShowWelcome() {
       this.initialized = false;
-      this.showWelcome = true;
-      this.showAssessmentList = false;
-      this.showItemList = false;
+      this.initContent = 'welcome';
     },
 
     setShowAssessmentList() {
       this.initialized = false;
-      this.showWelcome = false;
-      this.showAssessmentList = true;
-      this.showItemList = false;
+      this.initContent = 'assessmentList';
     },
 
     setShowItemList() {
       this.initialized = false;
-      this.showWelcome = false;
-      this.showAssessmentList = false;
-      this.showItemList = true;
+      this.initContent = 'itemList';
+    },
+
+    setShowTemplate() {
+      this.initialized = false;
+      this.initContent = 'template';
     },
 
 
