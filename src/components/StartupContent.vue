@@ -60,6 +60,7 @@ async function loadAssessments() {
   if (stores.assessments().countAssessments == 1 ) {
     for (const key in stores.assessments().assessments) {
       const assessment = stores.assessments().assessments[key];
+      stores.layout().setShowItemList();
       stores.api().selectAssessment(assessment.ass_id, assessment.context_id);
       return;
     }
@@ -183,6 +184,10 @@ async function sendLogout() {
             <v-icon left icon="mdi-logout-variant"></v-icon>
             <span>{{ $t('allEnd') }}</span>
           </v-btn>
+          <v-btn v-if="showLogoutButton" :loading="stores.api().isSending" @click="sendLogout">
+            <v-icon left icon="mdi-logout-variant"></v-icon>
+            <span>{{ $t('startupContentLogout') }}</span>
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -196,6 +201,10 @@ async function sendLogout() {
           <v-btn v-show="showReturnButton" :href="stores.config().returnUrl">
             <v-icon left icon="mdi-logout-variant"></v-icon>
             <span>{{ $t('allEnd') }}</span>
+          </v-btn>
+          <v-btn v-if="showLogoutButton" :loading="stores.api().isSending" @click="sendLogout">
+            <v-icon left icon="mdi-logout-variant"></v-icon>
+            <span>{{ $t('startupContentLogout') }}</span>
           </v-btn>
         </v-card-actions>
       </v-card>
