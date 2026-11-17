@@ -7,6 +7,7 @@ import Item from "@/data/Item";
 const apiStore = stores.api();
 const configStore = stores.config();
 const userStore = stores.user();
+const assessmentStore = stores.assessments();
 
 async function returnToBackend() {
   if (stores.changes().countChanges == 0 || await stores.api().saveChangesToBackend(true)) {
@@ -42,7 +43,7 @@ async function logout() {
       <v-list-item :disabled="!apiStore.assId" prepend-icon="mdi-file-edit-outline" :title="$t('appMenuTemplate')" @click="stores.layout().setShowTemplate();"></v-list-item>
 <!--      <v-list-item :disabled="!apiStore.assId" prepend-icon="mdi-chart-bar" :title="$t('appMenuStatistics')" @click="stores.layout().setShowTemplate();"></v-list-item>-->
       <v-divider></v-divider>
-      <v-list-item :disabled="!apiStore.userId" prepend-icon="mdi-swap-horizontal" :title="$t('appMenuChangeAssessment')" @click="stores.layout().setShowAssessmentList();"></v-list-item>
+      <v-list-item v-if="assessmentStore.countAssessments > 1" :disabled="!apiStore.userId" prepend-icon="mdi-swap-horizontal" :title="$t('appMenuChangeAssessment')" @click="stores.layout().setShowAssessmentList();"></v-list-item>
       <v-list-item :disabled="apiStore.isLoading || apiStore.isSending" prepend-icon="mdi-logout-variant" :title="$t('appMenuLogout')" @click="logout"></v-list-item>
     </v-list>
   </v-menu>

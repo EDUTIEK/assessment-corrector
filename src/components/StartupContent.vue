@@ -36,8 +36,7 @@ async function sendLogin() {
     if (stores.user().hasToAccept) {
       showAgreement(true);
     } else {
-      stores.api().loadAssessmentsFromBackend();
-      stores.layout().setShowAssessmentList();
+      loadAssessments();
     }
   } else {
     loginMessage.value = result.message;
@@ -51,10 +50,21 @@ async function sendAgreement() {
     agreementSending.value = false;
     if (result.ok) {
       showAgreement(false);
-      stores.api().loadAssessmentsFromBackend();
-      stores.layout().setShowAssessmentList();
+      loadAssessments();
     }
   }
+}
+
+async function loadAssessments() {
+  await stores.api().loadAssessmentsFromBackend();
+  if (stores.assessments().countAssessments == 1 ) {
+    for (const key in stores.assessments().assessments) {
+      const assessment = stores.assessments().assessments[key];
+      stores.api().selectAssessment(assessment.ass_id, assessment.context_id);
+      return;
+    }
+  }
+  stores.layout().setShowAssessmentList();
 }
 
 async function sendLogout() {
