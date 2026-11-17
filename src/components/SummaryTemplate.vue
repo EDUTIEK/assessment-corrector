@@ -4,7 +4,7 @@ import Editor from '@tinymce/tinymce-vue'
 import TinyHelper from '@/lib/TinyHelper';
 
 import {stores} from "@/store";
-import { nextTick, ref, watch } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 
 const templateStore = stores.templates();
 
@@ -16,10 +16,11 @@ const editorId = ref('summaryTemplate');
 const helper = new TinyHelper( editorId.value);
 
 // Foreign template selected for comparison. Selection itself follows later.
-const browseOther = ref(true);
+const browseOther = ref(false);
 const otherTemplate = ref(null);
+const showAside = computed(() => browseOther.value || otherTemplate.value != null);
 
-watch(otherTemplate, async () => {
+watch(showAside, async () => {
   await nextTick();
   window.dispatchEvent(new Event('resize'));
 });
@@ -38,6 +39,11 @@ async function browseOtherTemplates() {
 function showOtherTemplate(key) {
   browseOther.value = false;
   otherTemplate.value = templateStore.templates[key];
+}
+
+async function chooseOther() {
+  otherTemplate.value = null;
+  browseOther.value = true;
 }
 
 function adoptOther() {
@@ -67,11 +73,11 @@ function handleChange() {
 </script>
 
 <template>
-  <div class="app-template-text-wrapper" :class="{ 'app-template-text-wrapper--wide': otherTemplate }">
+  <div class="app-template-text-wrapper" :class="{ 'app-template-text-wrapper--wide': showAside }">
     <v-row
         no-gutters
         class="fill-height flex-nowrap"
-        :class="{ 'ga-4': otherTemplate }"
+        :class="{ 'ga-4': showAside }"
     >
       <v-col class="app-template-pane d-flex flex-column">
         <v-toolbar density="compact" color="white" elevation="1" class="mb-2">
@@ -126,30 +132,38 @@ function handleChange() {
             color="white"
             class="app-template-body overflow-y-auto pa-4 xlas-content headlines-three"
         >
-          <v-list lines="one">
+          <v-list lines="one" v-if="templateStore.otherTemplates.length">
             <v-list-item
                 v-for="template of templateStore.otherTemplates"
                 :key="template.getKey()"
                 :title="template.user_name"
                 @click="showOtherTemplate(template.getKey())"
-            ></v-list-item>
+            >
+              <template v-slot:prepend>
+                <v-icon aria-role="hidden" icon="mdi-file-outline"></v-icon>
+              </template>
+            </v-list-item>
           </v-list>
+          <p v-if="!templateStore.otherTemplates.length">{{$t('TemplateNoSharedFound')}}</p>
         </v-sheet>
       </v-col>
 
       <v-col v-if="otherTemplate" class="app-template-pane d-flex flex-column">
         <v-toolbar density="compact" color="white" elevation="1" class="mb-2">
           <template #prepend>
-            <v-toolbar-title class="app-template-title-aside ms-4">{{ $t('templateOtherTitle') }}</v-toolbar-title>
+            <v-toolbar-title class="app-template-title-aside ms-4">{{ otherTemplate.user_name }}</v-toolbar-title>
           </template>
           <template #append>
+            <v-btn @click="chooseOther">
+              {{ $t('templateChooseOther') }}
+            </v-btn>
             <v-btn @click="adoptOther">
               {{ $t('allApply') }}
             </v-btn>
             <v-btn
                 icon="mdi-close"
                 :aria-label="$t('allClose')"
-                @click="otherTemplate.value = null"
+                @click="otherTemplate = null"
             />
           </template>
         </v-toolbar>
