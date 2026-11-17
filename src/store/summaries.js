@@ -582,7 +582,7 @@ export const useSummariesStore = defineStore('summaries', {
     async setOwnPregraded() {
       this.editSummary.status = Summary.STATUS_PRE_GRADED;
       await this.updateContent(false, true);
-      stores.api().clearInterval('summariesStore.updateContent');
+      stores.api().clearInterval('item', 'summariesStore.updateContent');
     },
 
     /**
@@ -591,7 +591,7 @@ export const useSummariesStore = defineStore('summaries', {
     async setOwnAuthorized() {
       this.editSummary.status = Summary.STATUS_AUTHORIZED;
       await this.updateContent(false, true);
-      stores.api().clearInterval('summariesStore.updateContent');
+      stores.api().clearInterval('item', 'summariesStore.updateContent');
     },
 
     /**
@@ -601,7 +601,7 @@ export const useSummariesStore = defineStore('summaries', {
       this.editSummary.require_other_revision = !!require_other_revision;
       this.editSummary.status = Summary.STATUS_REVISED;
       await this.updateContent(false, true);
-      stores.api().clearInterval('summariesStore.updateContent');
+      stores.api().clearInterval('item', 'summariesStore.updateContent');
     },
   }
 
