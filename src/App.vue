@@ -5,25 +5,13 @@
  */
 
 import AppBar from "@/components/AppBar.vue";
+import AppMessages from '@/components/AppMessages.vue';
 import NavBar from "@/components/NavBar.vue";
 import MainContent from "@/components/MainContent.vue";
 import StartupContent from "@/components/StartupContent.vue";
 import {stores} from "@/store";
 
 stores.api().init();
-
-/**
- * Feedback text: all HTML is quoted, only newlines become line breaks
- */
-const escapeHtml = (text) => text
-  .replace(/&/g, '&amp;')
-  .replace(/</g, '&lt;')
-  .replace(/>/g, '&gt;')
-  .replace(/"/g, '&quot;')
-  .replace(/'/g, '&#39;');
-
-const feedbackHtml = () => escapeHtml(stores.layout().feedbackText ?? '')
-  .replace(/\r?\n/g, '<br />');
 
 </script>
 
@@ -33,23 +21,7 @@ const feedbackHtml = () => escapeHtml(stores.layout().feedbackText ?? '')
     <app-bar v-if="stores.layout().initialized"/>
     <nav-bar v-if="stores.layout().initialized"/>
     <main-content v-if="stores.layout().initialized"/>
-
-    <v-snackbar
-      v-model="stores.layout().showFeedback"
-      :timeout="stores.layout().feedbackAutoClose ? 5000 : -1"
-      location="top"
-      variant="text"
-      content-class="feedback-snackbar"
-    >
-      <v-alert
-        class="ma-0"
-        closable
-        :type="stores.layout().feedbackType"
-        @click:close="stores.layout().setHideFeedback()"
-      >
-        <span v-html="feedbackHtml()"></span>
-      </v-alert>
-    </v-snackbar>
+    <app-messages></app-messages>
   </v-app>
 </template>
 
@@ -66,21 +38,6 @@ html {
 
 .hidden {
   display: none !important;
-}
-
-/* content-class sits on .v-snackbar__wrapper; drop its frame so only the alert shows */
-.v-snackbar__wrapper.feedback-snackbar {
-  background: transparent;
-  border-radius: 0;
-  box-shadow: none;
-  min-width: 0;
-  min-height: 0;
-  overflow: visible;
-  padding: 0;
-}
-
-.feedback-snackbar .v-snackbar__content {
-  padding: 0;
 }
 
 /* Content for screen readers only */
