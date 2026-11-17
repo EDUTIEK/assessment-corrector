@@ -222,6 +222,13 @@ export default class Item {
   grading_grade = null;
 
   /**
+   * Other corrector's grading status
+   * @type {string}
+   * @see Summary
+   */
+  other_status = '';
+
+  /**
    * Textual representation of the other corrector's grading status
    * @type {string}
    * @see Summary
@@ -335,6 +342,9 @@ export default class Item {
     }
     if (data.grading_grade !== undefined && data.grading_grade !== null) {
       this.grading_grade = data.grading_grade.toString();
+    }
+    if (data.other_status !== undefined && data.other_status !== null) {
+      this.other_status = data.other_status.toString();
     }
     if (data.other_status_text !== undefined && data.other_status_text !== null) {
       this.other_status_text = data.other_status_text.toString();

@@ -12,7 +12,7 @@ import { computed, nextTick, ref, watch } from "vue";
 import i18n from "@/plugins/i18n";
 import { stores } from "@/store";
 import BulkAuthorization from "@/components/BulkAuthorization.vue";
-import { correctionStatusForFilter, gradingStatusForFilter } from "@/store/items";
+import { correctionStatusForFilter, gradingStatusForFilter, otherStatusForFilter } from "@/store/items";
 import Correction from "@/data/Correction";
 import Item from "@/data/Item";
 import Procedure from "@/data/Procedure";
@@ -68,6 +68,12 @@ const GRADING_LABELS = {
   [Summary.STATUS_REVISED]: "itemListFilterGradingRevised",
 };
 
+const OTHER_LABELS = {
+  [Summary.STATUS_OPEN]: "itemListFilterGradingOpen",
+  [Summary.STATUS_AUTHORIZED]: "itemListFilterGradingAuthorized",
+  [Summary.STATUS_REVISED]: "itemListFilterGradingRevised",
+};
+
 const CORRECTION_LABELS = {
   [Item.STATUS_OPEN]: "itemListFilterCorrectionOpen",
   [Item.STATUS_APPROXIMATION]: "itemListFilterCorrectionApproximation",
@@ -100,6 +106,20 @@ function gradingFilterOptions() {
   return filterOptions(allowed, labels);
 }
 
+function otherFilterOptions() {
+  const procedure = settingsStore.Assessment.procedure;
+  const labels = { ...OTHER_LABELS };
+  if (procedure === Procedure.APPROXIMATION) {
+    labels[Summary.STATUS_REVISED] = "itemListFilterGradingApproximated";
+  } else if (procedure === Procedure.CONSULTING) {
+    labels[Summary.STATUS_REVISED] = "itemListFilterGradingConsulted";
+  } else {
+    delete labels[Summary.STATUS_REVISED];
+  }
+  // not_started and pre_graded are folded into open by otherStatusForFilter
+  return filterOptions(Object.keys(labels), labels);
+}
+
 function correctionFilterOptions() {
   const procedure = settingsStore.Assessment.procedure;
   const allowed = Item.ALLOWED_CORRECTION_STATUS.filter((status) => {
@@ -129,6 +149,13 @@ const FILTER_DEFS = [
     normalize: gradingStatusForFilter,
   },
   {
+    key: "other_status",
+    pref: "filter_other_status",
+    titleKey: "itemListOtherStatus",
+    options: otherFilterOptions,
+    normalize: otherStatusForFilter,
+  },
+  {
     key: "correction_status",
     pref: "filter_correction_status",
     titleKey: "itemListFilterCorrectionStatus",
@@ -139,11 +166,7 @@ const FILTER_DEFS = [
 
 const visibleKeys = ref([...DEFAULT_VISIBLE]);
 const columnsOpen = ref(false);
-const filterOpen = ref({
-  position: false,
-  grading_status: false,
-  correction_status: false,
-});
+const filterOpen = ref(Object.fromEntries(FILTER_DEFS.map((filter) => [filter.key, false])));
 const focusedKey = ref(null);
 const currentItems = ref([]);
 const selecting = ref(false);

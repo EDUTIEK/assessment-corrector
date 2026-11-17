@@ -17,6 +17,7 @@ const storage = getStorage('preferences');
 const ITEM_LIST_FILTERS = {
   filter_assigned_position: Correction.ALLOWED_POSITIONS,
   filter_grading_status: Summary.ALLOWED_STATUS,
+  filter_other_status: Summary.ALLOWED_STATUS,
   filter_correction_status: Item.ALLOWED_CORRECTION_STATUS,
 };
 
@@ -58,7 +59,7 @@ function normalizeFilterSelection(value, allowed) {
 }
 
 /**
- * Backend columns store a scalar. One numeric position stays a number, several values a comma-separated string.
+ * Backend columns store a scalar. Several values are a comma-separated string.
  * An empty selection is encoded as ',' so it survives a reload.
  *
  * @param {Array|string|number|null} value
@@ -89,9 +90,11 @@ export const usePreferencesStore = defineStore('preferences', {
       default_shape: Mark.SHAPE_TEXT_MARKER,              // default shape for new pdf annotations
       display_labels: false,                              // show marking labels in the essay
       select_words: true,                                 // do pdf text selection by words
-      filter_grading_status: null,                        // null: all own grading statuses; array: selected values
-      filter_correction_status: null,                     // null: all correction statuses; array: selected values
       filter_assigned_position: null,                     // null: all assigned positions; array: selected values
+      filter_grading_status: null,                        // null: all own grading statuses; array: selected values
+      filter_other_status: null,                          // null: all other grading statuses; array: selected values
+      filter_correction_status: null,                     // null: all correction statuses; array: selected values
+
 
       // not saved
       locale: 'de-DE'                                     // currently fixed
@@ -215,6 +218,7 @@ export const usePreferencesStore = defineStore('preferences', {
         const payload = JSON.parse(JSON.stringify(this.$state));
         payload.filter_assigned_position = encodeFilterSelection(payload.filter_assigned_position, true);
         payload.filter_grading_status = encodeFilterSelection(payload.filter_grading_status, false);
+        payload.filter_other_status = encodeFilterSelection(payload.filter_other_status, false);
         payload.filter_correction_status = encodeFilterSelection(payload.filter_correction_status, false);
         changes.push(changesStore.getChangeDataToSend(change, payload));
         break;

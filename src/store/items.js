@@ -30,6 +30,25 @@ export function gradingStatusForFilter(status, procedure) {
 }
 
 /**
+ * Other grading status used by the item filters.
+ * NOT_STARTED and PRE_GRADED should be treated as OPEN
+ * Without a procedure, a revision left over from an earlier setting counts as authorized.
+ *
+ * @param {string|number|null} status
+ * @param {string} procedure
+ * @return {string|number|null}
+ */
+export function otherStatusForFilter(status, procedure) {
+  if (status === Summary.STATUS_NOT_STARTED || status === Summary.STATUS_PRE_GRADED) {
+    return Summary.STATUS_OPEN;
+  }
+  if (procedure === Procedure.NONE && status === Summary.STATUS_REVISED) {
+    return Summary.STATUS_AUTHORIZED;
+  }
+  return status;
+}
+
+/**
  * Overall correction status used by the item filters.
  * Without a procedure, approximation and consulting count as open.
  *
@@ -117,6 +136,7 @@ export const useItemsStore = defineStore('items', {
       items = items.filter((item) =>
         matchesItemFilter(item.position, preferences.filter_assigned_position)
         && matchesItemFilter(item.grading_status, preferences.filter_grading_status, procedure, gradingStatusForFilter)
+        && matchesItemFilter(item.other_status, preferences.filter_other_status, procedure, otherStatusForFilter)
         && matchesItemFilter(item.correction_status, preferences.filter_correction_status, procedure, correctionStatusForFilter)
       );
 
