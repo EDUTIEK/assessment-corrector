@@ -10,6 +10,12 @@ export default class Template {
     return 'T' + task_id + '_' + corrector_id;
   }
 
+  static order(item1, item2) {
+    return item1.user_name < item2.user_name ? -1
+      : item1.user_name > item2.user_name ? 1
+        : 0
+  }
+
   /**
    * Task to which this template belongs
    * @type {integer}
@@ -21,6 +27,12 @@ export default class Template {
    * @type {integer}
    */
   corrector_id = null;
+
+  /**
+   * Name of the sharing user
+   * @type {string}
+   */
+  user_name = null;
 
   /**
    * Content of the template
@@ -45,6 +57,9 @@ export default class Template {
     }
     if (data.corrector_id !== undefined && data.corrector_id !== null) {
       this.corrector_id = parseInt(data.corrector_id);
+    }
+    if (data.user_name !== undefined && data.user_name !== null) {
+      this.user_name = data.user_name.toString();
     }
     if (data.content !== undefined && data.content !== null) {
       this.content = data.content.toString();

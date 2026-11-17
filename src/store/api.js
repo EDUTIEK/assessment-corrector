@@ -662,6 +662,26 @@ export const useApiStore = defineStore('api', {
       return true;
     },
 
+    /**
+     * Load shared templates from the backend
+     */
+    async loadOtherTemplates(task_id) {
+      console.log("loadOtherTemplates...");
+
+      try {
+        this.setLoading(true);
+        const response = await this.request('get', '/corrector/entities/task/templates/' + task_id);
+        await stores.templates().loadOtherTemplates(response.data, task_id);
+        this.setLoading(false);
+        return true;
+      }
+      catch (error) {
+        console.error(error);
+        this.setLoading(false);
+        return false;
+      }
+    },
+
 
     /**
      * Periodically send changes to the backend

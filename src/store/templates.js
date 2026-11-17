@@ -9,6 +9,8 @@ import Template from "@/data/Template";
 import Summary from '@/data/Summary';
 import Change from '@/data/Change';
 import Correction from '@/data/Correction';
+import Item from '@/data/Item';
+import { correctionStatusForFilter, gradingStatusForFilter } from '@/store/items';
 
 const storage = getStorage('templates');
 const { t } = i18n.global;
@@ -44,6 +46,17 @@ export const useTemplateStore = defineStore('templates', {
         Correction.extractTaskId(stores.corrections().ownKey),
         Correction.extractCorrectorId(stores.corrections().ownKey)
       )];
+    },
+
+    /**
+     * Shared templates of other correctors
+     */
+    otherTemplates(state) {
+      const corrector_id = Correction.extractCorrectorId(stores.corrections().ownKey);
+      const task_id = Correction.extractTaskId(stores.corrections().ownKey);
+      let templates = Object.values(state.templates);
+      templates = templates.filter(template => template.task_id == task_id && template.corrector_id !== corrector_id);
+      return templates.toSorted(Template.order);
     },
   },
 
@@ -98,6 +111,29 @@ export const useTemplateStore = defineStore('templates', {
 
       lockUpdate = 0;
       apiStore.setInterval('assessment', 'templatesStore.updateContent', this.updateContent, checkInterval);
+    },
+
+    async loadOtherTemplates(data = [], task_id) {
+
+      try {
+        for (const key in this.templates) {
+          const template = this.templates[key];
+          if (template.task_id == task_id) {
+            delete this.templates[key];
+            await storage.removeItem(key);
+          }
+        }
+
+        for (const item of data) {
+          const template = new Template(item);
+          this.templates[template.getKey()] = template;
+          await storage.setItem(template.getKey(), template.getData());
+        }
+        await storage.setItem('keys', Object.keys(this.templates));
+      }
+      catch (err) {
+        console.log(err);
+      }
     },
 
     /**
