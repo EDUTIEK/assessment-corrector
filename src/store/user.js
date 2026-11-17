@@ -15,6 +15,7 @@ const { t } = i18n.global
 
 const startState = {
   // saved in storage
+  login: '',                // Login name of the user
   full_name: '',            // Full name of the current user
   agreement: '',            // User agreement
   accepted: false,          // acceptance of the user agreement
@@ -56,6 +57,7 @@ export const useUserStore = defineStore('user', {
     async loadFromBackend(data = {}) {
       try {
         this.$patch({
+          login: data.login ?? null,
           full_name: data.full_name ?? null,
           agreement: data.agreement ?? null,
           accepted: data.accepted ?? false,

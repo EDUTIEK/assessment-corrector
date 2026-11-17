@@ -6,6 +6,7 @@ import Item from "@/data/Item";
 
 const apiStore = stores.api();
 const configStore = stores.config();
+const userStore = stores.user();
 
 async function returnToBackend() {
   if (stores.changes().countChanges == 0 || await stores.api().saveChangesToBackend(true)) {
@@ -32,7 +33,7 @@ async function logout() {
 
   <v-btn v-if="!configStore.returnUrl" id="app-menu-activator">
     <v-icon left icon="mdi-dots-vertical"></v-icon>
-    {{ $t('appMenuMenu')}}
+    {{ userStore.login }}
   </v-btn>
 
   <v-menu activator="#app-menu-activator">
