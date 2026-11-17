@@ -15,6 +15,7 @@ export const useLayoutStore = defineStore('layout', {
   state: () => {
     return {
       // saved in storage
+      initContent: '',                    // welcome|assessmentList|itemList/template
       expandedColumn: 'none',             // left|right|none
       leftContent: 'essay',               // instructions|instructionsPdf|solution|solutionPdf|resources|essay|correction
       rightContent: 'marking',            // summary|marking|correction
@@ -38,11 +39,9 @@ export const useLayoutStore = defineStore('layout', {
       // not stored
       leftCorrectionKey: '',               // key of the correction shown on the left side
       rightCorrectionKey: '',              // key of the correction shown on the right side
-      showIncludesPopup: false,            // show the popup to set the included elements
 
       initFailure: '',                    // failure from app initialisation
       initialized: false,                 // used to switch from startup screen to the editing view
-      initContent: '',                    // welcome|assessmentList|itemList/template
 
       showItemLoadFailure: false,         // show a message that the loading if an item failed
       showSendFailure: false,             // show a message about a sending failure
@@ -167,6 +166,7 @@ export const useLayoutStore = defineStore('layout', {
         const data = await storage.getItem('layout');
         if (data) {
           this.expandedColumn = data.expandedColumn;
+          this.initContent = data.initContent;
           this.rightContent = data.rightContent;
           this.showMarkingComments = !!data.showMarkingComments,
           this.showMarkingGeneralPoints = !!data.showMarkingGeneralPoints,
@@ -198,6 +198,7 @@ export const useLayoutStore = defineStore('layout', {
       try {
         await storage.setItem('layout', {
           expandedColumn: this.expandedColumn,
+          initContent: this.initContent,
           leftContent: this.leftContent,
           rightContent: this.rightContent,
           showMarkingComments: this.showMarkingComments,
@@ -463,28 +464,42 @@ export const useLayoutStore = defineStore('layout', {
       }
     },
 
-    setInitialized() {
-      this.initialized = true;
+    finishInitialisation() {
+      console.log('finishInitialisation', this.initContent)
+      if (this.initContent != 'assessmentList' && this.initContent != 'itemList') {
+        this.initialized = true;
+      }
+      this.saveToStorage();
     },
 
     setShowWelcome() {
       this.initialized = false;
       this.initContent = 'welcome';
+      this.saveToStorage();
     },
 
     setShowAssessmentList() {
       this.initialized = false;
       this.initContent = 'assessmentList';
+      this.saveToStorage();
     },
 
     setShowItemList() {
       this.initialized = false;
       this.initContent = 'itemList';
+      this.saveToStorage();
     },
 
     setShowTemplate() {
       this.initialized = false;
       this.initContent = 'template';
+      this.saveToStorage();
+    },
+
+    setShowItem() {
+      this.initialized = true;
+      this.initContent = '';
+      this.saveToStorage();
     },
 
 

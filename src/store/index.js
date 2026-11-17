@@ -28,6 +28,7 @@ const startStores = {
     api: () => useApiStore(),
     assessments: () => useAssessmentsStore(),
     config: () => useConfigStore(),
+    layout: () => useLayoutStore(),
     user: () => useUserStore()
 }
 
@@ -38,7 +39,6 @@ const assessmentStores = {
     criteria: () => useCriteriaStore(),
     essay: () => useEssayStore(),
     items: () => useItemsStore(),
-    layout: () => useLayoutStore(),
     levels: () => useLevelsStore(),
     pages: () => usePagesStore(),
     points: () => usePointsStore(),

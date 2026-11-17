@@ -413,7 +413,7 @@ async function selectItem(item) {
     await apiStore.selectItem(item.key);
   } finally {
     selecting.value = false;
-    stores.layout().setInitialized();
+    stores.layout().setShowItem();
   }
 }
 </script>

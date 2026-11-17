@@ -310,8 +310,11 @@ export const useApiStore = defineStore('api', {
       let newItem = false;
 
       const configStore = stores.config();
+      const layoutStore = stores.layout();
+
       await configStore.loadFromConfig();
       await configStore.loadFromStorage();
+      await layoutStore.loadFromStorage();
 
       // take values formerly stored
       this.userId = localStorage.getItem('xlasCorrectorUserId') ?? '';
@@ -383,13 +386,13 @@ export const useApiStore = defineStore('api', {
       await configStore.saveToStorage();
       if (!configStore.backendUrl) {
         await clearAllStores();
-        stores.layout().initFailure = t('apiMissingBackendUrl');
+        layoutStore.initFailure = t('apiMissingBackendUrl');
         return;
       }
 
       if (!this.userToken || !this.userId) {
         await clearAllStores();
-        stores.layout().setShowWelcome();
+        layoutStore.setShowWelcome();
         return;
       }
 
@@ -398,7 +401,7 @@ export const useApiStore = defineStore('api', {
 
       if (!this.assId || !this.contextId) {
         await clearAssessmentStores();
-        stores.layout().setShowAssessmentList();
+        layoutStore.setShowAssessmentList();
         return;
       }
 
@@ -477,7 +480,7 @@ export const useApiStore = defineStore('api', {
       if (stores.summaries().isOneAuthorized) {
         stores.comments().setShowOtherCorrections(true);
       }
-      stores.layout().setInitialized();
+      stores.layout().finishInitialisation();
     },
 
     /**
@@ -493,7 +496,6 @@ export const useApiStore = defineStore('api', {
       await stores.assessments().loadFromStorage();
       await stores.criteria().loadFromStorage();
       await stores.items().loadFromStorage();
-      await stores.layout().loadFromStorage();
       await stores.levels().loadFromStorage();
       await stores.preferences().loadFromStorage();
       await stores.resources().loadFromStorage();
@@ -585,8 +587,6 @@ export const useApiStore = defineStore('api', {
         this.setLoading(false);
         return false;
       }
-      
-      await stores.layout().clearStorage();
 
       await stores.config().loadFromBackend(response.data['Assessment']['Config']);
       await stores.levels().loadFromBackend(response.data['Assessment']['GradeLevels']);
