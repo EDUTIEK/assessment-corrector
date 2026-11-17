@@ -299,6 +299,29 @@ async function selectAssessment(assessment) {
   vertical-align: middle;
 }
 
+:deep(.v-table__wrapper > table > thead > tr:not(.v-data-table-progress) > th),
+:deep(.v-table__wrapper > table > tbody > tr > td) {
+  border-bottom: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
+}
+
+:deep(.v-table--fixed-header > .v-table__wrapper > table > thead > tr:not(.v-data-table-progress) > th) {
+  box-shadow: none;
+  border-top: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
+  border-bottom: thin solid rgba(var(--v-border-color), var(--v-border-opacity)) !important;
+}
+
+:deep(.v-table__wrapper > table > thead > tr:not(.v-data-table-progress) > th:first-child),
+:deep(.v-table__wrapper > table > tbody > tr > td:first-child),
+:deep(.v-data-table__th + .v-data-table__th),
+:deep(.v-data-table__td + .v-data-table__td) {
+  border-inline-start: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
+}
+
+:deep(.v-table__wrapper > table > thead > tr:not(.v-data-table-progress) > th:last-child),
+:deep(.v-table__wrapper > table > tbody > tr > td:last-child) {
+  border-inline-end: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
+}
+
 :deep(tbody > tr.assessment-list__current > td) {
   background-color: #d7e7f8;
 }
