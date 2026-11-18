@@ -28,6 +28,17 @@ import 'tinymce/plugins/pagebreak';
 const formatting_options = 'extended';
 const headline_scheme = 'three';
 
+// Widths live in content.css (.xlas-hang-1 … .xlas-hang-4).
+// A real tab character cannot be stored: TinyMCE collapses it outside whitespace elements.
+const HANGING_INDENTS = [
+    {format: 'hanging1', className: 'xlas-hang-1', titleKey: 'settingsHangingIndent1'},
+    {format: 'hanging2', className: 'xlas-hang-2', titleKey: 'settingsHangingIndent2'},
+    {format: 'hanging3', className: 'xlas-hang-3', titleKey: 'settingsHangingIndent3'},
+    {format: 'hanging4', className: 'xlas-hang-4', titleKey: 'settingsHangingIndent4'},
+];
+const HANGING_TAB_CLASS = 'xlas-hang-tab';
+const HANGING_TAB_MAX_PREFIX = 32;
+
 let settingsStore;
 let preferencesStore;
 let snippetsStore;
@@ -68,6 +79,7 @@ export default class TinyHelper {
             toolbar: this.tinyToolbar(formatting_options),
             toolbar_mode: 'wrap',
             valid_elements: this.tinyValidElements(formatting_options),
+            valid_classes: this.tinyValidClasses(formatting_options),
             valid_styles: this.tinyValidStyles(formatting_options),
             formats: this.tinyFormats(),
             style_formats: this.tinyStyleFormats(formatting_options, headline_scheme),
@@ -104,6 +116,12 @@ export default class TinyHelper {
 
                 editor.on('keydown', this.handleKeyDown.bind(this));
                 editor.on('keyup', this.handleKeyUp.bind(this));
+                editor.on('FormatApply FormatRemove', this.unwrapOrphanHangingTabs.bind(this));
+                editor.on('ExecCommand', (commandEvent) => {
+                    if (commandEvent.command === 'RemoveFormat') {
+                        this.unwrapOrphanHangingTabs();
+                    }
+                });
 
             }.bind(this)
         }
@@ -327,7 +345,7 @@ export default class TinyHelper {
                 return '@[style|border|colspan|rowspan],'
                     // #td/#th: pad empty cells with &nbsp; so caret/arrow-key navigation works after reload
                     // (fresh inserts already get this; loaded HTML with custom valid_elements does not otherwise)
-                    + 'p/div,br,strong/b,em/i,u,s,ol,ul,li,h1,h2,h3,h4,h5,h6,pre,code,blockquote,span,sub,sup,table,thead,tbody,#th,tr,#td,hr,'
+                    + 'p/div[class],br,strong/b,em/i,u,s,ol,ul,li,h1,h2,h3,h4,h5,h6,pre,code,blockquote,span[class],sub,sup,table,thead,tbody,#th,tr,#td,hr,'
                     + 'img[class<mce-pagebreak|src|data-mce-resize|data-mce-placeholder|data-mce-selected]';
             case 'full':
                 return 'p/div,br,strong/b,em/i,u,ol,ul,li,h1,h2,h3,h4,h5,h6,pre';
@@ -339,6 +357,18 @@ export default class TinyHelper {
             default:
                 return 'p/div,p/li,br';
         }
+    }
+
+    tinyValidClasses(formatting_options) {
+        if (formatting_options !== 'extended') {
+            return {};
+        }
+
+        return {
+            p: HANGING_INDENTS.map((item) => item.className).join(' '),
+            span: HANGING_TAB_CLASS,
+            img: 'mce-pagebreak'
+        };
     }
 
     tinyValidStyles(formatting_options) {
@@ -451,6 +481,15 @@ export default class TinyHelper {
         if (align.items.length) {
             formats.push(align);
         }
+        if (formatting_options === 'extended') {
+            formats.push({
+                title: t('settingsHangingIndent'),
+                items: HANGING_INDENTS.map((item) => ({
+                    title: t(item.titleKey),
+                    format: item.format
+                }))
+            });
+        }
 
         return formats;
     }
@@ -459,10 +498,26 @@ export default class TinyHelper {
      * @see https://www.tiny.cloud/docs/configure/content-formatting/#formats
      */
     tinyFormats() {
-        return {
+        const formats = {
             underline: { inline: 'u', remove: 'all' },
             strikethrough: { inline: 's', remove: 'all' }
+        };
+
+        for (const item of HANGING_INDENTS) {
+            formats[item.format] = {
+                block: 'p',
+                classes: item.className,
+                onformat: (element) => {
+                    for (const other of HANGING_INDENTS) {
+                        if (other.className !== item.className) {
+                            element.classList.remove(other.className);
+                        }
+                    }
+                }
+            };
         }
+
+        return formats;
     }
 
     handleKeyUp(event) {
@@ -521,6 +576,9 @@ export default class TinyHelper {
                     this.prevent_next_keyup_auto_replace = true;
                     return false;
                 }
+                if (this.insertHangingTab(event)) {
+                    return false;
+                }
                 break;
 
             case "Backspace":
@@ -541,6 +599,124 @@ export default class TinyHelper {
                 if (event.altKey) {
                     layoutStore.handleKeyDown(event);
                 }
+        }
+    }
+
+    isHangingParagraph(element) {
+        return !!element && HANGING_INDENTS.some((item) => element.classList.contains(item.className));
+    }
+
+    /**
+     * Tab after a manual number jumps to the hanging indent.
+     * The number is wrapped in a span; TinyMCE would drop a literal tab character.
+     * @returns {boolean} true if the key was handled
+     */
+    insertHangingTab(event) {
+        const editor = this.editor;
+        if (!editor || !editor.selection.isCollapsed() || event.shiftKey || event.altKey || event.ctrlKey || event.metaKey) {
+            return false;
+        }
+
+        const block = editor.dom.getParent(editor.selection.getStart(), 'p');
+        if (!this.isHangingParagraph(block)) {
+            return false;
+        }
+
+        const existing = block.querySelector('span.' + HANGING_TAB_CLASS);
+        if (existing) {
+            return this.moveCaretToHangingTab(event, existing);
+        }
+
+        const selection = editor.selection.getRng();
+        if (!block.contains(selection.startContainer)) {
+            return false;
+        }
+
+        let prefix;
+        try {
+            prefix = editor.dom.createRng();
+            prefix.setStart(block, 0);
+            prefix.setEnd(selection.startContainer, selection.startOffset);
+        } catch (e) {
+            return false;
+        }
+
+        const prefixText = prefix.toString();
+        if (!prefixText.trim() || prefixText.length > HANGING_TAB_MAX_PREFIX || /[\r\n]/.test(prefixText)) {
+            return false;
+        }
+        if (prefix.cloneContents().querySelector('br, table, ul, ol, li, p, div')) {
+            return false;
+        }
+
+        event.preventDefault();
+        try {
+            editor.undoManager.transact(() => {
+                const span = editor.dom.create('span', {'class': HANGING_TAB_CLASS});
+                span.appendChild(prefix.extractContents());
+                prefix.insertNode(span);
+                this.placeCaretAfterHangingTab(span);
+            });
+        } catch (e) {
+            console.log(e);
+        }
+        return true;
+    }
+
+    /**
+     * A second Tab while the caret is still in the number moves it to the indent.
+     */
+    moveCaretToHangingTab(event, span) {
+        const editor = this.editor;
+        const after = editor.dom.createRng();
+        try {
+            after.setStartAfter(span);
+            after.collapse(true);
+            if (editor.selection.getRng().compareBoundaryPoints(Range.START_TO_START, after) >= 0) {
+                return false;
+            }
+        } catch (e) {
+            return false;
+        }
+
+        event.preventDefault();
+        this.placeCaretAfterHangingTab(span);
+        return true;
+    }
+
+    /**
+     * The caret cannot stay after a float unless a text node follows it.
+     */
+    placeCaretAfterHangingTab(span) {
+        const editor = this.editor;
+        let next = span.nextSibling;
+        let offset = 0;
+        if (!next || next.nodeType !== Node.TEXT_NODE || next.data.length === 0) {
+            if (next && next.nodeType === Node.TEXT_NODE) {
+                next.data = '\u200B';
+            } else {
+                next = editor.getDoc().createTextNode('\u200B');
+                span.parentNode.insertBefore(next, span.nextSibling);
+            }
+            offset = 1;
+        }
+
+        const range = editor.dom.createRng();
+        range.setStart(next, offset);
+        range.collapse(true);
+        editor.selection.setRng(range);
+    }
+
+    unwrapOrphanHangingTabs() {
+        const editor = this.editor;
+        if (!editor) {
+            return;
+        }
+
+        for (const span of editor.dom.select('span.' + HANGING_TAB_CLASS)) {
+            if (!this.isHangingParagraph(editor.dom.getParent(span, 'p'))) {
+                editor.dom.remove(span, true);
+            }
         }
     }
 }

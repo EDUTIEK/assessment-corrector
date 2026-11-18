@@ -37,6 +37,32 @@
     overflow-wrap: break-word;      /* modern variant of word-wrap */
 }
 
+/**
+ * Hanging indent for manually numbered paragraphs.
+ * The number is wrapped in span.xlas-hang-tab. That span is the tab stop:
+ * it fills the left padding, and the following lines start at the same position.
+ * padding-left, min-width and the negative margin of one format must stay equal.
+ */
+.xlas-content p.xlas-hang-1 .xlas-hang-tab,
+.xlas-content p.xlas-hang-2 .xlas-hang-tab,
+.xlas-content p.xlas-hang-3 .xlas-hang-tab,
+.xlas-content p.xlas-hang-4 .xlas-hang-tab {
+    float: left;
+    white-space: nowrap;
+}
+
+.xlas-content p.xlas-hang-1 { padding-left: 2em; }
+.xlas-content p.xlas-hang-1 .xlas-hang-tab { min-width: 2em; margin-left: -2em; }
+
+.xlas-content p.xlas-hang-2 { padding-left: 3em; }
+.xlas-content p.xlas-hang-2 .xlas-hang-tab { min-width: 3em; margin-left: -3em; }
+
+.xlas-content p.xlas-hang-3 { padding-left: 4em; }
+.xlas-content p.xlas-hang-3 .xlas-hang-tab { min-width: 4em; margin-left: -4em; }
+
+.xlas-content p.xlas-hang-4 { padding-left: 5.5em; }
+.xlas-content p.xlas-hang-4 .xlas-hang-tab { min-width: 5.5em; margin-left: -5.5em; }
+
 .xlas-content ol,
 .xlas-content ul {
     margin: 0;
