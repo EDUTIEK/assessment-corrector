@@ -27,7 +27,9 @@ export const useSnippetsStore = defineStore('snippets', {
       select: null,                   // data model for selection in Snippets component
       edit: new Snippet(),            // data model for editing in Snippets component
 
-      list_purpose: Snippet.FOR_COMMENT, // purpose for which the list is opened
+      list_purpose: stores.settings().Task.enable_comments
+        ? Snippet.FOR_COMMENT
+        : Snippet.FOR_SUMMARY,        // purpose for which the list is opened
 
       last_auto_purpose: null,
       last_auto_search: null,

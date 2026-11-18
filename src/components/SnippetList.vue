@@ -13,6 +13,7 @@ const { t } = i18n.global;
 const apiStore = stores.api();
 const snippetsStore = stores.snippets();
 const layoutStore = stores.layout();
+const settingsStore = stores.settings();
 
 const selectedKey = ref('');
 const selectedPurpose = ref('');
@@ -146,8 +147,10 @@ async function download()
         <v-col cols="6" class="ma-0 pa-0 text-right">
           <div class="header-buttons">
             <v-btn-toggle density="compact" variant="outlined" divided v-model="selectedPurpose">
-              <v-btn size="small" variant="text" :value="Snippet.FOR_COMMENT" @click="setPurpose(Snippet.FOR_COMMENT)">{{ t('snippetsForComment') }}</v-btn>
-              <v-btn size="small" variant="text" :value="Snippet.FOR_SUMMARY" @click="setPurpose(Snippet.FOR_SUMMARY)">{{ t('snippetsForSummary') }}</v-btn>
+              <v-btn v-if="settingsStore.Task.enable_comments"
+                     size="small" variant="text" :value="Snippet.FOR_COMMENT" @click="setPurpose(Snippet.FOR_COMMENT)">{{ t('snippetsForComment') }}</v-btn>
+              <v-btn v-if="settingsStore.Task.enable_comments"
+                     size="small" variant="text" :value="Snippet.FOR_SUMMARY" @click="setPurpose(Snippet.FOR_SUMMARY)">{{ t('snippetsForSummary') }}</v-btn>
             </v-btn-toggle>
           </div>
         </v-col>
