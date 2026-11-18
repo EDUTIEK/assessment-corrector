@@ -409,6 +409,8 @@
     "startupContentLoginTitle": "Bitte melden Sie sich an",
     "startupContentLogout": "Abmelden",
     "startupContentPassword": "Passwort",
+    "startupContentShowPassword": "Passwort anzeigen",
+    "startupContentHidePassword": "Passwort verbergen",
     "startupContentUserName": "Benutzername",
     "startupContentLoadData": "Lade Daten...",
     "startupContentLoadError": "Fehler beim Laden",

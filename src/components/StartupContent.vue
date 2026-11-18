@@ -7,6 +7,7 @@ import SummaryTemplate from '@/components/SummaryTemplate.vue';
 
 const login = ref('');
 const password = ref('');
+const showPassword = ref(false);
 const accepted = ref(false);
 
 const loginDialog = ref(false);
@@ -22,6 +23,9 @@ const showLogoutButton = computed(() => !stores.config().returnUrl && stores.api
 function showLogin(show) {
   loginDialog.value = show;
   loginMessage.value = '';
+  if (!show) {
+    showPassword.value = false;
+  }
 }
 
 function showAgreement(show) {
@@ -117,11 +121,25 @@ async function sendLogout() {
             <v-text-field
                 v-model="password"
                 :label="$t('startupContentPassword')"
-                type="password"
+                :type="showPassword ? 'text' : 'password'"
                 name="password"
                 autocomplete="current-password"
                 @change="loginMessage = ''"
-            ></v-text-field>
+            >
+              <template #append-inner>
+                <v-btn
+                    :icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+                    :aria-label="showPassword ? $t('startupContentHidePassword') : $t('startupContentShowPassword')"
+                    :aria-pressed="showPassword"
+                    type="button"
+                    variant="text"
+                    size="small"
+                    tabindex="0"
+                    @mousedown.prevent
+                    @click="showPassword = !showPassword"
+                ></v-btn>
+              </template>
+            </v-text-field>
 
           </v-card-text>
           <v-card-actions>
