@@ -18,6 +18,7 @@ export const useSettingsStore = defineStore('settings', {
     return {
       Assessment: {
         title: '',                      // assessment title
+        correction_period: '',          // info message about the correction period
         multiple_correctors: false,     // has a submission multiple corrections
         mutual_visibility: false,       // correction sees other corrections
         procedure_when_distance: false, // should a revision procedure follow when points differ

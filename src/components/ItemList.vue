@@ -182,6 +182,8 @@ watch(() => itemsStore.sortedItems, (items) => {
   }
 });
 
+const correctionPeriod =  settingsStore.Assessment.correction_period?.replace(/\r?\n/g, '<br />');
+
 const columnOptions = computed(() =>
   COLUMN_DEFS.map((column) => ({
     ...column,
@@ -423,6 +425,10 @@ async function selectItem(item) {
       class="item-list"
       :aria-busy="apiStore.isLoading ? 'true' : undefined"
   >
+    <v-alert v-if="correctionPeriod" class="item-list__period" type="info" variant="text" color="primary">
+      <span v-html="correctionPeriod"></span>
+    </v-alert>
+
     <div class="item-list__toolbar">
       <fieldset class="item-list__group">
         <legend class="item-list__group-label">{{ $t("itemListFilters") }}</legend>
@@ -669,6 +675,10 @@ async function selectItem(item) {
   padding: 16px 16px 8px;
   background: rgb(var(--v-theme-surface));
   overflow: hidden;
+}
+
+.item-list__period {
+  flex: 0 0 auto;
 }
 
 .item-list__toolbar {
