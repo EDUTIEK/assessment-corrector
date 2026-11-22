@@ -787,6 +787,7 @@ export const useApiStore = defineStore('api', {
 
       } catch (error) {
         console.log(error);
+        this.setSending(false);
         return new ApiResult(false, error.response?.status, error.response?.data);
       }
     },
@@ -804,6 +805,73 @@ export const useApiStore = defineStore('api', {
 
       } catch (error) {
         console.log(error);
+        this.setSending(false);
+        return new ApiResult(false, error.response?.status, error.response?.data);
+      }
+    },
+
+    /**
+     * Send a request for a password change code
+     * @return ApiResult
+     */
+    async sendPasswordRequest(email) {
+      try {
+        const formData = new FormData();
+        formData.append('email', email);
+
+        this.setSending(true);
+        const response = await this.request('post', '/corrector/start/password/request', {data: formData});
+        this.setSending(false);
+        return new ApiResult(true);
+
+      } catch (error) {
+        console.log(error);
+        this.setSending(false);
+        return new ApiResult(false, error.response?.status, error.response?.data);
+      }
+    },
+
+    /**
+     * Send a request to check a password code
+     * @return ApiResult
+     */
+    async sendPasswordCode(login, code) {
+      try {
+        const formData = new FormData();
+        formData.append('login', login);
+        formData.append('code', code);
+
+        this.setSending(true);
+        const response = await this.request('post', '/corrector/start/password/code', {data: formData});
+        this.setSending(false);
+        return new ApiResult(true);
+
+      } catch (error) {
+        console.log(error);
+        this.setSending(false);
+        return new ApiResult(false, error.response?.status, error.response?.data);
+      }
+    },
+
+    /**
+     * Send a request to change to password
+     * @return ApiResult
+     */
+    async sendPasswordChange(login, code, password) {
+      try {
+        const formData = new FormData();
+        formData.append('login', login);
+        formData.append('code', code);
+        formData.append('password', password);
+
+        this.setSending(true);
+        const response = await this.request('post', '/corrector/start/password/change', {data: formData});
+        this.setSending(false);
+        return new ApiResult(true);
+
+      } catch (error) {
+        console.log(error);
+        this.setSending(false);
         return new ApiResult(false, error.response?.status, error.response?.data);
       }
     },
