@@ -325,6 +325,34 @@ export const useApiStore = defineStore('api', {
       this.userToken = localStorage.getItem('xlasCorrectorUserToken') ?? '';
       this.timeOffset = Math.floor(localStorage.getItem('xlasCorrectorTimeOffset') ?? 0);
 
+
+      // a query string marks the call from the backend
+      // keep its content for this session and open the same address without it,
+      // so a later reload can be distinguished from that call
+      console.log(window.location.search);
+      if (window.location.search) {
+        sessionStorage.setItem('xlasCorrectorQuery', window.location.search.substring(1));
+        const url = new URL(window.location.href);
+        url.search = '';
+        window.location.replace(url.href);
+        return;
+      }
+
+      const query = sessionStorage.getItem('xlasCorrectorQuery');
+      sessionStorage.removeItem('xlasCorrectorQuery');
+
+      // password change requested
+      if (query == 'password') {
+        console.log('show password');
+        layoutStore.setShowWelcome();
+        layoutStore.showPasswordCodeDialog = true;
+        return;
+      }
+
+      if (query?.startsWith('item')) {
+        let parts = query.split("/");
+      }
+
       // check if context given by cookies differs and force a reload if neccessary
       if (Cookies.get('xlasUserId') != undefined && Cookies.get('xlasUserId') != this.userId) {
         this.userId = Cookies.get('xlasUserId');

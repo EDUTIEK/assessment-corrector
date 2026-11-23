@@ -5,6 +5,9 @@ import Welcome from "@/components/Welcome.vue";
 import AssessmentList from "@/components/AssessmentList.vue";
 import SummaryTemplate from '@/components/SummaryTemplate.vue';
 
+const apiStore = stores.api();
+const layoutStore = stores.layout();
+
 const login = ref('');
 const email = ref('');
 const code = ref('');
@@ -15,16 +18,15 @@ const passwordRequestSent = ref(null);
 const loginDialog = ref(false);
 const agreementDialog = ref(false);
 const passwordRequestDialog = ref(false);
-const passwordCodeDialog = ref(false);
 const passwordChangeDialog = ref(false);
 
 const accepted = ref(false);
 const agreementSending = ref(false);
 const showPassword = ref(false);
 
-const showAppBar = computed(() => !stores.layout().isWelcomeShown);
+const showAppBar = computed(() => !layoutStore.isWelcomeShown);
 const showReturnButton = computed(() => !!stores.config().returnUrl);
-const showLogoutButton = computed(() => !stores.config().returnUrl && stores.api().userId);
+const showLogoutButton = computed(() => !stores.config().returnUrl && apiStore.userId);
 const disableSendPasswordRequest = ref(false);
 let disableSendPasswordRequestTimer = null;
 
@@ -63,7 +65,7 @@ function hideDialogs() {
   loginDialog.value = false;
   agreementDialog.value = false;
   passwordRequestDialog.value = false;
-  passwordCodeDialog.value = false;
+  layoutStore.showPasswordCodeDialog = false;
   passwordChangeDialog.value = false;
 }
 
@@ -77,7 +79,7 @@ function showPasswordRequest() {
 }
 
 async function sendLogin() {
-  const result = await stores.api().sendLogin(login.value, password.value);
+  const result = await apiStore.sendLogin(login.value, password.value);
   if (result.ok) {
     hideDialogs();
     if (stores.user().hasToAccept) {
@@ -93,7 +95,7 @@ async function sendLogin() {
 async function sendAgreement() {
   if (accepted.value) {
     agreementSending.value = true;
-    const result = await stores.api().sendAgreement();
+    const result = await apiStore.sendAgreement();
     agreementSending.value = false;
     if (result.ok) {
       hideDialogs();
@@ -103,38 +105,38 @@ async function sendAgreement() {
 }
 
 async function loadAssessments() {
-  await stores.api().loadAssessmentsFromBackend();
+  await apiStore.loadAssessmentsFromBackend();
   if (stores.assessments().countAssessments == 1 ) {
     for (const key in stores.assessments().assessments) {
       const assessment = stores.assessments().assessments[key];
-      stores.layout().setShowItemList();
-      stores.api().selectAssessment(assessment.ass_id, assessment.context_id);
+      layoutStore.setShowItemList();
+      apiStore.selectAssessment(assessment.ass_id, assessment.context_id);
       return;
     }
   }
-  stores.layout().setShowAssessmentList();
+  layoutStore.setShowAssessmentList();
 }
 
 async function sendLogout() {
-  await stores.api().sendLogout();
-  stores.layout().setShowWelcome();
+  await apiStore.sendLogout();
+  layoutStore.setShowWelcome();
 }
 
 async function sendPasswordRequest() {
-  const result = await stores.api().sendPasswordRequest(email.value);
+  const result = await apiStore.sendPasswordRequest(email.value);
   passwordRequestSent.value = Date.now();
   if (result.ok) {
     hideDialogs();
     code.value = '';
     message.value = '';
-    passwordCodeDialog.value = true;
+    layoutStore.showPasswordCodeDialog = true;
   } else {
     message.value = result.message;
   }
 }
 
 async function sendPasswordCode() {
-  const result = await stores.api().sendPasswordCode(login.value, code.value);
+  const result = await apiStore.sendPasswordCode(login.value, code.value);
   if (result.ok) {
     hideDialogs();
     message.value = '';
@@ -146,7 +148,7 @@ async function sendPasswordCode() {
 }
 
 async function sendPasswordChange() {
-  const result = await stores.api().sendPasswordChange(login.value, code.value, password.value);
+  const result = await apiStore.sendPasswordChange(login.value, code.value, password.value);
   if (result.ok) {
     hideDialogs();
     showLogin(true);
@@ -163,19 +165,19 @@ async function sendPasswordChange() {
 
     <v-app-bar v-if="showAppBar" elevation="1" color="white" density="compact">
       <v-app-bar-title>{{
-          stores.api().isLoading ? $t('startupContentLoadData')
-              : stores.layout().isAssessmentListShown ? $t('appMenuAssessments')
-                : stores.layout().isItemListShown ? $t('appMenuItems')
-                      : stores.layout().isTemplateShown ? $t('appMenuTemplate') : ''
+          apiStore.isLoading ? $t('startupContentLoadData')
+              : layoutStore.isAssessmentListShown ? $t('appMenuAssessments')
+                : layoutStore.isItemListShown ? $t('appMenuItems')
+                      : layoutStore.isTemplateShown ? $t('appMenuTemplate') : ''
         }}</v-app-bar-title>
       <v-spacer></v-spacer>
       <app-menu></app-menu>
     </v-app-bar>
 
-    <welcome v-if="stores.layout().isWelcomeShown" @login="showLogin(true)"/>
-    <assessment-list v-if="stores.layout().isAssessmentListShown"/>
-    <item-list v-if="stores.layout().isItemListShown" />
-    <summary-template  v-if="stores.layout().isTemplateShown" />
+    <welcome v-if="layoutStore.isWelcomeShown" @login="showLogin(true)"/>
+    <assessment-list v-if="layoutStore.isAssessmentListShown"/>
+    <item-list v-if="layoutStore.isItemListShown" />
+    <summary-template  v-if="layoutStore.isTemplateShown" />
 
     <!--
       Login
@@ -222,7 +224,7 @@ async function sendPasswordChange() {
 
           </v-card-text>
           <v-card-actions>
-            <v-btn type="submit" variant="flat" color="primary" :loading="stores.api().isSending">
+            <v-btn type="submit" variant="flat" color="primary" :loading="apiStore.isSending">
               <span>{{ $t('startupContentLogin') }}</span>
             </v-btn>
             <v-btn @click="hideDialogs()">
@@ -262,7 +264,7 @@ async function sendPasswordChange() {
             ></v-text-field>
           </v-card-text>
           <v-card-actions>
-            <v-btn type="submit" variant="flat" color="primary" :loading="stores.api().isSending"
+            <v-btn type="submit" variant="flat" color="primary" :loading="apiStore.isSending"
             :disabled="emailRules.email(email) !== true || disableSendPasswordRequest">
               <span>{{ $t('startupContentPasswordRequestSubmit') }}</span>
             </v-btn>
@@ -277,7 +279,7 @@ async function sendPasswordChange() {
     <!--
       Password Code
     -->
-    <v-dialog v-model="passwordCodeDialog" max-width="60em">
+    <v-dialog v-model="layoutStore.showPasswordCodeDialog" max-width="60em">
       <v-card>
         <v-form @submit.prevent="sendPasswordCode()">
           <v-card-title>
@@ -303,7 +305,7 @@ async function sendPasswordChange() {
             ></v-text-field>
           </v-card-text>
           <v-card-actions>
-            <v-btn type="submit" variant="flat" color="primary" :loading="stores.api().isSending">
+            <v-btn type="submit" variant="flat" color="primary" :loading="apiStore.isSending">
               <span>{{ $t('startupContentPasswordCodeSubmit') }}</span>
             </v-btn>
             <v-btn @click="hideDialogs()">
@@ -359,7 +361,7 @@ async function sendPasswordChange() {
 
           </v-card-text>
           <v-card-actions>
-            <v-btn type="submit" variant="flat" color="primary" :loading="stores.api().isSending">
+            <v-btn type="submit" variant="flat" color="primary" :loading="apiStore.isSending">
               <span>{{ $t('startupContentChangePasswordSubmit') }}</span>
             </v-btn>
             <v-btn @click="hideDialogs()">
@@ -395,7 +397,7 @@ async function sendPasswordChange() {
             <v-btn type="submit" variant="flat" :disabled="!accepted" color="primary" :loading="agreementSending">
               <span>{{ $t('startupContentAgreementButton') }}</span>
             </v-btn>
-            <v-btn @click="sendLogout" :loading="stores.api().isSending && !agreementSending">
+            <v-btn @click="sendLogout" :loading="apiStore.isSending && !agreementSending">
               <span>{{ $t('startupContentLogout') }}</span>
             </v-btn>
           </v-card-actions>
@@ -406,14 +408,14 @@ async function sendPasswordChange() {
     <!--
       Init Failure
     -->
-    <v-dialog v-model="stores.layout().hasInitFailure" persistent  max-width="60em">
+    <v-dialog v-model="layoutStore.hasInitFailure" persistent  max-width="60em">
       <v-card>
         <v-card-title>
           {{ $t('startupContentLoadError') }}
         </v-card-title>
         <v-card-text>
           <v-alert type="warning" variant="text" color="#0000A0" >
-            {{ stores.layout().initFailure }}
+            {{ layoutStore.initFailure }}
           </v-alert>
         </v-card-text>
         <v-card-actions>
@@ -421,7 +423,7 @@ async function sendPasswordChange() {
             <v-icon left icon="mdi-logout-variant"></v-icon>
             <span>{{ $t('allEnd') }}</span>
           </v-btn>
-          <v-btn v-if="showLogoutButton" :loading="stores.api().isSending" @click="sendLogout">
+          <v-btn v-if="showLogoutButton" :loading="apiStore.isSending" @click="sendLogout">
             <v-icon left icon="mdi-logout-variant"></v-icon>
             <span>{{ $t('startupContentLogout') }}</span>
           </v-btn>
@@ -432,7 +434,7 @@ async function sendPasswordChange() {
     <!--
       Item Load Failure
      -->
-    <v-dialog v-model="stores.layout().showItemLoadFailure" persistent  max-width="60em">
+    <v-dialog v-model="layoutStore.showItemLoadFailure" persistent  max-width="60em">
       <v-card>
         <v-card-text>
           <p>{{ $t('startupContentLoadItemError') }}</p>
@@ -442,7 +444,7 @@ async function sendPasswordChange() {
             <v-icon left icon="mdi-logout-variant"></v-icon>
             <span>{{ $t('allEnd') }}</span>
           </v-btn>
-          <v-btn v-if="showLogoutButton" :loading="stores.api().isSending" @click="sendLogout">
+          <v-btn v-if="showLogoutButton" :loading="apiStore.isSending" @click="sendLogout">
             <v-icon left icon="mdi-logout-variant"></v-icon>
             <span>{{ $t('startupContentLogout') }}</span>
           </v-btn>
@@ -453,18 +455,18 @@ async function sendPasswordChange() {
     <!--
        Data replace confirmation
     -->
-    <v-dialog v-model="stores.layout().showDataReplaceConfirmation" persistent  max-width="60em">
+    <v-dialog v-model="layoutStore.showDataReplaceConfirmation" persistent  max-width="60em">
       <v-card>
         <v-card-text>
           <p>{{ $t('startupContentDataReplaceInfo1') }}</p>
           <p><strong>{{ stores.tasks().currentTitle }}: {{
-              stores.items().getItem(stores.api().storedItemKey,
+              stores.items().getItem(apiStore.storedItemKey,
                   { key: 0, title: 'Unbekannt' }).title
             }}</strong></p>
           <p>{{ $t('startupContentDataReplaceInfo2') }}</p>
         </v-card-text>
         <v-card-actions>
-          <v-btn @click="stores.api().initAfterReplaceDataConfirmed">
+          <v-btn @click="apiStore.initAfterReplaceDataConfirmed">
             <v-icon left icon="mdi-reload"></v-icon>
             <span>{{ $t('startupContentDeleteAndLoad') }}</span>
           </v-btn>
@@ -479,22 +481,22 @@ async function sendPasswordChange() {
     <!--
       Item replace confirmation
     -->
-    <v-dialog v-model="stores.layout().showItemReplaceConfirmation" persistent  max-width="60em">
+    <v-dialog v-model="layoutStore.showItemReplaceConfirmation" persistent  max-width="60em">
       <v-card>
         <v-card-text>
           <p>{{ $t('startupContentItemReplaceInfo1') }}</p>
           <p><strong>{{ stores.tasks().currentTitle }}: {{
-              stores.items().getItem(stores.api().storedItemKey,
+              stores.items().getItem(apiStore.storedItemKey,
                   { key: 0, title: 'Unbekannt' }).title
             }}</strong></p>
           <p>{{ $t('startupContentItemReplaceInfo2') }}</p>
         </v-card-text>
         <v-card-actions>
-          <v-btn @click="stores.api().initAfterKeepDataConfirmed">
+          <v-btn @click="apiStore.initAfterKeepDataConfirmed">
             <v-icon left icon="mdi-pencil-outline"></v-icon>
             <span>{{ $t('startupContentKeepLocalData') }}</span>
           </v-btn>
-          <v-btn @click="stores.api().initAfterReplaceDataConfirmed">
+          <v-btn @click="apiStore.initAfterReplaceDataConfirmed">
             <v-icon left icon="mdi-trash-can-outline"></v-icon>
             <span>{{ $t('startupContentDeleteLocalData') }}</span>
           </v-btn>
