@@ -33,7 +33,7 @@ async function logout() {
   </v-btn>
 
   <v-btn v-if="!configStore.returnUrl" id="app-menu-activator">
-    <v-icon left icon="mdi-dots-vertical"></v-icon>
+    <v-icon left icon="mdi-menu"></v-icon>
     {{ userStore.login }}
   </v-btn>
 
