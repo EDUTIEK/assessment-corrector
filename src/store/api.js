@@ -2,7 +2,7 @@
  * API Store
  * Handles the communication with the backend
  */
-import {clearAllStores, clearAssessmentStores, stores} from "@/store";
+import { clearAllStores, clearAssessmentStores, clearStartStores, stores } from "@/store";
 import {defineStore} from 'pinia';
 import axios from 'axios';
 import Cookies from 'js-cookie';
@@ -419,13 +419,23 @@ export const useApiStore = defineStore('api', {
       }
 
       if (!this.userToken || !this.userId) {
-        await clearAllStores();
+        await clearStartStores();
         layoutStore.setShowWelcome();
         return;
       }
 
       await stores.user().loadFromStorage();
       await stores.assessments().loadFromStorage();
+
+      if (stores.user().hasToAccept) {
+        layoutStore.setShowAgreement();
+        return;
+      }
+
+      if (stores.user().hasToChangePassword) {
+        layoutStore.setShowPasswordChange();
+        return;
+      }
 
       if (!this.assId || !this.contextId) {
         await clearAssessmentStores();
@@ -810,7 +820,7 @@ export const useApiStore = defineStore('api', {
         const response = await this.request('put', '/corrector/start/logout');
         this.setSending(false);
 
-        await clearAllStores();
+        await clearStartStores();
         return new ApiResult(true);
 
       } catch (error) {
@@ -885,12 +895,13 @@ export const useApiStore = defineStore('api', {
      * Send a request to change to password
      * @return ApiResult
      */
-    async sendPasswordChange(login, code, password) {
+    async sendPasswordChange(login, code, password, new_password) {
       try {
         const formData = new FormData();
         formData.append('login', login);
         formData.append('code', code);
         formData.append('password', password);
+        formData.append('new_password', new_password);
 
         this.setSending(true);
         const response = await this.request('post', '/corrector/start/password/change', {data: formData});

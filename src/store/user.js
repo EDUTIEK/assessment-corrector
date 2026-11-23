@@ -19,6 +19,7 @@ const startState = {
   full_name: '',            // Full name of the current user
   agreement: '',            // User agreement
   accepted: false,          // acceptance of the user agreement
+  change_password: false    // user must change the password
 }
 
 export const useUserStore = defineStore('user', {
@@ -28,7 +29,8 @@ export const useUserStore = defineStore('user', {
 
   getters: {
 
-    hasToAccept: state => !!state.agreement && !state.accepted
+    hasToAccept: state => !!state.agreement && !state.accepted,
+    hasToChangePassword: state => !!state.change_password
 
 
   },
@@ -61,6 +63,7 @@ export const useUserStore = defineStore('user', {
           full_name: data.full_name ?? null,
           agreement: data.agreement ?? null,
           accepted: data.accepted ?? false,
+          change_password: data.change_password ?? false,
         });
         await storage.setItem('user',  Object.assign({}, this.$state));
       }
@@ -71,6 +74,11 @@ export const useUserStore = defineStore('user', {
 
     async setAccepted() {
       this.accepted = true;
+      await storage.setItem('user',  Object.assign({}, this.$state));
+    },
+
+    async setPasswordChanged() {
+      this.change_password = false;
       await storage.setItem('user',  Object.assign({}, this.$state));
     }
   }

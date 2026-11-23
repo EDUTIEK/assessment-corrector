@@ -24,11 +24,14 @@ import { useAssessmentsStore } from '@/store/assessments';
  * Service locator for pinia stores
  */
 
+const configStores = {
+    config: () => useConfigStore(),
+    layout: () => useLayoutStore(),
+}
+
 const startStores = {
     api: () => useApiStore(),
     assessments: () => useAssessmentsStore(),
-    config: () => useConfigStore(),
-    layout: () => useLayoutStore(),
     user: () => useUserStore()
 }
 
@@ -51,13 +54,20 @@ const assessmentStores = {
     templates: () => useTemplateStore(),
 }
 
-export const stores = Object.assign({}, startStores, assessmentStores);
+export const stores = Object.assign({}, configStores, startStores, assessmentStores);
 
 async function clearStores(stores) {
     for (const key of Object.values(stores)) {
         const store = key();
         await store.clearStorage();
     }
+}
+
+/**
+ * Clear all data of the start related stores
+ */
+export async function clearStartStores() {
+    await clearStores(startStores);
 }
 
 /**
@@ -71,6 +81,7 @@ export async function clearAssessmentStores() {
  * Clear all data of all stores
  */
 export async function clearAllStores() {
+    await clearStores(configStores);
     await clearStores(startStores);
     await clearStores(assessmentStores);
 }

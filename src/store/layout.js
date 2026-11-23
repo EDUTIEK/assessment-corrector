@@ -43,7 +43,9 @@ export const useLayoutStore = defineStore('layout', {
       initFailure: '',                    // failure from app initialisation
       initialized: false,                 // used to switch from startup screen to the editing view
 
+      showAgreementDialog: false,         // show the dialog to accept the user agreement
       showPasswordCodeDialog: false,      // show the dialog to enter a password code
+      showPasswordChangeDialog: false,    // show the dialog to change the password
       showItemLoadFailure: false,         // show a message that the loading if an item failed
       showSendFailure: false,             // show a message about a sending failure
       showDataReplaceConfirmation: false, // show a confirmation that the stored data should be replaced by another task or user
@@ -476,6 +478,20 @@ export const useLayoutStore = defineStore('layout', {
     setShowWelcome() {
       this.initialized = false;
       this.initContent = 'welcome';
+      this.saveToStorage();
+    },
+
+    setShowAgreement() {
+      this.initialized = false;
+      this.initContent = 'welcome';
+      this.showPasswordChangeDialog = true;
+      this.saveToStorage();
+    },
+
+    setShowPasswordChange() {
+      this.initialized = false;
+      this.initContent = 'welcome';
+      this.showPasswordChangeDialog = true;
       this.saveToStorage();
     },
 

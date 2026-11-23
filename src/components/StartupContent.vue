@@ -1,9 +1,12 @@
 <script setup>
 import {ref, computed, watch} from "vue";
+import i18n from "@/plugins/i18n";
 import {stores} from "@/store";
 import Welcome from "@/components/Welcome.vue";
 import AssessmentList from "@/components/AssessmentList.vue";
 import SummaryTemplate from '@/components/SummaryTemplate.vue';
+
+const { t } = i18n.global;
 
 const apiStore = stores.api();
 const layoutStore = stores.layout();
@@ -12,17 +15,17 @@ const login = ref('');
 const email = ref('');
 const code = ref('');
 const password = ref('');
+const new_password = ref('');
 const message = ref('');
 const passwordRequestSent = ref(null);
 
 const loginDialog = ref(false);
-const agreementDialog = ref(false);
 const passwordRequestDialog = ref(false);
-const passwordChangeDialog = ref(false);
 
 const accepted = ref(false);
 const agreementSending = ref(false);
 const showPassword = ref(false);
+const showNewPassword = ref(false);
 
 const showAppBar = computed(() => !layoutStore.isWelcomeShown);
 const showReturnButton = computed(() => !!stores.config().returnUrl);
@@ -48,29 +51,29 @@ const emailRules = {
   }
 }
 
-function showLogin(show) {
+function showLogin() {
   login.value = '';
   code.value = '';
   login.value = '';
   email.value = '';
   password.value = '';
   message.value = '';
-  loginDialog.value = show;
-  if (!show) {
-    showPassword.value = false;
-  }
+  showPassword.value = false;
+  loginDialog.value = true;
 }
 
 function hideDialogs() {
   loginDialog.value = false;
-  agreementDialog.value = false;
   passwordRequestDialog.value = false;
+  message.value = '';
+  layoutStore.showAgreementDialog = false;
   layoutStore.showPasswordCodeDialog = false;
-  passwordChangeDialog.value = false;
+  layoutStore.showPasswordChangeDialog = false;
 }
 
-function showAgreement(show) {
-  agreementDialog.value = show;
+function showAgreement() {
+  hideDialogs();
+  layoutStore.showAgreementDialog = true;
 }
 
 function showPasswordRequest() {
@@ -78,12 +81,19 @@ function showPasswordRequest() {
   passwordRequestDialog.value = true;
 }
 
+function showPasswordChange() {
+  hideDialogs();
+  layoutStore.showPasswordChangeDialog = true;
+}
+
 async function sendLogin() {
   const result = await apiStore.sendLogin(login.value, password.value);
   if (result.ok) {
-    hideDialogs();
+    showPassword.value = false;
     if (stores.user().hasToAccept) {
-      showAgreement(true);
+      showAgreement();
+    } else if (stores.user().hasToChangePassword) {
+      showPasswordChange();
     } else {
       loadAssessments();
     }
@@ -98,23 +108,13 @@ async function sendAgreement() {
     const result = await apiStore.sendAgreement();
     agreementSending.value = false;
     if (result.ok) {
-      hideDialogs();
-      loadAssessments();
+      if (stores.user().hasToChangePassword) {
+        showPasswordChange();
+      } else {
+        loadAssessments();
+      }
     }
   }
-}
-
-async function loadAssessments() {
-  await apiStore.loadAssessmentsFromBackend();
-  if (stores.assessments().countAssessments == 1 ) {
-    for (const key in stores.assessments().assessments) {
-      const assessment = stores.assessments().assessments[key];
-      layoutStore.setShowItemList();
-      apiStore.selectAssessment(assessment.ass_id, assessment.context_id);
-      return;
-    }
-  }
-  layoutStore.setShowAssessmentList();
 }
 
 async function sendLogout() {
@@ -141,21 +141,39 @@ async function sendPasswordCode() {
     hideDialogs();
     message.value = '';
     password.value = '';
-    passwordChangeDialog.value = true;
+    layoutStore.showPasswordChangeDialog = true;
   } else {
     message.value = result.message;
   }
 }
 
 async function sendPasswordChange() {
-  const result = await apiStore.sendPasswordChange(login.value, code.value, password.value);
+  const result = await apiStore.sendPasswordChange(login.value, code.value, password.value, new_password.value);
   if (result.ok) {
     hideDialogs();
-    showLogin(true);
+    showPassword.value = false;
+    showNewPassword.value = false;
+    await stores.user().setPasswordChanged();
+    await stores.api().sendLogout();
+    showLogin();
+    message.value = t('startupContentPasswordChanged');
   } else {
-    password.value = '';
     message.value = result.message;
   }
+}
+
+async function loadAssessments() {
+  hideDialogs();
+  await apiStore.loadAssessmentsFromBackend();
+  if (stores.assessments().countAssessments == 1 ) {
+    for (const key in stores.assessments().assessments) {
+      const assessment = stores.assessments().assessments[key];
+      layoutStore.setShowItemList();
+      apiStore.selectAssessment(assessment.ass_id, assessment.context_id);
+      return;
+    }
+  }
+  layoutStore.setShowAssessmentList();
 }
 
 </script>
@@ -174,7 +192,7 @@ async function sendPasswordChange() {
       <app-menu></app-menu>
     </v-app-bar>
 
-    <welcome v-if="layoutStore.isWelcomeShown" @login="showLogin(true)"/>
+    <welcome v-if="layoutStore.isWelcomeShown" @login="showLogin()"/>
     <assessment-list v-if="layoutStore.isAssessmentListShown"/>
     <item-list v-if="layoutStore.isItemListShown" />
     <summary-template  v-if="layoutStore.isTemplateShown" />
@@ -182,7 +200,7 @@ async function sendPasswordChange() {
     <!--
       Login
     -->
-    <v-dialog v-model="loginDialog" max-width="60em">
+    <v-dialog v-model="loginDialog" persistent max-width="60em">
       <v-card>
         <v-form @submit.prevent="sendLogin">
           <v-card-title>
@@ -242,7 +260,7 @@ async function sendPasswordChange() {
     <!--
       Password Request
     -->
-    <v-dialog v-model="passwordRequestDialog" max-width="60em">
+    <v-dialog v-model="passwordRequestDialog" persistent max-width="60em">
       <v-card>
         <v-form @submit.prevent="sendPasswordRequest">
           <v-card-title>
@@ -279,7 +297,7 @@ async function sendPasswordChange() {
     <!--
       Password Code
     -->
-    <v-dialog v-model="layoutStore.showPasswordCodeDialog" max-width="60em">
+    <v-dialog v-model="layoutStore.showPasswordCodeDialog" persistent max-width="60em">
       <v-card>
         <v-form @submit.prevent="sendPasswordCode()">
           <v-card-title>
@@ -323,7 +341,7 @@ async function sendPasswordChange() {
     <!--
       Password Change
     -->
-    <v-dialog v-model="passwordChangeDialog" max-width="60em">
+    <v-dialog v-model="layoutStore.showPasswordChangeDialog" persistent max-width="60em">
       <v-card>
         <v-form @submit.prevent="sendPasswordChange">
           <input type="hidden" name="code" :value="code" />
@@ -335,26 +353,50 @@ async function sendPasswordChange() {
             <v-alert v-if="message" type="warning" variant="text" color="#0000A0">
               {{ message }}
             </v-alert>
-            <p class="app-dialog-info">{{ $t('startupContentPasswordChangeInfo') }}</p>
+            <p v-if="!apiStore.userId" class="app-dialog-info">{{ $t('startupContentPasswordChangeInfo') }}</p>
+            <p v-if="apiStore.userId" class="app-dialog-info">{{ $t('startupContentPasswordChangeExistingInfo') }}</p>
             <v-text-field
+                v-if="apiStore.userId"
                 v-model="password"
-                :label="$t('startupContentNewPassword')"
+                :label="$t('startupContentOldPassword')"
                 :type="showPassword ? 'text' : 'password'"
                 name="password"
+                autocomplete="current-password"
+                @change="message = ''"
+            >
+              <template #append-inner>
+              <v-btn
+                  :icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+                  :aria-label="showPassword ? $t('startupContentHidePassword') : $t('startupContentShowPassword')"
+                  :aria-pressed="showPassword"
+                  type="button"
+                  variant="text"
+                  size="small"
+                  tabindex="0"
+                  @mousedown.prevent
+                  @click="showPassword = !showPassword"
+              ></v-btn>
+            </template>
+            </v-text-field>
+            <v-text-field
+                v-model="new_password"
+                :label="$t('startupContentNewPassword')"
+                :type="showNewPassword ? 'text' : 'password'"
+                name="new_password"
                 autocomplete="new-password"
                 @change="message = ''"
             >
               <template #append-inner>
                 <v-btn
-                    :icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
-                    :aria-label="showPassword ? $t('startupContentHidePassword') : $t('startupContentShowPassword')"
-                    :aria-pressed="showPassword"
+                    :icon="showNewPassword ? 'mdi-eye-off' : 'mdi-eye'"
+                    :aria-label="showNewPassword ? $t('startupContentHidePassword') : $t('startupContentShowPassword')"
+                    :aria-pressed="showNewPassword"
                     type="button"
                     variant="text"
                     size="small"
                     tabindex="0"
                     @mousedown.prevent
-                    @click="showPassword = !showPassword"
+                    @click="showNewPassword = !showNewPassword"
                 ></v-btn>
               </template>
             </v-text-field>
@@ -375,7 +417,7 @@ async function sendPasswordChange() {
     <!--
       Agreement
     -->
-    <v-dialog v-model="agreementDialog" persistent  max-width="60em">
+    <v-dialog v-model="layoutStore.showAgreementDialog" persistent  max-width="60em">
       <v-card>
         <v-form @submit.prevent="sendAgreement">
           <v-card-title>
