@@ -297,7 +297,7 @@ async function sendPasswordChange() {
               <span>{{ $t('allCancel') }}</span>
             </v-btn>
             <v-spacer></v-spacer>
-            <v-btn @click="showPasswordRequest()" :loading="stores.api().isSending">
+            <v-btn @click="showPasswordRequest()">
               <span>{{ $t('startupContentPasswordCodeResend') }}</span>
             </v-btn>
           </v-card-actions>
