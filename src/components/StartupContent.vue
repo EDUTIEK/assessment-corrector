@@ -1,5 +1,5 @@
 <script setup>
-import {ref, computed} from "vue";
+import {ref, computed, watch} from "vue";
 import {stores} from "@/store";
 import Welcome from "@/components/Welcome.vue";
 import AssessmentList from "@/components/AssessmentList.vue";
@@ -10,6 +10,7 @@ const email = ref('');
 const code = ref('');
 const password = ref('');
 const message = ref('');
+const passwordRequestSent = ref(null);
 
 const loginDialog = ref(false);
 const agreementDialog = ref(false);
@@ -24,6 +25,17 @@ const showPassword = ref(false);
 const showAppBar = computed(() => !stores.layout().isWelcomeShown);
 const showReturnButton = computed(() => !!stores.config().returnUrl);
 const showLogoutButton = computed(() => !stores.config().returnUrl && stores.api().userId);
+const disableSendPasswordRequest = ref(false);
+let disableSendPasswordRequestTimer = null;
+
+// wait 5 seconds after sending a password request before a next try is possible
+watch(passwordRequestSent, () => {
+  disableSendPasswordRequest.value = true;
+  clearTimeout(disableSendPasswordRequestTimer);
+  disableSendPasswordRequestTimer = setTimeout(() => {
+    disableSendPasswordRequest.value = false;
+  }, 5000);
+});
 
 // Definiere deine Regeln
 const emailRules = {
@@ -110,6 +122,7 @@ async function sendLogout() {
 
 async function sendPasswordRequest() {
   const result = await stores.api().sendPasswordRequest(email.value);
+  passwordRequestSent.value = Date.now();
   if (result.ok) {
     hideDialogs();
     code.value = '';
@@ -250,7 +263,7 @@ async function sendPasswordChange() {
           </v-card-text>
           <v-card-actions>
             <v-btn type="submit" variant="flat" color="primary" :loading="stores.api().isSending"
-            :disabled="emailRules.email(email) !== true">
+            :disabled="emailRules.email(email) !== true || disableSendPasswordRequest">
               <span>{{ $t('startupContentPasswordRequestSubmit') }}</span>
             </v-btn>
             <v-btn @click="hideDialogs()">
@@ -297,7 +310,7 @@ async function sendPasswordChange() {
               <span>{{ $t('allCancel') }}</span>
             </v-btn>
             <v-spacer></v-spacer>
-            <v-btn @click="showPasswordRequest()">
+            <v-btn @click="showPasswordRequest()" :disabled = "disableSendPasswordRequest">
               <span>{{ $t('startupContentPasswordCodeResend') }}</span>
             </v-btn>
           </v-card-actions>
