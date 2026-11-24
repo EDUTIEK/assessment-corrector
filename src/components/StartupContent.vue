@@ -1,7 +1,7 @@
 <script setup>
 import {ref, computed, watch} from "vue";
 import i18n from "@/plugins/i18n";
-import {stores} from "@/store";
+import { clearStartStores, stores } from "@/store";
 import Welcome from "@/components/Welcome.vue";
 import AssessmentList from "@/components/AssessmentList.vue";
 import SummaryTemplate from '@/components/SummaryTemplate.vue';
@@ -144,6 +144,7 @@ async function sendPasswordRequest() {
 }
 
 async function sendPasswordCode() {
+  await clearStartStores();
   const result = await apiStore.sendPasswordCode(login.value, code.value);
   if (result.ok) {
     hideDialogs();
@@ -215,7 +216,9 @@ async function loadAssessments() {
             {{ $t('startupContentLoginTitle') }}
           </v-card-title>
           <v-card-text>
-            <v-alert v-if="message" v-html="message" type="warning" variant="text" color="#0000A0" />
+            <v-alert v-if="message" type="warning" variant="text" color="#0000A0">
+              <div v-html="message"></div>
+            </v-alert>
             <v-text-field
                 v-model="login"
                 :label="$t('startupContentUserName')"
@@ -273,7 +276,9 @@ async function loadAssessments() {
             {{ $t('startupContentPasswordRequestTitle') }}
           </v-card-title>
           <v-card-text>
-            <v-alert v-if="message" v-html="message" type="warning" variant="text" color="#0000A0" />
+            <v-alert v-if="message" type="warning" variant="text" color="#0000A0">
+              <div v-html="message"></div>
+            </v-alert>
             <v-sheet>
               <p class="app-dialog-info">{{ $t('startupContentPasswordRequestInfo') }}</p>
             </v-sheet>
@@ -309,7 +314,7 @@ async function loadAssessments() {
           </v-card-title>
           <v-card-text>
             <v-alert v-if="message" type="warning" variant="text" color="#0000A0">
-              {{ formattedMessage }}
+              <div v-html="message"></div>
             </v-alert>
             <p class="app-dialog-info">{{ $t('startupContentPasswordCodeInfo') }}</p>
             <v-text-field
@@ -354,7 +359,9 @@ async function loadAssessments() {
             {{ $t('startupContentPasswordChangeTitle') }}
           </v-card-title>
           <v-card-text>
-            <v-alert v-if="message" v-html="message" type="warning" variant="text" color="#0000A0" />
+            <v-alert v-if="message" type="warning" variant="text" color="#0000A0">
+              <div v-html="message"></div>
+            </v-alert>
             <p v-if="!apiStore.userId" class="app-dialog-info">{{ $t('startupContentPasswordChangeInfo') }}</p>
             <p v-if="apiStore.userId" class="app-dialog-info">{{ $t('startupContentPasswordChangeExistingInfo') }}</p>
             <v-text-field
