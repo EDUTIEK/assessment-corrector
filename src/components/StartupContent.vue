@@ -30,6 +30,7 @@ const showNewPassword = ref(false);
 const showAppBar = computed(() => !layoutStore.isWelcomeShown);
 const showReturnButton = computed(() => !!stores.config().returnUrl);
 const showLogoutButton = computed(() => !stores.config().returnUrl && apiStore.userId);
+
 const disableSendPasswordRequest = ref(false);
 let disableSendPasswordRequestTimer = null;
 
@@ -42,7 +43,14 @@ watch(passwordRequestSent, () => {
   }, 5000);
 });
 
-// Definiere deine Regeln
+const formatMessage = text => text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/\r?\n/g, '<br />')
+
 const emailRules = {
   required: (value) => !!value || 'E-Mail ist erforderlich.',
   email: (value) => {
@@ -98,7 +106,7 @@ async function sendLogin() {
       loadAssessments();
     }
   } else {
-    message.value = result.message;
+    message.value = formatMessage(result.message);
   }
 }
 
@@ -131,7 +139,7 @@ async function sendPasswordRequest() {
     message.value = '';
     layoutStore.showPasswordCodeDialog = true;
   } else {
-    message.value = result.message;
+    message.value = formatMessage(result.message);
   }
 }
 
@@ -143,7 +151,7 @@ async function sendPasswordCode() {
     password.value = '';
     layoutStore.showPasswordChangeDialog = true;
   } else {
-    message.value = result.message;
+    message.value = formatMessage(result.message);
   }
 }
 
@@ -158,7 +166,7 @@ async function sendPasswordChange() {
     showLogin();
     message.value = t('startupContentPasswordChanged');
   } else {
-    message.value = result.message;
+    message.value = formatMessage(result.message);
   }
 }
 
@@ -207,9 +215,7 @@ async function loadAssessments() {
             {{ $t('startupContentLoginTitle') }}
           </v-card-title>
           <v-card-text>
-            <v-alert v-if="message" type="warning" variant="text" color="#0000A0">
-              {{ message }}
-            </v-alert>
+            <v-alert v-if="message" v-html="message" type="warning" variant="text" color="#0000A0" />
             <v-text-field
                 v-model="login"
                 :label="$t('startupContentUserName')"
@@ -267,9 +273,7 @@ async function loadAssessments() {
             {{ $t('startupContentPasswordRequestTitle') }}
           </v-card-title>
           <v-card-text>
-            <v-alert v-if="message" type="warning" variant="text" color="#0000A0">
-              {{ message }}
-            </v-alert>
+            <v-alert v-if="message" v-html="message" type="warning" variant="text" color="#0000A0" />
             <v-sheet>
               <p class="app-dialog-info">{{ $t('startupContentPasswordRequestInfo') }}</p>
             </v-sheet>
@@ -305,7 +309,7 @@ async function loadAssessments() {
           </v-card-title>
           <v-card-text>
             <v-alert v-if="message" type="warning" variant="text" color="#0000A0">
-              {{ message }}
+              {{ formattedMessage }}
             </v-alert>
             <p class="app-dialog-info">{{ $t('startupContentPasswordCodeInfo') }}</p>
             <v-text-field
@@ -350,9 +354,7 @@ async function loadAssessments() {
             {{ $t('startupContentPasswordChangeTitle') }}
           </v-card-title>
           <v-card-text>
-            <v-alert v-if="message" type="warning" variant="text" color="#0000A0">
-              {{ message }}
-            </v-alert>
+            <v-alert v-if="message" v-html="message" type="warning" variant="text" color="#0000A0" />
             <p v-if="!apiStore.userId" class="app-dialog-info">{{ $t('startupContentPasswordChangeInfo') }}</p>
             <p v-if="apiStore.userId" class="app-dialog-info">{{ $t('startupContentPasswordChangeExistingInfo') }}</p>
             <v-text-field
