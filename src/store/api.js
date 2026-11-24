@@ -305,6 +305,13 @@ export const useApiStore = defineStore('api', {
      * Trigger a reload of all data if cookie values differ from the local store
      */
     async init() {
+      // get the opening parameters
+      let newUserId = this.getParam('userId');
+      let newUserToken = this.getParam('userToken');
+      let newAsAdmin =  this.getParam('asAdmin');
+      let newBackendUrl = this.getParam('backendUrl');
+      let newReturnUrl = this.getParam('returnUrl');
+      let query = this.getParam('query');
 
       let newContext = false;
       let newItem = false;
@@ -325,23 +332,7 @@ export const useApiStore = defineStore('api', {
       this.userToken = localStorage.getItem('xlasCorrectorUserToken') ?? '';
       this.timeOffset = Math.floor(localStorage.getItem('xlasCorrectorTimeOffset') ?? 0);
 
-
-      // a query string marks the call from the backend
-      // keep its content for this session and open the same address without it,
-      // so a later reload can be distinguished from that call
-      console.log(window.location.search);
-      if (window.location.search) {
-        sessionStorage.setItem('xlasCorrectorQuery', window.location.search.substring(1));
-        const url = new URL(window.location.href);
-        url.search = '';
-        window.location.replace(url.href);
-        return;
-      }
-
-      const query = sessionStorage.getItem('xlasCorrectorQuery');
-      sessionStorage.removeItem('xlasCorrectorQuery');
-
-      // password change requested
+      // handle a password change request
       if (query == 'password') {
         console.log('show password');
         layoutStore.setShowWelcome();
@@ -349,65 +340,58 @@ export const useApiStore = defineStore('api', {
         return;
       }
 
-      if (query?.startsWith('item')) {
+      // handle deep linking
+      let newAssId = null, newContextId = null, newTaskId = null, newWriterId = null;
+      if (query?.startsWith('open')) {
         let parts = query.split("/");
+        newAssId = parts[1] ?? null;
+        newContextId = parts[2] ?? null;
+        newTaskId = parts[3] ?? null;
+        newWriterId = parts[4] ?? null;
       }
 
-      // check if context given by cookies differs and force a reload if neccessary
-      if (Cookies.get('xlasUserId') != undefined && Cookies.get('xlasUserId') != this.userId) {
-        this.userId = Cookies.get('xlasUserId');
+      // these values need a reload of the assessment data
+      if (newUserId !== null && newUserId != this.userId) {
+        this.userId = newUserId;
         this.userToken = '';
         newContext = true;
       }
-      if (!!Cookies.get('xlasAssId') && Cookies.get('xlasAssId') != this.assId) {
-        this.assId = Cookies.get('xlasAssId');
+      if (newAsAdmin !== null && newAsAdmin != this.asAdmin) {
+        this.asAdmin = newAsAdmin
         newContext = true;
       }
-      if (Cookies.get('xlasContextId') != undefined && Cookies.get('xlasContextId') != this.contextId) {
-        this.contextId = Cookies.get('xlasContextId');
+      if (newAssId !== null && newAssId != this.assId) {
+        this.assId = newAssId;
         newContext = true;
       }
-      if (Cookies.get('xlasAsAdmin') != undefined  && Cookies.get('xlasAsAdmin') != this.asAdmin) {
-        this.asAdmin = Cookies.get('xlasAsAdmin')
+      if (newContextId !== null &&  newContextId != this.contextId) {
+        this.contextId = newContextId;
         newContext = true;
       }
 
-      // these values just need a reload of the item
-      let task_id = Item.extractTaskId(this.itemKey);
-      let writer_id = Item.extractWriterId(this.itemKey);
-      if (Cookies.get('xlasTaskId') != undefined && Cookies.get('xlasWriterId') != undefined
-          && (Cookies.get('xlasTaskId') != task_id || Cookies.get('xlasWriterId') != writer_id)) {
-        newItem = true;
-        task_id = Cookies.get('xlasTaskId');
-        writer_id = Cookies.get('xlasWriterId');
-        this.itemKey = Item.buildKey(task_id, writer_id);
-      }
-      if (!this.itemKey) {
-        newItem = true;
-      }
-
-      // these values can be changed without forcing a whole reload
-      if (Cookies.get('xlasBackendUrl') != undefined && Cookies.get('xlasBackendUrl') != configStore.backendUrl) {
-        configStore.applyData({ backendUrl: Cookies.get('xlasBackendUrl') });
-      }
-      if (Cookies.get('xlasReturnUrl') != undefined && Cookies.get('xlasReturnUrl') != configStore.returnUrl) {
-        configStore.returnUrl = Cookies.get('xlasReturnUrl');
-      }
-      if (Cookies.get('xlasUserToken') != undefined && Cookies.get('xlasUserToken') != this.userToken) {
-        this.userToken = Cookies.get('xlasUserToken');
+      // these values need a reload of the item
+      if (newTaskId !== null && newWriterId !== null) {
+        const taskId = Item.extractTaskId(this.itemKey);
+        const writerId = Item.extractWriterId(this.itemKey);
+        if (newTaskId != taskId || newWriterId !== writerId) {
+          this.itemKey = Item.buildKey(newTaskId, newWriterId);
+          newItem = true;
+        }
+        if (!this.itemKey) {
+          newItem = true;
+        }
       }
 
-      // remove the cookies
-      // needed to distinct the call from the backend from a later reload
-      Cookies.remove('xlasBackendUrl');
-      Cookies.remove('xlasReturnUrl');
-      Cookies.remove('xlasUserId');
-      Cookies.remove('xlasAssId');
-      Cookies.remove('xlasContextId');
-      Cookies.remove('xlasAsAdmin');
-      Cookies.remove('xlasTaskId');
-      Cookies.remove('xlasWriterId');
-      Cookies.remove('xlasUserToken');
+      // these values can be changed without data or item reload
+      if (newBackendUrl!== null && newBackendUrl != configStore.backendUrl) {
+        configStore.applyData({ backendUrl: newBackendUrl });
+      }
+      if (newReturnUrl!== null && newReturnUrl != configStore.returnUrl) {
+        configStore.applyData({ returnUrl: newReturnUrl });
+      }
+      if (newUserToken !== null && newUserToken != this.userToken) {
+        this.userToken = newUserToken;
+      }
 
       // save the state
       await this.saveToStorage();
@@ -519,6 +503,16 @@ export const useApiStore = defineStore('api', {
         stores.comments().setShowOtherCorrections(true);
       }
       stores.layout().finishInitialisation();
+    },
+
+    /**
+     * Get an opening parameter value (null if not set)
+     * Delete it to distinct an instant reload from a later manual reload
+     */
+    getParam(key) {
+      let value = sessionStorage.getItem('xlas_corrector_' + key);
+      sessionStorage.removeItem('xlas_corrector_' + key);
+      return value;
     },
 
     /**
