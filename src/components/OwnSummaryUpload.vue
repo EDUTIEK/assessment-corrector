@@ -53,16 +53,14 @@ async function uploadFile() {
     return;
   }
 
-  const id = await apiStore.sendSummaryPdf(props.summary, selectedFile.value, updateProgress);
-  if (id) {
-    props.summary.pdf = id;
-    props.summary.text = '';
+  const result = await apiStore.sendSummaryPdf(props.summary, selectedFile.value, updateProgress);
+  if (result.ok && !result.message) {
     closeUpload();
     return;
   }
 
-  message.value = t('ownSummaryUploadError');
-  isSuccess.value = false;
+  message.value = (result.ok ? t('ownSummaryUploadWarning') : t('ownSummaryUploadError')) +  result.message;
+  isSuccess.value = result.ok;
   uploadPercentage.value = 0;
 }
 
