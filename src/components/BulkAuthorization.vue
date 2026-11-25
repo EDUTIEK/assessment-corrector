@@ -72,6 +72,13 @@ function itemInfo(item) {
   return item.pseudonym;
 }
 
+function itemWarning(item) {
+  if (changeType.value == Change.TYPE_BULK_AUTHORIZE) {
+    return itemsStore.getAuthorizationWarningText(item);
+  }
+  return '';
+}
+
 async function confirmedAction() {
   if (!releaseItems.value.length || releasing.value) {
     return;
@@ -119,7 +126,8 @@ defineExpose({
           <p>{{ $t(langPrefix + 'Info') }}</p>
           <ul class="bulk-authorization__release">
             <li v-for="item in releaseItems" :key="item.key">
-              {{ itemInfo(item) }}
+              {{ item.pseudonym }}
+              <span style="color:#0000A0;" v-if="itemWarning(item)"> - {{ itemWarning(item)}}</span>
             </li>
           </ul>
           <p>{{ $t(langPrefix + 'Warn') }}</p>
