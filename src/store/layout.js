@@ -468,7 +468,6 @@ export const useLayoutStore = defineStore('layout', {
     },
 
     finishInitialisation() {
-      console.log('finishInitialisation', this.initContent)
       if (this.initContent != 'assessmentList' && this.initContent != 'itemList') {
         this.initialized = true;
       }

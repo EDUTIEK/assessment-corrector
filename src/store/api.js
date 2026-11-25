@@ -32,12 +32,12 @@ export const useApiStore = defineStore('api', {
       timeOffset: 0,                      // difference between server time and client time (ms)
 
       // not saved
+      itemByLink: false,                  // item is selected by link
       intervals: {
         api: {},                          // list of all registered timer intervals for the api
         assessment: {},                   // list of all registered timer intervals for assessment data, indexed by their name
         item: {}                          // list of all registered timer intervals for item data, indexed by their name
       },
-      itemIntervals: {},
       lastSendingTry: 0,                  // timestamp of the last try to send changes (milliseconds)
       lastLoadingTry: 0,                  // timestamp of the last try to load data (milliseconds)
     }
@@ -371,15 +371,12 @@ export const useApiStore = defineStore('api', {
 
       // these values need a reload of the item
       if (newTaskId !== null && newWriterId !== null) {
-        const taskId = Item.extractTaskId(this.itemKey);
-        const writerId = Item.extractWriterId(this.itemKey);
-        if (newTaskId != taskId || newWriterId !== writerId) {
-          this.itemKey = Item.buildKey(newTaskId, newWriterId);
-          newItem = true;
-        }
-        if (!this.itemKey) {
-          newItem = true;
-        }
+        this.itemKey = Item.buildKey(newTaskId, newWriterId);
+        this.itemByLink = true;
+        newItem = true;
+      }
+      if (!this.itemKey) {
+        newItem = true;
       }
 
       // these values can be changed without data or item reload
@@ -403,7 +400,7 @@ export const useApiStore = defineStore('api', {
       }
 
       if (!this.userToken || !this.userId) {
-        await clearStartStores();
+        await clearAssessmentStores();
         layoutStore.setShowWelcome();
         return;
       }
@@ -502,7 +499,11 @@ export const useApiStore = defineStore('api', {
       if (stores.summaries().isOneAuthorized) {
         stores.comments().setShowOtherCorrections(true);
       }
-      stores.layout().finishInitialisation();
+      if (this.itemKey && this.itemByLink) {
+        stores.layout().setShowItem();
+      } else {
+        stores.layout().finishInitialisation();
+      }
     },
 
     /**
@@ -510,7 +511,7 @@ export const useApiStore = defineStore('api', {
      * Delete it to distinct an instant reload from a later manual reload
      */
     getParam(key) {
-      let value = sessionStorage.getItem('xlas_corrector_' + key);
+      const value = sessionStorage.getItem('xlas_corrector_' + key);
       sessionStorage.removeItem('xlas_corrector_' + key);
       return value;
     },
@@ -649,7 +650,7 @@ export const useApiStore = defineStore('api', {
       this.clearAllIntervals(['api', 'item']);
 
       const itemsStore = stores.items();
-      if (itemKey == '' && stores.items().hasItems && !stores.items().getItem(itemKey)) {
+      if (itemsStore.hasItems && (itemKey == '' || !stores.items().getItem(itemKey))) {
         itemKey = itemsStore.firstKey ?? '';
       }
 
@@ -760,11 +761,14 @@ export const useApiStore = defineStore('api', {
     },
 
     async selectAssessment(assId, contextId) {
-      if (assId !== this.assId || contextId !== this.contextId) {
+
+      if (assId != this.assId || contextId != this.contextId) {
         this.assId = assId;
         this.contextId = contextId;
         this.itemKey = '';
         await this.initAfterDetermination(true, true);
+      } else {
+        await this.initAfterDetermination(false, false);
       }
     },
 

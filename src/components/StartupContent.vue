@@ -174,11 +174,17 @@ async function sendPasswordChange() {
 async function loadAssessments() {
   hideDialogs();
   await apiStore.loadAssessmentsFromBackend();
-  if (stores.assessments().countAssessments == 1 ) {
-    for (const key in stores.assessments().assessments) {
-      const assessment = stores.assessments().assessments[key];
-      layoutStore.setShowItemList();
-      apiStore.selectAssessment(assessment.ass_id, assessment.context_id);
+  for (const key in stores.assessments().assessments) {
+    const assessment = stores.assessments().assessments[key];
+    if (stores.assessments().countAssessments == 1
+        || (assessment.ass_id == apiStore.assId && assessment.context_id == apiStore.contextId)
+    ) {
+      await apiStore.selectAssessment(assessment.ass_id, assessment.context_id);
+      if (apiStore.itemKey && apiStore.itemByLink) {
+        layoutStore.setShowItem();
+      } else {
+        layoutStore.setShowItemList();
+      }
       return;
     }
   }
