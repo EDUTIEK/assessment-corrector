@@ -11,6 +11,7 @@ import md5 from 'md5';
 import Change from '@/data/Change';
 import Item from '@/data/Item';
 import Snippet from '@/data/Snippet';
+import ApiResult from '@/data/ApiResult';
 
 const { t } = i18n.global;
 const sendInterval = 1000;      // time (ms) to wait for sending open savings to the backend
@@ -605,7 +606,7 @@ export const useApiStore = defineStore('api', {
 
     /**
      * Send a summary pdf file
-     * @return {string|false}
+     * @return {ApiResult}
      */
     async sendSummaryPdf(summary, file, onProgress) {
 
@@ -623,10 +624,18 @@ export const useApiStore = defineStore('api', {
               },
               onUploadProgress: onProgress
             }));
-        return response.data.id;
+
+        if (response.data.id) {
+          summary.pdf = response.data.id;
+          summary.text = '';
+          return new ApiResult(true, null, response.data.message);
+        } else {
+          return new ApiResult(false, null, response.data.message);
+        }
 
       } catch (error) {
         console.log(error);
+        return new ApiResult(false, null, error.message);
         return false;
       }
     },
