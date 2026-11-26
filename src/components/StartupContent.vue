@@ -16,10 +16,7 @@ const email = ref('');
 const code = ref('');
 const password = ref('');
 const new_password = ref('');
-const message = ref('');
 const passwordRequestSent = ref(null);
-
-const loginDialog = ref(false);
 const passwordRequestDialog = ref(false);
 
 const accepted = ref(false);
@@ -62,18 +59,17 @@ const emailRules = {
 function showLogin() {
   login.value = '';
   code.value = '';
-  login.value = '';
   email.value = '';
   password.value = '';
-  message.value = '';
   showPassword.value = false;
-  loginDialog.value = true;
+  layoutStore.startupMessage = '';
+  layoutStore.showLoginDialog = true;
 }
 
 function hideDialogs() {
-  loginDialog.value = false;
   passwordRequestDialog.value = false;
-  message.value = '';
+  layoutStore.startupMessage = '';
+  layoutStore.showLoginDialog = false;
   layoutStore.showAgreementDialog = false;
   layoutStore.showPasswordCodeDialog = false;
   layoutStore.showPasswordChangeDialog = false;
@@ -106,7 +102,7 @@ async function sendLogin() {
       loadAssessments();
     }
   } else {
-    message.value = formatMessage(result.message);
+    layoutStore.startupMessage = formatMessage(result.message);
   }
 }
 
@@ -136,10 +132,10 @@ async function sendPasswordRequest() {
   if (result.ok) {
     hideDialogs();
     code.value = '';
-    message.value = '';
+    layoutStore.startupMessage = '';
     layoutStore.showPasswordCodeDialog = true;
   } else {
-    message.value = formatMessage(result.message);
+    layoutStore.startupMessage = formatMessage(result.message);
   }
 }
 
@@ -148,11 +144,11 @@ async function sendPasswordCode() {
   const result = await apiStore.sendPasswordCode(login.value, code.value);
   if (result.ok) {
     hideDialogs();
-    message.value = '';
+    layoutStore.startupMessage = '';
     password.value = '';
     layoutStore.showPasswordChangeDialog = true;
   } else {
-    message.value = formatMessage(result.message);
+    layoutStore.startupMessage = formatMessage(result.message);
   }
 }
 
@@ -165,9 +161,9 @@ async function sendPasswordChange() {
     await stores.user().setPasswordChanged();
     await stores.api().sendLogout();
     showLogin();
-    message.value = t('startupContentPasswordChanged');
+    layoutStore.startupMessage = t('startupContentPasswordChanged');
   } else {
-    message.value = formatMessage(result.message);
+    layoutStore.startupMessage = formatMessage(result.message);
   }
 }
 
@@ -215,22 +211,22 @@ async function loadAssessments() {
     <!--
       Login
     -->
-    <v-dialog v-model="loginDialog" persistent max-width="60em">
+    <v-dialog v-model="layoutStore.showLoginDialog" persistent max-width="60em">
       <v-card>
         <v-form @submit.prevent="sendLogin">
           <v-card-title>
             {{ $t('startupContentLoginTitle') }}
           </v-card-title>
           <v-card-text>
-            <v-alert v-if="message" type="warning" variant="text" color="#0000A0">
-              <div v-html="message"></div>
+            <v-alert v-if="layoutStore.startupMessage" type="warning" variant="text" color="#0000A0">
+              <div v-html="layoutStore.startupMessage"></div>
             </v-alert>
             <v-text-field
                 v-model="login"
                 :label="$t('startupContentUserName')"
                 name="login"
                 autocomplete="username"
-                @change="message = ''"
+                @change="layoutStore.startupMessage = ''"
             ></v-text-field>
             <v-text-field
                 v-model="password"
@@ -238,7 +234,7 @@ async function loadAssessments() {
                 :type="showPassword ? 'text' : 'password'"
                 name="password"
                 autocomplete="current-password"
-                @change="message = ''"
+                @change="layoutStore.startupMessage = ''"
             >
               <template #append-inner>
                 <v-btn
@@ -282,8 +278,8 @@ async function loadAssessments() {
             {{ $t('startupContentPasswordRequestTitle') }}
           </v-card-title>
           <v-card-text>
-            <v-alert v-if="message" type="warning" variant="text" color="#0000A0">
-              <div v-html="message"></div>
+            <v-alert v-if="layoutStore.startupMessage" type="warning" variant="text" color="#0000A0">
+              <div v-html="layoutStore.startupMessage"></div>
             </v-alert>
             <v-sheet>
               <p class="app-dialog-info">{{ $t('startupContentPasswordRequestInfo') }}</p>
@@ -293,7 +289,7 @@ async function loadAssessments() {
                 :label="$t('startupContentEmail')"
                 name="email"
                 :rules="[emailRules.required, emailRules.email]"
-                @change="message = ''"
+                @change="layoutStore.startupMessage = ''"
             ></v-text-field>
           </v-card-text>
           <v-card-actions>
@@ -319,8 +315,8 @@ async function loadAssessments() {
             {{ $t('startupContentPasswordCodeTitle') }}
           </v-card-title>
           <v-card-text>
-            <v-alert v-if="message" type="warning" variant="text" color="#0000A0">
-              <div v-html="message"></div>
+            <v-alert v-if="layoutStore.startupMessage" type="warning" variant="text" color="#0000A0">
+              <div v-html="layoutStore.startupMessage"></div>
             </v-alert>
             <p class="app-dialog-info">{{ $t('startupContentPasswordCodeInfo') }}</p>
             <v-text-field
@@ -328,13 +324,13 @@ async function loadAssessments() {
                 :label="$t('startupContentUserName')"
                 name="login"
                 autocomplete="username"
-                @change="message = ''"
+                @change="layoutStore.startupMessage = ''"
             ></v-text-field>
             <v-text-field
                 v-model="code"
                 :label="$t('startupContentPasswordCode')"
                 name="code"
-                @change="message = ''"
+                @change="layoutStore.startupMessage = ''"
             ></v-text-field>
           </v-card-text>
           <v-card-actions>
@@ -365,8 +361,8 @@ async function loadAssessments() {
             {{ $t('startupContentPasswordChangeTitle') }}
           </v-card-title>
           <v-card-text>
-            <v-alert v-if="message" type="warning" variant="text" color="#0000A0">
-              <div v-html="message"></div>
+            <v-alert v-if="layoutStore.startupMessage" type="warning" variant="text" color="#0000A0">
+              <div v-html="layoutStore.startupMessage"></div>
             </v-alert>
             <p v-if="!apiStore.userId" class="app-dialog-info">{{ $t('startupContentPasswordChangeInfo') }}</p>
             <p v-if="apiStore.userId" class="app-dialog-info">{{ $t('startupContentPasswordChangeExistingInfo') }}</p>
@@ -377,7 +373,7 @@ async function loadAssessments() {
                 :type="showPassword ? 'text' : 'password'"
                 name="password"
                 autocomplete="current-password"
-                @change="message = ''"
+                @change="layoutStore.startupMessage = ''"
             >
               <template #append-inner>
               <v-btn
@@ -399,7 +395,7 @@ async function loadAssessments() {
                 :type="showNewPassword ? 'text' : 'password'"
                 name="new_password"
                 autocomplete="new-password"
-                @change="message = ''"
+                @change="layoutStore.startupMessage = ''"
             >
               <template #append-inner>
                 <v-btn
@@ -463,38 +459,17 @@ async function loadAssessments() {
     </v-dialog>
 
     <!--
-      Init Failure
+      Startup Failure
     -->
-    <v-dialog v-model="layoutStore.hasInitFailure" persistent  max-width="60em">
+    <v-dialog v-model="layoutStore.showStartupFailureDialog" persistent  max-width="60em">
       <v-card>
         <v-card-title>
-          {{ $t('startupContentLoadError') }}
+          {{ $t('startupContentFailureTitle') }}
         </v-card-title>
         <v-card-text>
           <v-alert type="warning" variant="text" color="#0000A0" >
-            {{ layoutStore.initFailure }}
+            {{ layoutStore.startupMessage }}
           </v-alert>
-        </v-card-text>
-        <v-card-actions>
-          <v-btn v-show="showReturnButton" :href="stores.config().returnUrl">
-            <v-icon left icon="mdi-logout-variant"></v-icon>
-            <span>{{ $t('allEnd') }}</span>
-          </v-btn>
-          <v-btn v-if="showLogoutButton" :loading="apiStore.isSending" @click="sendLogout">
-            <v-icon left icon="mdi-logout-variant"></v-icon>
-            <span>{{ $t('startupContentLogout') }}</span>
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <!--
-      Item Load Failure
-     -->
-    <v-dialog v-model="layoutStore.showItemLoadFailure" persistent  max-width="60em">
-      <v-card>
-        <v-card-text>
-          <p>{{ $t('startupContentLoadItemError') }}</p>
         </v-card-text>
         <v-card-actions>
           <v-btn v-show="showReturnButton" :href="stores.config().returnUrl">
@@ -527,7 +502,7 @@ async function loadAssessments() {
             <v-icon left icon="mdi-reload"></v-icon>
             <span>{{ $t('startupContentDeleteAndLoad') }}</span>
           </v-btn>
-          <v-btn v-show="showReturn" :href="stores.config().returnUrl">
+          <v-btn v-show="showReturnButton" :href="stores.config().returnUrl">
             <v-icon left icon="mdi-logout-variant"></v-icon>
             <span>{{ $t('allCancel') }}</span>
           </v-btn>

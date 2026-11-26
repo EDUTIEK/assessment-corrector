@@ -40,13 +40,15 @@ export const useLayoutStore = defineStore('layout', {
       leftCorrectionKey: '',               // key of the correction shown on the left side
       rightCorrectionKey: '',              // key of the correction shown on the right side
 
-      initFailure: '',                    // failure from app initialisation
       initialized: false,                 // used to switch from startup screen to the editing view
 
+      startupMessage: '',                 // message shown in the startup dialogs
+      showLoginDialog: false,             // show the dialog to log in
       showAgreementDialog: false,         // show the dialog to accept the user agreement
       showPasswordCodeDialog: false,      // show the dialog to enter a password code
       showPasswordChangeDialog: false,    // show the dialog to change the password
-      showItemLoadFailure: false,         // show a message that the loading if an item failed
+      showStartupFailureDialog: false,    // show the dialog with a startup failure
+
       showSendFailure: false,             // show a message about a sending failure
       showDataReplaceConfirmation: false, // show a confirmation that the stored data should be replaced by another task or user
       showItemReplaceConfirmation: false, // show a confirmation that the stored item should be replaced by another item
@@ -65,8 +67,6 @@ export const useLayoutStore = defineStore('layout', {
    * Getter functions (with params) start with 'get', simple state queries not
    */
   getters: {
-    hasInitFailure: state => state.initFailure !== '',
-
     isWelcomeShown: state => state.initContent == 'welcome',
     isAssessmentListShown: state => state.initContent == 'assessmentList',
     isItemListShown: state => state.initContent == 'itemList',
@@ -474,9 +474,25 @@ export const useLayoutStore = defineStore('layout', {
       this.saveToStorage();
     },
 
+    setShowStartupFailure(message) {
+      this.initialized = false;
+      this.initContent = stores.config().returnUrl ? '' : 'welcome';
+      this.startupMessage = message;
+      this.showStartupFailureDialog = true;
+      this.saveToStorage();
+    },
+
     setShowWelcome() {
       this.initialized = false;
       this.initContent = 'welcome';
+      this.saveToStorage();
+    },
+
+    setShowLogin(message) {
+      this.initialized = false;
+      this.initContent = 'welcome';
+      this.startupMessage = message;
+      this.showLoginDialog = true;
       this.saveToStorage();
     },
 

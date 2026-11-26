@@ -395,7 +395,7 @@ export const useApiStore = defineStore('api', {
       await configStore.saveToStorage();
       if (!configStore.backendUrl) {
         await clearAllStores();
-        layoutStore.initFailure = t('apiMissingBackendUrl');
+        layoutStore.setShowStartupFailure(t('apiMissingBackendUrl'));
         return;
       }
 
@@ -593,9 +593,7 @@ export const useApiStore = defineStore('api', {
         response = await this.request('get', '/corrector/start/assessments');
       }
       catch (error) {
-        console.error(error);
-        stores.layout().initFailure = t('apiLoadingDataFailed');
-        this.setLoading(false);
+        this.handleLoadingError(error);
         return false;
       }
 
@@ -619,9 +617,7 @@ export const useApiStore = defineStore('api', {
         response = await this.request('get', '/corrector/data');
       }
       catch (error) {
-        console.error(error);
-        stores.layout().initFailure = t('apiLoadingDataFailed');
-        this.setLoading(false);
+        this.handleLoadingError(error);
         return false;
       }
 
@@ -666,9 +662,7 @@ export const useApiStore = defineStore('api', {
         response = await this.request('get', '/corrector/item/' + task_id + '/' + writer_id);
       }
       catch (error) {
-        console.error(error);
-        stores.layout().showItemLoadFailure = true;
-        this.setLoading(false);
+        this.handleLoadingError(error);
         return false;
       }
 
@@ -714,9 +708,18 @@ export const useApiStore = defineStore('api', {
         return true;
       }
       catch (error) {
-        console.error(error);
-        this.setLoading(false);
+        this.handleLoadingError(error);
         return false;
+      }
+    },
+
+    handleLoadingError(error) {
+      console.error(error);
+      this.setLoading(false);
+      if (error.response?.status === 401 && !stores.config().returnUrl) {
+        stores.layout().setShowLogin(t('apiLoadingUnauthorized'));
+      } else {
+        stores.layout().setShowStartupFailure(t('apiLoadingDataFailed'));
       }
     },
 
