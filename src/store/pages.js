@@ -175,7 +175,7 @@ export const usePagesStore = defineStore('pages', {
      * @param {array} data - array of plain objects
      * @public
      */
-    async loadFromBackend(data) {
+    async loadFromBackend(data = []) {
       const apiStore = stores.api();
       try {
         await storage.clear();

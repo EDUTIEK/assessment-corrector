@@ -424,9 +424,12 @@ export const useApiStore = defineStore('api', {
         return;
       }
 
-      await this.initAfterDetermination(newContext, newItem);
+      this.initAfterDetermination(newContext, newItem);
     },
 
+    /**
+     * @returns {Promise<boolean>}
+     */
     async initAfterDetermination(newContext, newItem) {
 
       const changesStore = stores.changes();
@@ -438,25 +441,28 @@ export const useApiStore = defineStore('api', {
           await this.loadDataFromStorage();
           stores.layout().initialized = false;
           stores.layout().showDataReplaceConfirmation = true;
+          return false;
         } else if (newItem) {
           console.log('init: open saving, same context, new item');
           await this.loadDataFromStorage();
           stores.layout().initialized = false;
           stores.layout().showItemReplaceConfirmation = true;
+          return false;
         } else {
           console.log('init: open saving, same context, same item');
           await this.loadDataFromStorage();
-          await this.initAfterKeepDataConfirmed();
+          return await this.initAfterKeepDataConfirmed();
         }
       } else {
         console.log('init: no open saving');
-        await this.initAfterReplaceDataConfirmed();
+        return await this.initAfterReplaceDataConfirmed();
       }
     },
 
 
     /**
      * init after the replacement of all data is confirmed
+     * @returns {Promise<boolean>}
      */
     async initAfterReplaceDataConfirmed() {
       console.log('initAfterReplaceDataConfirmed');
@@ -465,17 +471,19 @@ export const useApiStore = defineStore('api', {
       stores.layout().showDataReplaceConfirmation = false;
       stores.layout().showItemReplaceConfirmation = false;
 
-      if (await this.loadDataFromBackend()) {
-        await this.loadItemFromBackend(this.itemKey);
-        await this.finishInitialisation();
+      if (await this.loadDataFromBackend() && this.loadItemFromBackend(this.itemKey)) {
+        this.finishInitialisation();
+        return true;
       }
+      return false;
     },
 
     /**
      * Init after the keeping the data of the item with open sendings
-     *
      * - Load the basic assessment data from the backend to get a current list of items
      * - If the item with open sendings is not in the list, add it afterward
+     *
+     * @returns {Promise<boolean>}
      */
     async initAfterKeepDataConfirmed() {
       console.log('initAfterKeepDataConfirmed');
@@ -489,8 +497,10 @@ export const useApiStore = defineStore('api', {
       if (await this.loadDataFromBackend()) {
         await stores.items().saveItem(item);
         await this.loadItemFromStorage(this.itemKey);
-        await this.finishInitialisation();
+        this.finishInitialisation();
+        return true;
       }
+      return false;
     },
 
     /**
@@ -582,6 +592,7 @@ export const useApiStore = defineStore('api', {
 
     /**
      * Load assessments from the backend
+     * @returns {Promise<boolean>}
      */
     async loadAssessmentsFromBackend() {
       console.log("loadAssessmentsFromBackend...");
@@ -605,6 +616,7 @@ export const useApiStore = defineStore('api', {
 
     /**
      * Load common data from the backend
+     * @returns {Promise<boolean>}
      */
     async loadDataFromBackend() {
       console.log("loadDataFromBackend...");
@@ -643,6 +655,7 @@ export const useApiStore = defineStore('api', {
 
     /**
      * Load the data of a new correction item from the backend
+     * @returns {Promise<boolean>}
      */
     async loadItemFromBackend(itemKey) {
       console.log("loadItemFromBackend...");
@@ -696,6 +709,7 @@ export const useApiStore = defineStore('api', {
 
     /**
      * Load shared templates from the backend
+     * @returns {Promise<boolean>}
      */
     async loadOtherTemplates(task_id) {
       console.log("loadOtherTemplates...");
@@ -713,6 +727,9 @@ export const useApiStore = defineStore('api', {
       }
     },
 
+    /**
+     * Handle an error during the loading of data
+     */
     handleLoadingError(error) {
       console.error(error);
       this.setLoading(false);
@@ -770,20 +787,28 @@ export const useApiStore = defineStore('api', {
 
     async selectAssessment(assId, contextId) {
 
+      let success;
       if (assId != this.assId || contextId != this.contextId) {
         this.assId = assId;
         this.contextId = contextId;
         this.itemKey = '';
-        await this.initAfterDetermination(true, true);
+        success = this.initAfterDetermination(true, true);
       } else {
-        await this.initAfterDetermination(false, false);
+        success = this.initAfterDetermination(false, false);
+      }
+      if (success) {
+        stores.layout().setShowItemList();
       }
     },
 
     async selectItem(newKey) {
+      let success = true;
       if (newKey !== this.itemKey) {
         this.itemKey = newKey;
-        await this.initAfterDetermination(false, true);
+        success = await this.initAfterDetermination(false, true);
+      }
+      if (success) {
+        stores.layout().setShowItem();
       }
     },
 

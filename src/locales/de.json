@@ -53,7 +53,7 @@
     "apiCorrectionFiles": "Korrekturen",
     "apiLoginFailed": "Die Anmeldung ist aus unbekanntem Grund fehlgeschlagen.",
     "apiMissingBackendUrl": "Der zuständige Server wurde nicht gefunden. Bitte rufen Sie die Korrekturoberfläche erneut von der Adresse auf, die Sie bekommen haben.",
-    "apiLoadingUnauthorized": "Ihr Zugriff ist abgelaufen. Bitte melden Sie sich erneut an.",
+    "apiLoadingUnauthorized": "Ihre Sitzung ist abgelaufen oder Sie haben die Korrektur in einem anderen Browser aufgerufen. Es ist immer nur eine Sitzung gleichzeitig möglich. Bitte melden Sie sich erneut an, wenn Sie hier weiter arbeiten möchten.",
     "apiLoadingDataFailed": "Die Korrektur konnte nicht geladen werden. Bitte rufen Sie die Korrekturoberfläche neu auf.",
     "apiWritingFile": "Abgabe",
     "apiWritingFiles": "Abgaben",

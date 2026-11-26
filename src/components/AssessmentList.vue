@@ -169,7 +169,6 @@ async function selectAssessment(assessment) {
     await apiStore.selectAssessment(assessment.ass_id, assessment.context_id);
   } finally {
     selecting.value = false;
-    stores.layout().setShowItemList();
   }
 }
 </script>
